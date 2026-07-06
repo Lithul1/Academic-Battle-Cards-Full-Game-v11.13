@@ -1546,7 +1546,7 @@ try{document.documentElement.style.setProperty('--abc-bg','url("'+window.ABC_BG+
 window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
 try{document.documentElement.style.setProperty('--abc-bg-qc','url("'+window.ABC_BG_QC+'")');}catch(e){}
 window.ABC_ICONS={archives:"data:image/png;base64,__ABCASSET_111__",rest:"data:image/png;base64,__ABCASSET_112__",start:"data:image/png;base64,__ABCASSET_113__",scrim:"data:image/png;base64,__ABCASSET_114__",elite:"data:image/png;base64,__ABCASSET_115__",boss:"data:image/png;base64,__ABCASSET_116__"};
-window.ABC_SND={card_slide:"data:audio/ogg;base64,__ABCASSET_117__",card_place:"data:audio/ogg;base64,__ABCASSET_118__",card_shove:"data:audio/ogg;base64,__ABCASSET_119__",card_shuffle:"data:audio/ogg;base64,__ABCASSET_120__",book_flip:"data:audio/ogg;base64,__ABCASSET_121__",card_fan:"data:audio/ogg;base64,__ABCASSET_122__",pack_open:"data:audio/ogg;base64,__ABCASSET_123__",pack_take:"data:audio/ogg;base64,__ABCASSET_124__",battle_music:"data:audio/ogg;base64,__ABCASSET_125__",tape_noise:"data:audio/ogg;base64,__ABCASSET_126__"};
+window.ABC_SND={card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",card_place:"data:audio/mpeg;base64,__ABCASSET_118__",card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",pack_take:"data:audio/mpeg;base64,__ABCASSET_124__",battle_music:"data:audio/mpeg;base64,__ABCASSET_125__",tape_noise:"data:audio/mpeg;base64,__ABCASSET_126__"};
 window.ABC_AUDIO=(function(){
   var SND=window.ABC_SND||{},cache={},muted=false,music=null,musicKey=null,MV=0.45;
   try{muted=localStorage.getItem('abc_muted')==='1';}catch(e){}
@@ -2332,7 +2332,7 @@ function deckBox(key, soon){
 function menuScreen(){
   return `<div class="title-screen menu-landing">
     <img class="title-logo title-crest" src="${window.ABC_CREST||window.ABC_LOGO||''}" alt="Academic Battle Cards">
-    <p class="title-sub">A literary scrimmage — deal, draw, &amp; duel with trivia</p>
+    <p class="title-sub">A literary scrimmage — deal, draw &amp; duel with trivia</p>
     <div class="menu-list">
       <button class="menu-btn" data-do="go-quick"><span class="menu-ic">⚡</span><span class="menu-tx"><b>Quickplay</b><small>Pick a difficulty — random decks for both sides</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="go-custom"><span class="menu-ic">♟</span><span class="menu-tx"><b>Custom Play</b><small>Choose difficulty, your deck, the opponent &amp; house rules</small></span><span class="menu-go">›</span></button>
