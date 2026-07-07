@@ -801,8 +801,6 @@ body[data-screen="scrim"]{ background:#e9dcc0; }
 
 /* ===== demo_11_13: quick/custom paper + Scrimmage map notebook ===== */
 :root{ --abc-bg-qc:none; }
-#abc-mute{ position:fixed; top:10px; right:10px; z-index:9999; width:40px; height:40px; border-radius:10px; border:1px solid rgba(40,25,12,.2); background:#faf7ef; box-shadow:0 2px 6px rgba(40,25,12,.18); font-size:20px; line-height:1; cursor:pointer; padding:0; }
-#abc-mute:hover{ transform:translateY(-1px); }
 body[data-screen="menu"][data-menuscreen="difficulty"]::before,
 body[data-screen="menu"][data-menuscreen="custom"]::before,
 body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(--abc-bg-qc); }
@@ -1546,20 +1544,7 @@ try{document.documentElement.style.setProperty('--abc-bg','url("'+window.ABC_BG+
 window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
 try{document.documentElement.style.setProperty('--abc-bg-qc','url("'+window.ABC_BG_QC+'")');}catch(e){}
 window.ABC_ICONS={archives:"data:image/png;base64,__ABCASSET_111__",rest:"data:image/png;base64,__ABCASSET_112__",start:"data:image/png;base64,__ABCASSET_113__",scrim:"data:image/png;base64,__ABCASSET_114__",elite:"data:image/png;base64,__ABCASSET_115__",boss:"data:image/png;base64,__ABCASSET_116__"};
-window.ABC_SND={card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",card_place:"data:audio/mpeg;base64,__ABCASSET_118__",card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",pack_take:"data:audio/mpeg;base64,__ABCASSET_124__",battle_music:"data:audio/mpeg;base64,__ABCASSET_125__",tape_noise:"data:audio/mpeg;base64,__ABCASSET_126__"};
-window.ABC_AUDIO=(function(){
-  var SND=window.ABC_SND||{},cache={},muted=false,music=null,musicKey=null,MV=0.45;
-  try{muted=localStorage.getItem('abc_muted')==='1';}catch(e){}
-  function base(k){if(!cache[k]){var a=new Audio();a.src=SND[k]||'';a.preload='auto';cache[k]=a;}return cache[k];}
-  function sfx(k,v){try{if(muted||!SND[k])return;var a=base(k).cloneNode();a.volume=(v==null?0.7:v);var p=a.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
-  function playMusic(k,v){try{if(musicKey===k&&music&&!music.paused)return;stopMusic();if(!SND[k])return;MV=(v==null?0.45:v);music=new Audio(SND[k]);music.loop=true;music.volume=muted?0:MV;musicKey=k;var p=music.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
-  function stopMusic(){try{if(music){music.pause();music=null;musicKey=null;}}catch(e){}}
-  function setMuted(m){muted=!!m;try{localStorage.setItem('abc_muted',muted?'1':'0');}catch(e){}try{if(music)music.volume=muted?0:MV;}catch(e){}var b=document.getElementById('abc-mute');if(b)b.textContent=muted?"\U0001F507":"\U0001F50A";}
-  function toggleMute(){setMuted(!muted);return muted;}
-  function mount(){try{if(document.getElementById('abc-mute'))return;var b=document.createElement('button');b.id='abc-mute';b.type='button';b.setAttribute('aria-label','Toggle sound');b.textContent=muted?"\U0001F507":"\U0001F50A";b.onclick=function(){toggleMute();};document.body.appendChild(b);}catch(e){}}
-  if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',mount);else mount();
-  return {sfx:sfx,playMusic:playMusic,stopMusic:stopMusic,toggleMute:toggleMute,setMuted:setMuted,isMuted:function(){return muted;}};
-})();
+window.ABC_SND={music_thereturn:"data:audio/mpeg;base64,__ABCASSET_125__",music_hiphop9:"data:audio/mpeg;base64,__ABCASSET_126__",sfx_card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",sfx_card_place:"data:audio/mpeg;base64,__ABCASSET_118__",sfx_card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",sfx_card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",sfx_book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",sfx_card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",sfx_pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",sfx_pack_take:"data:audio/mpeg;base64,__ABCASSET_124__"};
 </script>
 <script>
 /* ACADEMIC BATTLE CARDS — engine + UI (v2: title, deck pick, full bookmarks, defense, discard piles) */
@@ -1657,7 +1642,6 @@ function newGame(st,youDef,oppDef){
         pending:null, defend:false, picker:null, viewPile:null, poison:0, _logopen:false, _settings:false, fxShuffle:false,
         you:newPlayer('You',youDef,st), opp:newPlayer('Opponent',oppDef,st), log:[] };
   APP.screen='play';
-  try{window.ABC_AUDIO&&ABC_AUDIO.sfx('card_shuffle',0.55);}catch(e){}
   pushLog(`New game — You (${setName(youDef.d)}) vs Opponent (${setName(oppDef.d)}).`);
   render();
   dealOpening();
@@ -1679,7 +1663,7 @@ function decodeDeck(code){
 }
 function dealOne(side){ const p=S[side]; if(p.deck.length){ const c=p.deck.shift(); c._new=true; p.hand.push(c); p._lastDrawn=c; } }
 function dealOpening(){
-  busy=true; S.fxShuffle=true; pushLog('Shuffling decks…'); render();
+  busy=true; S.fxShuffle=true; try{SFX.card('card_shuffle',0.6);}catch(e){} pushLog('Shuffling decks…'); render();
   setTimeout(()=>{
     if(!S){ return; }
     S.fxShuffle=false; render();
@@ -1852,7 +1836,7 @@ function doDraw(){
   }
   if(drawn>0) pushLog(`${who(p)} drew ${drawn} card${drawn>1?'s':''} (hand of ${p.hand.length}).`);
   else pushLog(`${who(p)} has no cards left to draw.`);
-  try{if(window.ABC_AUDIO&&drawn>0)ABC_AUDIO.sfx('card_slide',0.5);}catch(e){}
+  try{if(drawn>0)SFX.card('card_slide',0.6);}catch(e){}
   flickDeck(S.turn);
   S.phase='strategize'; render();
 }
@@ -2278,11 +2262,11 @@ function armAiWatch(){ clearTimeout(aiWatch); aiWatch=setTimeout(function tick()
 function endAiTurn(){ clearTimeout(aiWatch); setTimeout(()=>{ if(!S) return; busy=false; if(!S.over){ S.turn='you'; startTurn(); } },700); }
 
 /* ---------------- trivia ---------------- */
-function openTrivia(card,handIdx,targetUid){ busy=true; S.pending={card,handIdx,target:targetUid}; try{window.ABC_AUDIO&&ABC_AUDIO.sfx('book_flip',0.6);}catch(e){} render(); }
+function openTrivia(card,handIdx,targetUid){ busy=true; S.pending={card,handIdx,target:targetUid}; try{SFX.card('book_flip',0.7);}catch(e){} render(); }
 function answerTrivia(choice){
   const pend=S.pending; if(!pend) return;
   const correct=choice===pend.card.ans; S.pending=null; busy=false;
-  try{ if(window.ABC_AUDIO) ABC_AUDIO.sfx(correct?'card_place':'card_shove',0.6); }catch(e){}
+  try{SFX.card(correct?'card_place':'card_shove',0.7);}catch(e){}
   toast(correct?'Correct! Card attached.':'Wrong — card discarded.', correct?'good':'bad');
   attach('you',pend.handIdx,correct,pend.target);
 }
@@ -2290,7 +2274,7 @@ function answerTrivia(choice){
 /* ================= RENDERING ================= */
 function render(){
   const root=$('#game'); if(!root) return;
-  try{ if(window.ABC_AUDIO){ if(APP.screen==='play'&&S) ABC_AUDIO.playMusic('battle_music',0.45); else ABC_AUDIO.stopMusic(); } }catch(e){}
+  try{ if(APP.screen==='play'&&S){ SFX.contextTrack(S.scrim?((S.scrim.node&&S.scrim.node.boss)?'thereturn':'hiphop9'):null); } else { SFX.contextTrack(null); } }catch(e){}
   if(APP.screen==='play' && S){ document.body.setAttribute('data-screen','play'); sweepActiveBm(S.you); sweepActiveBm(S.opp); renderGame(root); return; }
   if(APP.screen==='scrim'){ document.body.setAttribute('data-screen','scrim'); document.body.setAttribute('data-scrimview',(SCRIM&&SCRIM.view)||''); root.innerHTML=scrimScreen(); scrimAfterRender&&scrimAfterRender(); return; }
   if(APP.screen==='builder'){ document.body.setAttribute('data-screen','builder'); root.innerHTML=builderScreen(); return; }
@@ -2626,6 +2610,13 @@ const SFX = (function(){
   let ctx=null, master=null, sfxGain=null, musGain=null;
   let unlocked=false, musicOn=true, sfxOn=true, musicPlaying=false, musTimer=null, bar=0, nextT=0, vinylSrc=null;
   let musicTrack='lofi', musicVol=0.6, sfxVol=0.6;
+  var FILEAUD=(window.ABC_SND||{}), fileBuf={}, fileSrc=null, userTrack='lofi';
+  function isFileTrack(n){ return !!FILEAUD['music_'+n]; }
+  function _ab(u){ var s=atob(u.split(',')[1]), n=s.length, a=new Uint8Array(n); for(var i=0;i<n;i++)a[i]=s.charCodeAt(i); return a.buffer; }
+  function _loadBuf(key,cb){ if(fileBuf[key]){cb(fileBuf[key]);return;} var d=FILEAUD[key]; if(!d||!ctx){cb(null);return;} try{ var p=ctx.decodeAudioData(_ab(d), function(b){fileBuf[key]=b;cb(b);}, function(){cb(null);}); if(p&&p.then)p.then(function(b){fileBuf[key]=b;cb(b);}).catch(function(){cb(null);}); }catch(e){cb(null);} }
+  function stopFile(){ if(fileSrc){ try{fileSrc.stop();}catch(e){} fileSrc=null; } }
+  function startFile(name){ stopFile(); _loadBuf('music_'+name,function(b){ if(!b||!musicPlaying||musicTrack!==name)return; var s=ctx.createBufferSource(); s.buffer=b; s.loop=true; s.connect(musGain); try{s.start();}catch(e){} fileSrc=s; }); }
+  function playSfxFile(key,vol){ if(!sfxOn||!ctx)return; _loadBuf('sfx_'+key,function(b){ if(!b)return; var s=ctx.createBufferSource(); s.buffer=b; var g=ctx.createGain(); g.gain.value=(vol==null?0.85:vol); s.connect(g); g.connect(sfxGain); try{s.start();}catch(e){} }); }
   function musLevel(){ return 0.26*musicVol; }
   function build(){
     if(ctx) return true;
@@ -2730,7 +2721,7 @@ const SFX = (function(){
   ];
   const CITYMEL=[ [[523.25,0,1.0],[587.33,1,0.5],[659.25,1.5,1.5]], [[659.25,0,1.0],[587.33,1,1.0],[523.25,2,1.8]] ];
   // ===== schedulers =====
-  function scheduleBar(){ if(!musicPlaying||!ctx) return; (musicTrack==='citypop'?cityBar:lofiBar)(); }
+  function scheduleBar(){ if(!musicPlaying||!ctx||isFileTrack(musicTrack)) return; (musicTrack==='citypop'?cityBar:lofiBar)(); }
   function queueNext(barDur){ bar++; nextT+=barDur; musTimer=setTimeout(scheduleBar, Math.max(30,(nextT-ctx.currentTime)*1000-260)); }
   function lofiBar(){
     const spb=60/70, barDur=spb*4, sw=0.58, t=nextT, C=CHORDS[bar%CHORDS.length];
@@ -2756,18 +2747,27 @@ const SFX = (function(){
     queueNext(barDur);
   }
   function startMusic(){
-    if(!ctx||musicPlaying) return; musicPlaying=true; bar=0; nextT=ctx.currentTime+0.15; if(musicTrack==='lofi') startVinyl();
+    if(!ctx||musicPlaying) return; musicPlaying=true; bar=0; nextT=ctx.currentTime+0.15;
     musGain.gain.cancelScheduledValues(ctx.currentTime); musGain.gain.setValueAtTime(Math.max(0.0001,musGain.gain.value),ctx.currentTime); musGain.gain.linearRampToValueAtTime(Math.max(0.0001,musLevel()),ctx.currentTime+2);
-    scheduleBar();
+    if(isFileTrack(musicTrack)){ startFile(musicTrack); } else { if(musicTrack==='lofi') startVinyl(); scheduleBar(); }
   }
-  function stopMusic(){ musicPlaying=false; if(musTimer){ clearTimeout(musTimer); musTimer=null; } stopVinyl(); if(ctx){ musGain.gain.cancelScheduledValues(ctx.currentTime); musGain.gain.setValueAtTime(Math.max(0.0001,musGain.gain.value),ctx.currentTime); musGain.gain.linearRampToValueAtTime(0.0001,ctx.currentTime+0.6); } }
-  function setTrack(name){ if(name!=='lofi'&&name!=='citypop'||name===musicTrack) return; musicTrack=name; bar=0; if(musicPlaying){ if(name==='lofi') startVinyl(); else stopVinyl(); } }
+  function stopMusic(){ musicPlaying=false; if(musTimer){ clearTimeout(musTimer); musTimer=null; } stopVinyl(); stopFile(); if(ctx){ musGain.gain.cancelScheduledValues(ctx.currentTime); musGain.gain.setValueAtTime(Math.max(0.0001,musGain.gain.value),ctx.currentTime); musGain.gain.linearRampToValueAtTime(0.0001,ctx.currentTime+0.6); } }
+  function playTrack(name){
+    if(name===musicTrack) return;
+    var proc=(name==='lofi'||name==='citypop');
+    if(!proc && !isFileTrack(name)) return;
+    stopFile(); stopVinyl(); if(musTimer){ clearTimeout(musTimer); musTimer=null; }
+    musicTrack=name; bar=0;
+    if(musicPlaying){ if(isFileTrack(name)){ startFile(name); } else { if(name==='lofi') startVinyl(); nextT=ctx.currentTime+0.12; scheduleBar(); } }
+  }
+  function setTrack(name){ userTrack=name; playTrack(name); }
+  function contextTrack(name){ playTrack(name||userTrack); }
   function setMusicVol(v){ musicVol=Math.max(0,Math.min(1,v)); if(ctx&&musicPlaying){ musGain.gain.cancelScheduledValues(ctx.currentTime); musGain.gain.setValueAtTime(Math.max(0.0001,musGain.gain.value),ctx.currentTime); musGain.gain.linearRampToValueAtTime(Math.max(0.0001,musLevel()),ctx.currentTime+0.15); } }
   function setSfxVol(v){ sfxVol=Math.max(0,Math.min(1,v)); if(sfxGain) sfxGain.gain.value=0.75*sfxVol; }
   function toggleMusic(){ musicOn=!musicOn; if(musicOn){ unlock(); startMusic(); } else stopMusic(); return musicOn; }
   function toggleSfx(){ sfxOn=!sfxOn; return sfxOn; }
   return { unlock, attack, block, heal, status, ko, toggleMusic, toggleSfx, isMusicOn:()=>musicOn, isSfxOn:()=>sfxOn,
-    setTrack, getTrack:()=>musicTrack, setMusicVol, setSfxVol, getMusicVol:()=>musicVol, getSfxVol:()=>sfxVol };
+    setTrack, getTrack:()=>musicTrack, setMusicVol, setSfxVol, getMusicVol:()=>musicVol, getSfxVol:()=>sfxVol, card:playSfxFile, contextTrack };
 })();
 function spawnKO(side,name){
   if(typeof document==='undefined') return;
@@ -2947,6 +2947,8 @@ function settingsRows(s){
     <div class="set-row"><span>Music track</span><span class="trk-pick">
       <button type="button" class="trk-opt ${SFX.getTrack()==='lofi'?'on':''}" data-audio="track:lofi">Lofi</button>
       <button type="button" class="trk-opt ${SFX.getTrack()==='citypop'?'on':''}" data-audio="track:citypop">City Pop</button>
+      <button type="button" class="trk-opt ${SFX.getTrack()==='hiphop9'?'on':''}" data-audio="track:hiphop9">Hip-Hop</button>
+      <button type="button" class="trk-opt ${SFX.getTrack()==='thereturn'?'on':''}" data-audio="track:thereturn">The Return</button>
     </span></div>
     ${row('Music volume: '+Math.round(SFX.getMusicVol()*100)+'%',`<input type="range" min="0" max="100" step="5" value="${Math.round(SFX.getMusicVol()*100)}" data-audio="musicvol">`)}
     ${row('Sound FX volume: '+Math.round(SFX.getSfxVol()*100)+'%',`<input type="range" min="0" max="100" step="5" value="${Math.round(SFX.getSfxVol()*100)}" data-audio="sfxvol">`)}`;
