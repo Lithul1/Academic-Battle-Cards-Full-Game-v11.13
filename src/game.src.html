@@ -2610,12 +2610,12 @@ const SFX = (function(){
   let ctx=null, master=null, sfxGain=null, musGain=null, procGain=null;
   let unlocked=false, musicOn=true, sfxOn=true, musicPlaying=false, musTimer=null, bar=0, nextT=0, vinylSrc=null;
   let musicTrack='lofi', musicVol=0.6, sfxVol=0.6;
-  var FILEAUD=(window.ABC_SND||{}), fileBuf={}, fileSrc=null, userTrack='lofi';
+  var FILEAUD=(window.ABC_SND||{}), fileBuf={}, fileSrc=null, fileGen=0, userTrack='lofi';
   function isFileTrack(n){ return !!FILEAUD['music_'+n]; }
   function _ab(u){ var s=atob(u.split(',')[1]), n=s.length, a=new Uint8Array(n); for(var i=0;i<n;i++)a[i]=s.charCodeAt(i); return a.buffer; }
   function _loadBuf(key,cb){ if(fileBuf[key]){cb(fileBuf[key]);return;} var d=FILEAUD[key]; if(!d||!ctx){cb(null);return;} try{ var p=ctx.decodeAudioData(_ab(d), function(b){fileBuf[key]=b;cb(b);}, function(){cb(null);}); if(p&&p.then)p.then(function(b){fileBuf[key]=b;cb(b);}).catch(function(){cb(null);}); }catch(e){cb(null);} }
-  function stopFile(){ if(fileSrc){ try{fileSrc.stop();}catch(e){} fileSrc=null; } }
-  function startFile(name){ stopFile(); _loadBuf('music_'+name,function(b){ if(!b||!musicPlaying||musicTrack!==name)return; var s=ctx.createBufferSource(); s.buffer=b; s.loop=true; s.connect(musGain); try{s.start();}catch(e){} fileSrc=s; }); }
+  function stopFile(){ fileGen++; if(fileSrc){ try{fileSrc.stop();}catch(e){} fileSrc=null; } }
+  function startFile(name){ stopFile(); var g=fileGen; _loadBuf('music_'+name,function(b){ if(!b||!musicPlaying||musicTrack!==name||g!==fileGen)return; var s=ctx.createBufferSource(); s.buffer=b; s.loop=true; s.connect(musGain); try{s.start();}catch(e){} fileSrc=s; }); }
   function playSfxFile(key,vol){ if(!sfxOn||!ctx)return; _loadBuf('sfx_'+key,function(b){ if(!b)return; var s=ctx.createBufferSource(); s.buffer=b; var g=ctx.createGain(); g.gain.value=(vol==null?0.85:vol); s.connect(g); g.connect(sfxGain); try{s.start();}catch(e){} }); }
   function musLevel(){ return 0.26*musicVol; }
   function build(){
