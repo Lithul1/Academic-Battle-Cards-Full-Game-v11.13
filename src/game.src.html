@@ -1544,7 +1544,7 @@ try{document.documentElement.style.setProperty('--abc-bg','url("'+window.ABC_BG+
 window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
 try{document.documentElement.style.setProperty('--abc-bg-qc','url("'+window.ABC_BG_QC+'")');}catch(e){}
 window.ABC_ICONS={archives:"data:image/png;base64,__ABCASSET_111__",rest:"data:image/png;base64,__ABCASSET_112__",start:"data:image/png;base64,__ABCASSET_113__",scrim:"data:image/png;base64,__ABCASSET_114__",elite:"data:image/png;base64,__ABCASSET_115__",boss:"data:image/png;base64,__ABCASSET_116__"};
-window.ABC_SND={music_thereturn:"data:audio/mpeg;base64,__ABCASSET_125__",music_hiphop9:"data:audio/mpeg;base64,__ABCASSET_126__",sfx_card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",sfx_card_place:"data:audio/mpeg;base64,__ABCASSET_118__",sfx_card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",sfx_card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",sfx_book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",sfx_card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",sfx_pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",sfx_pack_take:"data:audio/mpeg;base64,__ABCASSET_124__"};
+window.ABC_SND={music_thereturn:"data:audio/mpeg;base64,__ABCASSET_125__",music_hiphop9:"data:audio/mpeg;base64,__ABCASSET_126__",sfx_card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",sfx_card_place:"data:audio/mpeg;base64,__ABCASSET_118__",sfx_card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",sfx_card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",sfx_book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",sfx_card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",sfx_pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",sfx_pack_take:"data:audio/mpeg;base64,__ABCASSET_124__",music_boss:"data:audio/mpeg;base64,__ABCASSET_127__"};
 </script>
 <script>
 /* ACADEMIC BATTLE CARDS — engine + UI (v2: title, deck pick, full bookmarks, defense, discard piles) */
@@ -2274,7 +2274,7 @@ function answerTrivia(choice){
 /* ================= RENDERING ================= */
 function render(){
   const root=$('#game'); if(!root) return;
-  try{ if(APP.screen==='play'&&S){ SFX.contextTrack(S.scrim?((S.scrim.node&&S.scrim.node.boss)?'thereturn':'hiphop9'):null); } else { SFX.contextTrack(null); } }catch(e){}
+  try{ if(APP.screen==='play'&&S){ SFX.contextTrack(S.scrim?((S.scrim.node&&S.scrim.node.boss)?'boss':'hiphop9'):null); } else { SFX.contextTrack(null); } }catch(e){}
   if(APP.screen==='play' && S){ document.body.setAttribute('data-screen','play'); sweepActiveBm(S.you); sweepActiveBm(S.opp); renderGame(root); return; }
   if(APP.screen==='scrim'){ document.body.setAttribute('data-screen','scrim'); document.body.setAttribute('data-scrimview',(SCRIM&&SCRIM.view)||''); root.innerHTML=scrimScreen(); scrimAfterRender&&scrimAfterRender(); return; }
   if(APP.screen==='builder'){ document.body.setAttribute('data-screen','builder'); root.innerHTML=builderScreen(); return; }
@@ -2607,7 +2607,7 @@ function flickDeck(sideKey){
   document.body.appendChild(o); setTimeout(()=>o.remove(),560);
 }
 const SFX = (function(){
-  let ctx=null, master=null, sfxGain=null, musGain=null;
+  let ctx=null, master=null, sfxGain=null, musGain=null, procGain=null;
   let unlocked=false, musicOn=true, sfxOn=true, musicPlaying=false, musTimer=null, bar=0, nextT=0, vinylSrc=null;
   let musicTrack='lofi', musicVol=0.6, sfxVol=0.6;
   var FILEAUD=(window.ABC_SND||{}), fileBuf={}, fileSrc=null, userTrack='lofi';
@@ -2625,6 +2625,7 @@ const SFX = (function(){
     master=ctx.createGain(); master.gain.value=0.9; master.connect(ctx.destination);
     sfxGain=ctx.createGain(); sfxGain.gain.value=0.75*sfxVol; sfxGain.connect(master);
     musGain=ctx.createGain(); musGain.gain.value=0.0001; musGain.connect(master);
+    procGain=ctx.createGain(); procGain.gain.value=1; procGain.connect(musGain);
     return true;
   }
   function unlock(){ if(!build()) return; if(ctx.state==='suspended') ctx.resume(); if(!unlocked){ unlocked=true; if(musicOn) startMusic(); } }
@@ -2663,7 +2664,7 @@ const SFX = (function(){
     vinylSrc=ctx.createBufferSource(); vinylSrc.buffer=makeVinyl(); vinylSrc.loop=true;
     const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=5200;
     const g=ctx.createGain(); g.gain.value=0.5;
-    vinylSrc.connect(f); f.connect(g); g.connect(musGain); vinylSrc.start();
+    vinylSrc.connect(f); f.connect(g); g.connect(procGain); vinylSrc.start();
   }
   function stopVinyl(){ if(vinylSrc){ try{vinylSrc.stop();}catch(e){} vinylSrc=null; } }
   // ---- instruments ----
@@ -2673,30 +2674,30 @@ const SFX = (function(){
     f.type='lowpass'; f.frequency.value=1500;
     const pk=peak||0.07;
     g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(pk,t+0.015); g.gain.exponentialRampToValueAtTime(pk*0.55,t+0.3); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.connect(f); o2.connect(f); f.connect(g); g.connect(musGain); o.start(t); o2.start(t); o.stop(t+dur+0.05); o2.stop(t+dur+0.05);
+    o.connect(f); o2.connect(f); f.connect(g); g.connect(procGain); o.start(t); o2.start(t); o.stop(t+dur+0.05); o2.stop(t+dur+0.05);
   }
   function bass(freq,t,dur){  // plucked upright-ish
     const o=ctx.createOscillator(), g=ctx.createGain(), f=ctx.createBiquadFilter();
     o.type='triangle'; o.frequency.value=freq; f.type='lowpass'; f.frequency.value=480;
     g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.26,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.connect(f); f.connect(g); g.connect(musGain); o.start(t); o.stop(t+dur+0.05);
+    o.connect(f); f.connect(g); g.connect(procGain); o.start(t); o.stop(t+dur+0.05);
   }
   function lead(freq,t,dur){  // smooth sax/guitar with vibrato
     const o=ctx.createOscillator(), g=ctx.createGain(), f=ctx.createBiquadFilter(), lfo=ctx.createOscillator(), lg=ctx.createGain();
     o.type='sine'; o.frequency.value=freq; f.type='lowpass'; f.frequency.value=1900;
     lfo.type='sine'; lfo.frequency.value=5; lg.gain.value=freq*0.006; lfo.connect(lg); lg.connect(o.frequency); lfo.start(t); lfo.stop(t+dur+0.05);
     g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.075,t+0.09); g.gain.setValueAtTime(0.075,Math.max(t+0.1,t+dur-0.18)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.connect(f); f.connect(g); g.connect(musGain); o.start(t); o.stop(t+dur+0.05);
+    o.connect(f); f.connect(g); g.connect(procGain); o.start(t); o.stop(t+dur+0.05);
   }
-  function kick(t){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(115,t); o.frequency.exponentialRampToValueAtTime(45,t+0.13); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.46,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+0.2); o.connect(g); g.connect(musGain); o.start(t); o.stop(t+0.22); }
+  function kick(t){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(115,t); o.frequency.exponentialRampToValueAtTime(45,t+0.13); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.46,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+0.2); o.connect(g); g.connect(procGain); o.start(t); o.stop(t+0.22); }
   function snare(t){
     const src=ctx.createBufferSource(), nb=ctx.createBuffer(1,Math.floor(ctx.sampleRate*0.2),ctx.sampleRate), c=nb.getChannelData(0);
     for(let i=0;i<c.length;i++) c[i]=Math.random()*2-1; src.buffer=nb;
     const bf=ctx.createBiquadFilter(); bf.type='bandpass'; bf.frequency.value=1700; bf.Q.value=0.6;
     const g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.2,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
-    src.connect(bf); bf.connect(g); g.connect(musGain); src.start(t); src.stop(t+0.2);
+    src.connect(bf); bf.connect(g); g.connect(procGain); src.start(t); src.stop(t+0.2);
     const o=ctx.createOscillator(), og=ctx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(185,t); o.frequency.exponentialRampToValueAtTime(120,t+0.09);
-    og.gain.setValueAtTime(0.0001,t); og.gain.exponentialRampToValueAtTime(0.11,t+0.005); og.gain.exponentialRampToValueAtTime(0.0001,t+0.11); o.connect(og); og.connect(musGain); o.start(t); o.stop(t+0.13);
+    og.gain.setValueAtTime(0.0001,t); og.gain.exponentialRampToValueAtTime(0.11,t+0.005); og.gain.exponentialRampToValueAtTime(0.0001,t+0.11); o.connect(og); og.connect(procGain); o.start(t); o.stop(t+0.13);
   }
   function hat(t,peak){ noise(t,0.03,peak||0.04,7000,musGain); }
   // ii–V–I–vi in C: Dm7 · G7 · Cmaj9 · Am7  (root, fifth, chord voicing)
@@ -2708,10 +2709,10 @@ const SFX = (function(){
   ];
   const MEL=[[392.00,440.00],[523.25,440.00],[329.63,392.00],[293.66,329.63]]; // C-major pentatonic motifs
   // ===== City Pop instruments =====
-  function guitarStab(freqs,t){ freqs.forEach(f=>{ const o=ctx.createOscillator(), g=ctx.createGain(), fl=ctx.createBiquadFilter(); o.type='sawtooth'; o.frequency.value=f; fl.type='bandpass'; fl.frequency.value=1500; fl.Q.value=1.3; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.045,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+0.12); o.connect(fl); fl.connect(g); g.connect(musGain); o.start(t); o.stop(t+0.14); }); }
+  function guitarStab(freqs,t){ freqs.forEach(f=>{ const o=ctx.createOscillator(), g=ctx.createGain(), fl=ctx.createBiquadFilter(); o.type='sawtooth'; o.frequency.value=f; fl.type='bandpass'; fl.frequency.value=1500; fl.Q.value=1.3; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.045,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+0.12); o.connect(fl); fl.connect(g); g.connect(procGain); o.start(t); o.stop(t+0.14); }); }
   function shaker(t,peak){ noise(t,0.025,peak||0.03,8000,musGain); }
-  function bongo(freq,t){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(freq,t); o.frequency.exponentialRampToValueAtTime(freq*0.7,t+0.08); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.14,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+0.12); o.connect(g); g.connect(musGain); o.start(t); o.stop(t+0.14); }
-  function brass(freq,t,dur){ const o=ctx.createOscillator(), o2=ctx.createOscillator(), g=ctx.createGain(), fl=ctx.createBiquadFilter(); o.type='sawtooth'; o2.type='sawtooth'; o.frequency.value=freq; o2.frequency.value=freq; o2.detune.value=9; fl.type='lowpass'; fl.frequency.value=2600; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.085,t+0.04); g.gain.setValueAtTime(0.085,Math.max(t+0.05,t+dur-0.1)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(fl); o2.connect(fl); fl.connect(g); g.connect(musGain); o.start(t); o2.start(t); o.stop(t+dur+0.05); o2.stop(t+dur+0.05); }
+  function bongo(freq,t){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(freq,t); o.frequency.exponentialRampToValueAtTime(freq*0.7,t+0.08); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.14,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+0.12); o.connect(g); g.connect(procGain); o.start(t); o.stop(t+0.14); }
+  function brass(freq,t,dur){ const o=ctx.createOscillator(), o2=ctx.createOscillator(), g=ctx.createGain(), fl=ctx.createBiquadFilter(); o.type='sawtooth'; o2.type='sawtooth'; o.frequency.value=freq; o2.frequency.value=freq; o2.detune.value=9; fl.type='lowpass'; fl.frequency.value=2600; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.085,t+0.04); g.gain.setValueAtTime(0.085,Math.max(t+0.05,t+dur-0.1)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(fl); o2.connect(fl); fl.connect(g); g.connect(procGain); o.start(t); o2.start(t); o.stop(t+dur+0.05); o2.stop(t+dur+0.05); }
   // City Pop: royal-road maj7 progression  Fmaj7 · G7 · Em7 · Am7
   const CITY=[
     { root:87.31,  fifth:130.81, voice:[174.61,220.00,261.63,329.63], gtr:[220.00,261.63,329.63] },
@@ -2756,9 +2757,12 @@ const SFX = (function(){
     if(name===musicTrack) return;
     var proc=(name==='lofi'||name==='citypop');
     if(!proc && !isFileTrack(name)) return;
+    var toFile=isFileTrack(name), fromFile=isFileTrack(musicTrack);
+    if(!fromFile && !toFile){ musicTrack=name; bar=0; if(musicPlaying){ if(name==='lofi') startVinyl(); else stopVinyl(); } return; }
     stopFile(); stopVinyl(); if(musTimer){ clearTimeout(musTimer); musTimer=null; }
     musicTrack=name; bar=0;
-    if(musicPlaying){ if(isFileTrack(name)){ startFile(name); } else { if(name==='lofi') startVinyl(); nextT=ctx.currentTime+0.12; scheduleBar(); } }
+    if(ctx&&procGain){ try{ procGain.gain.cancelScheduledValues(ctx.currentTime); procGain.gain.setValueAtTime(toFile?0.0001:1, ctx.currentTime); }catch(e){} }
+    if(musicPlaying){ if(toFile){ startFile(name); } else { if(name==='lofi') startVinyl(); nextT=ctx.currentTime+0.12; scheduleBar(); } }
   }
   function setTrack(name){ userTrack=name; playTrack(name); }
   function contextTrack(name){ playTrack(name||userTrack); }
@@ -3400,7 +3404,7 @@ function handleScrim(cmd){
     else if(a==='healall'){ SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.min(t.maxHp,t.curHp+20); }); }
     else if(a==='revive'){ const dead=SCRIM.team.filter(t=>t.curHp<=0); if(dead.length){ dead[0].curHp=Math.round(dead[0].maxHp*0.5); } }
     SCRIM.view='map'; render(); scrimSave(); return; }
-  if(op==='draftpick'){ const k=+a; const ref=SCRIM.draft&&SCRIM.draft[k]; if(ref){ if(ref.t==='ab') SCRIM.deck.ab.push({d:ref.d,i:ref.i}); else if(ref.t==='bm') SCRIM.deck.bm.push(ref.i); else SCRIM.deck.cr.push(ref.i); } SCRIM.draft=null; SCRIM.view='map'; render(); scrimSave(); return; }
+  if(op==='draftpick'){ try{SFX.card('pack_take',0.75);}catch(e){} const k=+a; const ref=SCRIM.draft&&SCRIM.draft[k]; if(ref){ if(ref.t==='ab') SCRIM.deck.ab.push({d:ref.d,i:ref.i}); else if(ref.t==='bm') SCRIM.deck.bm.push(ref.i); else SCRIM.deck.cr.push(ref.i); } SCRIM.draft=null; SCRIM.view='map'; render(); scrimSave(); return; }
   if(op==='draftskip'){ SCRIM.draft=null; SCRIM.view='map'; render(); scrimSave(); return; }
   if(op==='vault'){ scrimBuyUnlock(a); return; }
   if(op==='rosetta'){ if(S&&S.pending&&S.scrim&&!S.scrim.rosettaUsed){ const type=S.pending.card.type; const decks=Object.keys(DATA.abcs); let pick=null,g=0; while(!pick&&g++<40){ const d=decks[rnd(decks.length)]; const x=DATA.abcs[d][rnd(DATA.abcs[d].length)]; if(x&&x.type===type) pick=x; } if(pick){ const c=S.pending.card; c.q=pick.q; c.opts=pick.opts.slice(); c.ans=pick.ans; S.scrim.rosettaUsed=true; pushLog('Rosetta Stone \u2014 the question is swapped.'); render(); } } return; }
@@ -3409,7 +3413,7 @@ function handleScrim(cmd){
 function scrimResolveNode(c,r){
   const node=SCRIM.map.cols[c][r]; SCRIM.pending={c,r};
   if(node.type==='scrim'||node.type==='elite'||node.type==='boss'){ scrimStartBattle(node); }
-  else if(node.type==='archives'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.draft=scrimRollDraft(3); SCRIM.view='archives'; render(); scrimSave(); }
+  else if(node.type==='archives'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.draft=scrimRollDraft(3); SCRIM.view='archives'; try{SFX.card('pack_open',0.7);}catch(e){} render(); scrimSave(); }
   else if(node.type==='rest'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.view='rest'; render(); scrimSave(); }
 }
 function scrimAfterBattle(){
@@ -3424,7 +3428,7 @@ function scrimAfterBattle(){
   SCRIM._gainedArt=art;
   if(node.boss){ S=null; scrimEndRun(true); return; }
   S=null; stopTurnTimer(); APP.screen='scrim';
-  SCRIM.pending=null; SCRIM.draft=scrimRollDraft(3); SCRIM.view='reward'; render(); scrimSave();
+  SCRIM.pending=null; SCRIM.draft=scrimRollDraft(3); SCRIM.view='reward'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave();
 }
 function scrimBuyUnlock(id){
   const U={ hp:{cost:40,name:'Hardy Scholars (+10 starting Max HP)'}, kit:{cost:60,name:'Extra kit slot (cosmetic)'} };
