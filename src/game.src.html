@@ -1435,6 +1435,8 @@ const DATA = {
     { id:'editorialdeadline', name:'Editorial Deadline', kind:'RESET', rarity:'E', text:'Both players discard every charged Attack ABC. Block ABC remain attached.', effect:'deadline' },
     { id:'libraryrestore', name:'Library Restoration', kind:'RESET', rarity:'E', text:'Reattach up to 2 Attack and 2 Block ABC from your discard onto your Active, free of trivia.', effect:'restoration' },
     { id:'completerewrite', name:'Complete Rewrite', kind:'RESET', rarity:'L', text:'Your Active: remove all statuses, discard all charged ABC, heal 30 HP, and draw 2 cards.', effect:'completerewrite' },
+    { id:'maskingtape', name:'Masking Tape', kind:'UTILITY', rarity:'U', text:'Remove Tear and Rip from all of your active and backstage characters.', effect:'maskingtape' },
+    { id:'roundrobin', name:'Round Robin', kind:'RESET', rarity:'R', text:"Both players' Active characters are swapped out for one from their backstage.", effect:'roundrobin' },
   ],
   // -------- 1ST EDITION (Commander) CARDS --------
   firsteds: [
@@ -2022,6 +2024,8 @@ function playBookmark(side,idx){
     case 'deadline':{ ['you','opp'].forEach(k=>{ const pl=S[k]; pl.team.forEach(c=>{ if(c.atkCharge.length) pl.discard.push(...c.atkCharge.splice(0)); }); }); pushLog('Editorial Deadline: every charged Attack ABC is discarded; Block ABC remain.'); remove(); break; }
     case 'restoration':{ const m=active(P); let a=0,b=0; for(let i=P.discard.length-1;i>=0&&(a<2||b<2);i--){ const c=P.discard[i]; if(c.cat!=='abc') continue; if(c.type==='ATTACK'&&a<2){ m.atkCharge.push(P.discard.splice(i,1)[0]); a++; } else if(c.type==='BLOCK'&&b<2){ m.blkCharge.push(P.discard.splice(i,1)[0]); b++; } } pushLog(`Library Restoration: ${m.name} regains ${a} Attack and ${b} Block ABC.`); remove(); break; }
     case 'completerewrite':{ const m=active(P); clearAllStatus(m); if(m.atkCharge.length||m.blkCharge.length) P.discard.push(...m.atkCharge.splice(0),...m.blkCharge.splice(0)); const b0=m.hp; m.hp=Math.min(m.maxHp,m.hp+30); fxHeal(sideOfChar(m),m.hp-b0); for(let d=0;d<2;d++){ if(!P.deck.length&&P.discard.length)P.deck=shuffle(P.discard.splice(0)); if(P.deck.length)P.hand.push(P.deck.shift()); } pushLog(`Complete Rewrite: ${m.name} is fully reset, heals 30 (${m.hp}/${m.maxHp}), and you draw 2.`); remove(); break; }
+    case 'maskingtape':{ let n=0; P.team.forEach(c=>{ if(c.hp>0){ if(c.status.tear){ delete c.status.tear; n++; } if(c.status.rip){ delete c.status.rip; n++; } } }); pushLog(n?`Masking Tape: cleared ${n} Tear/Rip effect${n>1?'s':''} from your team.`:`Masking Tape: no Tear or Rip on your team.`); remove(); break; }
+    case 'roundrobin':{ const done=[]; ['you','opp'].forEach(k=>{ const pl=S[k]; const bi=pl.team.findIndex((c,ix)=>ix!==pl.activeIdx && c.hp>0); if(bi>=0){ doSwitch(pl,bi); done.push(`${who(pl)} \u2192 ${pl.team[pl.activeIdx].name}`); } }); pushLog(done.length?`Round Robin: front lines rotate \u2014 ${done.join('; ')}.`:`Round Robin: no benched characters to rotate in.`); remove(); break; }
     default: toast('No effect'); return;
   }
   commit();
