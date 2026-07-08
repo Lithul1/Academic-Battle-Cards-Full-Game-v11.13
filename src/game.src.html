@@ -135,6 +135,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .char[data-deck="oz"]{--frame:#0f2a1e;--paper:#eaf3e6;--plate:linear-gradient(#ffe38f,#e6c34d);--plate-ink:#123322;--hp:#2f9d63;--hp-ink:#04140c;--ground:radial-gradient(circle at 30% 20%,#12503a,#06170f 70%)}
 .char[data-deck="othello"]{--frame:#141821;--paper:#e7ecf3;--plate:#1b2634;--plate-ink:#cfe4ff;--hp:#d94b3a;--hp-ink:#1a0a08;--ground:linear-gradient(160deg,#1d2733,#080b12)}
 .char[data-deck="macbeth"]{--frame:#1a0e10;--paper:#efe1de;--plate:#2a1418;--plate-ink:#f0d8d0;--hp:#9c2b2b;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#3a1418,#110507 70%)}
+.char[data-deck="wonderland"]{--frame:#2a0f1e;--paper:#f6eef2;--plate:linear-gradient(#f7d6e0,#e6a6c0);--plate-ink:#3a1020;--hp:#c0223f;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#5a1a3a,#180612 70%)}
 .char[data-deck="gatsby"] .pc-name,.char[data-deck="crucible"] .pc-name,.char[data-deck="sherlock"] .pc-name,.char[data-deck="oz"] .pc-name{font-family:var(--disp)}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 3px var(--gold),0 3px 0 var(--red-dk)}50%{box-shadow:0 0 0 5px var(--gold),0 3px 0 var(--red-dk)}}
 .char.hit{animation:hit .45s}
@@ -1105,6 +1106,21 @@ const DATA = {
       {"id": "siward", "name": "Siward", "hp": 80, "accent": "#556B2F", "img": "", "tags": ["General"], "atk": {"n": "Seasoned Commander", "t": "If Highlightis active, this attack gains +20 damage.", "cost": 3, "dmg": 70, "cond": [{"test": "selfHasStatus", "status": "highlight", "then": {"dmgAdd": 20}}], "label": "70/3"}, "blk": {"n": "Veteran Defense", "t": "Remove Tear after blocking.", "cost": 2, "block": 50, "blkCleanse": "tear", "blockType": "cleanse", "label": "50/2"}},
       {"id": "porter", "name": "The Porter", "hp": 70, "accent": "#8B5A2B", "img": "", "tags": ["Comic"], "atk": {"n": "Knock, Knock!", "t": "Inflict Glue until opponent's next turn.", "cost": 1, "dmg": 30, "inflict": "glue", "label": "30/1"}, "blk": {"n": "Comic Relief", "t": "Remove Burn or Smudgefrom yourself.", "cost": 1, "block": 30, "blkCleanse": ["burn", "smudge"], "blockType": "cleanse", "label": "30/1"}}
     ],
+    wonderland: [
+      {"id": "alice", "name": "Alice", "hp": 140, "accent": "#6FA8DC", "img": "", "tags": ["Hero"], "atk": {"n": "Curious Courage", "t": "Gain Highlightbefore dealing damage.", "cost": 3, "dmg": 60, "selfStatus": "highlight", "label": "60/3"}, "blk": {"n": "Growing Resolve", "t": "Remove Smudge or Glue from yourself before blocking.", "cost": 2, "block": 40, "blkCleanse": ["smudge", "glue"], "blockType": "cleanse", "label": "40/2"}},
+      {"id": "white_rabbit", "name": "White Rabbit", "hp": 90, "accent": "#FFFFFF", "img": "", "tags": ["Rabbit"], "atk": {"n": "I'm Late!", "t": "Inflict Glue on the opponent.", "cost": 2, "dmg": 40, "inflict": "glue", "label": "40/2"}, "blk": {"n": "Pocket Watch", "t": "Gain Highlightafter successfully blocking.", "cost": 2, "block": 30, "label": "30/2"}},
+      {"id": "mad_hatter", "name": "The Mad Hatter", "hp": 130, "accent": "#8E44AD", "img": "", "tags": ["Hatter"], "atk": {"n": "Mad Tea Party", "t": "Inflict Smudgeon the opponent.", "cost": 3, "dmg": 60, "inflict": "smudge", "label": "60/3"}, "blk": {"n": "Riddle Me This", "t": "Negate one incoming status effect.", "cost": 2, "block": 40, "blockType": "negateStatus", "label": "40/2"}},
+      {"id": "march_hare", "name": "The March Hare", "hp": 90, "accent": "#A67C52", "img": "", "tags": ["Hare"], "atk": {"n": "Chaotic Leap", "t": "Inflict Spill.", "cost": 2, "dmg": 50, "inflict": "spill", "label": "50/2"}, "blk": {"n": "Sudden Dodge", "t": "Remove Spill from yourself.", "cost": 2, "block": 30, "blkCleanse": "spill", "blockType": "cleanse", "label": "30/2"}},
+      {"id": "dormouse", "name": "Dormouse", "hp": 120, "accent": "#C49A6C", "img": "", "tags": ["Mouse"], "atk": {"n": "Sleepy Ramble", "t": "Inflict Glue until the opponent's next turn.", "cost": 2, "dmg": 40, "inflict": "glue", "label": "40/2"}, "blk": {"n": "Catnap", "t": "Gain Laminateuntil your next turn.", "cost": 2, "block": 40, "blockType": "laminate", "label": "40/2"}},
+      {"id": "cheshire_cat", "name": "The Cheshire Cat", "hp": 90, "accent": "#C27BA0", "img": "", "tags": ["Cat"], "atk": {"n": "Vanishing Grin", "t": "Inflict Rip. Disable one opponent attack until they leave play.", "cost": 3, "dmg": 70, "inflict": "rip", "label": "70/3"}, "blk": {"n": "Fade Away", "t": "Negate Ripor Tearbefore reducing damage.", "cost": 2, "block": 40, "blkCleanse": ["rip", "tear"], "blockType": "cleanse", "label": "40/2"}},
+      {"id": "queen_hearts", "name": "The Queen of Hearts", "hp": 160, "accent": "#CC0000", "img": "", "tags": ["Royal"], "atk": {"n": "Off With Their Heads!", "t": "Inflict Burn on the opponent.", "cost": 4, "dmg": 90, "inflict": "burn", "label": "90/4"}, "blk": {"n": "Royal Decree", "t": "Gain Laminateuntil your next turn.", "cost": 2, "block": 50, "blockType": "laminate", "label": "50/2"}},
+      {"id": "king_hearts", "name": "The King of Hearts", "hp": 80, "accent": "#D4AF37", "img": "", "tags": ["Royal"], "atk": {"n": "Gentle Judgment", "t": "Remove Burnfrom yourself before attacking.", "cost": 2, "dmg": 50, "cleanseAlly": "burn", "label": "50/2"}, "blk": {"n": "Royal Pardon", "t": "Remove one negative status from any ally.", "cost": 2, "block": 40, "blkCleanse": "any", "blockType": "cleanse", "label": "40/2"}},
+      {"id": "knave_hearts", "name": "The Knave of Hearts", "hp": 110, "accent": "#7F6000", "img": "", "tags": ["Rogue"], "atk": {"n": "Tart Thief", "t": "Inflict Tear.", "cost": 3, "dmg": 60, "inflict": "tear", "label": "60/3"}, "blk": {"n": "Plead Innocence", "t": "Remove Smudgefrom yourself.", "cost": 2, "block": 30, "blkCleanse": "smudge", "blockType": "cleanse", "label": "30/2"}},
+      {"id": "caterpillar", "name": "The Caterpillar", "hp": 80, "accent": "#38761D", "img": "", "tags": ["Sage"], "atk": {"n": "Who Are You?", "t": "Inflict Smudgeand remove opponent's Highlight.", "cost": 3, "dmg": 60, "inflict": "smudge", "stripPos": "highlight", "label": "60/3"}, "blk": {"n": "Wisdom of the Hookah", "t": "Gain Highlightafter blocking.", "cost": 2, "block": 40, "label": "40/2"}},
+      {"id": "duchess", "name": "The Duchess", "hp": 60, "accent": "#B45F06", "img": "", "tags": ["Noble"], "atk": {"n": "Pepper Storm", "t": "Inflict Spill.", "cost": 2, "dmg": 50, "inflict": "spill", "label": "50/2"}, "blk": {"n": "Motherly Instinct", "t": "Remove Burn or Spill from yourself.", "cost": 2, "block": 30, "blkCleanse": ["burn", "spill"], "blockType": "cleanse", "label": "30/2"}},
+      {"id": "mock_turtle", "name": "The Mock Turtle", "hp": 150, "accent": "#3D85C6", "img": "", "tags": ["Scholar"], "atk": {"n": "Melancholy Tale", "t": "Draw 1 card after damage.", "cost": 3, "dmg": 60, "drawAfter": 1, "label": "60/3"}, "blk": {"n": "Ancient Lessons", "t": "Remove Tear from yourself or an ally.", "cost": 2, "block": 40, "blkCleanse": "tear", "blockType": "cleanse", "label": "40/2"}},
+      {"id": "gryphon", "name": "The Gryphon", "hp": 70, "accent": "#E69138", "img": "", "tags": ["Guardian"], "atk": {"n": "Soaring Dive", "t": "If Highlightis active, this attack gains +20 damage.", "cost": 3, "dmg": 70, "cond": [{"test": "selfHasStatus", "status": "highlight", "then": {"dmgAdd": 20}}], "label": "70/3"}, "blk": {"n": "Winged Guard", "t": "Negate Glue before reducing damage.", "cost": 2, "block": 50, "blkCleanse": "glue", "blockType": "cleanse", "label": "50/2"}}
+    ],
     oz: [
       { id:"dorothy", name:"Dorothy Gale", hp:90, accent:"#4A90E2", img:"", tags:["protagonist"],
         atk:{n:"Silver Shoes Click", t:"Dorothy taps her magical heels together to escape danger, leaving a lingering spark of offensive potential.", cost:2, dmg:30, grant:"highlight", label:"30/2"},
@@ -1387,6 +1403,58 @@ const DATA = {
       _abc('B',4,"Macbeth's tragic flaw is",["laziness","ambition","generosity","patience"],1),
       _abc('B',4,"Shakespeare suggests that",["ambition without morality destroys","fate cannot change","witches rule humanity","revenge brings happiness"],0)
     ],
+    wonderland: [
+      _abc('A',1,"What is Alice doing when she first notices the White Rabbit?",["Reading","Playing cards","Picking flowers","Sewing"],0),
+      _abc('A',1,"Where does Alice follow the White Rabbit?",["Into a cave","Down a rabbit hole","Through a mirror","Into a forest"],1),
+      _abc('A',1,"Alice cries enough tears to create a",["Pond","River","Lake","Ocean"],2),
+      _abc('A',1,"What phrase does the Queen of Hearts shout repeatedly?",["Off with their heads!","You're late!","Silence!","Begin!"],0),
+      _abc('A',1,"Which dance do the Gryphon and Mock Turtle describe?",["Lobster Quadrille","Sea Waltz","Crab Jig","Ocean Reel"],0),
+      _abc('A',1,"What happens immediately after the cards attack Alice?",["She wakes up","She defeats them","She becomes Queen","The Rabbit apologizes"],0),
+      _abc('A',1,"What theme is emphasized throughout Alice's adventures?",["Conquering enemies","Identity and growing up","Wealth","War"],1),
+      _abc('A',2,"What words appear on the mysterious bottle?",["Magic Potion","Drink Me","Wonderland","Try Me"],1),
+      _abc('A',2,"What is unusual about the Caucus Race?",["It has no finish line","Everyone flies","Only Alice races","It happens underwater"],0),
+      _abc('A',2,"What is the name of the lizard sent down the chimney?",["Bill","Tom","Jack","Ned"],0),
+      _abc('A',2,"The Caterpillar sits on top of a",["Rock","Mushroom","Tree stump","Fence"],1),
+      _abc('A',2,"Eating different sides of the mushroom changes Alice's",["Voice","Age","Size","Hair"],2),
+      _abc('A',2,"The Cheshire Cat tells Alice everyone in Wonderland is",["Honest","Mad","Brave","Lost"],1),
+      _abc('A',2,"Who is holding the baby when Alice arrives at the Duchess's house?",["Cook","Duchess","Queen","Rabbit"],1),
+      _abc('A',2,"At the tea party, what time is it always?",["Noon","Six o'clock","Midnight","Dawn"],1),
+      _abc('A',2,"Which sleepy guest rarely speaks during the tea party?",["Mouse","Dormouse","Hare","Gryphon"],1),
+      _abc('A',3,"The March Hare is best known for being",["Wise","Quiet","Chaotic","Invisible"],2),
+      _abc('A',3,"What are used as croquet mallets?",["Flamingos","Umbrellas","Clubs","Foxes"],0),
+      _abc('A',3,"Which creature escorts Alice to meet the Mock Turtle?",["Griffin","Gryphon","Eagle","Dragon"],1),
+      _abc('A',3,"The Mock Turtle's teacher is called",["Professor Crab","Shellback","Turtle Master","Tortoise"],3),
+      _abc('A',3,"Who steals the Queen's tarts?",["White Rabbit","Cheshire Cat","Mad Hatter","Knave of Hearts"],3),
+      _abc('A',3,"During the trial, what evidence is suddenly produced?",["A diary","A letter","A map","A crown"],1),
+      _abc('A',4,"As the trial continues, Alice begins to",["Shrink","Grow larger","Turn invisible","Fall asleep"],1),
+      _abc('A',4,"Wonderland is ultimately revealed to be",["Another world","A dream","A magical kingdom","A storybook"],1),
+      _abc('A',4,"Which character gives Alice conflicting directions throughout the story?",["Cheshire Cat","White Rabbit","Queen","King"],0),
+      _abc('B',1,"What causes Alice to shrink the first time?",["Eating cake","Drinking from a bottle","Magic dust","A mushroom"],1),
+      _abc('B',1,"Which bird organizes the Caucus Race?",["Eagle","Dodo","Raven","Swan"],1),
+      _abc('B',1,"Which animal mistakes Alice for its housemaid?",["Dormouse","White Rabbit","Hedgehog","Lizard"],1),
+      _abc('B',1,"What advice does the Caterpillar repeatedly ask Alice?",["Where are you going?","Can you sing?","Why are you here?","Who are you?"],3),
+      _abc('B',1,"Which character can disappear until only its grin remains?",["Mad Hatter","Gryphon","White Rabbit","Cheshire Cat"],3),
+      _abc('B',1,"Which Duchess's household is filled with pepper?",["Queen's","Duchess's","Rabbit's","Hatter's"],1),
+      _abc('B',1,"Who hosts the famous tea party?",["Queen","Mad Hatter","Caterpillar","White Rabbit"],1),
+      _abc('B',1,"Why is Time angry with the Mad Hatter?",["He insulted Time","He stole a watch","He overslept","He broke a clock"],0),
+      _abc('B',1,"What game does the Queen of Hearts play?",["Chess","Cricket","Croquet","Tennis"],2),
+      _abc('B',2,"The Mock Turtle says he studied at what school?",["Sea School","Reeling and Writhing","Coral Academy","Ocean Prep"],1),
+      _abc('B',2,"What kind of trial is held near the end of the novel?",["Murder","Theft of tarts","Treason","Kidnapping"],1),
+      _abc('B',2,"The jurors record notes using",["Ink","Chalk","Slates","Sand"],2),
+      _abc('B',2,"Who is the first Wonderland creature Alice speaks to?",["Mouse","White Rabbit","Dodo","Caterpillar"],0),
+      _abc('B',2,"What unusual item is the White Rabbit carrying?",["A pocket watch","A cane","A lantern","A book"],0),
+      _abc('B',2,"Which item causes Alice to grow larger?",["A mushroom","A cookie","A cake labeled \"Eat Me\"","An apple"],2),
+      _abc('B',2,"What does the Caterpillar smoke?",["Pipe","Cigar","Hookah","Cigarette"],2),
+      _abc('B',2,"Into what does the Duchess's baby transform?",["Cat","Pig","Rabbit","Mouse"],1),
+      _abc('B',3,"What are used as croquet balls?",["Hedgehogs","Rabbits","Stones","Apples"],0),
+      _abc('B',3,"Who secretly pardons many of the Queen's condemned subjects?",["Alice","King of Hearts","White Rabbit","Gryphon"],1),
+      _abc('B',3,"Why was the teacher called Tortoise?",["He walked slowly","He taught us","He wore a shell","He liked turtles"],1),
+      _abc('B',3,"Which poem does Alice recite incorrectly for the Caterpillar?",["Twinkle, Twinkle, Little Star","You Are Old, Father William","Jabberwocky","The Walrus and the Carpenter"],1),
+      _abc('B',3,"Alice finally calls the court nothing but a pack of",["Wolves","Cards","Rabbits","Fools"],1),
+      _abc('B',4,"Alice awakens beside her",["Sister","Mother","Father","Brother"],0),
+      _abc('B',4,"Which character constantly worries about being late?",["Mad Hatter","White Rabbit","King of Hearts","Dormouse"],1),
+      _abc('B',4,"Which literary style best describes much of the novel?",["Historical realism","Nonsense literature","Epic poetry","Gothic horror"],1)
+    ],
     oz: [
       _abc('A',1,"What environmental force transports Dorothy from Kansas to the Land of Oz?",["A great flood","A violent cyclone","A massive earthquake","A sudden volcanic eruption"],1),
       _abc('A',1,"In the original novel by L. Frank Baum, what color are Dorothy's magical shoes?",["Ruby red","Emerald green","Bright silver","Golden yellow"],2),
@@ -1548,11 +1616,11 @@ const DATA = {
         passive:{id:"tomorrow",name:"Tomorrow, and Tomorrow…",text:"All of Macbeth's move costs are reduced by 1 (min 1). Caveat: he is perpetually Smudged, and each enemy character he KOs makes every future attach require two correct answers.",costMod:-1,smudgeLock:true,killWorsen:true},
         atk:{n:"Scorpion-Minded Strike",t:"Inflicts Glue. If the defender already has a negative status, deals +20 damage.",cost:2,dmg:50,inflict:"glue",cond:[{test:"defenderHasStatus",then:{dmgAdd:20}}],label:"50/2"},
         blk:{n:"Vaulting Ambition",t:"Avoids the attack entirely, but Macbeth must retreat to Backstage.",cost:1,blockType:"negate",forceSwitchSelf:"bench",label:"X/1"} },
-      { id:"alice_1e", name:"Alice", deck:null, hp:90, accent:"#2C6EA6", img:"", fe:true, orphan:"Alice in Wonderland",
+      { id:"alice_1e", name:"Alice", deck:"wonderland", hp:90, accent:"#2C6EA6", img:"", fe:true, base:["wonderland","alice"],
         passive:{id:"curious",name:"Curious Alterations",text:"At the start of your turn, grant Alice Highlight or Laminate. Caveat: she is perpetually Smudged (attaches to her need two correct answers).",profileToggle:true,smudgeLock:true},
         atk:{n:"Drink Me / Eat Me",t:"If Alice is Highlighted, this attack gains Pierce. If she is Laminated, it inflicts Glue.",cost:2,dmg:40,cond:[{test:"selfHasStatus",status:"highlight",then:{pierce:true}},{test:"selfHasStatus",status:"laminate",then:{inflict:"glue"}}],label:"40/2"},
         blk:{n:"Nonsensical Rebuttal",t:"Clears one negative status from Alice. If the attacker is from a Gothic or Tragedy deck, block 60 instead.",cost:2,block:40,selfCleanse:1,cond:[{test:"attackerDeckIn",decks:["frankenstein","hamlet","othello","macbeth"],then:{blockSet:60}}],label:"40/2"} },
-      { id:"queen_1e", name:"The Queen of Hearts", deck:null, hp:110, accent:"#B01E3C", img:"", fe:true, orphan:"Alice in Wonderland",
+      { id:"queen_1e", name:"The Queen of Hearts", deck:"wonderland", hp:110, accent:"#B01E3C", img:"", fe:true, base:["wonderland","queen_hearts"],
         passive:{id:"offheads",name:"Off With Their Heads!",text:"Any character that blocks the Queen's attack is immediately Torn. Caveat: she cannot gain damage-reducing statuses, and takes +10 damage whenever she has no attached Block ABC.",blockerTear:true,noDamageReduction:true,nakedVuln:10},
         atk:{n:"Croquet Execution",t:"If the defender already has Tear, force the opponent to discard 1 random card.",cost:3,dmg:60,cond:[{test:"defenderHasStatus",status:"tear",then:{foeDiscard:1}}],label:"60/3"},
         blk:{n:"Mock Trial",t:"The opponent's next attack is forced onto one of their benched-target choices — it strikes a random benched enemy instead of the Queen.",cost:1,block:30,forceRedirectFoe:true,label:"30/1"} },
@@ -1759,7 +1827,7 @@ function dealOpening(){
     step();
   }, 800);
 }
-const setName = k => k==='gatsby'?'The Great Gatsby':k==='crucible'?'The Crucible':k==='hamlet'?'Hamlet':k==='frankenstein'?'Frankenstein':k==='sherlock'?'Sherlock Holmes':k==='othello'?'Othello':k==='oz'?'The Wonderful Wizard of Oz':k==='macbeth'?'Macbeth':k;
+const setName = k => k==='gatsby'?'The Great Gatsby':k==='crucible'?'The Crucible':k==='hamlet'?'Hamlet':k==='frankenstein'?'Frankenstein':k==='sherlock'?'Sherlock Holmes':k==='othello'?'Othello':k==='oz'?'The Wonderful Wizard of Oz':k==='macbeth'?'Macbeth':k==='wonderland'?'Alice in Wonderland':k;
 const otherDeck = k => (Object.keys(DATA.characters).find(x=>x!==k)) || k;
 const me = ()=> S[S.turn];
 const foeKey = ()=> S.turn==='you'?'opp':'you';
@@ -2384,7 +2452,7 @@ function deckCard(key){
   const names=DATA.characters[key].slice(0,3).map(c=>c.name).join(' · ');
   const avs=chars.map(c=>c.img?`<img class="deck-av" src="${c.img}" style="object-position:${c.imgpos||'50% 18%'}">`:`<span class="deck-av mono-av" style="background:${c.accent}">${initials(c.name)}</span>`).join('');
   const sel=APP.youDeck===key;
-  const accent={gatsby:'#1F6A6A',crucible:'#B53A2C',hamlet:'#6E3B73',frankenstein:'#3E6E50',sherlock:'#5A4A3A',othello:'#A62B2B',oz:'#00A86B',macbeth:'#9C2B2B'}[key]||'#6E3B73';
+  const accent={gatsby:'#1F6A6A',crucible:'#B53A2C',hamlet:'#6E3B73',frankenstein:'#3E6E50',sherlock:'#5A4A3A',othello:'#A62B2B',oz:'#00A86B',macbeth:'#9C2B2B',wonderland:'#B01E3C'}[key]||'#6E3B73';
   return `<button class="deck-opt ${sel?'sel':''}" data-deck="${key}" style="--da:${accent}">
     <div class="deck-avatars">${avs}</div>
     <div class="deck-nm">${setName(key)}</div>
@@ -2438,7 +2506,7 @@ function customScreen(){
     <div class="deck-pick-wrap">
       <h2>Choose your deck — pick a box off the shelf</h2>
       <div class="bookshelf">
-        <div class="shelf-row">${deckBox('gatsby')}${deckBox('crucible')}${deckBox('hamlet')}${deckBox('frankenstein')}${deckBox('sherlock')}${deckBox('othello')}${deckBox('oz')}${deckBox('macbeth')}</div>
+        <div class="shelf-row">${deckBox('gatsby')}${deckBox('crucible')}${deckBox('hamlet')}${deckBox('frankenstein')}${deckBox('sherlock')}${deckBox('othello')}${deckBox('oz')}${deckBox('macbeth')}${deckBox('wonderland')}</div>
         <div class="shelf-plank"></div>
       </div>
       <div class="opp-pick">
@@ -2531,6 +2599,7 @@ function builderScreen(){
         <button class="bd-set ${k==='othello'?'on':''}" data-bld="set:othello">Othello</button>
         <button class="bd-set ${k==='oz'?'on':''}" data-bld="set:oz">Wizard of Oz</button>
         <button class="bd-set ${k==='macbeth'?'on':''}" data-bld="set:macbeth">Macbeth</button>
+        <button class="bd-set ${k==='wonderland'?'on':''}" data-bld="set:wonderland">Alice in Wonderland</button>
       </div>
     </div>
     <div class="bd-totals">
