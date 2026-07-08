@@ -134,6 +134,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .char[data-deck="sherlock"]{--frame:#22301f;--paper:#ece1c4;--plate:#d8ca9f;--plate-ink:#2a2016;--hp:#b08d3c;--hp-ink:#241a08;--ground:linear-gradient(160deg,#2d3326,#11150e)}
 .char[data-deck="oz"]{--frame:#0f2a1e;--paper:#eaf3e6;--plate:linear-gradient(#ffe38f,#e6c34d);--plate-ink:#123322;--hp:#2f9d63;--hp-ink:#04140c;--ground:radial-gradient(circle at 30% 20%,#12503a,#06170f 70%)}
 .char[data-deck="othello"]{--frame:#141821;--paper:#e7ecf3;--plate:#1b2634;--plate-ink:#cfe4ff;--hp:#d94b3a;--hp-ink:#1a0a08;--ground:linear-gradient(160deg,#1d2733,#080b12)}
+.char[data-deck="macbeth"]{--frame:#1a0e10;--paper:#efe1de;--plate:#2a1418;--plate-ink:#f0d8d0;--hp:#9c2b2b;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#3a1418,#110507 70%)}
 .char[data-deck="gatsby"] .pc-name,.char[data-deck="crucible"] .pc-name,.char[data-deck="sherlock"] .pc-name,.char[data-deck="oz"] .pc-name{font-family:var(--disp)}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 3px var(--gold),0 3px 0 var(--red-dk)}50%{box-shadow:0 0 0 5px var(--gold),0 3px 0 var(--red-dk)}}
 .char.hit{animation:hit .45s}
@@ -1087,6 +1088,23 @@ const DATA = {
         atk:{n:"Retributive Seizure", t:"Redirects kinetic feedback. Deals an additional +20 damage if any ally character was defeated last turn.", cost:2, dmg:30, cond:[{test:"allyKOPreviousTurn",then:{dmgAdd:20}}], label:"30/2"},
         blk:{n:"Executed Inheritance", t:"Erases data codes using inherited shielding networks. Blocks an additional +15 for each Block ABC attached; grants Hardcover.", cost:2, block:20, blockType:"perABC", base:20, step:15, grant:"hardcover", label:"20+/2"} },
     ],
+    macbeth: [
+      {"id": "macbeth", "name": "Macbeth", "hp": 150, "accent": "#7A1F1F", "img": "", "tags": ["King"], "atk": {"n": "Vaulting Ambition", "t": "If this attack KOs a character, Macbeth gains Burn.", "cost": 3, "dmg": 70, "onKO": {"selfStatus": "burn"}, "label": "70/3"}, "blk": {"n": "False Courage", "t": "Negate Tearbefore reducing damage.", "cost": 2, "block": 40, "blkCleanse": "tear", "blockType": "cleanse", "label": "40/2"}},
+      {"id": "lady_macbeth", "name": "Lady Macbeth", "hp": 130, "accent": "#5C2E6B", "img": "", "tags": ["Noble"], "atk": {"n": "Unsex Me Here", "t": "Inflict Smudgeon opponent.", "cost": 2, "dmg": 50, "inflict": "smudge", "label": "50/2"}, "blk": {"n": "Out, Damned Spot!", "t": "Remove Burn or Spill from yourself.", "cost": 2, "block": 30, "blkCleanse": ["burn", "spill"], "blockType": "cleanse", "label": "30/2"}},
+      {"id": "banquo", "name": "Banquo (Ghost)", "hp": 70, "accent": "#8A8A8A", "img": "", "tags": ["Ghost"], "atk": {"n": "Haunting Vision", "t": "Inflict Spill.", "cost": 3, "dmg": 60, "inflict": "spill", "label": "60/3"}, "blk": {"n": "Silent Accusation", "t": "Remove opponent's Highlightbefore blocking.", "cost": 2, "block": 40, "blockType": "negateStatus", "label": "40/2"}},
+      {"id": "duncan", "name": "King Duncan (Sleeping)", "hp": 120, "accent": "#D4AF37", "img": "", "tags": ["King"], "atk": {"n": "Royal Blessing", "t": "Gain Highlight.", "cost": 2, "dmg": 40, "selfStatus": "highlight", "label": "40/2"}, "blk": {"n": "Peaceful Reign", "t": "Gain Laminateuntil next turn.", "cost": 2, "block": 50, "blockType": "laminate", "label": "50/2"}},
+      {"id": "witches", "name": "The Weird Sisters", "hp": 90, "accent": "#4B2354", "img": "", "tags": ["Witch"], "atk": {"n": "Double, Double", "t": "Choose to inflict Glue or Spill.", "cost": 2, "dmg": 50, "inflictChoice": ["glue", "spill"], "label": "50/2"}, "blk": {"n": "Prophetic Mist", "t": "Negate one incoming status effect.", "cost": 2, "block": 30, "blockType": "negateStatus", "label": "30/2"}},
+      {"id": "malcolm", "name": "Malcolm", "hp": 80, "accent": "#3F6C3A", "img": "", "tags": ["Heir"], "atk": {"n": "Rally the Nobles", "t": "Remove Smudgefrom an ally before attacking.", "cost": 3, "dmg": 60, "cleanseAlly": "smudge", "label": "60/3"}, "blk": {"n": "Lawful Rule", "t": "Remove Tear from yourself or an ally.", "cost": 2, "block": 40, "blkCleanse": "tear", "blockType": "cleanse", "label": "40/2"}},
+      {"id": "macduff", "name": "Macduff", "hp": 160, "accent": "#27496D", "img": "", "tags": ["Thane"], "atk": {"n": "From His Mother's Womb", "t": "Ignore Laminatewhen dealing damage.", "cost": 4, "dmg": 90, "pierceLaminate": true, "label": "90/4"}, "blk": {"n": "Shield of Justice", "t": "Negate Burnbefore reducing damage.", "cost": 2, "block": 50, "blkCleanse": "burn", "blockType": "cleanse", "label": "50/2"}},
+      {"id": "ross", "name": "Ross", "hp": 120, "accent": "#7B6A58", "img": "", "tags": ["Messenger"], "atk": {"n": "Bearer of Tidings", "t": "Draw 1 card after dealing damage.", "cost": 2, "dmg": 40, "drawAfter": 1, "label": "40/2"}, "blk": {"n": "Urgent Dispatch", "t": "Remove Glue after blocking.", "cost": 1, "block": 30, "blkCleanse": "glue", "blockType": "cleanse", "label": "30/1"}},
+      {"id": "hecate", "name": "Hecate", "hp": 100, "accent": "#2F2142", "img": "", "tags": ["Witch"], "atk": {"n": "Master of Illusions", "t": "Inflict Rip. Disable one attack until character leaves play.", "cost": 3, "dmg": 70, "inflict": "rip", "label": "70/3"}, "blk": {"n": "Moonlit Protection", "t": "Gain Laminate.", "cost": 2, "block": 30, "blockType": "laminate", "label": "30/2"}},
+      {"id": "fleance", "name": "Fleance", "hp": 70, "accent": "#2D6A4F", "img": "", "tags": ["Noble"], "atk": {"n": "Escape into Darkness", "t": "Gain Highlightafter attacking.", "cost": 2, "dmg": 40, "selfStatus": "highlight", "label": "40/2"}, "blk": {"n": "Narrow Escape", "t": "Negate Riptargeting Fleance.", "cost": 2, "block": 40, "blkCleanse": "rip", "blockType": "cleanse", "label": "40/2"}},
+      {"id": "donalbain", "name": "Donalbain", "hp": 110, "accent": "#4F7A8C", "img": "", "tags": ["Prince"], "atk": {"n": "Flight to Ireland", "t": "Remove Glue from yourself.", "cost": 2, "dmg": 40, "cleanseAlly": "glue", "label": "40/2"}, "blk": {"n": "Suspicious Retreat", "t": "Reduce an additional 20 damage if attacker has Burn.", "cost": 2, "block": 30, "cond": [{"test": "defenderHasStatus", "status": "burn", "then": {"blockAdd": 20}}], "label": "30/2"}},
+      {"id": "murderers", "name": "The Murderers", "hp": 60, "accent": "#3B3B3B", "img": "", "tags": ["Assassin"], "atk": {"n": "Ambush at Night", "t": "Inflict Tear.", "cost": 3, "dmg": 60, "inflict": "tear", "label": "60/3"}, "blk": {"n": "Cover Their Tracks", "t": "Prevent Smudgeuntil next turn.", "cost": 1, "block": 30, "blockType": "immunity", "label": "30/1"}},
+      {"id": "apparitions", "name": "The Three Apparitions", "hp": 120, "accent": "#6E4AA5", "img": "", "tags": ["Spirit"], "atk": {"n": "Bewildering Prophecy", "t": "Inflict Smudgeand remove Highlight.", "cost": 3, "dmg": 60, "inflict": "smudge", "stripPos": "highlight", "label": "60/3"}, "blk": {"n": "Cryptic Warning", "t": "Cancel one incoming Spilleffect.", "cost": 2, "block": 40, "blockType": "negateStatus", "label": "40/2"}},
+      {"id": "siward", "name": "Siward", "hp": 80, "accent": "#556B2F", "img": "", "tags": ["General"], "atk": {"n": "Seasoned Commander", "t": "If Highlightis active, this attack gains +20 damage.", "cost": 3, "dmg": 70, "cond": [{"test": "selfHasStatus", "status": "highlight", "then": {"dmgAdd": 20}}], "label": "70/3"}, "blk": {"n": "Veteran Defense", "t": "Remove Tear after blocking.", "cost": 2, "block": 50, "blkCleanse": "tear", "blockType": "cleanse", "label": "50/2"}},
+      {"id": "porter", "name": "The Porter", "hp": 70, "accent": "#8B5A2B", "img": "", "tags": ["Comic"], "atk": {"n": "Knock, Knock!", "t": "Inflict Glue until opponent's next turn.", "cost": 1, "dmg": 30, "inflict": "glue", "label": "30/1"}, "blk": {"n": "Comic Relief", "t": "Remove Burn or Smudgefrom yourself.", "cost": 1, "block": 30, "blkCleanse": ["burn", "smudge"], "blockType": "cleanse", "label": "30/1"}}
+    ],
     oz: [
       { id:"dorothy", name:"Dorothy Gale", hp:90, accent:"#4A90E2", img:"", tags:["protagonist"],
         atk:{n:"Silver Shoes Click", t:"Dorothy taps her magical heels together to escape danger, leaving a lingering spark of offensive potential.", cost:2, dmg:30, grant:"highlight", label:"30/2"},
@@ -1307,6 +1325,68 @@ const DATA = {
       _abc('B',4,"Which character survives the tragedy to assume supreme command over Cyprus?",["Iago","Gratiano","Cassio","Lodovico"],2),
       _abc('B',4,"What secondary motive does Iago declare in soliloquy for hating the Moor?",["Suspicion Othello slept with Emilia","A dispute over estate land","An ancient blood feud","A stolen military archive"],0),
     ],
+    macbeth: [
+      _abc('B',1,"King Duncan names __________ as his heir.",["Macbeth","Banquo","Malcolm","Donalbain"],2),
+      _abc('A',1,"Lady Macbeth first learns about the witches' prophecy through",["Banquo","Ross","Macbeth's letter","Duncan"],2),
+      _abc('B',1,"Why does Lady Macbeth decide not to kill Duncan herself?",["She is interrupted","She loses her dagger","He reminds her of her father","Macbeth insists on doing it"],2),
+      _abc('B',1,"Banquo is best described as",["dishonest","loyal and honorable","cowardly","jealous"],1),
+      _abc('B',1,"Macbeth cannot say",["Forgive me","Amen","Help me","Farewell"],1),
+      _abc('B',1,"Banquo is awake late because",["he dreamed of the witches","he guards Duncan","he plans murder","he is ill"],0),
+      _abc('A',1,"Malcolm escapes to",["Ireland","Norway","England","Wales"],2),
+      _abc('B',1,"Donalbain escapes to",["Ireland","England","France","Norway"],0),
+      _abc('A',1,"Macbeth becomes",["Prince","King","Duke","Regent"],1),
+      _abc('B',1,"Lady Macbeth tells the guests Macbeth is",["joking","possessed","ill","drunk"],2),
+      _abc('A',1,"Hecate is",["Macbeth's servant","Queen of the witches","Duncan's daughter","Lady Macbeth's sister"],1),
+      _abc('B',1,"Ross tells Macduff that",["Malcolm died","Macbeth killed his family","Banquo survived","Duncan lives"],1),
+      _abc('B',1,"\"Out, damned spot!\" refers to",["dirt","blood","ink","wine"],1),
+      _abc('B',1,"Malcolm becomes",["Duke","Thane of Cawdor","King of Scotland","Lord of England"],2),
+      _abc('B',1,"The witches first predict that Macbeth will become",["King immediately","Thane of Cawdor and later king","Duke of England","Earl of Northumberland"],1),
+      _abc('A',1,"Banquo is told that he",["will become king","will defeat Macbeth","will father kings though not be king himself","will never have children"],2),
+      _abc('A',2,"Blood throughout the play symbolizes",["wealth","guilt","victory","royalty"],1),
+      _abc('A',2,"Lady Macbeth changes from",["weak to powerful","ambitious to guilt-ridden","loyal to Malcolm","kind to cruel"],1),
+      _abc('A',2,"The play ends with",["Scotland restored","Macbeth victorious","Banquo crowned","England victorious"],0),
+      _abc('A',2,"Lady Macbeth worries that Macbeth is too full of",["ambition","kindness","courage","greed"],1),
+      _abc('A',2,"The Weird Sisters are known for",["healing soldiers","predicting the future","ruling Scotland","serving Duncan"],1),
+      _abc('A',2,"Who returns the bloody daggers to Duncan's chamber?",["Macbeth","Lady Macbeth","Banquo","Lennox"],1),
+      _abc('A',2,"Macbeth kills Duncan because",["Duncan attacks him","Lady Macbeth persuades him","Banquo forces him","the witches command him"],1),
+      _abc('A',2,"Macduff becomes suspicious because Macbeth",["flees","kills Duncan's guards","blames Banquo","confesses"],1),
+      _abc('B',2,"Macbeth fears Banquo because",["he knows the truth","Banquo's descendants will rule","Banquo wants revenge","Banquo supports Malcolm"],1),
+      _abc('A',2,"At the banquet Macbeth sees",["Duncan's ghost","Banquo's ghost","Hecate","Lady Macbeth"],1),
+      _abc('A',2,"Macduff's absence from the banquet makes Macbeth",["happy","suspicious","amused","relieved"],1),
+      _abc('B',2,"Macbeth decides to visit",["Malcolm","the witches again","Macduff","England"],1),
+      _abc('A',2,"The first apparition warns Macbeth to beware of",["Banquo","Malcolm","Macduff","Fleance"],2),
+      _abc('B',2,"The second apparition says Macbeth cannot be harmed by",["any king","any man born of woman","witches","Banquo"],1),
+      _abc('A',2,"The third apparition says Macbeth is safe until",["England invades","Birnam Wood comes to Dunsinane","Malcolm dies","Banquo returns"],1),
+      _abc('B',2,"The line of kings shown to Macbeth descend from",["Duncan","Macbeth","Banquo","Macduff"],2),
+      _abc('A',2,"Macduff vows to",["flee","forgive Macbeth","kill Macbeth","become king"],2),
+      _abc('A',2,"The doctor believes Lady Macbeth needs",["surgery","spiritual healing","medicine only","imprisonment"],1),
+      _abc('B',2,"Malcolm's soldiers disguise themselves with",["shields","Birnam branches","cloaks","armor"],1),
+      _abc('B',2,"A central theme of the play is",["romantic love","corrupting ambition","science","family tradition"],1),
+      _abc('A',3,"The floating dagger symbolizes Macbeth's",["courage","guilty ambition","wisdom","loyalty"],1),
+      _abc('B',3,"The witches' prophecies are dangerous because they",["force action","invite dangerous misinterpretation","are false","predict nothing"],1),
+      _abc('A',3,"At the beginning of the play, Macbeth is known as the",["King of Scotland","Thane of Glamis","Prince of Cumberland","Earl of Fife"],1),
+      _abc('A',3,"Duncan comes to Macbeth's castle because he wants to",["arrest Macbeth","celebrate Macbeth's loyalty","meet the witches","declare war"],1),
+      _abc('A',3,"Before killing Duncan, Macbeth sees",["Banquo's ghost","a floating dagger","the witches","a bloody crown"],1),
+      _abc('B',3,"Duncan's sons flee because they",["fear for their lives","seek glory","hate Scotland","distrust Banquo"],0),
+      _abc('B',3,"Duncan's murder symbolizes",["justice","destruction of natural order","peace","mercy"],1),
+      _abc('B',3,"Fleance",["dies","escapes","kills Macbeth","becomes king"],1),
+      _abc('B',3,"\"Blood will have blood\" means",["violence brings revenge","family comes first","kings never die","Scotland needs peace"],0),
+      _abc('A',3,"Macduff travels to England to",["escape","seek Malcolm's help","visit family","find Banquo"],1),
+      _abc('B',3,"Lady Macduff dies because",["she supported Macbeth","Macbeth seeks revenge on Macduff","she attacked soldiers","she fled"],1),
+      _abc('A',3,"Lady Macbeth's sleepwalking reveals",["happiness","guilt","bravery","excitement"],1),
+      _abc('B',3,"Young Siward dies fighting",["Banquo","Macbeth","Macduff","Malcolm"],1),
+      _abc('A',3,"Macbeth realizes the witches",["deceived him with half-truths","never existed","loved him","served Duncan"],0),
+      _abc('B',4,"Malcolm pretends to be unfit to rule in order to",["avoid ruling","test Macduff","deceive Macbeth","flee Scotland"],1),
+      _abc('A',4,"Macbeth orders the murder of",["Malcolm's army","Lady Macbeth","Macduff's family","Ross"],2),
+      _abc('A',4,"Macbeth hires murderers to kill",["Malcolm","Macduff","Banquo and Fleance","Ross"],2),
+      _abc('A',4,"The moving forest fulfills",["Duncan's curse","the witches' prophecy","Banquo's revenge","Ross's warning"],1),
+      _abc('B',4,"Macduff reveals he was",["adopted","born in England","delivered by Caesarean section","immortal"],2),
+      _abc('A',4,"Macbeth is killed by",["Malcolm","Banquo","Macduff","Ross"],2),
+      _abc('B',4,"Banquo serves as Macbeth's",["servant","moral contrast","rival for the throne","cousin"],1),
+      _abc('A',4,"Dramatic irony occurs because",["the audience knows Macbeth murdered Duncan","Duncan knows Macbeth is guilty","Macbeth knows more than everyone","Banquo predicts the ending"],0),
+      _abc('B',4,"Macbeth's tragic flaw is",["laziness","ambition","generosity","patience"],1),
+      _abc('B',4,"Shakespeare suggests that",["ambition without morality destroys","fate cannot change","witches rule humanity","revenge brings happiness"],0)
+    ],
     oz: [
       _abc('A',1,"What environmental force transports Dorothy from Kansas to the Land of Oz?",["A great flood","A violent cyclone","A massive earthquake","A sudden volcanic eruption"],1),
       _abc('A',1,"In the original novel by L. Frank Baum, what color are Dorothy's magical shoes?",["Ruby red","Emerald green","Bright silver","Golden yellow"],2),
@@ -1464,7 +1544,7 @@ const DATA = {
         passive:{id:"myname",name:"Because It Is My Name!",text:"Once per turn, attach 1 ABC to Proctor free of trivia. Caveat: Proctor carries a permanent, uncleansable Spill (−10 HP each turn).",freeAttach:1,spillLock:true},
         atk:{n:"Righteous Denunciation",t:"Deals +10 damage for every Bookmark in your discard pile (max +30).",cost:2,dmg:40,bmDiscardBonus:10,bmDiscardCap:30,label:"40+/2"},
         blk:{n:"Unyielding Integrity",t:"Caps incoming damage at 20 for this Battle Phase. Discard 1 attached Block ABC after use.",cost:2,blockType:"capto",cap:20,postDiscardBlk:1,label:"Cap20/2"} },
-      { id:"macbeth_1e", name:"Macbeth", deck:null, hp:110, accent:"#7A1F2B", img:"", fe:true, orphan:"Macbeth",
+      { id:"macbeth_1e", name:"Macbeth", deck:"macbeth", hp:110, accent:"#7A1F2B", img:"", fe:true, base:["macbeth","macbeth"],
         passive:{id:"tomorrow",name:"Tomorrow, and Tomorrow…",text:"All of Macbeth's move costs are reduced by 1 (min 1). Caveat: he is perpetually Smudged, and each enemy character he KOs makes every future attach require two correct answers.",costMod:-1,smudgeLock:true,killWorsen:true},
         atk:{n:"Scorpion-Minded Strike",t:"Inflicts Glue. If the defender already has a negative status, deals +20 damage.",cost:2,dmg:50,inflict:"glue",cond:[{test:"defenderHasStatus",then:{dmgAdd:20}}],label:"50/2"},
         blk:{n:"Vaulting Ambition",t:"Avoids the attack entirely, but Macbeth must retreat to Backstage.",cost:1,blockType:"negate",forceSwitchSelf:"bench",label:"X/1"} },
@@ -1679,7 +1759,7 @@ function dealOpening(){
     step();
   }, 800);
 }
-const setName = k => k==='gatsby'?'The Great Gatsby':k==='crucible'?'The Crucible':k==='hamlet'?'Hamlet':k==='frankenstein'?'Frankenstein':k==='sherlock'?'Sherlock Holmes':k==='othello'?'Othello':k==='oz'?'The Wonderful Wizard of Oz':k;
+const setName = k => k==='gatsby'?'The Great Gatsby':k==='crucible'?'The Crucible':k==='hamlet'?'Hamlet':k==='frankenstein'?'Frankenstein':k==='sherlock'?'Sherlock Holmes':k==='othello'?'Othello':k==='oz'?'The Wonderful Wizard of Oz':k==='macbeth'?'Macbeth':k;
 const otherDeck = k => (Object.keys(DATA.characters).find(x=>x!==k)) || k;
 const me = ()=> S[S.turn];
 const foeKey = ()=> S.turn==='you'?'opp':'you';
@@ -1906,9 +1986,9 @@ function attach(side,handIdx,correct,targetUid){
 /* ---------------- status effects (Tear, Rip, Glue, Spill, Smudge, Burn / Highlight, Laminate, Hardcover, Margin Notes) ---------------- */
 const STATUS_NEG=['tear','rip','glue','spill','smudge','burn'];
 const LAMINATE_BLOCKS=['tear','rip','glue','spill'];
-function inflict(t,k){
+function inflict(t,k,ignoreLam){
   if(!t||t.hp<=0) return false;
-  if(t.status.laminate && LAMINATE_BLOCKS.includes(k)){ pushLog(`${t.name} is Laminated — ${k.charAt(0).toUpperCase()+k.slice(1)} prevented.`); return false; }
+  if(!ignoreLam && t.status.laminate && LAMINATE_BLOCKS.includes(k)){ pushLog(`${t.name} is Laminated — ${k.charAt(0).toUpperCase()+k.slice(1)} prevented.`); return false; }
   t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'neg'); return true;
 }
 function grant(t,k){ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ pushLog(`${t.name} is too isolated to gain ${statusName(k)}.`); return false; } if(t&&t.hp>0){ t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'pos'); return true; } return false; }
@@ -2081,6 +2161,7 @@ function performAttack(side,abilKey){           // == beginAttack
   if(cost!=null && pool()<cost){ toast(`Need ${cost} ATTACK ABCs (have ${pool()}).`); return false; }
   const D=foeOf(side), dKey=(D===S.you?'you':'opp'), def=active(D);
   if(!def||def.hp<=0){ toast('No target.'); return false; }
+  if(ab.cleanseAlly){ const ally=A.team.find(c=>c.hp>0 && c.status[ab.cleanseAlly]); if(ally){ delete ally.status[ab.cleanseAlly]; pushLog(`${att.name} clears ${statusName(ab.cleanseAlly)} from ${ally.name}.`); } }
   let dmg=calcDamage(att,ab);
   if(hasCrit(side,'russian')){ dmg=att.hp; pushLog(`Russian Formalism: ${att.name}'s damage equals its HP (${dmg}).`); }
   let condPierce=false, condInflict=null, condFoeDiscard=0;
@@ -2128,6 +2209,7 @@ function doBlock(){
   let spentBlk=spend(def.blkCharge,b.cost);
   if(spentBlk.length<b.cost && hasCrit(dKey,'queer')){ spentBlk.push(...spend(def.atkCharge,b.cost-spentBlk.length)); }
   const res=calcBlock(def,b,dmg); let amt=res.amt; let neg=!!res.negate; let failDouble=false;
+  if(b.blkCleanse && def.status[b.blkCleanse]){ delete def.status[b.blkCleanse]; pushLog(`${def.name} shrugs off ${statusName(b.blkCleanse)} while blocking.`); }
   if(b.cond){ b.cond.forEach(r=>{ if(condMatch(r,D,A,att)){ const t=r.then||{};
       if(t.negate){ neg=true; amt=dmg; }
       if(t.blockSet!=null) amt=t.blockSet;
@@ -2174,13 +2256,16 @@ function finishAttack(blocked,negated,forceNet){
   if(ab.sacrifice && !symbolsOff()){ att.hp=Math.max(0,att.hp-ab.sacrifice); pushLog(`${att.name} sacrifices ${ab.sacrifice} HP.`); }
   if(ab.stripBlocks && def.blkCharge.length){ const n=def.blkCharge.length; D.discard.push(...def.blkCharge.splice(0)); pushLog(`Quick-Sand Crash buries ${def.name}'s defense — ${n} Block ABC lost.`); }
   if(!symbolsOff()){
-    if(ab.inflict && def.hp>0){ if(inflict(def,ab.inflict)) pushLog(`${def.name} is afflicted with ${ab.inflict.charAt(0).toUpperCase()+ab.inflict.slice(1)}.`); }
-    if(atkCtx&&atkCtx.condInflict && def.hp>0){ if(inflict(def,atkCtx.condInflict)) pushLog(`${def.name} is afflicted with ${atkCtx.condInflict.charAt(0).toUpperCase()+atkCtx.condInflict.slice(1)}.`); }
+    if(ab.inflict && def.hp>0){ if(inflict(def,ab.inflict,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(ab.inflict)}.`); }
+    if(atkCtx&&atkCtx.condInflict && def.hp>0){ if(inflict(def,atkCtx.condInflict,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(atkCtx.condInflict)}.`); }
+    if(ab.inflictChoice && ab.inflictChoice.length && def.hp>0){ const opts=ab.inflictChoice; const pick=opts.find(s=>!def.status[s])||opts[rnd(opts.length)]; if(inflict(def,pick,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(pick)}.`); }
+    if(ab.stripPos && def.hp>0 && def.status[ab.stripPos]){ delete def.status[ab.stripPos]; pushLog(`${def.name} loses ${statusName(ab.stripPos)}.`); }
     if(atkCtx&&atkCtx.condFoeDiscard){ for(let i=0;i<atkCtx.condFoeDiscard;i++){ if(D.hand.length) D.discard.push(D.hand.splice(rnd(D.hand.length),1)[0]); } pushLog(`${who(D)} is forced to discard ${atkCtx.condFoeDiscard} card.`); }
     if(ab.grant){ grant(att,ab.grant); pushLog(`${att.name} gains ${ab.grant}.`); }
     if(ab.weaken!=null && def.hp>0){ def.status.weaken=ab.weaken; pushLog(`${def.name} is weakened — its next attack deals ${ab.weaken} less.`); }
     if(ab.selfStatus){ att.status[ab.selfStatus]=true; pushLog(`${att.name} suffers ${ab.selfStatus}.`); }
     if(ab.selfDamage){ att.hp=Math.max(0,att.hp-ab.selfDamage); pushLog(`${att.name} loses ${ab.selfDamage} HP.`); }
+    if(ab.drawAfter){ drawN(side,ab.drawAfter); pushLog(`${who(A)} draws ${ab.drawAfter}.`); }
   }
   flash(dKey);
   if(negated || (blocked>0 && net<=0)){ fxBlock(dKey, negated?0:blocked); }
@@ -2189,6 +2274,7 @@ function finishAttack(blocked,negated,forceNet){
   // ---- crit thesis auto-tracking (events observable at combat resolution) ----
   A.critTurn=A.critTurn||{}; D.critTurn=D.critTurn||{}; A.critEver=A.critEver||{}; D.critEver=D.critEver||{};
   const koed = def.hp<=0;
+  if(koed && ab.onKO && ab.onKO.selfStatus && att.hp>0){ att.status[ab.onKO.selfStatus]=true; pushLog(`${att.name} gains ${statusName(ab.onKO.selfStatus)}.`); }
   const noKeywords = !ab.flags && !ab.sacrifice && !ab.inflict && !ab.grant && ab.weaken==null && !pierce;
   const printedAtk = (ab.dmg!=null?ab.dmg:(ab.base!=null?ab.base:null));
   if(koed){
@@ -2298,7 +2384,7 @@ function deckCard(key){
   const names=DATA.characters[key].slice(0,3).map(c=>c.name).join(' · ');
   const avs=chars.map(c=>c.img?`<img class="deck-av" src="${c.img}" style="object-position:${c.imgpos||'50% 18%'}">`:`<span class="deck-av mono-av" style="background:${c.accent}">${initials(c.name)}</span>`).join('');
   const sel=APP.youDeck===key;
-  const accent={gatsby:'#1F6A6A',crucible:'#B53A2C',hamlet:'#6E3B73',frankenstein:'#3E6E50',sherlock:'#5A4A3A',othello:'#A62B2B',oz:'#00A86B'}[key]||'#6E3B73';
+  const accent={gatsby:'#1F6A6A',crucible:'#B53A2C',hamlet:'#6E3B73',frankenstein:'#3E6E50',sherlock:'#5A4A3A',othello:'#A62B2B',oz:'#00A86B',macbeth:'#9C2B2B'}[key]||'#6E3B73';
   return `<button class="deck-opt ${sel?'sel':''}" data-deck="${key}" style="--da:${accent}">
     <div class="deck-avatars">${avs}</div>
     <div class="deck-nm">${setName(key)}</div>
@@ -2352,7 +2438,7 @@ function customScreen(){
     <div class="deck-pick-wrap">
       <h2>Choose your deck — pick a box off the shelf</h2>
       <div class="bookshelf">
-        <div class="shelf-row">${deckBox('gatsby')}${deckBox('crucible')}${deckBox('hamlet')}${deckBox('frankenstein')}${deckBox('sherlock')}${deckBox('othello')}${deckBox('oz')}</div>
+        <div class="shelf-row">${deckBox('gatsby')}${deckBox('crucible')}${deckBox('hamlet')}${deckBox('frankenstein')}${deckBox('sherlock')}${deckBox('othello')}${deckBox('oz')}${deckBox('macbeth')}</div>
         <div class="shelf-plank"></div>
       </div>
       <div class="opp-pick">
@@ -2444,6 +2530,7 @@ function builderScreen(){
         <button class="bd-set ${k==='sherlock'?'on':''}" data-bld="set:sherlock">Sherlock Holmes</button>
         <button class="bd-set ${k==='othello'?'on':''}" data-bld="set:othello">Othello</button>
         <button class="bd-set ${k==='oz'?'on':''}" data-bld="set:oz">Wizard of Oz</button>
+        <button class="bd-set ${k==='macbeth'?'on':''}" data-bld="set:macbeth">Macbeth</button>
       </div>
     </div>
     <div class="bd-totals">
