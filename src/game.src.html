@@ -3571,7 +3571,13 @@ function scrimStartKit(kitId){
   SCRIM.active=true; SCRIM.kit=kitId; SCRIM.artifacts=[]; SCRIM.cleared=0; SCRIM.act=1; SCRIM.bosses=scrimRollBosses();
   const dk=kit.deck;
   SCRIM.team = kit.chars.map(id=>{ const def=DATA.characters[dk].find(c=>c.id===id); const mx=def?def.hp:80; return { deck:dk, id:id, curHp:mx, maxHp:mx, fe:false }; });
-  const ab=[]; for(let i=0;i<8 && i<DATA.abcs[dk].length;i++) ab.push({d:dk,i:i});
+  // Balanced starter: guarantee both ATTACK and BLOCK are drawable. Some decks are ordered
+  // lopsided (Macbeth's leading cards are block-heavy; Othello/Wonderland's are all attack),
+  // so a naive "first 8" slice could leave a kit unable to attack or block. Pull 4 of each.
+  const _src=DATA.abcs[dk]||[]; const _atk=[], _blk=[];
+  _src.forEach((c,i)=>{ (c.type==='ATTACK'?_atk:_blk).push(i); });
+  const ab=[]; for(let i=0;i<4;i++){ if(_atk[i]!=null) ab.push({d:dk,i:_atk[i]}); if(_blk[i]!=null) ab.push({d:dk,i:_blk[i]}); }
+  for(let i=0; ab.length<8 && i<_src.length; i++){ if(!ab.some(x=>x.i===i)) ab.push({d:dk,i:i}); }
   const bm=[0,1,2,3,4].filter(i=>i<DATA.bookmarks.length);
   SCRIM.deck = { ab:ab, bm:bm, cr:[] };
   SCRIM.map = scrimGenMap(1);
