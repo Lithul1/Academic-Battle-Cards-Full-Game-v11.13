@@ -34,7 +34,7 @@ body{
 }
 
 /* ===== UI redesign (demo_11_12): shared paper backdrop on framed screens ===== */
-:root{ --abc-bg:none; }
+:root{ --abc-bg:none; --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); }
 body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:var(--abc-bg) center/cover no-repeat; }
 /* gameplay surfaces keep their own playfield/ink look */
@@ -128,7 +128,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .pc-move.blk{background:#bfe0e0;color:var(--teal-dk);cursor:default}
 /* ---- per-deck themes (frame & palette per novel; red/blue move chips kept for game consistency) ---- */
 .char[data-deck="hamlet"]{--frame:#0b0b0d;--paper:#f5f6fb;--plate:#ffffff;--plate-ink:#0b0b0d;--hp:#4f9fe0;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#1a2440,#0a0e1c 70%)}
-.char[data-deck="gatsby"]{--frame:#0e0e0e;--paper:#f7efd6;--plate:linear-gradient(#f6d97a,#d4af37);--plate-ink:#241a06;--hp:#d4af37;--hp-ink:#241a06;--ground:linear-gradient(150deg,#2b2416,#0c0a06);--deckbg:url("data:image/png;base64,__ABCASSET_900__");background:var(--paper) var(--deckbg) center/cover;padding:9px}
+.char[data-deck="gatsby"]{--frame:#0e0e0e;--paper:#f7efd6;--plate:linear-gradient(#f6d97a,#d4af37);--plate-ink:#241a06;--hp:#d4af37;--hp-ink:#241a06;--ground:linear-gradient(150deg,#2b2416,#0c0a06);background:var(--paper) var(--deckbg-gatsby) center/cover;padding:9px}
 .char[data-deck="crucible"]{--frame:#2a2018;--paper:#efe6d1;--plate:#e7dabb;--plate-ink:#3a2a1a;--hp:#8f2d2d;--hp-ink:#ffffff;--ground:linear-gradient(160deg,#3b3025,#140f0a)}
 .char[data-deck="frankenstein"]{--frame:#0e1519;--paper:#e6eef1;--plate:#17222a;--plate-ink:#d6f4ff;--hp:#27c2d4;--hp-ink:#04222a;--ground:linear-gradient(160deg,#163a44,#080d10)}
 .char[data-deck="sherlock"]{--frame:#22301f;--paper:#ece1c4;--plate:#d8ca9f;--plate-ink:#2a2016;--hp:#b08d3c;--hp-ink:#241a08;--ground:linear-gradient(160deg,#2d3326,#11150e)}
@@ -512,6 +512,7 @@ body.dragging-abc .drop-zone.dragover{ outline:3px solid #E6B85C; box-shadow:0 0
   background:#2A211A; color:#F3E4C4; border:1px solid #C99B57; font-size:1rem; cursor:pointer; z-index:2; }
 .pv-card{ border-radius:14px; padding:16px; background:linear-gradient(165deg,#211a14,#171210); border:1px solid #5a4636; box-shadow:0 14px 40px rgba(0,0,0,.6); color:#EFE2C7; }
 .pv-card.pvchar{ border:1px solid var(--accent); }
+.pv-card.pvchar[data-deck="gatsby"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-gatsby) center/cover; }
 .pv-port{ height:170px; border-radius:10px; overflow:hidden; background:linear-gradient(160deg,var(--accent,#444),#1b1714); display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
 .pv-port.small{ height:120px; }
 .pv-port img{ width:100%; height:100%; object-fit:cover; }
@@ -735,9 +736,9 @@ body[data-screen="play"] .turnclock{ font-size:clamp(13px,2vh,16px); padding:2px
 .fe-peek{ font-family:var(--cond); font-size:10px; letter-spacing:.5px; text-transform:uppercase; color:#5a4a2a;
   background:var(--cream-hi); border:1.5px solid #caa53a; border-radius:6px; padding:2px 6px; text-align:center; }
 .fe-peek b{ color:var(--ink); }
-.bv-passive{ background:linear-gradient(90deg,rgba(202,165,58,.16),transparent); border-left:3px solid #caa53a; border-radius:6px; padding:7px 9px; margin:2px 0 4px; }
+.bv-passive{ background:linear-gradient(90deg,#f2e4bf,#f7efd6); border-left:3px solid #caa53a; border-radius:6px; padding:7px 9px; margin:2px 0 4px; }
 .bv-passive .bv-ph{ font-family:var(--cond); letter-spacing:1px; font-size:12px; color:#8a6a1a; text-transform:uppercase; }
-.bv-passive p{ margin:3px 0 0; font-size:13px; }
+.bv-passive p{ margin:3px 0 0; font-size:13px; color:#2a2016; }
 .bd-chip.fe.on{ box-shadow:0 0 0 2px #caa53a; }
 .fe-tag{ display:block; font-family:var(--cond); font-size:9px; letter-spacing:.5px; color:#8a6a1a; text-transform:uppercase; opacity:.85; }
 .pv-card.fe .pv-name .fe-badge{ position:static; display:inline-block; vertical-align:middle; margin-left:6px; }
@@ -3214,17 +3215,17 @@ function handleBuilder(cmd){
   else if(op==='gencode'){ clampDeck(def); B.code=encodeDeck(def); }
   else if(op==='use'){ clampDeck(def); APP.customDeck=clone(def); APP.youDeck=def.d; APP.codeMsg={text:'Custom deck ready — choose Custom Play to take it into a match.',ok:true}; APP.screen='menu'; }
   else if(op==='copycode'){ const el=document.getElementById('bd-codeout'); if(el){ el.select&&el.select(); try{ navigator.clipboard&&navigator.clipboard.writeText(el.value); }catch(e){} } toast('Code copied'); return; }
-  else if(op==='prevch'){ showPreview(buildCharPreview(DATA.characters[def.d].find(x=>x.id===arg))); return; }
+  else if(op==='prevch'){ showPreview(buildCharPreview(DATA.characters[def.d].find(x=>x.id===arg), def.d)); return; }
   else if(op==='prevab'){ showPreview(buildAbcPreview(DATA.abcs[def.d][+arg])); return; }
   else if(op==='prevcr'){ showPreview(buildCritPreview(DATA.crits[+arg])); return; }
   else if(op==='prevfe'){ showPreview(buildFePreview(firstedById(arg))); return; }
   else if(op==='prevbm'){ showPreview(buildBmPreview(DATA.bookmarks[+arg])); return; }
   render();
 }
-function buildCharPreview(ch){ if(!ch) return '';
+function buildCharPreview(ch,deck){ if(!ch) return '';
   const img=ch.img?`<img src="${ch.img}" style="object-position:${ch.imgpos||'50% 18%'}">`:`<span class="pvmono" style="background:${ch.accent}">${initials(ch.name)}</span>`;
   const mv=(m,cls)=>`<div class="pv-move ${cls}"><div class="pv-mv-top"><b>${m.n}</b><span class="pv-cost">${m.label||''}</span></div><div class="pv-mv-txt">${m.t||''}</div></div>`;
-  return `<div class="pv-card pvchar" style="--accent:${ch.accent}">
+  return `<div class="pv-card pvchar" data-deck="${deck||''}" style="--accent:${ch.accent}">
     <div class="pv-port">${img}</div>
     <div class="pv-name">${ch.name}</div>
     <div class="pv-hp">❤ ${ch.hp} HP${(ch.tags||[]).includes('villain')?' · <em>Villain</em>':''}</div>
@@ -3234,7 +3235,7 @@ function buildCharPreview(ch){ if(!ch) return '';
 function buildFePreview(f){ if(!f) return '';
   const im=feImg(f); const img=im?`<img src="${im.img}" style="object-position:${im.pos||'50% 16%'}">`:`<span class="pvmono" style="background:${f.accent}">${initials(f.name)}</span>`;
   const mv=(m,cls)=>`<div class="pv-move ${cls}"><div class="pv-mv-top"><b>${m.n}</b><span class="pv-cost">${m.label||''}</span></div><div class="pv-mv-txt">${m.t||''}</div></div>`;
-  return `<div class="pv-card pvchar fe" style="--accent:${f.accent}">
+  return `<div class="pv-card pvchar fe" data-deck="${f.deck||''}" style="--accent:${f.accent}">
     <div class="pv-port">${img}</div>
     <div class="pv-name">${f.name} <span class="fe-badge">1ST ED</span></div>
     <div class="pv-hp">\u2764 ${f.hp} HP \u00b7 ${f.deck?setName(f.deck):'no deck yet'}</div>
