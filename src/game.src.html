@@ -34,7 +34,7 @@ body{
 }
 
 /* ===== UI redesign (demo_11_12): shared paper backdrop on framed screens ===== */
-:root{ --abc-bg:none; --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); }
+:root{ --abc-bg:none; --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); --deckbg-hamlet:url("data:image/png;base64,__ABCASSET_902__"); --deckbg-frankenstein:url("data:image/png;base64,__ABCASSET_903__"); --deckbg-sherlock:url("data:image/png;base64,__ABCASSET_904__"); --deckbg-othello:url("data:image/png;base64,__ABCASSET_905__"); --deckbg-macbeth:url("data:image/png;base64,__ABCASSET_906__"); --deckbg-wonderland:url("data:image/png;base64,__ABCASSET_907__"); --deckbg-oz:url("data:image/png;base64,__ABCASSET_908__"); }
 body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:var(--abc-bg) center/cover no-repeat; }
 /* gameplay surfaces keep their own playfield/ink look */
@@ -127,15 +127,15 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .pc-move.atk[disabled]{opacity:.62;cursor:not-allowed}
 .pc-move.blk{background:#bfe0e0;color:var(--teal-dk);cursor:default}
 /* ---- per-deck themes (frame & palette per novel; red/blue move chips kept for game consistency) ---- */
-.char[data-deck="hamlet"]{--frame:#0b0b0d;--paper:#f5f6fb;--plate:#ffffff;--plate-ink:#0b0b0d;--hp:#4f9fe0;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#1a2440,#0a0e1c 70%)}
+.char[data-deck="hamlet"]{--frame:#0b0b0d;--paper:#f5f6fb;--plate:#ffffff;--plate-ink:#0b0b0d;--hp:#4f9fe0;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#1a2440,#0a0e1c 70%);background:var(--paper) var(--deckbg-hamlet) center/cover;padding:9px}
 .char[data-deck="gatsby"]{--frame:#0e0e0e;--paper:#f7efd6;--plate:linear-gradient(#f6d97a,#d4af37);--plate-ink:#241a06;--hp:#d4af37;--hp-ink:#241a06;--ground:linear-gradient(150deg,#2b2416,#0c0a06);background:var(--paper) var(--deckbg-gatsby) center/cover;padding:9px}
 .char[data-deck="crucible"]{--frame:#2a2018;--paper:#efe6d1;--plate:#e7dabb;--plate-ink:#3a2a1a;--hp:#8f2d2d;--hp-ink:#ffffff;--ground:linear-gradient(160deg,#3b3025,#140f0a)}
-.char[data-deck="frankenstein"]{--frame:#0e1519;--paper:#e6eef1;--plate:#17222a;--plate-ink:#d6f4ff;--hp:#27c2d4;--hp-ink:#04222a;--ground:linear-gradient(160deg,#163a44,#080d10)}
-.char[data-deck="sherlock"]{--frame:#22301f;--paper:#ece1c4;--plate:#d8ca9f;--plate-ink:#2a2016;--hp:#b08d3c;--hp-ink:#241a08;--ground:linear-gradient(160deg,#2d3326,#11150e)}
-.char[data-deck="oz"]{--frame:#0f2a1e;--paper:#eaf3e6;--plate:linear-gradient(#ffe38f,#e6c34d);--plate-ink:#123322;--hp:#2f9d63;--hp-ink:#04140c;--ground:radial-gradient(circle at 30% 20%,#12503a,#06170f 70%)}
-.char[data-deck="othello"]{--frame:#141821;--paper:#e7ecf3;--plate:#1b2634;--plate-ink:#cfe4ff;--hp:#d94b3a;--hp-ink:#1a0a08;--ground:linear-gradient(160deg,#1d2733,#080b12)}
-.char[data-deck="macbeth"]{--frame:#1a0e10;--paper:#efe1de;--plate:#2a1418;--plate-ink:#f0d8d0;--hp:#9c2b2b;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#3a1418,#110507 70%)}
-.char[data-deck="wonderland"]{--frame:#2a0f1e;--paper:#f6eef2;--plate:linear-gradient(#f7d6e0,#e6a6c0);--plate-ink:#3a1020;--hp:#c0223f;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#5a1a3a,#180612 70%)}
+.char[data-deck="frankenstein"]{--frame:#0e1519;--paper:#e6eef1;--plate:#17222a;--plate-ink:#d6f4ff;--hp:#27c2d4;--hp-ink:#04222a;--ground:linear-gradient(160deg,#163a44,#080d10);background:var(--paper) var(--deckbg-frankenstein) center/cover;padding:9px}
+.char[data-deck="sherlock"]{--frame:#22301f;--paper:#ece1c4;--plate:#d8ca9f;--plate-ink:#2a2016;--hp:#b08d3c;--hp-ink:#241a08;--ground:linear-gradient(160deg,#2d3326,#11150e);background:var(--paper) var(--deckbg-sherlock) center/cover;padding:9px}
+.char[data-deck="oz"]{--frame:#0f2a1e;--paper:#eaf3e6;--plate:linear-gradient(#ffe38f,#e6c34d);--plate-ink:#123322;--hp:#2f9d63;--hp-ink:#04140c;--ground:radial-gradient(circle at 30% 20%,#12503a,#06170f 70%);background:var(--paper) var(--deckbg-oz) center/cover;padding:9px}
+.char[data-deck="othello"]{--frame:#141821;--paper:#e7ecf3;--plate:#1b2634;--plate-ink:#cfe4ff;--hp:#d94b3a;--hp-ink:#1a0a08;--ground:linear-gradient(160deg,#1d2733,#080b12);background:var(--paper) var(--deckbg-othello) center/cover;padding:9px}
+.char[data-deck="macbeth"]{--frame:#1a0e10;--paper:#efe1de;--plate:#2a1418;--plate-ink:#f0d8d0;--hp:#9c2b2b;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#3a1418,#110507 70%);background:var(--paper) var(--deckbg-macbeth) center/cover;padding:9px}
+.char[data-deck="wonderland"]{--frame:#2a0f1e;--paper:#f6eef2;--plate:linear-gradient(#f7d6e0,#e6a6c0);--plate-ink:#3a1020;--hp:#c0223f;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#5a1a3a,#180612 70%);background:var(--paper) var(--deckbg-wonderland) center/cover;padding:9px}
 .char[data-deck="gatsby"] .pc-name,.char[data-deck="crucible"] .pc-name,.char[data-deck="sherlock"] .pc-name,.char[data-deck="oz"] .pc-name{font-family:var(--disp)}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 3px var(--gold),0 3px 0 var(--red-dk)}50%{box-shadow:0 0 0 5px var(--gold),0 3px 0 var(--red-dk)}}
 .char.hit{animation:hit .45s}
@@ -513,6 +513,13 @@ body.dragging-abc .drop-zone.dragover{ outline:3px solid #E6B85C; box-shadow:0 0
 .pv-card{ border-radius:14px; padding:16px; background:linear-gradient(165deg,#211a14,#171210); border:1px solid #5a4636; box-shadow:0 14px 40px rgba(0,0,0,.6); color:#EFE2C7; }
 .pv-card.pvchar{ border:1px solid var(--accent); }
 .pv-card.pvchar[data-deck="gatsby"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-gatsby) center/cover; }
+.pv-card.pvchar[data-deck="hamlet"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-hamlet) center/cover; }
+.pv-card.pvchar[data-deck="frankenstein"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-frankenstein) center/cover; }
+.pv-card.pvchar[data-deck="sherlock"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-sherlock) center/cover; }
+.pv-card.pvchar[data-deck="othello"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-othello) center/cover; }
+.pv-card.pvchar[data-deck="macbeth"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-macbeth) center/cover; }
+.pv-card.pvchar[data-deck="wonderland"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-wonderland) center/cover; }
+.pv-card.pvchar[data-deck="oz"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-oz) center/cover; }
 .pv-port{ height:170px; border-radius:10px; overflow:hidden; background:linear-gradient(160deg,var(--accent,#444),#1b1714); display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
 .pv-port.small{ height:120px; }
 .pv-port img{ width:100%; height:100%; object-fit:cover; }
