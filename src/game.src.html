@@ -1026,6 +1026,15 @@ const DATA = {
       { id:'voltemand_cornelius', name:'Voltemand & Cornelius', hp:50, accent:'#6E5A3C', img:'',
         atk:{n:"Envoys' Errand", t:'Word from Norway returns with force.', cost:1, dmg:20, label:'20/1'},
         blk:{n:'Safe Conduct', t:'Negotiated passage blunts the blow.', cost:2, block:20, grant:'laminate', cond:[{test:'inPlay',scope:'self',ids:['fortinbras'],then:{blockSet:40},log:'Safe Conduct blocks 40 — Fortinbras guarantees passage.'}], label:'20/2'} },
+      { id:'osric', name:'Osric', hp:110, accent:'#D9D2C3', img:'', tags:['Courtier'],
+        atk:{n:'Courtly Flattery', t:'Gain Highlight before dealing damage.', cost:2, dmg:40, grant:'highlight', label:'40/2'},
+        blk:{n:'Elegant Evasion', t:'Remove Smudge before reducing damage.', cost:2, block:40, blkCleanse:'smudge', label:'40/2'} },
+      { id:'yorick', name:'Yorick', hp:50, accent:'#B7B7B7', img:'', tags:['Spirit'],
+        atk:{n:'Lasting Memory', t:'Inflict Smudge on the opponent as they question mortality.', cost:2, dmg:60, inflict:'smudge', label:'60/2'},
+        blk:{n:"Fool's Legacy", t:"Negate opponent's Highlight before reducing damage.", cost:2, block:20, blockType:'negateStatus', label:'20/2'} },
+      { id:'reynaldo', name:'Reynaldo', hp:70, accent:'#6D9EEB', img:'', tags:['Spy'],
+        atk:{n:'Quiet Investigation', t:"Look at your opponent's hand. Draw one card.", cost:2, dmg:20, drawAfter:1, label:'20/2'},
+        blk:{n:'Careful Report', t:'Remove Glue from yourself or an ally.', cost:2, block:20, blkCleanse:'glue', cleanseAlly:'glue', label:'20/2'} },
     ],
     frankenstein: [
       { id:'creature', name:'The Creature', hp:140, accent:'#5A6E55', img:'', tags:['villain'],
@@ -1219,6 +1228,9 @@ const DATA = {
       { id:"chinaprincess", name:"The China Princess", hp:60, accent:"#FFF8DC", img:"", tags:["citizen","fragile"],
         atk:{n:"Fragile Elegance", t:"A delicate, stunning strike that bedazzles the opponent, though it puts her own brittle body at risk.", cost:2, dmg:40, flags:["recoilOnBlock10"], label:"40/2"},
         blk:{n:"Porcelain Retreat", t:"The Princess freezes perfectly still, depending on her hard clay glaze to protect her from cracking.", cost:1, block:30, cond:[{test:"atkCostGTE",n:3,then:{blockSet:0}}], label:"30/1"} },
+      { id:"winkie_soldier", name:"Winkie Soldier", hp:140, accent:"#FFD966", img:"", tags:["Winkie"],
+        atk:{n:"Golden Spear", t:"Inflict Tear on the opponent.", cost:3, dmg:60, inflict:"tear", label:"60/3"},
+        blk:{n:"Loyal Formation", t:"Gain Laminate until your next turn.", cost:2, block:20, grant:"laminate", label:"20/2"} },
     ]
   },
 
@@ -1713,8 +1725,8 @@ Object.keys(D.characters).forEach(function(k){D.characters[k].forEach(function(c
 var CI=window.CRIT_IMG;(D.crits||[]).forEach(function(c){if(CI[c.id])c.img=CI[c.id];});})();
 </script>
 <script>
-window.HAMLET_IMG={"claudius": "data:image/jpeg;base64,__ABCASSET_42__", "gertrude": "data:image/jpeg;base64,__ABCASSET_43__", "laertes": "data:image/jpeg;base64,__ABCASSET_44__", "hamlet": "data:image/jpeg;base64,__ABCASSET_45__", "horatio": "data:image/jpeg;base64,__ABCASSET_46__", "fortinbras": "data:image/jpeg;base64,__ABCASSET_47__", "ophelia": "data:image/jpeg;base64,__ABCASSET_48__", "polonius": "data:image/jpeg;base64,__ABCASSET_49__", "ghost_king": "data:image/jpeg;base64,__ABCASSET_50__", "rosencrantz_guildenstern": "data:image/jpeg;base64,__ABCASSET_51__", "voltemand_cornelius": "data:image/jpeg;base64,__ABCASSET_52__", "elsinore": "data:image/jpeg;base64,__ABCASSET_130__"};
-window.HAMLET_IMGPOS={"claudius": "50% 30%", "gertrude": "50% 24%", "laertes": "50% 18%", "hamlet": "50% 20%", "horatio": "50% 20%", "fortinbras": "50% 16%", "ophelia": "50% 13%", "polonius": "50% 30%", "ghost_king": "50% 14%", "rosencrantz_guildenstern": "50% 22%", "voltemand_cornelius": "50% 28%", "elsinore": "50% 42%"};
+window.HAMLET_IMG={"claudius": "data:image/jpeg;base64,__ABCASSET_42__", "gertrude": "data:image/jpeg;base64,__ABCASSET_43__", "laertes": "data:image/jpeg;base64,__ABCASSET_44__", "hamlet": "data:image/jpeg;base64,__ABCASSET_45__", "horatio": "data:image/jpeg;base64,__ABCASSET_46__", "fortinbras": "data:image/jpeg;base64,__ABCASSET_47__", "ophelia": "data:image/jpeg;base64,__ABCASSET_48__", "polonius": "data:image/jpeg;base64,__ABCASSET_49__", "ghost_king": "data:image/jpeg;base64,__ABCASSET_50__", "rosencrantz_guildenstern": "data:image/jpeg;base64,__ABCASSET_51__", "voltemand_cornelius": "data:image/jpeg;base64,__ABCASSET_52__", "elsinore": "data:image/jpeg;base64,__ABCASSET_130__", "osric": "data:image/jpeg;base64,__ABCASSET_912__", "yorick": "data:image/jpeg;base64,__ABCASSET_913__", "reynaldo": "data:image/jpeg;base64,__ABCASSET_914__"};
+window.HAMLET_IMGPOS={"claudius": "50% 30%", "gertrude": "50% 24%", "laertes": "50% 18%", "hamlet": "50% 20%", "horatio": "50% 20%", "fortinbras": "50% 16%", "ophelia": "50% 13%", "polonius": "50% 30%", "ghost_king": "50% 14%", "rosencrantz_guildenstern": "50% 22%", "voltemand_cornelius": "50% 28%", "elsinore": "50% 42%", "osric": "50% 20%", "yorick": "50% 18%", "reynaldo": "50% 20%"};
 (function(){var D=window.DATA;if(!D||!D.characters.hamlet)return;var H=window.HAMLET_IMG,P=window.HAMLET_IMGPOS;D.characters.hamlet.forEach(function(c){if(H[c.id]){c.img=H[c.id];c.imgpos=P[c.id]||'50% 22%';}});})();
 </script>
 <script>
@@ -1732,8 +1744,8 @@ window.SHERLOCK_IMGPOS={"holmes": "50% 28%", "watson": "50% 30%", "moriarty": "5
 window.DECKBOX={"gatsby": "data:image/jpeg;base64,__ABCASSET_74__", "crucible": "data:image/jpeg;base64,__ABCASSET_75__", "hamlet": "data:image/jpeg;base64,__ABCASSET_76__", "frankenstein": "data:image/jpeg;base64,__ABCASSET_77__", "sherlock": "data:image/jpeg;base64,__ABCASSET_78__"};
 </script>
 <script>
-window.OZ_IMG={"dorothy": "data:image/jpeg;base64,__ABCASSET_79__", "scarecrow": "data:image/jpeg;base64,__ABCASSET_80__", "tinwoodman": "data:image/jpeg;base64,__ABCASSET_81__", "cowardlylion": "data:image/jpeg;base64,__ABCASSET_82__", "toto": "data:image/jpeg;base64,__ABCASSET_83__", "witchwest": "data:image/jpeg;base64,__ABCASSET_84__", "glinda": "data:image/jpeg;base64,__ABCASSET_85__", "oz": "data:image/jpeg;base64,__ABCASSET_86__", "kalidah": "data:image/jpeg;base64,__ABCASSET_87__", "jinjur": "data:image/jpeg;base64,__ABCASSET_88__", "flyingmonkey": "data:image/jpeg;base64,__ABCASSET_89__", "munchkin": "data:image/jpeg;base64,__ABCASSET_90__", "guard": "data:image/jpeg;base64,__ABCASSET_91__", "quadling": "data:image/jpeg;base64,__ABCASSET_92__", "chinaprincess": "data:image/jpeg;base64,__ABCASSET_134__"};
-window.OZ_IMGPOS={"dorothy": "50% 18%", "scarecrow": "50% 8%", "tinwoodman": "50% 16%", "cowardlylion": "50% 16%", "toto": "50% 30%", "witchwest": "50% 16%", "glinda": "50% 16%", "oz": "50% 10%", "kalidah": "50% 10%", "jinjur": "50% 16%", "flyingmonkey": "50% 20%", "munchkin": "50% 18%", "guard": "50% 16%", "quadling": "50% 18%", "chinaprincess": "50% 14%"};
+window.OZ_IMG={"dorothy": "data:image/jpeg;base64,__ABCASSET_79__", "scarecrow": "data:image/jpeg;base64,__ABCASSET_80__", "tinwoodman": "data:image/jpeg;base64,__ABCASSET_81__", "cowardlylion": "data:image/jpeg;base64,__ABCASSET_82__", "toto": "data:image/jpeg;base64,__ABCASSET_83__", "witchwest": "data:image/jpeg;base64,__ABCASSET_84__", "glinda": "data:image/jpeg;base64,__ABCASSET_85__", "oz": "data:image/jpeg;base64,__ABCASSET_86__", "kalidah": "data:image/jpeg;base64,__ABCASSET_87__", "jinjur": "data:image/jpeg;base64,__ABCASSET_88__", "flyingmonkey": "data:image/jpeg;base64,__ABCASSET_89__", "munchkin": "data:image/jpeg;base64,__ABCASSET_90__", "guard": "data:image/jpeg;base64,__ABCASSET_91__", "quadling": "data:image/jpeg;base64,__ABCASSET_92__", "chinaprincess": "data:image/jpeg;base64,__ABCASSET_134__", "winkie_soldier": "data:image/jpeg;base64,__ABCASSET_915__"};
+window.OZ_IMGPOS={"dorothy": "50% 18%", "scarecrow": "50% 8%", "tinwoodman": "50% 16%", "cowardlylion": "50% 16%", "toto": "50% 30%", "witchwest": "50% 16%", "glinda": "50% 16%", "oz": "50% 10%", "kalidah": "50% 10%", "jinjur": "50% 16%", "flyingmonkey": "50% 20%", "munchkin": "50% 18%", "guard": "50% 16%", "quadling": "50% 18%", "chinaprincess": "50% 14%", "winkie_soldier": "50% 16%"};
 (function(){var D=window.DATA;if(!D||!D.characters.oz)return;var H=window.OZ_IMG,P=window.OZ_IMGPOS;D.characters.oz.forEach(function(c){if(H[c.id]){c.img=H[c.id];c.imgpos=P[c.id]||'50% 18%';}});})();
 </script>
 <script>
