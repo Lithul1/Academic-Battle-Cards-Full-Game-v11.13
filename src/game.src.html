@@ -1899,6 +1899,7 @@ function attackCostFor(side,ab){
 function playCrit(side,idx){
   const P=S[side], card=P.hand[idx]; if(!card||card.cat!=='crit') return;
   if(side==='you' && (S.turn!=='you'||S.phase!=='strategize'||busy)) return;
+  if(side==='you' && S.scrim && S.scrim.ruleShift==='sinstaram'){ toast&&toast('Filtered Feed — Crit Lenses are locked.'); return; }
   const place=()=>{
     if(P.crit){ pushLog(`${who(P)} archives ${P.crit.name} (no reward).`); P.grave.push({name:P.crit.name,_critArchive:true}); P.discard.push(P.crit); }
     const i=P.hand.indexOf(card); if(i>=0) P.hand.splice(i,1);
@@ -1978,7 +1979,7 @@ function tickTurnTimer(){
   if(busy || S._settings || S.viewPile){ paintTimer(); return; }   // pause during trivia / pickers / menus
   S._timeLeft--;
   paintTimer();
-  if(S._timeLeft<=0){ stopTurnTimer(); pushLog('⏱ Time! Your turn ends automatically.'); toast('Time up — turn passed.','bad'); endTurn(); }
+  if(S._timeLeft<=0){ stopTurnTimer(); if(S.scrim && S.scrim.ruleShift==='sicsoc'){ const a=active(S.you); if(a&&a.hp>0){ a.hp=Math.max(0,a.hp-20); pushLog('Doomscroll Clock — 20 distraction damage!'); checkKO(S.you,'you'); } } pushLog('⏱ Time! Your turn ends automatically.'); toast('Time up — turn passed.','bad'); if(S&&!S.over) endTurn(); }
 }
 function paintTimer(){
   const el=document.getElementById('turnclock'); if(!el||!S) return;
@@ -2013,6 +2014,19 @@ function startTurn(){
   p.flags.bmThisTurn = false;
   foeP.flags.noBookmarks = Math.max(0,(foeP.flags.noBookmarks||0)-1);
   p.critTurn = {correct:0,wrong:0,atk:false,blk:false,bm:false,readerStreak:0,queerMismatch:false};
+  // ---- scrimmage boss rule-shift per-turn hooks ----
+  if(S.scrim && S.scrim.ruleShift && S.turn==='opp'){
+    const rs=S.scrim.ruleShift, boss=active(S.opp);
+    if(rs==='claystation' && boss && boss.atk){
+      S._clayTurn=(S._clayTurn||0)+1;
+      if(boss._clayBase==null) boss._clayBase=boss.atk.dmg;
+      if(S._clayTurn%2===0){ let hi=0; S.you.team.forEach(c=>{ if(c.atk&&c.atk.dmg>hi) hi=c.atk.dmg; });
+        if(hi>boss._clayBase){ boss.atk.dmg=hi; pushLog('Morphic Mirror \u2014 Claystation copies your strongest attack ('+hi+').'); }
+        else boss.atk.dmg=boss._clayBase; }
+      else boss.atk.dmg=boss._clayBase;
+    }
+    if(rs==='sinstaram' && boss && boss.hp>0){ boss.status.highlight=true; }
+  }
   render();
   startTurnTimer();
   if(!S.over && S.turn==='opp') setTimeout(aiTurn,650);
@@ -2034,12 +2048,19 @@ function doDraw(){
   S.phase='strategize'; render();
 }
 function toEngage(){ S.phase='engage'; pushLog(`${who(me())}: ENGAGE phase.`); render(); }
-function endTurn(){ if(S.over) return; if(S.scrim && S.scrim.ruleShift==='sandroid' && S.turn==='you' && S.you.hand.length){ const n=S.you.hand.length; S.you.discard.push(...S.you.hand.splice(0)); pushLog(`The Infinite Scroll — ${n} unused card${n>1?'s':''} crumble to sand.`); } S.turn=foeKey(); startTurn(); }
+function endTurn(){ if(S.over) return;
+  if(S.scrim && S.turn==='you'){
+    if(S.scrim.ruleShift==='hexbox'){ const hexes=S.you.hand.filter(c=>c.cat==='hex').length; if(hexes){ const a=active(S.you); if(a&&a.hp>0){ const d=10*hexes; a.hp=Math.max(0,a.hp-d); pushLog(`Held ${hexes} Hex — ${d} curse damage as the turn ends.`); } S.you.hand=S.you.hand.filter(c=>c.cat!=='hex'); checkKO(S.you,'you'); } }
+    if(S.you._ratingsBlank) S.you._ratingsBlank=false;
+  }
+  if(S.over) return;
+  if(S.scrim && S.scrim.ruleShift==='sandroid' && S.turn==='you' && S.you.hand.length){ const n=S.you.hand.length; S.you.discard.push(...S.you.hand.splice(0)); pushLog(`The Infinite Scroll — ${n} unused card${n>1?'s':''} crumble to sand.`); } S.turn=foeKey(); startTurn(); }
 
 /* ---------------- attaching ABCs (trivia gate) ---------------- */
 function tryPlayHandCard(idx,targetUid){
   if(busy || S.turn!=='you' || S.phase!=='strategize') return;
   const p=S.you, card=p.hand[idx]; if(!card) return;
+  if(card.cat==='hex'){ const bmi=p.hand.findIndex(c=>c.cat==='bookmark'); if(bmi>=0){ p.discard.push(p.hand.splice(bmi,1)[0]); const hi=p.hand.indexOf(card); if(hi>=0) p.discard.push(p.hand.splice(hi,1)[0]); pushLog('You purge the Hex, spending a Bookmark.'); try{SFX.card('card_place',0.6);}catch(e){} render(); } else toast('Need a Bookmark in hand to purge the Hex.'); return; }
   if(card.cat==='bookmark'){ playBookmark('you',idx); return; }
   if(card.cat==='crit'){ playCrit('you',idx); return; }
   if(p.attachesLeft<=0){ toast('No attaches left this turn.'); return; }
@@ -2285,6 +2306,7 @@ function performAttack(side,abilKey){           // == beginAttack
   if(ab.bmDiscardBonus){ const n=(A.discard||[]).filter(c=>c.cat==='bookmark').length; const add=Math.min(ab.bmDiscardCap||9999, ab.bmDiscardBonus*n); if(add>0){ dmg+=add; pushLog(`${ab.n}: +${add} from ${n} Bookmark(s) in the discard.`); } }
   if(ab.guessTopFoe){ const top=D.deck[0]; const types=['ATTACK','BLOCK','BOOKMARK']; const guess=types[rnd(3)]; const actual=top?(top.cat==='abc'?top.type:'BOOKMARK'):null; if(actual&&guess===actual){ dmg+=ab.guessTopFoe.bonus||0; if(ab.guessTopFoe.inflict)condInflict=ab.guessTopFoe.inflict; pushLog(`The Mousetrap calls ${guess} — correct! +${ab.guessTopFoe.bonus} and Tear.`); } else pushLog(`The Mousetrap calls ${guess} — wrong.`); }
   if(ab.condPierceVillain && (def.tags||[]).includes('villain')){ condPierce=true; pushLog(`${ab.n} sees through the monstrous nature — Pierce.`); }
+  if(ab.dmgPerFoeBookmark){ const n=(D.hand||[]).filter(c=>c.cat==='bookmark').length; if(n){ dmg+=ab.dmgPerFoeBookmark*n; pushLog(`${ab.n}: +${ab.dmgPerFoeBookmark*n} from ${n} Bookmark(s) in hand.`); } }
   let spentAtk=spend(att.atkCharge,cost);
   if(spentAtk.length<cost && hasCrit(side,'queer')){ const more=spend(att.blkCharge,cost-spentAtk.length); if(more.length) A.critTurn.queerMismatch=true; spentAtk.push(...more); }
   if(ab.selfDiscardBlk){ for(let i=0;i<ab.selfDiscardBlk;i++){ if(att.blkCharge.length) A.discard.push(att.blkCharge.shift()); } pushLog(`${att.name} discards ${ab.selfDiscardBlk} Block ABC.`); }
@@ -2304,6 +2326,7 @@ function performAttack(side,abilKey){           // == beginAttack
   let pierce=(ab.flags||[]).includes('pierce') || condPierce;
   if(hasCrit(side,'psycho') && def.blkCharge.length===0){ pierce=true; }
   if(symbolsOff()) pierce=false;
+  if(S.scrim && S.scrim.ruleShift==='pintendo' && side==='opp'){ const bb=def.blk; const full=bb && bb.cost!=null && def.blkCharge.length>=bb.cost; if(!full){ pierce=true; } }
   atkCtx={side,A,att,ab,D,dKey,def,dmg,pierce,condInflict,condFoeDiscard};
   if(def.status.ecoNegate){ def.status.ecoNegate=false; pushLog(`${def.name} negates the attack (Ecocriticism)!`); return finishAttack(dmg,true); }
   if(def.status.ironcurtain && !pierce && !ab.ignoreDefBuffs){ def.status.ironcurtain=false; pushLog(`${def.name}'s Iron Curtain absorbs the blow!`); return finishAttack(dmg,true); }
@@ -2383,6 +2406,9 @@ function finishAttack(blocked,negated,forceNet){
     if(ab.drawAfter){ drawN(side,ab.drawAfter); pushLog(`${who(A)} draws ${ab.drawAfter}.`); }
     if(ab.heal){ const _b0=att.hp; att.hp=Math.min(att.maxHp,att.hp+ab.heal); if(att.hp>_b0){ try{fxHeal(sideOfChar(att));}catch(e){} pushLog(`${att.name} heals ${att.hp-_b0} HP.`); } }
     if(ab.grantAlly){ const _al=A.team.find(c=>c.hp>0 && c!==att); if(_al){ grant(_al,ab.grantAlly); pushLog(`${att.name} grants ${statusName(ab.grantAlly)} to ${_al.name}.`); } }
+    if(ab.splashBench){ D.team.forEach(c=>{ if(c!==def && c.hp>0) c.hp=Math.max(0,c.hp-ab.splashBench); }); pushLog(`${ab.n} splashes ${ab.splashBench} to the bench.`); checkKO(D,dKey); }
+    if(ab.forceFoeSwap){ const bench=D.team.map((c,i)=>({c,i})).filter(o=>o.i!==D.activeIdx && o.c.hp>0); if(bench.length){ const pk=bench[rnd(bench.length)]; doSwitch(D,pk.i); pushLog(`${ab.n} force-swaps ${who(D)}'s Active!`); } }
+    if(ab.blankFoeRatings){ if(dKey==='you') S.you._ratingsBlank=true; pushLog(`${who(D)}'s Power Ratings are blanked by the flash!`); }
   }
   flash(dKey);
   if(negated || (blocked>0 && net<=0)){ fxBlock(dKey, negated?0:blocked); }
@@ -2475,6 +2501,7 @@ function answerTrivia(choice){
   const correct=choice===pend.card.ans; S.pending=null; busy=false;
   try{SFX.card(correct?'card_place':'card_shove',0.7);}catch(e){}
   toast(correct?'Correct! Card attached.':'Wrong — card discarded.', correct?'good':'bad');
+  if(!correct && S.scrim && S.scrim.ruleShift==='hexbox'){ S.you.hand.push({cat:'hex',name:'Hex',_hex:true,_new:true}); pushLog('Hexbox injects a Hex — purge it with a Bookmark or take 10 at end of turn.'); }
   attach('you',pend.handIdx,correct,pend.target);
 }
 
@@ -2785,10 +2812,18 @@ function handCard(c,idx){
   const straty=S.turn==='you'&&S.phase==='strategize'&&!busy;
   const you=S.you;
   const deal=c._new?' deal-in':''; if(c._new) c._new=false;
+  if(c.cat==='hex'){
+    const canPurge=straty && you.hand.some(x=>x.cat==='bookmark');
+    return `<div class="hc hex ${canPurge?'playable':'spent'}${deal}" data-idx="${idx}">
+      <div class="hc-top" style="color:#c0392b">☒ HEX</div>
+      <div class="hc-name">Cursed Interruption</div>
+      <div class="hc-text">${canPurge?'Tap — spend a Bookmark to purge':'Hold it and take 10 at end of turn'}</div></div>`;
+  }
   if(c.cat==='abc'){
     const playable=straty && you.attachesLeft>0;
+    const pw = you._ratingsBlank ? '<span class="pw">?</span>' : `<span class="pw">${c.power}</span>`;
     return `<div class="hc abc ${c.type.toLowerCase()} ${playable?'playable drag-src':'spent'}${deal}" data-idx="${idx}">
-      <div class="hc-top">${c.type==='ATTACK'?'⚔ ATTACK':'⛊ BLOCK'}<span class="pw">${c.power}</span></div>
+      <div class="hc-top">${c.type==='ATTACK'?'⚔ ATTACK':'⛊ BLOCK'}${pw}</div>
       <div class="hc-q">${c.q}</div>
       <div class="hc-foot">${c.type==='ATTACK'?'Answer to charge an attack':'Answer to charge a block'}</div></div>`;
   }
@@ -3465,21 +3500,66 @@ const SCRIM_BOSSES = {
     ruleShift:'dyefone', shiftName:'Notification Inundation', shiftText:'Ink blots your trivia \u2014 some letters are censored, testing raw memory.',
     atk:{ n:'Blue-Light Blast', t:'Deals 40 and inflicts Smudge.', cost:2, dmg:40, inflict:'smudge', label:'40/2' },
     blk:{ n:'Glare', t:'Blocks 20 incoming damage.', cost:2, block:20, label:'20/2' } },
+  claystation:{ name:'Claystation', sub:'The Unrendered Console', hp:200, accent:'#7a5a3c', deck:'oz', acc:0.9,
+    ruleShift:'claystation', shiftName:'Morphic Mirror', shiftText:'On its even turns, Claystation copies your team\u2019s single highest printed Attack.',
+    atk:{ n:'Unrendered Smash', t:'Deals 50 and Pierces \u2014 ignores blocks and reductions.', cost:3, dmg:50, flags:['pierce'], label:'50/3' },
+    blk:{ n:'Morphic Guard', t:'Reshapes itself to block 25 incoming damage.', cost:2, block:25, label:'25/2' } },
+  sinstaram:{ name:'Sinsta-Ram', sub:'The Filtered Feed', hp:200, accent:'#b03a6a', deck:'wonderland', acc:0.9,
+    ruleShift:'sinstaram', shiftName:'Filtered Feed', shiftText:'Your Crit Lenses are locked, and the boss\u2019s own hits land Highlighted (+20).',
+    atk:{ n:'Blinding Flashbulb', t:'Deals 40 and blanks your Power Ratings for a turn.', cost:2, dmg:40, blankFoeRatings:1, label:'40/2' },
+    blk:{ n:'Ring Light', t:'Blocks 20 incoming damage.', cost:2, block:20, label:'20/2' } },
+  pintendo:{ name:'Pintendo', sub:'The Micro-Transaction Machine', hp:210, accent:'#c0392b', deck:'macbeth', acc:0.9,
+    ruleShift:'pintendo', shiftName:'First-Strike Protocol', shiftText:'The boss strikes first \u2014 you cannot block unless your Active is fully block-charged.',
+    atk:{ n:'Micro-Transaction Needle', t:'Deals 10 for every Bookmark currently in your hand.', cost:2, dmg:10, dmgPerFoeBookmark:10, label:'10+/2' },
+    blk:{ n:'Fast Guard', t:'A snap-purchase that blocks 20.', cost:1, block:20, label:'20/1' } },
+  hexbox:{ name:'Hexbox', sub:'The Cursed Console', hp:220, accent:'#2f6d3a', deck:'crucible', acc:0.9,
+    ruleShift:'hexbox', shiftName:'Curse Injection', shiftText:'A wrong answer injects a Hex; hold it at end of turn and take 10. Spend a Bookmark to purge it.',
+    atk:{ n:'Screaming Fan Curse', t:'Deals 20 to your Active and 10 to everyone on your bench.', cost:2, dmg:20, splashBench:10, label:'20/2' },
+    blk:{ n:'Warp Field', t:'Blocks 20 incoming damage.', cost:2, block:20, label:'20/2' } },
+  sicsoc:{ name:'SicSoc', sub:'The Doomscroll Network', hp:230, accent:'#1f6a6a', deck:'sherlock', acc:0.9,
+    ruleShift:'sicsoc', shiftName:'Doomscroll Clock', shiftText:'Your turns run on a 15-second timer \u2014 run out and take 20 as your turn ends.',
+    atk:{ n:'Viral Trend Shuffle', t:'Deals 30 and force-swaps your Active with a random bench character.', cost:2, dmg:30, forceFoeSwap:true, label:'30/2' },
+    blk:{ n:'Trend Guard', t:'Blocks 20 incoming damage.', cost:2, block:20, label:'20/2' } },
 };
+/* Boss difficulty ranks, gentlest -> harshest (drives tiered draw windows) */
+const SCRIM_BOSS_RANK = ['claystation','dyefone','sandroid','sinstaram','pintendo','hexbox','sicsoc'];
 
 function scrimHas(id){ return SCRIM.active && SCRIM.artifacts.indexOf(id)>=0; }
 function scrimBlot(str){ let n=0; return String(str).replace(/[A-Za-z]/g, ch=>{ n++; return (n%4===0)?'\u2593':ch; }); }
 function scrimTriviaText(str){ if(S && S.scrim && S.scrim.ruleShift==='dyefone') return scrimBlot(str); return str; }
 function scrimRandomDeck(){ const k=Object.keys(DATA.characters); return k[rnd(k.length)]; }
+/* ---- act-loop helpers ---- */
+function scrimRollBosses(){
+  // 0-indexed rank windows: Act1 ranks1-4, Act2 ranks3-6, Act3 ranks5-7. No repeats within a run.
+  const windows=[[0,3],[2,5],[4,6]]; const picked=[];
+  windows.forEach(w=>{ const pool=[]; for(let i=w[0];i<=w[1];i++){ const id=SCRIM_BOSS_RANK[i]; if(picked.indexOf(id)<0) pool.push(id); }
+    let choice = pool.length ? pool[rnd(pool.length)] : (SCRIM_BOSS_RANK.filter(id=>picked.indexOf(id)<0)[0]);
+    picked.push(choice); });
+  return picked;
+}
+function scrimActMul(){ const a=SCRIM.act||1; return a>=3?1.4:(a>=2?1.2:1.0); }
+function scrimAccFloor(){ const a=SCRIM.act||1; return a>=3?0.88:(a>=2?0.80:0.72); }
+function scrimRollFirstEds(n){
+  const all=(DATA.firsteds||[]).map(f=>f.id);
+  const have=SCRIM.team.filter(r=>r.fe).map(r=>r.id);
+  const pool=shuffle(all.filter(id=>have.indexOf(id)<0));
+  return pool.slice(0,n);
+}
+function scrimAdvanceAct(){
+  SCRIM.act=(SCRIM.act||1)+1;
+  SCRIM.map=scrimGenMap(SCRIM.act);
+  SCRIM.pending=null; SCRIM.bossReward=null; SCRIM._gainedArt=null;
+  SCRIM.view='map'; render(); scrimSave();
+}
 
 /* ---- persistence ---- */
 function metaLoad(){ try{ const j=window.localStorage.getItem('abc_meta'); if(j) META=Object.assign({ip:0,unlocks:[]},JSON.parse(j)); }catch(e){} }
 function metaSave(){ try{ window.localStorage.setItem('abc_meta',JSON.stringify(META)); }catch(e){} }
-function scrimSave(){ try{ if(SCRIM.active) window.localStorage.setItem('abc_scrim_run',JSON.stringify({kit:SCRIM.kit,team:SCRIM.team,deck:SCRIM.deck,artifacts:SCRIM.artifacts,map:SCRIM.map,cleared:SCRIM.cleared,act:SCRIM.act})); }catch(e){} }
+function scrimSave(){ try{ if(SCRIM.active) window.localStorage.setItem('abc_scrim_run',JSON.stringify({kit:SCRIM.kit,team:SCRIM.team,deck:SCRIM.deck,artifacts:SCRIM.artifacts,map:SCRIM.map,cleared:SCRIM.cleared,act:SCRIM.act,bosses:SCRIM.bosses})); }catch(e){} }
 function scrimClearSave(){ try{ window.localStorage.removeItem('abc_scrim_run'); }catch(e){} }
 function scrimHasSave(){ try{ return !!window.localStorage.getItem('abc_scrim_run'); }catch(e){ return false; } }
 function scrimLoadSave(){ try{ const j=window.localStorage.getItem('abc_scrim_run'); if(!j) return false; const o=JSON.parse(j);
-  SCRIM.active=true; SCRIM.kit=o.kit; SCRIM.team=o.team||[]; SCRIM.deck=o.deck||{ab:[],bm:[],cr:[]}; SCRIM.artifacts=o.artifacts||[]; SCRIM.map=o.map; SCRIM.cleared=o.cleared||0; SCRIM.act=o.act||1; SCRIM.view='map'; return true; }catch(e){ return false; } }
+  SCRIM.active=true; SCRIM.kit=o.kit; SCRIM.team=o.team||[]; SCRIM.deck=o.deck||{ab:[],bm:[],cr:[]}; SCRIM.artifacts=o.artifacts||[]; SCRIM.map=o.map; SCRIM.cleared=o.cleared||0; SCRIM.act=o.act||1; SCRIM.bosses=o.bosses||[]; SCRIM.view='map'; return true; }catch(e){ return false; } }
 
 /* ---- entry ---- */
 function scrimOpen(){ metaLoad(); SCRIM.view='intro'; APP.mode='scrim'; APP.screen='scrim'; render(); }
@@ -3488,22 +3568,24 @@ function scrimAfterRender(){ try{ scrimDrawConnectors(); }catch(e){} }
 /* ---- run setup ---- */
 function scrimStartKit(kitId){
   const kit=SCRIM_KITS[kitId]; if(!kit) return;
-  SCRIM.active=true; SCRIM.kit=kitId; SCRIM.artifacts=[]; SCRIM.cleared=0; SCRIM.act=1;
+  SCRIM.active=true; SCRIM.kit=kitId; SCRIM.artifacts=[]; SCRIM.cleared=0; SCRIM.act=1; SCRIM.bosses=scrimRollBosses();
   const dk=kit.deck;
   SCRIM.team = kit.chars.map(id=>{ const def=DATA.characters[dk].find(c=>c.id===id); const mx=def?def.hp:80; return { deck:dk, id:id, curHp:mx, maxHp:mx, fe:false }; });
   const ab=[]; for(let i=0;i<8 && i<DATA.abcs[dk].length;i++) ab.push({d:dk,i:i});
   const bm=[0,1,2,3,4].filter(i=>i<DATA.bookmarks.length);
   SCRIM.deck = { ab:ab, bm:bm, cr:[] };
-  SCRIM.map = scrimGenMap();
+  SCRIM.map = scrimGenMap(1);
   SCRIM.view='map'; render(); scrimSave();
 }
 
 /* ---- map generation (branching DAG, StS-style) ---- */
-function scrimGenMap(){
-  const N=6, cols=[];
+function scrimGenMap(act){
+  act=act||SCRIM.act||1;
+  const N=(act>=3?8:(act>=2?7:6)), cols=[];
   cols.push([{type:'start',done:true}]);
   for(let c=1;c<N-1;c++){ const rows=2+rnd(2); const arr=[]; for(let r=0;r<rows;r++) arr.push({type:scrimNodeType(c,N)}); cols.push(arr); }
-  cols.push([{type:'boss',boss:(Math.random()<0.5?'sandroid':'dyefone')}]);
+  const bossId=(SCRIM.bosses&&SCRIM.bosses[act-1]) || (Math.random()<0.5?'sandroid':'dyefone');
+  cols.push([{type:'boss',boss:bossId}]);
   for(let c=0;c<cols.length-1;c++){
     const nx=cols[c+1];
     cols[c].forEach(node=>{ node.next=[]; const k=1+rnd(Math.min(2,nx.length)); const idxs=shuffle(nx.map((_,i)=>i)).slice(0,k); node.next=idxs.sort((a,b)=>a-b); });
@@ -3522,7 +3604,7 @@ function scrimNodeType(c,N){
   return 'elite';
 }
 function scrimReachable(c,r){ const m=SCRIM.map; if(!m) return false; const cur=m.cols[m.pos.c][m.pos.r]; return c===m.pos.c+1 && cur.next && cur.next.indexOf(r)>=0 && !m.cols[c][r].done; }
-function scrimAdvanceTo(c,r){ SCRIM.map.pos={c,r}; SCRIM.map.cols[c][r].done=true; SCRIM.cleared++; }
+function scrimAdvanceTo(c,r){ if(!SCRIM.map || !SCRIM.map.cols[c] || !SCRIM.map.cols[c][r]) return; SCRIM.map.pos={c,r}; SCRIM.map.cols[c][r].done=true; SCRIM.cleared++; }
 
 /* ---- deck / character builders for a run battle ---- */
 function scrimPlayerShell(name,setKey,team,deck){ const ai=team.findIndex(c=>c.hp>0); return { name,setKey,team,activeIdx:ai>=0?ai:0,deck,hand:[],discard:[],grave:[],kos:0,attachesLeft:0,crit:null,critTurn:{},critEver:{},flags:{},activeBm:[],_lastDrawn:null }; }
@@ -3536,13 +3618,14 @@ function scrimYouPlayer(){ const team=[]; SCRIM.team.forEach((rec,i)=>{ rec._i=i
 function scrimNoHeal(bmIdxs){ return bmIdxs.filter(i=>!(DATA.bookmarks[i] && DATA.bookmarks[i].effect==='heal')); }
 function scrimBossDeck(b){ const dk=b.deck||scrimRandomDeck(); const def=defaultDeck(dk); return { ab:def.ab.map(i=>({d:dk,i})).slice(0,16), bm:scrimNoHeal(def.bm).slice(0,8), cr:[] }; }
 function scrimOppPlayer(node){
-  if(node.boss){ const b=SCRIM_BOSSES[node.boss];
-    const bc=makeChar({id:'boss_'+node.boss,name:b.name,hp:b.hp,accent:b.accent,img:'',tags:['villain'],atk:clone(b.atk),blk:clone(b.blk)},1.0); bc._boss=true; bc.sub=b.sub;
+  if(node.boss){ const b=SCRIM_BOSSES[node.boss]; const mul=scrimActMul();
+    const bAtk=clone(b.atk); if(bAtk.dmg!=null) bAtk.dmg=Math.round(bAtk.dmg*mul);
+    const bc=makeChar({id:'boss_'+node.boss,name:b.name,hp:Math.round(b.hp*mul),accent:b.accent,img:'',tags:['villain'],atk:bAtk,blk:clone(b.blk)},1.0); bc._boss=true; bc.sub=b.sub;
     return scrimPlayerShell(b.name,'boss',[bc],shuffle(buildRunDeck(scrimBossDeck(b)))); }
   const dk=node.oppDeck||scrimRandomDeck();
   const ids=shuffle(DATA.characters[dk].map(c=>c.id)).slice(0, node.type==='elite'?3:2);
   const depth=SCRIM.pending?SCRIM.pending.c:1;
-  const scale=node.type==='elite'?0.95:Math.min(0.9,0.55+0.06*depth);
+  const scale=(node.type==='elite'?0.95:Math.min(0.9,0.55+0.06*depth))*scrimActMul();
   const team=ids.map(id=>{ const c=makeChar(DATA.characters[dk].find(x=>x.id===id),1.0); c.maxHp=Math.max(20,Math.round(c.maxHp*scale/10)*10); c.hp=c.maxHp; return c; });
   const def=defaultDeck(dk);
   const rd={ ab:def.ab.map(i=>({d:dk,i})).slice(0,14), bm:scrimNoHeal(def.bm).slice(0,10), cr:node.type==='elite'?def.cr.slice(0,2):[] };
@@ -3553,7 +3636,8 @@ function scrimOppPlayer(node){
 function scrimStartBattle(node){
   stopTurnTimer();
   const st=clone(APP.settings); st.koTarget=99; st.hpScale=1.0;
-  st.aiAccuracy = node.boss?SCRIM_BOSSES[node.boss].acc:(node.type==='elite'?0.9:0.72);
+  st.aiAccuracy = node.boss?SCRIM_BOSSES[node.boss].acc:(node.type==='elite'?Math.min(0.96,scrimAccFloor()+0.06):scrimAccFloor());
+  if(node.boss==='sicsoc') st.turnTimer=15;
   st.handMin = (DEFAULTS.handMin||4) + (scrimHas('librarycard')?1:0);
   st.handSize = (DEFAULTS.handSize||5) + (scrimHas('librarycard')?1:0);
   const you=scrimYouPlayer(), opp=scrimOppPlayer(node);
@@ -3617,6 +3701,8 @@ function handleScrim(cmd){
     SCRIM.view='map'; render(); scrimSave(); return; }
   if(op==='draftpick'){ try{SFX.card('pack_take',0.75);}catch(e){} const k=+a; const ref=SCRIM.draft&&SCRIM.draft[k]; if(ref){ if(ref.t==='ab') SCRIM.deck.ab.push({d:ref.d,i:ref.i}); else if(ref.t==='bm') SCRIM.deck.bm.push(ref.i); else SCRIM.deck.cr.push(ref.i); } SCRIM.draft=null; SCRIM.view='map'; render(); scrimSave(); return; }
   if(op==='draftskip'){ SCRIM.draft=null; SCRIM.view='map'; render(); scrimSave(); return; }
+  if(op==='bossrewardpick'){ const k=+a; const feid=SCRIM.bossReward&&SCRIM.bossReward[k]; if(feid){ const fd=firstedById(feid); if(fd){ const mx=fd.hp||90; SCRIM.team.push({fe:true,id:feid,deck:fd.deck,curHp:mx,maxHp:mx}); toast('Commander recruited: '+fd.name); try{SFX.card('pack_take',0.75);}catch(e){} } } scrimAdvanceAct(); return; }
+  if(op==='bossrewardskip'){ scrimAdvanceAct(); return; }
   if(op==='vault'){ scrimBuyUnlock(a); return; }
   if(op==='rosetta'){ if(S&&S.pending&&S.scrim&&!S.scrim.rosettaUsed){ const type=S.pending.card.type; const decks=Object.keys(DATA.abcs); let pick=null,g=0; while(!pick&&g++<40){ const d=decks[rnd(decks.length)]; const x=DATA.abcs[d][rnd(DATA.abcs[d].length)]; if(x&&x.type===type) pick=x; } if(pick){ const c=S.pending.card; c.q=pick.q; c.opts=pick.opts.slice(); c.ans=pick.ans; S.scrim.rosettaUsed=true; pushLog('Rosetta Stone \u2014 the question is swapped.'); render(); } } return; }
   if(op==='afterbattle'){ scrimAfterBattle(); return; }
@@ -3637,7 +3723,13 @@ function scrimAfterBattle(){
   let art=null;
   if(node.type==='elite'||node.boss) art=scrimGrantArtifact();
   SCRIM._gainedArt=art;
-  if(node.boss){ S=null; scrimEndRun(true); return; }
+  if(node.boss){
+    S=null; stopTurnTimer(); APP.screen='scrim';
+    if((SCRIM.act||1)>=3){ scrimEndRun(true); return; }
+    const ipGain=40; META.ip=(META.ip||0)+ipGain; metaSave(); SCRIM._bossIP=ipGain;
+    SCRIM.bossReward=scrimRollFirstEds(3); SCRIM.pending=null;
+    SCRIM.view='bossreward'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave(); return;
+  }
   S=null; stopTurnTimer(); APP.screen='scrim';
   SCRIM.pending=null; SCRIM.draft=scrimRollDraft(3); SCRIM.view='reward'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave();
 }
@@ -3656,6 +3748,7 @@ function scrimScreen(){
     case 'map': return scrimMapScreen();
     case 'archives':
     case 'reward': return scrimDraftScreen();
+    case 'bossreward': return scrimBossRewardScreen();
     case 'rest': return scrimRestScreen();
     case 'shop': return scrimShopScreen();
     case 'dead': return scrimDeadScreen();
@@ -3781,6 +3874,28 @@ function scrimDraftScreen(){
     <button class="toolbtn" data-scrim="draftskip">Skip \u2014 take nothing</button>
   </div></div>`;
 }
+function scrimBossRewardScreen(){
+  const artLine = SCRIM._gainedArt?`<div class="reward-art">\u2728 Artifact acquired: <b>${SCRIM_ART[SCRIM._gainedArt].ic} ${SCRIM_ART[SCRIM._gainedArt].name}</b> \u2014 ${SCRIM_ART[SCRIM._gainedArt].text}</div>`:'';
+  const cards=(SCRIM.bossReward||[]).map((id,k)=>{ const fd=firstedById(id); if(!fd) return '';
+    const im=feImg(fd); const av=im?`<img src="${im.img}" style="object-position:${im.pos||'50% 18%'}">`:`<span class="dc-mono" style="background:${fd.accent||'#444'}">${initials(fd.name)}</span>`;
+    const pas=fd.passive?`${fd.passive.name}`:'';
+    return `<button class="draft-card fe-reward" data-scrim="bossrewardpick:${k}">
+      <div class="dc-top fe">\ud83d\udc51 1ST EDITION</div>
+      <div class="fe-port">${av}</div>
+      <div class="dc-nm">${fd.name.replace(/\\s*\\(1E\\)/,'')}</div>
+      <div class="dc-tx">${pas}</div>
+      <div class="dc-add">Recruit \u203a</div></button>`;
+  }).join('');
+  const noneLeft = !(SCRIM.bossReward||[]).length;
+  return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel">
+    <div class="scrim-title sm">\ud83c\udfc6 Algorithm Core purged \u2014 Act ${SCRIM.act} cleared</div>
+    ${artLine}
+    <div class="scrim-ipline">Intellect Points seized: <b>+${SCRIM._bossIP||0}</b> \u00b7 \ud83e\udde0 ${META.ip||0}</div>
+    <p class="scrim-intro-copy">${noneLeft?'You already command every First Edition available. Press on to the next act.':'Recruit a <b>First Edition Commander</b> to your roster before advancing to Act '+((SCRIM.act||1)+1)+'.'}</p>
+    <div class="draft-grid">${cards}</div>
+    <button class="toolbtn" data-scrim="bossrewardskip">${noneLeft?'Advance to Act '+((SCRIM.act||1)+1)+' \u203a':'Skip \u2014 recruit no one'}</button>
+  </div></div>`;
+}
 function scrimRestScreen(){
   const dead=SCRIM.team.some(t=>t.curHp<=0);
   return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel">
@@ -3819,7 +3934,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
