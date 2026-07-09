@@ -913,6 +913,30 @@ const DATA = {
       { id:'jordan', name:'Jordan Baker', hp:80, accent:'#9AA15A', img:'',
         atk:{n:'Reckless Drive', t:'A careless, powerful swing that lands hard.', cost:2, dmg:40, label:'40/2'},
         blk:{n:'Bend the Rules', t:'She quietly improves her lie to dodge trouble.', cost:2, block:30, label:'30/2'} },
+      { id:'james_gatz', name:'James Gatz', hp:90, accent:'#4F81BD', img:'',
+        atk:{n:'Farm Boy\'s Resolve', t:'Gains Highlight before dealing damage.', cost:2, dmg:30, grant:'highlight', label:'30/2'},
+        blk:{n:'Unbreakable Spirit', t:'Removes Smudge from himself before reducing damage.', cost:2, block:40, blockType:'cleanse', blkCleanse:'smudge', label:'40/2'} },
+      { id:'meyer_wolfsheim', name:'Meyer Wolfsheim', hp:140, accent:'#5B5B5B', img:'',
+        atk:{n:'Fixed the Game', t:'Inflicts Smudge on the opponent.', cost:3, dmg:60, inflict:'smudge', label:'60/3'},
+        blk:{n:'Underworld Connections', t:'Returns one Bookmark from your discard pile to your hand.', cost:2, block:30, recoverBookmark:true, label:'30/2'} },
+      { id:'owl_eyes', name:'Owl Eyes', hp:60, accent:'#8E7CC3', img:'',
+        atk:{n:'Keen Observation', t:'Removes the opponent\'s Highlight before dealing damage.', cost:2, dmg:50, stripPos:'highlight', label:'50/2'},
+        blk:{n:'Genuine Article', t:'Gains Highlight after a successful block.', cost:2, block:40, grant:'highlight', label:'40/2'} },
+      { id:'klipspringer', name:'Klipspringer', hp:80, accent:'#F1C232', img:'',
+        atk:{n:'Borrowed Tune', t:'Draw 1 card after dealing damage.', cost:2, dmg:40, drawAfter:1, label:'40/2'},
+        blk:{n:'Slip Away', t:'Negates Glue before reducing damage.', cost:1, block:30, blockType:'cleanse', blkCleanse:'glue', label:'30/1'} },
+      { id:'dan_cody', name:'Dan Cody', hp:150, accent:'#B45F06', img:'',
+        atk:{n:'Lessons at Sea', t:'Grants one ally Highlight before attacking.', cost:3, dmg:40, grantAlly:'highlight', label:'40/3'},
+        blk:{n:'Veteran Sailor', t:'Gains Laminate until your next turn.', cost:2, block:50, grant:'laminate', label:'50/2'} },
+      { id:'catherine', name:'Catherine', hp:70, accent:'#C27BA0', img:'',
+        atk:{n:'Rumor Mill', t:'Inflicts Spill on the opponent.', cost:2, dmg:50, inflict:'spill', label:'50/2'},
+        blk:{n:'Changing Stories', t:'Removes Spill from herself or an ally.', cost:2, block:30, blockType:'cleanse', blkCleanse:'spill', cleanseAlly:'spill', label:'30/2'} },
+      { id:'henry_gatz', name:'Henry Gatz', hp:90, accent:'#6AA84F', img:'',
+        atk:{n:'Father\'s Pride', t:'Heals 20 HP after dealing damage.', cost:2, dmg:40, heal:20, label:'40/2'},
+        blk:{n:'Family Keepsake', t:'Removes Burn or Tear from himself.', cost:2, block:30, blockType:'cleanse', blkCleanse:['burn','tear'], label:'30/2'} },
+      { id:'pammy_buchanan', name:'Pammy Buchanan', hp:100, accent:'#F9CB9C', img:'',
+        atk:{n:'Innocent Smile', t:'Removes Burn from one ally before attacking.', cost:1, dmg:20, cleanseAlly:'burn', label:'20/1'},
+        blk:{n:'Sheltered Life', t:'Prevents the next Smudge or Spill that would affect her.', cost:1, block:30, immuneNext:['smudge','spill'], label:'30/1'} },
     ],
     crucible: [
       { id:'abigail', name:'Abigail Williams', hp:200, accent:'#9C3B57',
@@ -1662,8 +1686,8 @@ window.WONDERLAND_IMGPOS={"alice": "50% 20%","white_rabbit": "50% 26%","mad_hatt
 (function(){var D=window.DATA;if(!D)return;var Wi=window.WONDERLAND_IMG,P=window.WONDERLAND_IMGPOS||{};(D.characters.wonderland||[]).forEach(function(c){if(Wi[c.id]){c.img=Wi[c.id];c.imgpos=P[c.id]||"50% 22%";}});})();
 </script>
 <script>
-window.CHAR_IMG_NEW={"tom": "data:image/jpeg;base64,__ABCASSET_163__", "daisy": "data:image/jpeg;base64,__ABCASSET_15__", "gatsby": "data:image/jpeg;base64,__ABCASSET_16__", "myrtle": "data:image/jpeg;base64,__ABCASSET_17__", "nick": "data:image/jpeg;base64,__ABCASSET_18__", "george": "data:image/jpeg;base64,__ABCASSET_19__", "jordan": "data:image/jpeg;base64,__ABCASSET_20__", "abigail": "data:image/jpeg;base64,__ABCASSET_21__", "jproctor": "data:image/jpeg;base64,__ABCASSET_22__", "eproctor": "data:image/jpeg;base64,__ABCASSET_23__", "parris": "data:image/jpeg;base64,__ABCASSET_24__", "putnam": "data:image/jpeg;base64,__ABCASSET_25__", "giles": "data:image/jpeg;base64,__ABCASSET_26__", "tituba": "data:image/jpeg;base64,__ABCASSET_27__"};
-window.CHAR_IMGPOS_NEW={"tom": "52% 0%", "daisy": "50% 16%", "gatsby": "58% 0%", "myrtle": "50% 7%", "nick": "40% 11%", "george": "52% 0%", "jordan": "50% 0%", "abigail": "50% 16%", "jproctor": "50% 14%", "eproctor": "50% 14%", "parris": "50% 16%", "putnam": "50% 16%", "giles": "50% 16%", "tituba": "60% 18%"};
+window.CHAR_IMG_NEW={"james_gatz": "data:image/jpeg;base64,__ABCASSET_164__", "meyer_wolfsheim": "data:image/jpeg;base64,__ABCASSET_165__", "owl_eyes": "data:image/jpeg;base64,__ABCASSET_166__", "klipspringer": "data:image/jpeg;base64,__ABCASSET_167__", "dan_cody": "data:image/jpeg;base64,__ABCASSET_168__", "catherine": "data:image/jpeg;base64,__ABCASSET_169__", "henry_gatz": "data:image/jpeg;base64,__ABCASSET_170__", "pammy_buchanan": "data:image/jpeg;base64,__ABCASSET_171__", "tom": "data:image/jpeg;base64,__ABCASSET_163__", "daisy": "data:image/jpeg;base64,__ABCASSET_15__", "gatsby": "data:image/jpeg;base64,__ABCASSET_16__", "myrtle": "data:image/jpeg;base64,__ABCASSET_17__", "nick": "data:image/jpeg;base64,__ABCASSET_18__", "george": "data:image/jpeg;base64,__ABCASSET_19__", "jordan": "data:image/jpeg;base64,__ABCASSET_20__", "abigail": "data:image/jpeg;base64,__ABCASSET_21__", "jproctor": "data:image/jpeg;base64,__ABCASSET_22__", "eproctor": "data:image/jpeg;base64,__ABCASSET_23__", "parris": "data:image/jpeg;base64,__ABCASSET_24__", "putnam": "data:image/jpeg;base64,__ABCASSET_25__", "giles": "data:image/jpeg;base64,__ABCASSET_26__", "tituba": "data:image/jpeg;base64,__ABCASSET_27__"};
+window.CHAR_IMGPOS_NEW={"james_gatz": "50% 6%", "meyer_wolfsheim": "50% 8%", "owl_eyes": "50% 8%", "klipspringer": "50% 8%", "dan_cody": "50% 8%", "catherine": "50% 8%", "henry_gatz": "50% 8%", "pammy_buchanan": "50% 8%", "tom": "52% 0%", "daisy": "50% 16%", "gatsby": "58% 0%", "myrtle": "50% 7%", "nick": "40% 11%", "george": "52% 0%", "jordan": "50% 0%", "abigail": "50% 16%", "jproctor": "50% 14%", "eproctor": "50% 14%", "parris": "50% 16%", "putnam": "50% 16%", "giles": "50% 16%", "tituba": "60% 18%"};
 window.CRIT_IMG={"marxist": "data:image/jpeg;base64,__ABCASSET_28__", "feminist": "data:image/jpeg;base64,__ABCASSET_29__", "psycho": "data:image/jpeg;base64,__ABCASSET_30__", "queer": "data:image/jpeg;base64,__ABCASSET_31__", "postcolonial": "data:image/jpeg;base64,__ABCASSET_32__", "archetypal": "data:image/jpeg;base64,__ABCASSET_33__", "newhist": "data:image/jpeg;base64,__ABCASSET_34__", "formalism": "data:image/jpeg;base64,__ABCASSET_35__", "deconstruct": "data:image/jpeg;base64,__ABCASSET_36__", "ecocrit": "data:image/jpeg;base64,__ABCASSET_37__", "biographical": "data:image/jpeg;base64,__ABCASSET_38__", "reader": "data:image/jpeg;base64,__ABCASSET_39__", "affective": "data:image/jpeg;base64,__ABCASSET_40__", "russian": "data:image/jpeg;base64,__ABCASSET_41__"};
 (function(){var D=window.DATA;if(!D)return;var N=window.CHAR_IMG_NEW,NP=window.CHAR_IMGPOS_NEW||{};
 Object.keys(D.characters).forEach(function(k){D.characters[k].forEach(function(c){if(N[c.id]){c.img=N[c.id];c.imgpos=NP[c.id]||c.imgpos||"50% 18%";}});});
@@ -2075,6 +2099,7 @@ const STATUS_NEG=['tear','rip','glue','spill','smudge','burn'];
 const LAMINATE_BLOCKS=['tear','rip','glue','spill'];
 function inflict(t,k,ignoreLam){
   if(!t||t.hp<=0) return false;
+  if(t.wardNext && t.wardNext.includes(k)){ t.wardNext=null; pushLog(`${t.name} shrugs off ${statusName(k)} — shielded.`); return false; }
   if(!ignoreLam && t.status.laminate && LAMINATE_BLOCKS.includes(k)){ pushLog(`${t.name} is Laminated — ${k.charAt(0).toUpperCase()+k.slice(1)} prevented.`); return false; }
   t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'neg'); return true;
 }
@@ -2296,7 +2321,10 @@ function doBlock(){
   let spentBlk=spend(def.blkCharge,b.cost);
   if(spentBlk.length<b.cost && hasCrit(dKey,'queer')){ spentBlk.push(...spend(def.atkCharge,b.cost-spentBlk.length)); }
   const res=calcBlock(def,b,dmg); let amt=res.amt; let neg=!!res.negate; let failDouble=false;
-  if(b.blkCleanse && def.status[b.blkCleanse]){ delete def.status[b.blkCleanse]; pushLog(`${def.name} shrugs off ${statusName(b.blkCleanse)} while blocking.`); }
+  if(b.blkCleanse){ [].concat(b.blkCleanse).forEach(function(_st){ if(def.status[_st]){ delete def.status[_st]; pushLog(`${def.name} shrugs off ${statusName(_st)} while blocking.`); } }); }
+    if(b.cleanseAlly){ const _al=D.team.find(c=>c.hp>0 && c!==def && c.status[b.cleanseAlly]); if(_al){ delete _al.status[b.cleanseAlly]; pushLog(`${def.name} clears ${statusName(b.cleanseAlly)} from ${_al.name}.`); } }
+    if(b.recoverBookmark){ for(let _i=D.discard.length-1;_i>=0;_i--){ const _c=D.discard[_i]; if(_c && _c.effect && _c.kind){ D.discard.splice(_i,1); D.hand.push(_c); pushLog(`${def.name} recovers ${_c.name} from the discard pile.`); break; } } }
+    if(b.immuneNext){ def.wardNext=[].concat(b.immuneNext); pushLog(`${def.name} is shielded against the next ${b.immuneNext.map(statusName).join(" or ")}.`); }
   if(b.cond){ b.cond.forEach(r=>{ if(condMatch(r,D,A,att)){ const t=r.then||{};
       if(t.negate){ neg=true; amt=dmg; }
       if(t.blockSet!=null) amt=t.blockSet;
@@ -2353,6 +2381,8 @@ function finishAttack(blocked,negated,forceNet){
     if(ab.selfStatus){ att.status[ab.selfStatus]=true; pushLog(`${att.name} suffers ${ab.selfStatus}.`); }
     if(ab.selfDamage){ att.hp=Math.max(0,att.hp-ab.selfDamage); pushLog(`${att.name} loses ${ab.selfDamage} HP.`); }
     if(ab.drawAfter){ drawN(side,ab.drawAfter); pushLog(`${who(A)} draws ${ab.drawAfter}.`); }
+    if(ab.heal){ const _b0=att.hp; att.hp=Math.min(att.maxHp,att.hp+ab.heal); if(att.hp>_b0){ try{fxHeal(sideOfChar(att));}catch(e){} pushLog(`${att.name} heals ${att.hp-_b0} HP.`); } }
+    if(ab.grantAlly){ const _al=A.team.find(c=>c.hp>0 && c!==att); if(_al){ grant(_al,ab.grantAlly); pushLog(`${att.name} grants ${statusName(ab.grantAlly)} to ${_al.name}.`); } }
   }
   flash(dKey);
   if(negated || (blocked>0 && net<=0)){ fxBlock(dKey, negated?0:blocked); }

@@ -18,6 +18,7 @@ ASSETS = os.path.join(ROOT, "assets", "assets.json")
 
 # character -> (asset id, source jpg)
 PORTRAITS = {
+    # 7 updated in place
     "daisy":  (15,  "daisy_portrait.jpg"),
     "gatsby": (16,  "gatsby_portrait.jpg"),
     "myrtle": (17,  "myrtle_portrait.jpg"),
@@ -25,6 +26,15 @@ PORTRAITS = {
     "george": (19,  "george_portrait.jpg"),
     "jordan": (20,  "jordan_portrait.jpg"),
     "tom":    (163, "tom_portrait.jpg"),
+    # 8 new cards
+    "james_gatz":      (164, "james_gatz_portrait.jpg"),
+    "meyer_wolfsheim": (165, "meyer_wolfsheim_portrait.jpg"),
+    "owl_eyes":        (166, "owl_eyes_portrait.jpg"),
+    "klipspringer":    (167, "klipspringer_portrait.jpg"),
+    "dan_cody":        (168, "dan_cody_portrait.jpg"),
+    "catherine":       (169, "catherine_portrait.jpg"),
+    "henry_gatz":      (170, "henry_gatz_portrait.jpg"),
+    "pammy_buchanan":  (171, "pammy_buchanan_portrait.jpg"),
 }
 ART_DIRS = [ROOT, os.path.join(ROOT, "portraits"), os.path.join(ROOT, "gatsby_portraits")]
 
