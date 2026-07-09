@@ -98,6 +98,25 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .pc-art{position:relative;height:132px;border:2px solid var(--frame,var(--ink));border-radius:8px;display:grid;place-items:center;overflow:hidden;background:var(--ground,linear-gradient(160deg,var(--accent),#1b1714))}
 .pc-art .mono{font-family:var(--disp);font-size:44px;color:rgba(255,255,255,.92);text-shadow:2px 2px 0 rgba(0,0,0,.4)}
 .pc-art .port-img{width:100%;height:100%;object-fit:cover;display:block}
+/* ---- scrimmage boss: enlarged menacing tile ---- */
+.char.boss{border-color:#b5122a;box-shadow:0 0 0 2px #2a0a0e,0 6px 0 #3a0a0e,0 8px 22px rgba(120,10,20,.45);animation:bosspulse 2.4s ease-in-out infinite}
+@keyframes bosspulse{0%,100%{box-shadow:0 0 0 2px #2a0a0e,0 6px 0 #3a0a0e,0 8px 22px rgba(120,10,20,.35)}50%{box-shadow:0 0 0 2px #2a0a0e,0 6px 0 #3a0a0e,0 10px 26px rgba(200,30,50,.6)}}
+.char.boss .pc-name{background:linear-gradient(#2a0a0e,#4a0d14);color:#ffd9dd;border-color:#b5122a;font-size:12px;letter-spacing:1px;text-transform:uppercase;text-shadow:0 0 6px rgba(255,60,80,.5)}
+.char.boss .pc-art{height:168px;border-color:#b5122a;background:radial-gradient(120% 100% at 50% 20%,#241016,#0c0608)}
+body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
+/* ---- boss reveal splash ---- */
+.brv-bg{background:radial-gradient(120% 90% at 50% 30%,rgba(60,6,10,.86),rgba(4,10,11,.94));z-index:60}
+.brv{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;max-width:min(92vw,640px);animation:brvin .45s cubic-bezier(.2,.9,.25,1.4)}
+@keyframes brvin{0%{transform:scale(.7) translateY(14px);opacity:0}60%{opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
+.brv-tag{font-family:var(--disp);font-size:clamp(15px,4vw,22px);letter-spacing:3px;color:#ff5a6e;text-shadow:0 0 12px rgba(255,40,60,.7)}
+.brv-stage{width:100%;display:grid;place-items:center}
+.brv-art{max-width:min(88vw,600px);max-height:52vh;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 12px 26px rgba(0,0,0,.6)) drop-shadow(0 0 18px rgba(255,60,80,.25))}
+.brv-mono{width:min(70vw,300px);aspect-ratio:3/4;display:grid;place-items:center;font-family:var(--disp);font-size:56px;color:#fff;border-radius:14px;border:3px solid #b5122a;background:radial-gradient(120% 100% at 50% 25%,var(--accent,#444),#140a0c);box-shadow:0 0 26px rgba(200,30,50,.5)}
+.brv-name{font-family:var(--disp);font-size:clamp(26px,7vw,46px);color:#fff;line-height:1;text-shadow:0 2px 0 #000,0 0 16px rgba(255,80,90,.4)}
+.brv-sub{font-family:var(--cond);font-style:italic;color:#e7c9cd;font-size:clamp(12px,3.4vw,16px);margin-top:-2px}
+.brv-shift{font-family:var(--cond);color:#f4e2e4;font-size:clamp(12px,3.3vw,15px);line-height:1.35;background:rgba(30,6,9,.6);border:1px solid rgba(200,60,70,.5);border-radius:9px;padding:8px 12px;max-width:min(88vw,520px)}
+.brv-shift b{color:#ff8a98}
+.brv-go{margin-top:4px}
 .pc-flip{position:absolute;right:5px;bottom:5px;width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:rgba(12,12,14,.72);color:#fff;font-family:var(--disp);font-size:13px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0;box-shadow:0 2px 5px rgba(0,0,0,.4);z-index:3}
 .pc-flip:hover{background:var(--red)}
 .pcb-close{align-self:center;margin-top:auto;font-family:var(--cond);font-size:11px;letter-spacing:.5px;padding:4px 12px;border:2px solid var(--frame,var(--ink));border-radius:6px;background:#fff;cursor:pointer}
@@ -1738,6 +1757,8 @@ window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
 try{document.documentElement.style.setProperty('--abc-bg-qc','url("'+window.ABC_BG_QC+'")');}catch(e){}
 window.ABC_ICONS={archives:"data:image/png;base64,__ABCASSET_111__",rest:"data:image/png;base64,__ABCASSET_112__",start:"data:image/png;base64,__ABCASSET_113__",scrim:"data:image/png;base64,__ABCASSET_114__",elite:"data:image/png;base64,__ABCASSET_115__",boss:"data:image/png;base64,__ABCASSET_116__"};
 window.ABC_SND={music_thereturn:"data:audio/mpeg;base64,__ABCASSET_125__",music_hiphop9:"data:audio/mpeg;base64,__ABCASSET_126__",sfx_card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",sfx_card_place:"data:audio/mpeg;base64,__ABCASSET_118__",sfx_card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",sfx_card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",sfx_book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",sfx_card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",sfx_pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",sfx_pack_take:"data:audio/mpeg;base64,__ABCASSET_124__",music_boss:"data:audio/mpeg;base64,__ABCASSET_127__"};
+window.ABC_BOSS_IMG={"dyefone":"data:image/webp;base64,__ABCASSET_909__","sandroid":"data:image/webp;base64,__ABCASSET_910__","sinstaram":"data:image/webp;base64,__ABCASSET_911__"};
+window.ABC_BOSS_IMGPOS={"dyefone":"44% 40%","sandroid":"48% 40%","sinstaram":"50% 40%"};
 </script>
 <script>
 /* ACADEMIC BATTLE CARDS — engine + UI (v2: title, deck pick, full bookmarks, defense, discard piles) */
@@ -1976,7 +1997,7 @@ function startTurnTimer(){
 }
 function tickTurnTimer(){
   if(!S || S.over || S.turn!=='you'){ stopTurnTimer(); return; }
-  if(busy || S._settings || S.viewPile){ paintTimer(); return; }   // pause during trivia / pickers / menus
+  if(busy || S._settings || S.viewPile || S._bossReveal){ paintTimer(); return; }   // pause during trivia / pickers / menus / boss reveal
   S._timeLeft--;
   paintTimer();
   if(S._timeLeft<=0){ stopTurnTimer(); if(S.scrim && S.scrim.ruleShift==='sicsoc'){ const a=active(S.you); if(a&&a.hp>0){ a.hp=Math.max(0,a.hp-20); pushLog('Doomscroll Clock — 20 distraction damage!'); checkKO(S.you,'you'); } } pushLog('⏱ Time! Your turn ends automatically.'); toast('Time up — turn passed.','bad'); if(S&&!S.over) endTurn(); }
@@ -2740,8 +2761,8 @@ function charTile(p,side){
   const port = ch.img
     ? `<img class="port-img" src="${ch.img}" alt="${ch.name}" style="object-position:${ch.imgpos||'50% 20%'}">`
     : `<span class="mono">${initials(ch.name)}</span>`;
-  return `<div class="char ${side} ${dead?'dead':''}${ch.fe?' fe':''}${side==='you'&&ch.hp>0?' drop-zone':''}" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"${side==='you'?` data-drop="1" data-charuid="${ch.uid}"`:''}>
-    <div class="pc-plate"><span class="pc-name">${ch.name}</span><span class="pc-hp"><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
+  return `<div class="char ${side} ${dead?'dead':''}${ch.fe?' fe':''}${ch._boss?' boss':''}${side==='you'&&ch.hp>0?' drop-zone':''}" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"${side==='you'?` data-drop="1" data-charuid="${ch.uid}"`:''}>
+    <div class="pc-plate"><span class="pc-name">${ch._boss?'\u26a0 ALGORITHM CORE':ch.name}</span><span class="pc-hp"><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
     <div class="pc-art">${port}${ch.fe?`<span class="fe-badge" title="1st Edition \u2014 ${((ch.passive&&ch.passive.name)||'').replace(/"/g,'&quot;')}">1ST ED</span>`:''}<button class="pc-flip" data-benchinfo="${side}:${ch.uid}" title="Ability details">i</button></div>
     <div class="pips">${chargePips(ch)}</div>
     <div class="pc-moves">
@@ -3043,6 +3064,24 @@ function fxDmgNum(side,dmg){ fxAt(side, `<div class="cfx-float atk">⚔ −${dmg
 function fxBlock(side,amt){ try{SFX.block();}catch(e){} fxAt(side, `<div class="cfx-ring blk"></div><div class="cfx-float blk">⛊ ${amt>0?('−'+amt):'Negated'}</div>`, 1000); }
 function fxHeal(side,amt){ if(amt>0){ try{SFX.heal();}catch(e){} fxAt(side, `<div class="cfx-ring heal"></div><div class="cfx-float heal">✚ +${amt}</div>`, 1100); } }
 function fxStatus(side,label,kind){ try{SFX.status(kind);}catch(e){} fxAt(side, `<div class="cfx-float status ${kind||''}">✦ ${label}</div>`, 1050); }
+function bossRevealModal(){
+  const id=S._bossReveal, b=SCRIM_BOSSES[id]; if(!b) return '';
+  const img=((window.ABC_BOSS_IMG)||{})[id]||'';
+  const art = img
+    ? `<img class="brv-art" src="${img}" alt="${b.name}">`
+    : `<div class="brv-mono" style="--accent:${b.accent}">${initials(b.name)}</div>`;
+  return `<div class="modal-bg brv-bg" data-do="bossgo">
+    <div class="brv">
+      <div class="brv-tag">\u26a0 ALGORITHM CORE</div>
+      <div class="brv-stage">${art}</div>
+      <div class="brv-info">
+        <div class="brv-name">${b.name}</div>
+        <div class="brv-sub">${b.sub||''}</div>
+        <div class="brv-shift"><b>${b.shiftName}</b> \u2014 ${b.shiftText}</div>
+      </div>
+      <button class="bigbtn brv-go" data-do="bossgo">Begin the fight \u203a</button>
+    </div></div>`;
+}
 function renderGame(root){
   if(!S) return;
   const you=S.you, opp=S.opp;
@@ -3082,6 +3121,7 @@ function renderGame(root){
    ${S.defend?defendModal():''}
    ${S.picker?pickerModal():''}
    ${S.viewPile?pileModal():''}
+   ${S._bossReveal?bossRevealModal():''}
    ${S.over?(S.scrim?scrimOverModal():overModal()):''}
    ${S._settings?settingsModal():''}
    ${S._benchView?benchInfoModal():''}`;
@@ -3388,6 +3428,7 @@ document.addEventListener('click',e=>{
     else if(d==='draw') doDraw();
     else if(d==='engage') toEngage();
     else if(d==='end') endTurn();
+    else if(d==='bossgo'){ if(S){ S._bossReveal=null; render(); } }
     else if(d==='title'){ stopTurnTimer(); APP.screen='menu'; S=null; render(); }
     else if(d==='rematch'){ startBattle(); }
     else if(d==='settings'){ S._settings=true; render(); }
@@ -3626,7 +3667,9 @@ function scrimBossDeck(b){ const dk=b.deck||scrimRandomDeck(); const def=default
 function scrimOppPlayer(node){
   if(node.boss){ const b=SCRIM_BOSSES[node.boss]; const mul=scrimActMul();
     const bAtk=clone(b.atk); if(bAtk.dmg!=null) bAtk.dmg=Math.round(bAtk.dmg*mul);
-    const bc=makeChar({id:'boss_'+node.boss,name:b.name,hp:Math.round(b.hp*mul),accent:b.accent,img:'',tags:['villain'],atk:bAtk,blk:clone(b.blk)},1.0); bc._boss=true; bc.sub=b.sub;
+    const bimg=((typeof window!=='undefined'&&window.ABC_BOSS_IMG)||{})[node.boss]||'';
+    const bc=makeChar({id:'boss_'+node.boss,name:b.name,hp:Math.round(b.hp*mul),accent:b.accent,img:bimg,tags:['villain'],atk:bAtk,blk:clone(b.blk)},1.0); bc._boss=true; bc.sub=b.sub;
+    bc.imgpos=((typeof window!=='undefined'&&window.ABC_BOSS_IMGPOS)||{})[node.boss]||'50% 40%';
     return scrimPlayerShell(b.name,'boss',[bc],shuffle(buildRunDeck(scrimBossDeck(b)))); }
   const dk=node.oppDeck||scrimRandomDeck();
   const ids=shuffle(DATA.characters[dk].map(c=>c.id)).slice(0, node.type==='elite'?3:2);
@@ -3652,6 +3695,7 @@ function scrimStartBattle(node){
   APP.screen='play';
   pushLog(node.boss?('\u26a0 ALGORITHM CORE \u2014 '+SCRIM_BOSSES[node.boss].name+'!'):(node.type==='elite'?'\ud83c\udf93 Thesis Defense \u2014 an elite fight!':'\u2694 A Scrimmage begins.'));
   if(S.scrim.ruleShift){ const b=SCRIM_BOSSES[node.boss]; pushLog('Global Rule Shift \u2014 '+b.shiftName+': '+b.shiftText); }
+  if(node.boss) S._bossReveal=node.boss;
   render(); dealOpening();
 }
 
