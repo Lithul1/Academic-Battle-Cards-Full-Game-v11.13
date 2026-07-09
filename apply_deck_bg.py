@@ -28,7 +28,7 @@ SRC = os.path.join(ROOT, "src", "game.src.html")
 # deck  ->  (reserved asset id 900-910, source PNG filename)
 DECKS = {
     "gatsby":       (900, "Gatsby_Card_Background_B.png"),
-    "crucible":     (901, "Crucible_Card_Background.png"),   # awaiting art
+    "crucible":     (901, "crucible_background_b.png"),
     "hamlet":       (902, "hamlet_background_a.png"),
     "frankenstein": (903, "Frankenstein_background_b.png"),
     "sherlock":     (904, "Sherlock_background_b.png"),
