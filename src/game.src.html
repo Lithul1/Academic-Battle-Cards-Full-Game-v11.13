@@ -1751,6 +1751,10 @@ const DATA = {
     { id:'completerewrite', name:'Complete Rewrite', kind:'RESET', rarity:'L', text:'Your Active: remove all statuses, discard all charged ABC, heal 30 HP, and draw 2 cards.', effect:'completerewrite' },
     { id:'maskingtape', name:'Masking Tape', kind:'UTILITY', rarity:'U', text:'Remove Tear and Rip from all of your active and backstage characters.', effect:'maskingtape' },
     { id:'roundrobin', name:'Round Robin', kind:'RESET', rarity:'R', text:"Both players' Active characters are swapped out for one from their backstage.", effect:'roundrobin' },
+    { id:'porchstories', name:'Porch Stories', kind:'UTILITY', rarity:'R', text:'Remove all negative status from one ally, then draw 1 card.', effect:'porchstories' },
+    { id:'horizonspromise', name:"Horizon's Promise", kind:'BOOST', rarity:'U', text:'Give one of your characters Highlight — its next attack deals +20.', effect:'horizonspromise' },
+    { id:'mucksurvival', name:'Muck Survival', kind:'UTILITY', rarity:'E', text:'Remove Burn, Spill, and Tear from one character and heal 30 HP.', effect:'mucksurvival' },
+    { id:'trialverdict', name:'Trial Verdict', kind:'UTILITY', rarity:'L', text:"Strip all positive status from the opponent's Active, then inflict Smudge.", effect:'trialverdict' },
   ],
   // -------- 1ST EDITION (Commander) CARDS --------
   firsteds: [
@@ -1798,6 +1802,14 @@ const DATA = {
         passive:{id:"dissolve",name:"Liquid Dissolution",text:"The Witch's attacks deal +20 against any character with a negative status. Caveat: whenever the opponent successfully attaches a Block ABC, she suffers an uncleansable Spill (−15 HP each turn).",statusDmgBonus:20,spillOnFoeBlockAttach:15},
         atk:{n:"Winged Monkey Ambush",t:"Inflicts Glue on the defender (cannot switch positions next phase).",cost:2,dmg:40,inflict:"glue",label:"40/2"},
         blk:{n:"Hourglass Countdown",t:"Caps incoming damage at 20 and inflicts Tear on the attacker.",cost:2,blockType:"capto",cap:20,inflictAtt:"tear",label:"Cap20/2"} },
+      { id:"1e_janie", name:"Janie Crawford (1E)", deck:"tewwg", hp:170, accent:"#D7A86E", img:"", fe:true, base:["tewwg","janie"],
+        passive:{id:"findingvoice",name:"Finding Her Voice",text:"Once each turn, a successful trivia attach removes one negative status from an ally. Caveat: your attacks cost +1 ABC while Janie is your Active Character.",onAttachCleanseAlly:true,costMod:1},
+        atk:{n:"Pear Tree Promise",t:"Gain Highlight before attacking.",cost:3,dmg:60,grant:"highlight",label:"60/3"},
+        blk:{n:"Horizon's Strength",t:"Remove Smudge or Glue before reducing damage.",cost:2,block:50,blkCleanse:["smudge","glue"],label:"50/2"} },
+      { id:"1e_eatonville", name:"Town of Eatonville (1E)", deck:"tewwg", hp:190, accent:"#6D9EAD", img:"", fe:true, base:["tewwg","eatonville"],
+        passive:{id:"strengthcommunity",name:"Strength in Community",text:"Whenever you play a Bookmark, every ally heals 10. Caveat: you may play only one Bookmark per turn instead of two.",onBookmarkHealTeam:10,bookmarkCap:1},
+        atk:{n:"Shared Hope",t:"Remove one negative status from every ally.",cost:3,dmg:60,teamCleanse:true,label:"60/3"},
+        blk:{n:"United Front",t:"All allies reduce incoming damage by 10 until your next turn.",cost:3,block:60,teamShield:10,label:"60/3"} },
   ]
 };
 if (typeof window !== 'undefined') window.DATA = DATA;
@@ -2244,6 +2256,7 @@ function attach(side,handIdx,correct,targetUid){
     pushLog(`${who(p)} attached ${card.type} (power ${card.power}) to ${act.name}.`);
     if(card.type==='BLOCK'){ const foe=(side==='you'?S.opp:S.you); const witch=feOnField(foe).find(c=>c.passive&&c.passive.spillOnFoeBlockAttach); if(witch){ witch.status.spill=true; witch.status._spillLock=true; witch.status.spillAmt=witch.passive.spillOnFoeBlockAttach; pushLog(`${witch.name} is doused — Spill (−${witch.status.spillAmt} HP/turn).`); } }
     if(act.status.marginNotes){ delete act.status.marginNotes; if(!p.deck.length&&p.discard.length)p.deck=shuffle(p.discard.splice(0)); if(p.deck.length){ p.hand.push(p.deck.shift()); pushLog(`${act.name}'s Margin Notes — drew a card.`); } }
+    if(!p.critTurn._voiceUsed){ const _janie=feOnField(p).find(c=>c.passive&&c.passive.onAttachCleanseAlly); if(_janie){ const _ally=p.team.find(c=>c.hp>0 && STATUS_NEG.some(s=>c.status[s])); if(_ally){ const _s=STATUS_NEG.find(x=>_ally.status[x]); delete _ally.status[_s]; if(_s==='smudge')delete _ally.status._smudgeHalf; p.critTurn._voiceUsed=true; pushLog(`Finding Her Voice — ${_janie.name} lifts ${statusName(_s)} from ${_ally.name}.`); } } }
   } else {
     p.critTurn.wrong=(p.critTurn.wrong||0)+1;
     const protect=hasCrit(side,'postcolonial') && p.flags.oppBmLast;
@@ -2299,11 +2312,12 @@ function condMatch(rule, own, other, otherChar){
 function playBookmark(side,idx){
   const P=S[side];
   if((P.flags.noBookmarks||0)>0){ if(side==='you') toast('Structuralism locked your Bookmarks this turn.'); return; }
-  if(P.flags.bmCount>=2){ if(side==='you') toast('Up to 2 bookmarks per turn.'); return; }
+  const _bmCap = feOnField(P).some(c=>c.passive&&c.passive.bookmarkCap) ? 1 : 2;
+  if((P.flags.bmCount||0)>=_bmCap){ if(side==='you') toast('Up to '+_bmCap+' bookmark'+(_bmCap>1?'s':'')+' per turn.'); return; }
   const card=P.hand[idx], isYou=side==='you', act=active(P);
   const remove=()=>{ const i=P.hand.indexOf(card); if(i>=0) P.hand.splice(i,1); P.discard.push(card); };
   const hold=(tag,uid)=>{ const i=P.hand.indexOf(card); if(i>=0) P.hand.splice(i,1); card._tag=tag; card._uid=uid||null; (P.activeBm||(P.activeBm=[])).push(card); };
-  const commit=()=>{ P.flags.bmCount=(P.flags.bmCount||0)+1; P.flags.bmThisTurn=true; if(!P.critTurn)P.critTurn={}; P.critTurn.bm=true; };
+  const commit=()=>{ P.flags.bmCount=(P.flags.bmCount||0)+1; P.flags.bmThisTurn=true; if(!P.critTurn)P.critTurn={}; P.critTurn.bm=true; const _eat=feOnField(P).find(c=>c.passive&&c.passive.onBookmarkHealTeam); if(_eat){ const amt=_eat.passive.onBookmarkHealTeam; let any=false; P.team.forEach(c=>{ if(c.hp>0&&c.hp<c.maxHp){ const b0=c.hp; c.hp=Math.min(c.maxHp,c.hp+amt); if(c.hp>b0){ fxHeal(sideOfChar(c),c.hp-b0); any=true; } } }); if(any) pushLog('Strength in Community — every ally heals '+amt+'.'); } };
   switch(card.effect){
     case 'heal':{
       const living=P.team.filter(c=>c.hp>0);
@@ -2380,6 +2394,34 @@ function playBookmark(side,idx){
     case 'completerewrite':{ const m=active(P); clearAllStatus(m); if(m.atkCharge.length||m.blkCharge.length) P.discard.push(...m.atkCharge.splice(0),...m.blkCharge.splice(0)); const b0=m.hp; m.hp=Math.min(m.maxHp,m.hp+30); fxHeal(sideOfChar(m),m.hp-b0); for(let d=0;d<2;d++){ if(!P.deck.length&&P.discard.length)P.deck=shuffle(P.discard.splice(0)); if(P.deck.length)P.hand.push(P.deck.shift()); } pushLog(`Complete Rewrite: ${m.name} is fully reset, heals 30 (${m.hp}/${m.maxHp}), and you draw 2.`); remove(); break; }
     case 'maskingtape':{ let n=0; P.team.forEach(c=>{ if(c.hp>0){ if(c.status.tear){ delete c.status.tear; n++; } if(c.status.rip){ delete c.status.rip; n++; } } }); pushLog(n?`Masking Tape: cleared ${n} Tear/Rip effect${n>1?'s':''} from your team.`:`Masking Tape: no Tear or Rip on your team.`); remove(); break; }
     case 'roundrobin':{ const done=[]; ['you','opp'].forEach(k=>{ const pl=S[k]; const bi=pl.team.findIndex((c,ix)=>ix!==pl.activeIdx && c.hp>0); if(bi>=0){ doSwitch(pl,bi); done.push(`${who(pl)} \u2192 ${pl.team[pl.activeIdx].name}`); } }); pushLog(done.length?`Round Robin: front lines rotate \u2014 ${done.join('; ')}.`:`Round Robin: no benched characters to rotate in.`); remove(); break; }
+    case 'porchstories':{
+      const living=P.team.filter(c=>c.hp>0);
+      const go=t=>{ cleanseNeg(t); drawN(side,1); pushLog(`${who(P)} shares Porch Stories — ${t.name} is cleansed; you draw a card.`); remove(); commit(); render(); };
+      if(isYou && living.length>1) askPick('Cleanse which character?', living.map(c=>({label:`${c.name}  ${c.hp}/${c.maxHp}`,val:c.uid})), uid=>go(living.find(c=>c.uid===uid)||act));
+      else go(living.slice().sort((a,b)=>STATUS_NEG.filter(s=>b.status[s]).length-STATUS_NEG.filter(s=>a.status[s]).length)[0]||act);
+      return;
+    }
+    case 'horizonspromise':{
+      const living=P.team.filter(c=>c.hp>0);
+      const go=t=>{ grant(t,'highlight'); pushLog(`${who(P)} points to the horizon — ${t.name} is Highlighted (+20 next attack).`); hold('highlight',t.uid); commit(); render(); };
+      if(isYou && living.length>1) askPick('Highlight which character?', living.map(c=>({label:c.name,val:c.uid})), uid=>go(living.find(c=>c.uid===uid)||act));
+      else go(act);
+      return;
+    }
+    case 'mucksurvival':{
+      const living=P.team.filter(c=>c.hp>0);
+      const go=t=>{ ['burn','spill','tear'].forEach(k=>{ delete t.status[k]; }); delete t.status._spillLock; delete t.status.spillAmt; const b0=t.hp; t.hp=Math.min(t.maxHp,t.hp+30); fxHeal(sideOfChar(t),t.hp-b0); pushLog(`${who(P)} survives the muck — ${t.name} sheds Burn/Spill/Tear and heals 30 (${t.hp}/${t.maxHp}).`); remove(); commit(); render(); };
+      if(isYou && living.length>1) askPick('Restore which character?', living.map(c=>({label:`${c.name}  ${c.hp}/${c.maxHp}`,val:c.uid})), uid=>go(living.find(c=>c.uid===uid)||act));
+      else go(living.slice().sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]||act);
+      return;
+    }
+    case 'trialverdict':{
+      const F=foeOf(side), oa=active(F); const POS=['highlight','laminate','hardcover','marginNotes','ironcurtain'];
+      let n=0; POS.forEach(k=>{ if(oa.status[k]){ delete oa.status[k]; n++; } });
+      inflict(oa,'smudge');
+      pushLog(`Trial Verdict: ${oa.name} is stripped of ${n} positive effect${n!==1?'s':''} and Smudged.`);
+      remove(); break;
+    }
     default: toast('No effect'); return;
   }
   commit();
@@ -3649,6 +3691,7 @@ const SCRIM_KITS = {
   drama:{  name:'Classical Dramatist', ic:'\u2694', blurb:'Hamlet and the tragic stage.', deck:'hamlet', chars:['horatio','laertes'] },
   macbeth:{ name:'Scottish Tragedian', ic:'\ud83d\udde1', blurb:'Macbeth and the blood-price of ambition.', deck:'macbeth', chars:['banquo','macduff'] },
   wonderland:{ name:'Nonsense Fabulist', ic:'\u2665', blurb:'Down the rabbit-hole into delightful madness.', deck:'wonderland', chars:['white_rabbit','cheshire_cat'] },
+  tewwg:{ name:'Harlem Renaissance Voice', ic:'\ud83c\udf50', blurb:'Their Eyes Were Watching God \u2014 Janie\u2019s search for the horizon.', deck:'tewwg', chars:['janie','teacake'] },
 };
 const SCRIM_NODE = { start:{ic:'\u2605',name:'Start'}, scrim:{ic:'\u2694',name:'Scrimmage'}, archives:{ic:'\ud83d\udcda',name:'Study Break'}, rest:{ic:'\u2615',name:'Coffee Break'}, elite:{ic:'\ud83c\udf93',name:'Thesis Defense'}, boss:{ic:'\ud83d\udea8',name:'Algorithm Boss'} };
 const SCRIM_ART = {
