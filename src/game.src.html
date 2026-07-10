@@ -2668,6 +2668,7 @@ function render(){
 const initials = n => n.replace('&','').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 
 /* ---- title / deck pick ---- */
+const DECK_ORDER = ['gatsby','crucible','hamlet','frankenstein','sherlock','othello','oz','macbeth','wonderland','tewwg'];
 function deckCard(key){
   const chars=DATA.characters[key].slice(0,4);
   const names=DATA.characters[key].slice(0,3).map(c=>c.name).join(' · ');
@@ -2727,14 +2728,14 @@ function customScreen(){
     <div class="deck-pick-wrap">
       <h2>Choose your deck — pick a box off the shelf</h2>
       <div class="bookshelf">
-        <div class="shelf-row">${deckBox('gatsby')}${deckBox('crucible')}${deckBox('hamlet')}${deckBox('frankenstein')}${deckBox('sherlock')}${deckBox('othello')}${deckBox('oz')}${deckBox('macbeth')}${deckBox('wonderland')}${deckBox('tewwg')}</div>
+        <div class="shelf-row">${DECK_ORDER.map(k=>deckBox(k)).join('')}</div>
         <div class="shelf-plank"></div>
       </div>
       <div class="opp-pick">
         <span class="opp-pick-label">Choose your opponent</span>
         <div class="opp-opts">
           <button class="opp-opt ${(!APP.oppDeck||APP.oppDeck==='random')?'on':''}" data-opp="random">🎲 Random</button>
-          ${['gatsby','crucible','hamlet','frankenstein','sherlock','othello','oz'].map(k=>`<button class="opp-opt ${APP.oppDeck===k?'on':''}" data-opp="${k}">${setName(k)}</button>`).join('')}
+          ${DECK_ORDER.map(k=>`<button class="opp-opt ${APP.oppDeck===k?'on':''}" data-opp="${k}">${setName(k)}</button>`).join('')}
         </div>
         <p class="facing">${(!APP.oppDeck||APP.oppDeck==='random')?"The AI will field a <b>random</b> deck.":`You'll face the AI playing <b>${setName(APP.oppDeck)}</b>.`}</p>
       </div>
