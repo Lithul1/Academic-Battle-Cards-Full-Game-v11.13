@@ -582,6 +582,7 @@ body.dragging-abc .drop-zone.dragover{ outline:3px solid #E6B85C; box-shadow:0 0
 .shelf-row{ display:flex; gap:16px; justify-content:center; align-items:flex-end; flex-wrap:wrap; padding:14px 12px 0; }
 .deckbox{ position:relative; width:120px; padding:0; border:none; background:none; cursor:pointer; transition:transform .16s ease; filter:drop-shadow(0 9px 11px rgba(0,0,0,.5)); }
 .deckbox .db-img{ border-radius:5px; overflow:hidden; border:1px solid rgba(0,0,0,.45); }
+.deckbox .db-dice{ display:flex;align-items:center;justify-content:center;font-size:58px;width:118px;height:168px;background:radial-gradient(circle at 30% 20%,#3a3226,#171310 75%);color:#e8dcc0; }
 .deckbox .db-img img{ display:block; width:100%; height:auto; }
 .deckbox:hover{ transform:translateY(-12px) rotate(-1deg); }
 .deckbox.sel{ transform:translateY(-14px); }
@@ -886,6 +887,7 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .reward-art{ text-align:center; background:#f5e6bf; border:2px solid #caa53a; border-radius:8px; padding:8px; margin:8px 0; font-size:13px; }
 .rest-opts{ display:flex; flex-direction:column; gap:10px; max-width:360px; margin:14px auto; }
 .rest-opt{ background:#fbf3dd; border:2.5px solid #241f1b; border-radius:10px; padding:12px; cursor:pointer; font-family:var(--cond); letter-spacing:.5px; box-shadow:0 3px 0 rgba(40,25,12,.4); }
+.rest-opt.off{ opacity:.45; cursor:not-allowed; }
 .rest-opt:hover{ transform:translateY(-2px); } .rest-team{ justify-content:center; margin:10px 0; }
 .vault-list{ display:flex; flex-direction:column; gap:10px; margin:14px 0; }
 .vault-row{ display:flex; justify-content:space-between; align-items:center; background:#fbf3dd; border:2px solid #241f1b; border-radius:10px; padding:10px 12px; }
@@ -1936,7 +1938,33 @@ function fePeekChips(p,sideKey){ if(sideKey!=='you'||!S) return ''; let out='';
   return out?`<div class="fe-peekwrap">${out}</div>`:''; }
 function defaultBookmarks(){ const base=DATA.bookmarks.map((_,i)=>i); return base.concat([0,1,3,5,10,9]).slice(0,LIMITS.bm); }
 function defaultDeck(k){
-  return { d:k, ch:DATA.characters[k].map(c=>c.id), ab:DATA.abcs[k].map((_,i)=>i).slice(0,LIMITS.ab), bm:defaultBookmarks(), cr:[0,1,4,7].slice(0,LIMITS.cr), fe:feFor(k) };
+  // tewwg default fields ONE commander (Janie 1E) — Eatonville 1E warps the bookmark
+  // rules by default; it remains available in the Deck Builder.
+  const fe = (k==='tewwg') ? ['1e_janie'] : feFor(k);
+  return { d:k, ch:DATA.characters[k].map(c=>c.id), ab:DATA.abcs[k].map((_,i)=>i).slice(0,LIMITS.ab), bm:defaultBookmarks(), cr:[0,1,4,7].slice(0,LIMITS.cr), fe:fe };
+}
+function pickN(arr,n){ const p=arr.slice(), o=[]; while(o.length<n && p.length) o.push(p.splice(rnd(p.length),1)[0]); return o; }
+function randomBookmarks(){
+  // Randomized loadout with rarity caps for balance: up to 1 Legendary, 2 Epic, 3 Rare;
+  // everything else Common/Uncommon.
+  const L=bmIdxByRarity(['L']), E=bmIdxByRarity(['E']), R=bmIdxByRarity(['R']), CU=bmIdxByRarity(['C','U']);
+  const out=[];
+  out.push(...pickN(L, rnd(2)));        // 0-1 Legendary
+  out.push(...pickN(E, rnd(3)));        // 0-2 Epic
+  out.push(...pickN(R, 1+rnd(3)));      // 1-3 Rare
+  const fill=CU.length?CU:DATA.bookmarks.map((_,i)=>i);
+  while(out.length<LIMITS.bm) out.push(fill[rnd(fill.length)]);
+  return out.slice(0,LIMITS.bm);
+}
+function randomDeck(k){
+  // Fresh composition each battle: random characters, trivia, crit lenses, and
+  // rarity-capped bookmarks. Commanders unchanged (deck identity).
+  return { d:k,
+    ch:pickN(DATA.characters[k].map(c=>c.id), Math.min(LIMITS.ch, DATA.characters[k].length)),
+    ab:pickN(DATA.abcs[k].map((_,i)=>i), Math.min(LIMITS.ab, DATA.abcs[k].length)),
+    bm:randomBookmarks(),
+    cr:pickN(DATA.crits.map((_,i)=>i), LIMITS.cr),
+    fe:(k==='tewwg')?['1e_janie']:feFor(k) };
 }
 function deckCounts(def){
   return { ch:def.ch.length, ab:def.ab.length, bm:def.bm.length, cr:def.cr.length, fe:(def.fe||[]).length,
@@ -1974,7 +2002,9 @@ function newPlayer(name,def,st){
   const ids=def.ch.length?def.ch:DATA.characters[def.d].map(c=>c.id);
   const defs=ids.map(id=>DATA.characters[def.d].find(c=>c.id===id)).filter(Boolean);
   const pool=shuffle(clone(defs));
-  const team=pool.slice(0,1+st.benchSize).map(d=>makeChar(d,st.hpScale));
+  // Uniform team size: decks fielding fewer than 2 Commanders backfill the empty
+  // slot(s) with regular characters, so every team is (1+bench+2) strong.
+  const team=pool.slice(0,1+st.benchSize+Math.max(0,LIMITS.fe-((def.fe||[]).length))).map(d=>makeChar(d,st.hpScale));
   (def.fe||[]).slice(0,LIMITS.fe).forEach(id=>{ const fd=firstedById(id); if(fd) team.push(makeChar(fd,st.hpScale)); });
   const deck=makeDeck(def);
   return { name,setKey:def.d,team,activeIdx:0,deck,hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,crit:null,critTurn:{},critEver:{},flags:{},activeBm:[] };
@@ -2770,7 +2800,7 @@ function customScreen(){
     <div class="deck-pick-wrap">
       <h2>Choose your deck — pick a box off the shelf</h2>
       <div class="bookshelf">
-        <div class="shelf-row">${DECK_ORDER.map(k=>deckBox(k)).join('')}</div>
+        <div class="shelf-row">${DECK_ORDER.map(k=>deckBox(k)).join('')}<button class="deckbox surprise ${APP.youDeck==='surprise'?'sel':''}" data-deck="surprise" title="Surprise Me — random deck, random composition"><div class="db-img db-dice">🎲</div><div class="db-badge">${APP.youDeck==='surprise'?'✓ Surprise Me':'Surprise Me'}</div></button></div>
         <div class="shelf-plank"></div>
       </div>
       <div class="opp-pick">
@@ -2855,15 +2885,7 @@ function builderScreen(){
       <button class="toolbtn" data-do="title">‹ Back</button>
       <h1>Deck Builder</h1>
       <div class="bd-setpick">
-        <button class="bd-set ${k==='gatsby'?'on':''}" data-bld="set:gatsby">Gatsby</button>
-        <button class="bd-set ${k==='crucible'?'on':''}" data-bld="set:crucible">Crucible</button>
-        <button class="bd-set ${k==='hamlet'?'on':''}" data-bld="set:hamlet">Hamlet</button>
-        <button class="bd-set ${k==='frankenstein'?'on':''}" data-bld="set:frankenstein">Frankenstein</button>
-        <button class="bd-set ${k==='sherlock'?'on':''}" data-bld="set:sherlock">Sherlock Holmes</button>
-        <button class="bd-set ${k==='othello'?'on':''}" data-bld="set:othello">Othello</button>
-        <button class="bd-set ${k==='oz'?'on':''}" data-bld="set:oz">Wizard of Oz</button>
-        <button class="bd-set ${k==='macbeth'?'on':''}" data-bld="set:macbeth">Macbeth</button>
-        <button class="bd-set ${k==='wonderland'?'on':''}" data-bld="set:wonderland">Alice in Wonderland</button>
+        ${DECK_ORDER.map(dk=>`<button class="bd-set ${k===dk?'on':''}" data-bld="set:${dk}">${setName(dk)}</button>`).join('')}
       </div>
     </div>
     <div class="bd-totals">
@@ -3435,7 +3457,12 @@ function toast(msg,kind=''){ let el=$('#toast'); if(!el){el=document.createEleme
 function flash(side){ const el=$(`.char.${side}`); if(el){ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); } }
 
 /* ---------------- events ---------------- */
-function deckForPlay(){ return APP.customDeck?clone(APP.customDeck):defaultDeck(APP.youDeck); }
+function deckForPlay(){
+  if(APP.customDeck) return clone(APP.customDeck);
+  if(APP.mode==='quick') return randomDeck(APP.youDeck);            // quickplay: fresh composition every battle
+  if(APP.youDeck==='surprise'){ const k=DECK_ORDER[rnd(DECK_ORDER.length)]; return randomDeck(k); }  // custom-play randomizer
+  return defaultDeck(APP.youDeck);
+}
 const DIFFICULTY = {
   passfail:     { key:'passfail',     name:'Pass / Fail',   tag:'Easy',   ai:0.80, timer:60, ur:0.0, epic:0, legend:0, accent:'#3E6E50', blurb:'80% AI · 60s turns · all-common opponent bookmarks' },
   honorroll:    { key:'honorroll',    name:'Honor Roll',    tag:'Normal', ai:0.85, timer:45, ur:0.5, epic:0, legend:0, accent:'#1F6A6A', blurb:'85% AI · 45s turns · 50% Uncommon/Rare opponent bookmarks' },
@@ -3469,7 +3496,8 @@ function beginBattle(stIn){
   const youDef=deckForPlay();
   const st=clone(stIn||APP.settings); st.youSet=youDef.d; st.oppSet=pickOpponent(youDef.d);
   const diff=DIFFICULTY[APP.difficulty]||DIFFICULTY.honorroll;
-  const oppDef=defaultDeck(st.oppSet); oppDef.bm=buildOppBookmarks(diff);
+  const oppDef=(APP.mode==='quick'||APP.youDeck==='surprise')?randomDeck(st.oppSet):defaultDeck(st.oppSet);
+  oppDef.bm=buildOppBookmarks(diff);   // opponent bookmarks stay difficulty-tuned for challenge
   newGame(st, youDef, oppDef);
 }
 function quickStart(diffKey){
@@ -3691,9 +3719,9 @@ const SCRIM_KITS = {
   drama:{  name:'Classical Dramatist', ic:'\u2694', blurb:'Hamlet and the tragic stage.', deck:'hamlet', chars:['horatio','laertes'] },
   macbeth:{ name:'Scottish Tragedian', ic:'\ud83d\udde1', blurb:'Macbeth and the blood-price of ambition.', deck:'macbeth', chars:['banquo','macduff'] },
   wonderland:{ name:'Nonsense Fabulist', ic:'\u2665', blurb:'Down the rabbit-hole into delightful madness.', deck:'wonderland', chars:['white_rabbit','cheshire_cat'] },
-  tewwg:{ name:'Harlem Renaissance Voice', ic:'\ud83c\udf50', blurb:'Their Eyes Were Watching God \u2014 Janie\u2019s search for the horizon.', deck:'tewwg', chars:['janie','teacake'] },
+  tewwg:{ name:'Renaissance Voice', ic:'\ud83c\udf50', blurb:'Their Eyes Were Watching God \u2014 Janie\u2019s search for the horizon.', deck:'tewwg', chars:['janie','teacake'] },
 };
-const SCRIM_NODE = { start:{ic:'\u2605',name:'Start'}, scrim:{ic:'\u2694',name:'Scrimmage'}, archives:{ic:'\ud83d\udcda',name:'Study Break'}, rest:{ic:'\u2615',name:'Coffee Break'}, elite:{ic:'\ud83c\udf93',name:'Thesis Defense'}, boss:{ic:'\ud83d\udea8',name:'Algorithm Boss'} };
+const SCRIM_NODE = { start:{ic:'\u2605',name:'Start'}, scrim:{ic:'\u2694',name:'Scrimmage'}, archives:{ic:'\ud83d\udcda',name:'Study Break'}, rest:{ic:'\u2615',name:'Coffee Break'}, fair:{ic:'\ud83c\udfea',name:'Book Fair'}, elite:{ic:'\ud83c\udf93',name:'Thesis Defense'}, boss:{ic:'\ud83d\udea8',name:'Algorithm Boss'} };
 const SCRIM_ART = {
   gutenberg:{ name:'The Gutenberg Press', ic:'\ud83d\udcdc', text:'Your attacks deal +5 base damage.' },
   rosetta:{   name:'The Rosetta Stone', ic:'\ud83d\uddff', text:'Once per match, swap a trivia question you don\u2019t know.' },
@@ -3777,7 +3805,7 @@ function scrimAfterRender(){ try{ scrimDrawConnectors(); }catch(e){} }
 /* ---- run setup ---- */
 function scrimStartKit(kitId){
   const kit=SCRIM_KITS[kitId]; if(!kit) return;
-  SCRIM.active=true; SCRIM.kit=kitId; SCRIM.artifacts=[]; SCRIM.cleared=0; SCRIM.act=1; SCRIM.bosses=scrimRollBosses();
+  SCRIM.active=true; SCRIM.kit=kitId; SCRIM.artifacts=[]; SCRIM.cleared=0; SCRIM.act=1; SCRIM.bosses=scrimRollBosses(); SCRIM.lf=0;
   const dk=kit.deck;
   SCRIM.team = kit.chars.map(id=>{ const def=DATA.characters[dk].find(c=>c.id===id); const mx=def?def.hp:80; return { deck:dk, id:id, curHp:mx, maxHp:mx, fe:false }; });
   // Balanced starter: guarantee both ATTACK and BLOCK are drawable. Some decks are ordered
@@ -3814,8 +3842,9 @@ function scrimNodeType(c,N){
   const roll=Math.random();
   if(c<=1) return roll<0.8?'scrim':'archives';
   if(roll<0.55) return 'scrim';
-  if(roll<0.72) return 'archives';
-  if(roll<0.85) return 'rest';
+  if(roll<0.70) return 'archives';
+  if(roll<0.80) return 'rest';
+  if(roll<0.88) return 'fair';
   return 'elite';
 }
 function scrimReachable(c,r){ const m=SCRIM.map; if(!m) return false; const cur=m.cols[m.pos.c][m.pos.r]; return c===m.pos.c+1 && cur.next && cur.next.indexOf(r)>=0 && !m.cols[c][r].done; }
@@ -3912,6 +3941,12 @@ function handleScrim(cmd){
   if(op==='tomap'){ SCRIM.view='map'; render(); return; }
   if(op==='endrun'){ SCRIM.view='intro'; APP.screen='scrim'; render(); return; }
   if(op==='node'){ const c=+a, r=+b; if(!scrimReachable(c,r)){ toast('That node is not reachable yet.'); return; } scrimResolveNode(c,r); return; }
+  if(op==='fairbuy'){ const lf=SCRIM.lf||0;
+    if(a==='healall'){ if(lf<3) return; SCRIM.lf=lf-3; SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.min(t.maxHp,t.curHp+25); }); toast('The team refuels. (−3 Late Fees)'); }
+    else if(a==='draft'){ if(lf<5) return; SCRIM.lf=lf-5; SCRIM.draft=scrimRollDraft(3); SCRIM.view='archives'; try{SFX.card('pack_open',0.7);}catch(e){} render(); scrimSave(); return; }
+    else if(a==='revive'){ if(lf<6) return; const dead=SCRIM.team.filter(t=>t.curHp<=0); if(!dead.length) return; SCRIM.lf=lf-6; dead[0].curHp=Math.round(dead[0].maxHp*0.5); toast('Back on the roster. (−6 Late Fees)'); }
+    else if(a==='ip'){ if(lf<4) return; SCRIM.lf=lf-4; META.ip=(META.ip||0)+10; metaSave(); toast('+10 Intellect Points. (−4 Late Fees)'); }
+    render(); scrimSave(); return; }
   if(op==='rest'){ const cur=S===null?null:null; // rest resolves on run team
     if(a==='heal1'){ const alive=SCRIM.team.filter(t=>t.curHp>0); if(alive.length){ let t=alive.sort((x,y)=>(x.curHp/x.maxHp)-(y.curHp/y.maxHp))[0]; t.curHp=t.maxHp; } }
     else if(a==='healall'){ SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.min(t.maxHp,t.curHp+20); }); }
@@ -3930,6 +3965,7 @@ function scrimResolveNode(c,r){
   if(node.type==='scrim'||node.type==='elite'||node.type==='boss'){ scrimStartBattle(node); }
   else if(node.type==='archives'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.draft=scrimRollDraft(3); SCRIM.view='archives'; try{SFX.card('pack_open',0.7);}catch(e){} render(); scrimSave(); }
   else if(node.type==='rest'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.view='rest'; render(); scrimSave(); }
+  else if(node.type==='fair'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.view='fair'; try{SFX.card('card_fan',0.6);}catch(e){} render(); scrimSave(); }
 }
 function scrimAfterBattle(){
   if(!S) { SCRIM.view='map'; render(); return; }
@@ -3937,6 +3973,8 @@ function scrimAfterBattle(){
   const won = !S.opp.team.some(x=>x.hp>0);
   const node=S.scrim.node;
   if(!won){ scrimEndRun(false); return; }
+  const _lf = node.boss?6:(node.type==='elite'?4:2);
+  SCRIM.lf=(SCRIM.lf||0)+_lf; SCRIM._lfGain=_lf;
   if(SCRIM.pending){ scrimAdvanceTo(SCRIM.pending.c,SCRIM.pending.r); }
   let art=null;
   if(node.type==='elite'||node.boss) art=scrimGrantArtifact();
@@ -3968,6 +4006,7 @@ function scrimScreen(){
     case 'reward': return scrimDraftScreen();
     case 'bossreward': return scrimBossRewardScreen();
     case 'rest': return scrimRestScreen();
+    case 'fair': return scrimFairScreen();
     case 'shop': return scrimShopScreen();
     case 'dead': return scrimDeadScreen();
     default: return scrimIntroScreen();
@@ -4043,7 +4082,7 @@ function scrimMapScreen(){
         <div class="guide-legend">${legend}</div>
         <div class="guide-run">
           <div>Run <b>${kit}</b></div><div>Act <b>${SCRIM.act}</b></div>
-          <div>Deck <b>${deckN}</b></div><div>IP <b>\ud83e\udde0 ${META.ip||0}</b></div>
+          <div>Deck <b>${deckN}</b></div><div>IP <b>\ud83e\udde0 ${META.ip||0}</b></div><div>Fees <b>\ud83d\udcb3 ${SCRIM.lf||0}</b></div>
         </div>
       </div>
       <div class="smap-spiral" aria-hidden="true"></div>
@@ -4114,6 +4153,22 @@ function scrimBossRewardScreen(){
     <button class="toolbtn" data-scrim="bossrewardskip">${noneLeft?'Advance to Act '+((SCRIM.act||1)+1)+' \u203a':'Skip \u2014 recruit no one'}</button>
   </div></div>`;
 }
+function scrimFairScreen(){
+  const lf=SCRIM.lf||0, dead=SCRIM.team.some(t=>t.curHp<=0);
+  const offer=(id,cost,ic,label,sub,disabled)=>`<button class="rest-opt ${lf<cost||disabled?'off':''}" data-scrim="fairbuy:${id}" ${lf<cost||disabled?'disabled':''}>${ic} ${label} <small style="opacity:.75">— ${sub}</small><span style="float:right">\ud83d\udcb3 ${cost}</span></button>`;
+  return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel">
+    <div class="scrim-title sm">\ud83c\udfea Book Fair</div>
+    <p class="scrim-intro-copy">Folding tables of paperbacks and a cash box of Late Fees. Balance: <b>\ud83d\udcb3 ${lf}</b></p>
+    <div class="hud-team rest-team">${scrimTeamStrip()}</div>
+    <div class="rest-opts">
+      ${offer('healall',3,'\u271a','Snack-cart recovery','restore 25 HP to everyone')}
+      ${offer('draft',5,'\ud83d\udcda','Bargain-bin draft','pick 1 of 3 new cards')}
+      ${offer('revive',6,'\u26a1','Emergency tutoring','revive a fallen character at 50% HP',!dead)}
+      ${offer('ip',4,'\ud83e\udde0','Sell old annotations','+10 Intellect Points')}
+      <button class="rest-opt" data-scrim="tomap">\u2192 Leave the fair</button>
+    </div>
+  </div></div>`;
+}
 function scrimRestScreen(){
   const dead=SCRIM.team.some(t=>t.curHp<=0);
   return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel">
@@ -4152,7 +4207,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;} };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
