@@ -34,7 +34,7 @@ body{
 }
 
 /* ===== UI redesign (demo_11_12): shared paper backdrop on framed screens ===== */
-:root{ --abc-bg:none; --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); --deckbg-hamlet:url("data:image/png;base64,__ABCASSET_902__"); --deckbg-frankenstein:url("data:image/png;base64,__ABCASSET_903__"); --deckbg-sherlock:url("data:image/png;base64,__ABCASSET_904__"); --deckbg-othello:url("data:image/png;base64,__ABCASSET_905__"); --deckbg-macbeth:url("data:image/png;base64,__ABCASSET_906__"); --deckbg-wonderland:url("data:image/png;base64,__ABCASSET_907__"); --deckbg-oz:url("data:image/png;base64,__ABCASSET_908__"); --deckbg-crucible:url("data:image/png;base64,__ABCASSET_901__"); }
+:root{ --abc-bg:none; --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); --deckbg-hamlet:url("data:image/png;base64,__ABCASSET_902__"); --deckbg-frankenstein:url("data:image/png;base64,__ABCASSET_903__"); --deckbg-sherlock:url("data:image/png;base64,__ABCASSET_904__"); --deckbg-othello:url("data:image/png;base64,__ABCASSET_905__"); --deckbg-macbeth:url("data:image/png;base64,__ABCASSET_906__"); --deckbg-wonderland:url("data:image/png;base64,__ABCASSET_907__"); --deckbg-oz:url("data:image/png;base64,__ABCASSET_908__"); --deckbg-crucible:url("data:image/png;base64,__ABCASSET_901__"); --deckbg-tewwg:url("data:image/jpeg;base64,__ABCASSET_919__"); }
 body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:var(--abc-bg) center/cover no-repeat; }
 /* gameplay surfaces keep their own playfield/ink look */
@@ -155,6 +155,7 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .char[data-deck="othello"]{--frame:#141821;--paper:#e7ecf3;--plate:#1b2634;--plate-ink:#cfe4ff;--hp:#d94b3a;--hp-ink:#1a0a08;--ground:linear-gradient(160deg,#1d2733,#080b12);background:var(--paper) var(--deckbg-othello) center/cover;padding:9px}
 .char[data-deck="macbeth"]{--frame:#1a0e10;--paper:#efe1de;--plate:#2a1418;--plate-ink:#f0d8d0;--hp:#9c2b2b;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#3a1418,#110507 70%);background:var(--paper) var(--deckbg-macbeth) center/cover;padding:9px}
 .char[data-deck="wonderland"]{--frame:#2a0f1e;--paper:#f6eef2;--plate:linear-gradient(#f7d6e0,#e6a6c0);--plate-ink:#3a1020;--hp:#c0223f;--hp-ink:#ffffff;--ground:radial-gradient(circle at 30% 20%,#5a1a3a,#180612 70%);background:var(--paper) var(--deckbg-wonderland) center/cover;padding:9px}
+.char[data-deck="tewwg"]{--frame:#3a2410;--paper:#f5ecd6;--plate:linear-gradient(#f0c86a,#d99a3c);--plate-ink:#3a2410;--hp:#c77d3a;--hp-ink:#241a08;--ground:radial-gradient(circle at 30% 20%,#c9962f,#3a2a10 70%);background:var(--paper) var(--deckbg-tewwg) center/cover;padding:9px}
 .char[data-deck="gatsby"] .pc-name,.char[data-deck="crucible"] .pc-name,.char[data-deck="sherlock"] .pc-name,.char[data-deck="oz"] .pc-name{font-family:var(--disp)}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 3px var(--gold),0 3px 0 var(--red-dk)}50%{box-shadow:0 0 0 5px var(--gold),0 3px 0 var(--red-dk)}}
 .char.hit{animation:hit .45s}
@@ -539,6 +540,7 @@ body.dragging-abc .drop-zone.dragover{ outline:3px solid #E6B85C; box-shadow:0 0
 .pv-card.pvchar[data-deck="macbeth"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-macbeth) center/cover; }
 .pv-card.pvchar[data-deck="wonderland"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-wonderland) center/cover; }
 .pv-card.pvchar[data-deck="oz"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-oz) center/cover; }
+.pv-card.pvchar[data-deck="tewwg"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-tewwg) center/cover; }
 .pv-card.pvchar[data-deck="crucible"]{ background:linear-gradient(rgba(18,14,8,.82),rgba(9,7,3,.88)),var(--deckbg-crucible) center/cover; }
 .pv-port{ height:170px; border-radius:10px; overflow:hidden; background:linear-gradient(160deg,var(--accent,#444),#1b1714); display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
 .pv-port.small{ height:120px; }
@@ -1231,6 +1233,44 @@ const DATA = {
       { id:"winkie_soldier", name:"Winkie Soldier", hp:140, accent:"#FFD966", img:"", tags:["Winkie"],
         atk:{n:"Golden Spear", t:"Inflict Tear on the opponent.", cost:3, dmg:60, inflict:"tear", label:"60/3"},
         blk:{n:"Loyal Formation", t:"Gain Laminate until your next turn.", cost:2, block:20, grant:"laminate", label:"20/2"} },
+    ],
+    tewwg: [
+      { id:"janie", name:"Janie Crawford", hp:150, accent:"#D7A86E", img:"", tags:["Hero"],
+        atk:{n:"Pear Tree Dream", t:"Gain Highlight before attacking.", cost:3, dmg:60, grant:"highlight", label:"60/3"},
+        blk:{n:"Voice Found", t:"Remove Smudge and Glue before blocking.", cost:3, block:50, blkCleanse:["smudge","glue"], label:"50/3"} },
+      { id:"logan", name:"Logan Killicks", hp:80, accent:"#8B7355", img:"", tags:["Farmer"],
+        atk:{n:"Heavy Plow", t:"Inflict Tear.", cost:3, dmg:70, inflict:"tear", label:"70/3"},
+        blk:{n:"Work Before Words", t:"Reduce damage and remove the attacker's Highlight.", cost:2, block:40, blockType:"negateStatus", label:"40/2"} },
+      { id:"phoeby", name:"Phoeby Watson", hp:100, accent:"#A67C8D", img:"", tags:["Friend"],
+        atk:{n:"Faithful Listener", t:"Heal 20 HP after damage.", cost:2, dmg:40, heal:20, label:"40/2"},
+        blk:{n:"Trusted Advice", t:"Remove one negative status from any ally.", cost:2, block:40, cleanseAllyAny:true, label:"40/2"} },
+      { id:"nanny", name:"Nanny", hp:140, accent:"#6AA84F", img:"", tags:["Guardian"],
+        atk:{n:"Hard-Earned Wisdom", t:"Grant an ally Highlight.", cost:2, dmg:40, grantAlly:"highlight", label:"40/2"},
+        blk:{n:"Protective Embrace", t:"Gain Laminate until your next turn.", cost:3, block:50, grant:"laminate", label:"50/3"} },
+      { id:"joe", name:"Joe Starks", hp:110, accent:"#7A1F1F", img:"", tags:["Mayor"],
+        atk:{n:"Commanding Voice", t:"Inflict Glue.", cost:4, dmg:80, inflict:"glue", label:"80/4"},
+        blk:{n:"Public Image", t:"Remove Smudge before blocking.", cost:2, block:40, blkCleanse:"smudge", label:"40/2"} },
+      { id:"teacake", name:"Tea Cake", hp:90, accent:"#F1C232", img:"", tags:["Companion"],
+        atk:{n:"Everlasting Love", t:"Heal 20 HP and gain Highlight after attacking.", cost:3, dmg:60, heal:20, grant:"highlight", label:"60/3"},
+        blk:{n:"Selfless Protection", t:"Negate Burn before reducing damage.", cost:2, block:50, blkCleanse:"burn", label:"50/2"} },
+      { id:"nunkie", name:"Nunkie", hp:70, accent:"#E69138", img:"", tags:["Rival"],
+        atk:{n:"Jealous Temptation", t:"Inflict Smudge.", cost:2, dmg:50, inflict:"smudge", label:"50/2"},
+        blk:{n:"Playful Escape", t:"Remove Glue from yourself.", cost:2, block:30, blkCleanse:"glue", label:"30/2"} },
+      { id:"johnny_taylor", name:"Johnny Taylor", hp:60, accent:"#3D85C6", img:"", tags:["Musician"],
+        atk:{n:"Sweet Serenade", t:"Draw one card after damage.", cost:2, dmg:40, drawAfter:1, label:"40/2"},
+        blk:{n:"Wandering Tune", t:"Gain Highlight after blocking.", cost:2, block:30, grant:"highlight", label:"30/2"} },
+      { id:"hurricane", name:"Lake Okeechobee Hurricane", hp:100, accent:"#3C78D8", img:"", tags:["Disaster"],
+        atk:{n:"Wrath of Nature", t:"Inflict Spill and Tear.", cost:4, dmg:90, inflict:["spill","tear"], label:"90/4"},
+        blk:{n:"Relentless Storm", t:"Gain Laminate until next turn.", cost:4, block:60, grant:"laminate", label:"60/4"} },
+      { id:"eatonville", name:"Town of Eatonville", hp:150, accent:"#6D9EAD", img:"", tags:["Community"],
+        atk:{n:"Community Strength", t:"Remove one negative status from every ally.", cost:3, dmg:60, teamCleanse:true, label:"60/3"},
+        blk:{n:"Standing Together", t:"Reduce damage for all allies by 10 until your next turn.", cost:3, block:60, teamShield:10, label:"60/3"} },
+      { id:"prescott", name:"Mr. Prescott", hp:100, accent:"#999999", img:"", tags:["Authority"],
+        atk:{n:"Cross Examination", t:"Inflict Smudge and remove the defender's Highlight.", cost:3, dmg:60, inflict:"smudge", stripPos:"highlight", label:"60/3"},
+        blk:{n:"Due Process", t:"Negate one status effect targeting this character.", cost:2, block:40, blockType:"negateStatus", label:"40/2"} },
+      { id:"rabid_dog", name:"The Rabid Dog", hp:80, accent:"#5B5B5B", img:"", tags:["Beast"],
+        atk:{n:"Rabid Bite", t:"Inflict Burn.", cost:3, dmg:70, inflict:"burn", label:"70/3"},
+        blk:{n:"Cornered Beast", t:"Inflict Tear on the attacker after blocking.", cost:2, block:40, inflictAtt:"tear", label:"40/2"} }
     ]
   },
 
@@ -1556,6 +1596,68 @@ const DATA = {
       _abc('B',4,"Who is appointed to rule over the Emerald City when the Wizard departs?",["The Tin Woodman","The Scarecrow","Glinda","The Soldier with the Green Whiskers"],1),
       _abc('B',4,"Which character is chosen by the Winkies to be their new leader after the Wicked Witch is gone?",["The Tin Woodman","The Cowardly Lion","The Scarecrow","Boq the Munchkin"],0),
       _abc('B',4,"What official title is held by the green-clad officer who guards the entrance to the capital city?",["The Guardian of the Gates","The Captain of the Guard","The Emerald Warden","The Grand Vizier"],0),
+    ],
+    tewwg: [
+      _abc('A',1,"What does the opening metaphor of the novel reveal about men's dreams?",["They sail forever on the horizon, never landing until the Watcher turns away","They are always grounded in clear reality and easy to achieve","They are easily broken by the women in their lives","They are completely forgotten as soon as the sun rises"],0),
+      _abc('B',1,"Who is the young girl on the Muck whose playful flirting with Tea Cake causes Janie to experience intense jealousy?",["Annie Tyler","Daisy Blunt","Nunkie","Pheoby Watson"],2),
+      _abc('A',2,"What best describes the lifelong relationship between Janie Crawford and Pheoby Watson?",["They are bitter childhood rivals who compete for attention","They are best friends and trusted confidantes who share life stories","They are distant cousins who rarely speak to each other","They are employer and servant in the town of Eatonville"],1),
+      _abc('B',2,"Why is Mrs. Turner so deeply drawn to Janie and eager to build a friendship with her?",["She wants to borrow money from Janie's store fortune","She shares Janie's deep love for Southern folk music","She respects Janie's past status as the mayor's wife","She admires Janie's light skin, straight hair, and Caucasian features"],3),
+      _abc('A',3,"Why was Janie confused about her race as a young child living with the Washburns?",["She was never allowed to speak to other children","Her grandmother told her she was from a white family","She dressed like the white children and had never seen herself in a mirror or photograph","She lived in an all-black town and had never seen white people"],2),
+      _abc('B',3,"Who does Mrs. Turner persistently try to introduce to Janie, hoping she will leave Tea Cake?",["Her brother","Her son","Logan Killicks","Amos Hicks"],0),
+      _abc('A',4,"What natural object completely fascinates Janie and sparks her ideas of love and marriage?",["A field of bright blooming roses","A massive weeping willow tree","A wild running river","A blossoming pear tree"],3),
+      _abc('B',4,"Why does Tea Cake choose to whip Janie in Chapter 17, an act that shocks readers?",["Because she burned their dinner on purpose","To ostentatiously display his absolute possession and control over her to the Turners","Because she refused to go work in the bean fields","To protect her from a worse punishment from the town council"],1),
+      _abc('A',1,"Who does Nanny catch Janie kissing over the front gatepost, ending her childhood?",["Johnny Taylor","Logan Killicks","Joe Starks","Vergible Woods"],0),
+      _abc('B',1,"Where does a massive, chaotic fistfight break out that results in the complete destruction of the property?",["Joe Starks' porch","The local Everglades post office","Mrs. Turner's restaurant","The boarding house bedroom"],2),
+      _abc('A',2,"According to Nanny's description of social hierarchy, what is the Black woman?",["The ruler of the household","The mule of the world","The foundation of the town","The keeper of the keys"],1),
+      _abc('B',2,"Which group of people are the very first to notice the natural warning signs of the hurricane and flee the Muck?",["The white plantation owners","The Bahaman drummers","The local sheriffs and deputies","The Seminole Indians"],3),
+      _abc('A',3,"Who is Janie's first husband, chosen for her by Nanny for financial security?",["Joe Starks","Hezekiah Potts","Logan Killicks","Thomas Turner"],2),
+      _abc('B',3,"What profound state of focus inspires the iconic title of Zora Neale Hurston's novel during the hurricane?",["The people sat in the dark, watching God","The preachers stood on the hills, screaming to heaven","The animals ran in circles, fearing nature","The town gathered to read holy texts together"],0),
+      _abc('A',4,"How does Logan Killicks' treatment of Janie change a few months into their marriage?",["He buys her fine clothes and jewelry","He abandons her to go live in another city","He stops working entirely and makes her do all the cooking","He stops pampering her and insists she help with manual labor like plowing"],3),
+      _abc('B',4,"What aggressive creature attacks Janie while she is clinging to a swimming cow in the roaring floodwaters?",["A wild alligator","A rabid dog","A venomous water moccasin","A panicked wildcat"],1),
+      _abc('A',1,"Who does Janie run away with to seek a fresh, ambitious life away from her first marriage?",["Joe Starks","Tea Cake","Amos Hicks","Motor Boat"],0),
+      _abc('B',1,"How is Tea Cake physically injured while bravely rescuing Janie from the floodwaters?",["His arm is broken by a floating piece of timber","He is shot by a panicked guard on the road","He is bitten on the cheek by a rabid dog","His leg is severely cut by a barbed wire fence"],2),
+      _abc('A',2,"What is the name of the historic, all-Black town where Joe Starks and Janie move?",["Buford","Eatonville","West Palm Beach","Orlando"],1),
+      _abc('B',2,"What horrific conscripted labor are white soldiers forcing Tea Cake to perform in Palm Beach after the storm?",["Rebuilding the broken lake dikes","Cooking meals for hundreds of refugees","Gathering loose cash from destroyed banks","Burying dead storm victims in separate graves based strictly on their race"],3),
+      _abc('A',3,"What is the very first physical structure Joe Starks arranges to build upon arriving in town?",["A local church","A grand mansion for himself","A general store and post office","A town hall and courthouse"],2),
+      _abc('B',3,"What fatal illness does Tea Cake contract as a direct result of his injury during the hurricane rescue?",["Rabies (Hydrophobia)","Malaria","Yellow Fever","Severe Typhoid"],0),
+      _abc('A',4,"Why does Joe Starks stop Janie from speaking when the town asks her for a short speech?",["He believes she is too uneducated to speak properly","He wants to protect her from public embarrassment","She tells him privately that she doesn't want to speak","He states that her place is in the home and women shouldn't make speeches"],3),
+      _abc('B',4,"What dangerous object does a worried Janie find hidden directly underneath Tea Cake's bed pillow?",["A large hunting knife","A loaded pistol","Her stolen bag of cash","A vial of poison"],1),
+      _abc('A',1,"What infrastructure object does Joe purchase for Eatonville that is celebrated with a town barbecue?",["A street lamp","A water well pump","A church bell","A public clock"],0),
+      _abc('B',1,"What tragic event brings a final, heartbreaking end to Tea Cake and Janie's relationship?",["Tea Cake leaves her to return to gambling","He dies peacefully in his sleep from exhaustion","Janie shoots him in absolute self-defense when his rabid madness drives him to attack her","He drowns when he attempts to cross the flooded lake a second time"],2),
+      _abc('A',2,"Why does Joe make Janie tie her beautiful hair up in a head rag while working at the store?",["To keep it clean from falling dust","Out of jealousy and a desire to hide it from other men's eyes","Because the townspeople complained about her appearance","To make her look more like a common laborer"],1),
+      _abc('B',2,"How do the Black friends from the Muck behave toward Janie during her tense courtroom murder trial?",["They hire an expensive defense lawyer to save her","They stay home and refuse to watch the trial","They gather to sing hymns of support outside the building","They turn against her completely and attempt to testify to secure her conviction"],3),
+      _abc('A',3,"What creature becomes the central topic of jokes, storytelling, and teasing on the front porch of Joe's store?",["A stray hunting hound","A massive wild alligator","Matt Bonner's yellow mule","A fast racehorse"],2),
+      _abc('B',3,"What unconventional clothing choice does Janie make for Tea Cake's funeral, breaking social norms?",["She wears a pair of old denim overalls","She wears a shimmering silk wedding dress","She wears a heavy black veil covering her entire face","She wears a bright red dress to celebrate his life"],0),
+      _abc('A',4,"What noble action does Joe Starks perform regarding Matt Bonner's overworked mule?",["He orders the town to chase it out of city limits","He forces Matt Bonner to sell it to a butcher","He gives it to Janie as a working farm animal","He buys it for five dollars to let it live out its life in lazy comfort"],3),
+      _abc('B',4,"What physical item does Janie carry back to Eatonville from the Muck to plant in remembrance of Tea Cake?",["A small dried pear tree cutting","A small packet of garden seeds","A pressed scarlet rosebud","A handful of dark swamp soil"],1),
+      _abc('A',1,"What does Janie begin to notice about Jody's physical appearance as their marriage deteriorates?",["He sags, grows a prominent belly, and begins to look visibly old and weak","He becomes extremely athletic and muscular from working","He starts dressing like a young traveler to impress others","He turns completely pale and loses all his hair overnight"],0),
+      _abc('B',1,"Based on the Chapter 1 vocabulary list, what is the definition of the word \"sodden\"?",["Extensively burned or charred","Exceptionally dirty or dusty","Thoroughly soaked or saturated with liquid","Cold and frozen solid"],2),
+      _abc('A',2,"How does Janie use her voice to completely overpower and humiliate Joe in front of the townspeople?",["She accuses him of stealing money from the post office","She tells him he looks like the change of life when he takes off his clothes","She reveals that he was never legally appointed as the mayor","She laughs at his lack of reading and writing skills"],1),
+      _abc('B',2,"What does the vocabulary word \"lacerating\" mean when describing Johnny Taylor's passionate kiss?",["Covering entirely with sweet honey","Trickily deceiving someone","Healing an old wound completely","Ripping, cutting, or tearing deeply"],3),
+      _abc('A',3,"What false rumor spreads through town that causes a dying Joe to stop eating Janie's cooking?",["That she is saving all her money to run away","That she is mocking his illness behind his back","That she is trying to poison his food","That she has invited her grandmother's ghost into the house"],2),
+      _abc('B',3,"What is the exact definition of the vocabulary word \"languid\" as used to describe Janie's emotional state?",["Lacking energy or vitality; weak and relaxed","Filled with sudden, explosive rage","Completely clear-headed and focused","Thirsty for fresh clean water"],0),
+      _abc('A',4,"What symbolic action does Janie take immediately after Joe Starks passes away in his bedroom?",["She burns her old wedding dress in the fireplace","She packs her bags and runs out to the train station","She locks the door of the store permanently","She looks in the mirror and tears off her restrictive head rag to let her hair down"],3),
+      _abc('B',4,"What does the vocabulary word \"desecrating\" mean when applied to Logan Killicks' presence near the pear tree?",["Decorating with beautiful flowers","Violating the sacredness or purity of something","Carving initials into the bark","Celebrating a long-awaited harvest"],1),
+      _abc('A',1,"What color does Janie transition to wearing after six months of wearing traditional black mourning clothes?",["Mourning white","Deep purple","Bright blue","Solid emerald green"],0),
+      _abc('B',1,"What does the vocabulary word \"sauntered\" mean when describing how the men walked toward Joe Starks' area?",["Sprinting at top speed out of fear","Tripping over loose rocks","Strolled or walked at a leisurely, casual pace","Marched rigidly in a military formation"],2),
+      _abc('A',2,"What board game does the charming stranger invite Janie to play, treating her as an intellectual equal?",["Chess","Checkers","Backgammon","Dominoes"],1),
+      _abc('B',2,"What is the definition of the vocabulary word \"eulogy\" as demonstrated by Joe Starks during the mule's funeral?",["A mocking, sarcastic insult aimed at enemies","A silent prayer offered in absolute isolation","A long list of financial debts owed by a person","A speech or formal writing praising a deceased person"],3),
+      _abc('A',3,"What is the real name of the tall, charismatic stranger popularly known as Tea Cake?",["Hezekiah Potts","Logan Killicks","Vergible Woods","Sam Watson"],2),
+      _abc('B',3,"What does the vocabulary word \"incredulous\" mean when describing the laughter leaking from the townspeople's mouths?",["Skeptical, unbelieving, or full of disbelief","Extremely loud and obnoxious","Fake and forced to polite standards","Terrified and shaking with panic"],0),
+      _abc('A',4,"What unconventional, late-night outdoor activity do Janie and Tea Cake enjoy together early in their courtship?",["Hunting wild boars","Counting shooting stars from the roof","Planting crops by lantern light","Midnight fishing"],3),
+      _abc('B',4,"What does the vocabulary word \"pugnaciously\" mean when describing the aggressive way Joe Starks thrusts out his belly?",["In a warm, welcoming, and friendly manner","In a quarrelsome, belligerent, or combative way","With extreme starvation and weakness","In a shy, embarrassed, and hidden posture"],1),
+      _abc('A',1,"How do the townspeople of Eatonville react to Janie's budding romance with Tea Cake?",["They deeply disapprove, believing he is a poor gambler out to steal her money","They celebrate by throwing them a massive surprise wedding party","They elect Tea Cake to be the brand new mayor of Eatonville","They ignore them completely because they are focused on the store"],0),
+      _abc('B',1,"What is the meaning of the word \"ostentatiously\" when the townspeople look over Janie's store tasks?",["In a completely hidden and secret way","Maliciously planning a crime","In a showy manner designed to attract attention","Quietly and politely minding one's business"],2),
+      _abc('A',2,"What legendary local cautionary tale about a wealthy widow who was robbed by a younger man haunts Janie's thoughts?",["The story of Nanny Crawford","The story of Annie Tyler and Who Flung","The story of Mrs. Turner","The story of Daisy Blunt"],1),
+      _abc('B',2,"What does the vocabulary word \"transients\" mean when describing the seasonal labor families on the Muck?",["Permanent, long-term homeowners","Wealthy international tourists","Foreign government officials","Temporary travelers or people staying only a short time"],3),
+      _abc('A',3,"What does Tea Cake do with the $200 he secretly takes from Janie's purse in Jacksonville?",["He buys himself a brand new automobile","He loses every single cent in a bad dice game","He throws a massive dinner party and concert for his fellow railway workers","He invests it into buying land in Eatonville"],2),
+      _abc('B',3,"What does the vocabulary word \"affront\" mean when Mrs. Turner views common Black folk as a personal slight?",["An open insult or personally offensive act","A highly valued compliment","A generous financial gift","A protective shield from danger"],0),
+      _abc('A',4,"Where does Tea Cake get stabbed while fighting a man named Double-Ugly over gambling winnings?",["At the general store counter","On the train platform","Inside a restaurant in Eatonville","Outside the gambling house during a dice game dispute"],3),
+      _abc('B',4,"What is the definition of the vocabulary word \"homage\" when workers render it to cruel gods?",["Active rebellion or mutiny","Respect, honor, or reverence paid to another","Sacrificial livestock slaughter","Total confusion and panic"],1),
+      _abc('A',1,"Where do Janie and Tea Cake move to find agricultural work picking beans?",["The Everglades (The Muck)","Jacksonville","St. Augustine","Savannah"],0),
+      _abc('B',1,"What is the exact meaning of the vocabulary word \"indiscriminate\" when describing the suffering caused by nature?",["Targetedly racist and focused","Carefully calculated and planned","Random, unselective, and haphazard","Completely gentle and harmless"],2),
+      _abc('A',2,"What survival and hunting skill does Tea Cake teach Janie on the Muck, which she eventually excels at?",["Riding unbroken horses","Shooting a rifle and pistol","Navigating swamp boats","Tracking wild panthers"],1),
+      _abc('B',2,"What does the vocabulary word \"mien\" mean when Nanny sends Janie away with a very stern look?",["A packed traveling lunch box","A volatile and dangerous temper","A feeling of supreme delight","A person's appearance, bearing, or manner"],3),
     ]
   },
 
@@ -1747,6 +1849,9 @@ window.DECKBOX={"gatsby": "data:image/jpeg;base64,__ABCASSET_74__", "crucible": 
 window.OZ_IMG={"dorothy": "data:image/jpeg;base64,__ABCASSET_79__", "scarecrow": "data:image/jpeg;base64,__ABCASSET_80__", "tinwoodman": "data:image/jpeg;base64,__ABCASSET_81__", "cowardlylion": "data:image/jpeg;base64,__ABCASSET_82__", "toto": "data:image/jpeg;base64,__ABCASSET_83__", "witchwest": "data:image/jpeg;base64,__ABCASSET_84__", "glinda": "data:image/jpeg;base64,__ABCASSET_85__", "oz": "data:image/jpeg;base64,__ABCASSET_86__", "kalidah": "data:image/jpeg;base64,__ABCASSET_87__", "jinjur": "data:image/jpeg;base64,__ABCASSET_88__", "flyingmonkey": "data:image/jpeg;base64,__ABCASSET_89__", "munchkin": "data:image/jpeg;base64,__ABCASSET_90__", "guard": "data:image/jpeg;base64,__ABCASSET_91__", "quadling": "data:image/jpeg;base64,__ABCASSET_92__", "chinaprincess": "data:image/jpeg;base64,__ABCASSET_134__", "winkie_soldier": "data:image/jpeg;base64,__ABCASSET_915__"};
 window.OZ_IMGPOS={"dorothy": "50% 18%", "scarecrow": "50% 8%", "tinwoodman": "50% 16%", "cowardlylion": "50% 16%", "toto": "50% 30%", "witchwest": "50% 16%", "glinda": "50% 16%", "oz": "50% 10%", "kalidah": "50% 10%", "jinjur": "50% 16%", "flyingmonkey": "50% 20%", "munchkin": "50% 18%", "guard": "50% 16%", "quadling": "50% 18%", "chinaprincess": "50% 14%", "winkie_soldier": "50% 16%"};
 (function(){var D=window.DATA;if(!D||!D.characters.oz)return;var H=window.OZ_IMG,P=window.OZ_IMGPOS;D.characters.oz.forEach(function(c){if(H[c.id]){c.img=H[c.id];c.imgpos=P[c.id]||'50% 18%';}});})();
+window.TEWWG_IMG={"janie":"data:image/jpeg;base64,__ABCASSET_920__","logan":"data:image/jpeg;base64,__ABCASSET_921__","phoeby":"data:image/jpeg;base64,__ABCASSET_922__","nanny":"data:image/jpeg;base64,__ABCASSET_923__","joe":"data:image/jpeg;base64,__ABCASSET_924__","teacake":"data:image/jpeg;base64,__ABCASSET_925__","nunkie":"data:image/jpeg;base64,__ABCASSET_926__","johnny_taylor":"data:image/jpeg;base64,__ABCASSET_927__","hurricane":"data:image/jpeg;base64,__ABCASSET_928__","eatonville":"data:image/jpeg;base64,__ABCASSET_929__","prescott":"data:image/jpeg;base64,__ABCASSET_930__","rabid_dog":"data:image/jpeg;base64,__ABCASSET_931__"};
+window.TEWWG_IMGPOS={"janie":"50% 20%","logan":"50% 16%","phoeby":"50% 18%","nanny":"50% 16%","joe":"50% 16%","teacake":"50% 18%","nunkie":"50% 45%","johnny_taylor":"50% 18%","hurricane":"50% 75%","eatonville":"50% 30%","prescott":"50% 16%","rabid_dog":"50% 30%"};
+(function(){var D=window.DATA;if(!D||!D.characters.tewwg)return;var H=window.TEWWG_IMG,P=window.TEWWG_IMGPOS;D.characters.tewwg.forEach(function(c){if(H[c.id]){c.img=H[c.id];c.imgpos=P[c.id]||'50% 18%';}});})();
 </script>
 <script>
 window.OTHELLO_IMG={"othello": "data:image/jpeg;base64,__ABCASSET_93__", "desdemona": "data:image/jpeg;base64,__ABCASSET_94__", "iago": "data:image/jpeg;base64,__ABCASSET_95__", "cassio": "data:image/jpeg;base64,__ABCASSET_96__", "emilia": "data:image/jpeg;base64,__ABCASSET_97__", "roderigo": "data:image/jpeg;base64,__ABCASSET_98__", "brabantio": "data:image/jpeg;base64,__ABCASSET_99__", "bianca": "data:image/jpeg;base64,__ABCASSET_100__", "montano": "data:image/jpeg;base64,__ABCASSET_101__", "duke": "data:image/jpeg;base64,__ABCASSET_102__", "lodovico": "data:image/jpeg;base64,__ABCASSET_103__", "gratiano": "data:image/jpeg;base64,__ABCASSET_104__"};
@@ -1756,6 +1861,7 @@ window.OTHELLO_IMGPOS={"othello": "50% 18%", "desdemona": "50% 18%", "iago": "50
 <script>
 (function(){if(!window.DECKBOX)window.DECKBOX={};window.DECKBOX.oz="data:image/jpeg;base64,__ABCASSET_105__";window.DECKBOX.othello="data:image/jpeg;base64,__ABCASSET_106__";})();
 (function(){if(!window.DECKBOX)window.DECKBOX={};window.DECKBOX.macbeth="data:image/jpeg;base64,__ABCASSET_916__";window.DECKBOX.wonderland="data:image/jpeg;base64,__ABCASSET_917__";})();
+(function(){if(!window.DECKBOX)window.DECKBOX={};window.DECKBOX.tewwg="data:image/jpeg;base64,__ABCASSET_918__";})();
 </script>
 
 
@@ -1904,7 +2010,7 @@ function dealOpening(){
     step();
   }, 800);
 }
-const setName = k => k==='gatsby'?'The Great Gatsby':k==='crucible'?'The Crucible':k==='hamlet'?'Hamlet':k==='frankenstein'?'Frankenstein':k==='sherlock'?'Sherlock Holmes':k==='othello'?'Othello':k==='oz'?'The Wonderful Wizard of Oz':k==='macbeth'?'Macbeth':k==='wonderland'?'Alice in Wonderland':k;
+const setName = k => k==='gatsby'?'The Great Gatsby':k==='crucible'?'The Crucible':k==='hamlet'?'Hamlet':k==='frankenstein'?'Frankenstein':k==='sherlock'?'Sherlock Holmes':k==='othello'?'Othello':k==='oz'?'The Wonderful Wizard of Oz':k==='macbeth'?'Macbeth':k==='wonderland'?'Alice in Wonderland':k==='tewwg'?'Their Eyes Were Watching God':k;
 const otherDeck = k => (Object.keys(DATA.characters).find(x=>x!==k)) || k;
 const me = ()=> S[S.turn];
 const foeKey = ()=> S.turn==='you'?'opp':'you';
@@ -2048,6 +2154,7 @@ function startTurn(){
   p.flags.bmThisTurn = false;
   foeP.flags.noBookmarks = Math.max(0,(foeP.flags.noBookmarks||0)-1);
   p.critTurn = {correct:0,wrong:0,atk:false,blk:false,bm:false,readerStreak:0,queerMismatch:false};
+  if(p._teamShield) p._teamShield=0;
   // ---- scrimmage boss rule-shift per-turn hooks ----
   if(S.scrim && S.scrim.ruleShift && S.turn==='opp'){
     const rs=S.scrim.ruleShift, boss=active(S.opp);
@@ -2380,6 +2487,8 @@ function doBlock(){
   const res=calcBlock(def,b,dmg); let amt=res.amt; let neg=!!res.negate; let failDouble=false;
   if(b.blkCleanse){ [].concat(b.blkCleanse).forEach(function(_st){ if(def.status[_st]){ delete def.status[_st]; pushLog(`${def.name} shrugs off ${statusName(_st)} while blocking.`); } }); }
     if(b.cleanseAlly){ const _al=D.team.find(c=>c.hp>0 && c!==def && c.status[b.cleanseAlly]); if(_al){ delete _al.status[b.cleanseAlly]; pushLog(`${def.name} clears ${statusName(b.cleanseAlly)} from ${_al.name}.`); } }
+    if(b.cleanseAllyAny){ const NEG=['tear','rip','glue','spill','smudge','burn','weaken']; const _al=D.team.find(c=>c.hp>0 && NEG.some(s=>c.status[s])); if(_al){ const s=NEG.find(x=>_al.status[x]); delete _al.status[s]; pushLog(`${def.name} clears ${statusName(s)} from ${_al.name}.`); } }
+    if(b.teamShield){ D._teamShield=Math.max(D._teamShield||0, b.teamShield); pushLog(`${who(D)}'s allies brace together — incoming damage reduced by ${b.teamShield} until their next turn.`); }
     if(b.recoverBookmark){ for(let _i=D.discard.length-1;_i>=0;_i--){ const _c=D.discard[_i]; if(_c && _c.effect && _c.kind){ D.discard.splice(_i,1); D.hand.push(_c); pushLog(`${def.name} recovers ${_c.name} from the discard pile.`); break; } } }
     if(b.immuneNext){ def.wardNext=[].concat(b.immuneNext); pushLog(`${def.name} is shielded against the next ${b.immuneNext.map(statusName).join(" or ")}.`); }
   if(b.cond){ b.cond.forEach(r=>{ if(condMatch(r,D,A,att)){ const t=r.then||{};
@@ -2422,13 +2531,14 @@ function finishAttack(blocked,negated,forceNet){
   if(def.status.hardcover && !pierce && !ab.ignoreDefBuffs && net>0 && !(def.fe&&def.passive&&def.passive.noDamageReduction)){ net=Math.max(0,net-10); pushLog(`${def.name}'s Hardcover reduces 10 damage.`); }
   if(def.fe&&def.passive&&def.passive.nakedVuln&&def.blkCharge.length===0&&net>0){ net+=def.passive.nakedVuln; pushLog(`${def.name} is exposed (no Block ABC) — +${def.passive.nakedVuln} damage.`); }
   if(ab.sacrifice && hasCrit(dKey,'feminist') && !symbolsOff() && net>30){ net=30; pushLog('Feminist Lens caps the Sacrifice attack at 30.'); }
+  if(D._teamShield && net>0){ const _r=Math.min(net,D._teamShield); net-=_r; pushLog(`${who(D)}'s allies stand together — ${_r} damage reduced.`); }
   def.hp=Math.max(0,def.hp-net);
   pushLog(`${att.name} uses ${ab.n}: ${net} damage to ${def.name}. (${def.hp}/${def.maxHp} HP)`);
   if(pierce) pushLog(`${ab.n} pierced the defense!`);
   if(ab.sacrifice && !symbolsOff()){ att.hp=Math.max(0,att.hp-ab.sacrifice); pushLog(`${att.name} sacrifices ${ab.sacrifice} HP.`); }
   if(ab.stripBlocks && def.blkCharge.length){ const n=def.blkCharge.length; D.discard.push(...def.blkCharge.splice(0)); pushLog(`Quick-Sand Crash buries ${def.name}'s defense — ${n} Block ABC lost.`); }
   if(!symbolsOff()){
-    if(ab.inflict && def.hp>0){ if(inflict(def,ab.inflict,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(ab.inflict)}.`); }
+    if(ab.inflict && def.hp>0){ [].concat(ab.inflict).forEach(function(_st){ if(inflict(def,_st,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(_st)}.`); }); }
     if(atkCtx&&atkCtx.condInflict && def.hp>0){ if(inflict(def,atkCtx.condInflict,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(atkCtx.condInflict)}.`); }
     if(ab.inflictChoice && ab.inflictChoice.length && def.hp>0){ const opts=ab.inflictChoice; const pick=opts.find(s=>!def.status[s])||opts[rnd(opts.length)]; if(inflict(def,pick,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(pick)}.`); }
     if(ab.stripPos && def.hp>0 && def.status[ab.stripPos]){ delete def.status[ab.stripPos]; pushLog(`${def.name} loses ${statusName(ab.stripPos)}.`); }
@@ -2440,6 +2550,7 @@ function finishAttack(blocked,negated,forceNet){
     if(ab.drawAfter){ drawN(side,ab.drawAfter); pushLog(`${who(A)} draws ${ab.drawAfter}.`); }
     if(ab.heal){ const _b0=att.hp; att.hp=Math.min(att.maxHp,att.hp+ab.heal); if(att.hp>_b0){ try{fxHeal(sideOfChar(att));}catch(e){} pushLog(`${att.name} heals ${att.hp-_b0} HP.`); } }
     if(ab.grantAlly){ const _al=A.team.find(c=>c.hp>0 && c!==att); if(_al){ grant(_al,ab.grantAlly); pushLog(`${att.name} grants ${statusName(ab.grantAlly)} to ${_al.name}.`); } }
+    if(ab.teamCleanse){ const NEG=['tear','rip','glue','spill','smudge','burn','weaken']; A.team.forEach(c=>{ if(c.hp>0){ const s=NEG.find(x=>c.status[x]); if(s) delete c.status[s]; } }); pushLog(`${ab.n} lifts a burden from every ally.`); }
     if(ab.splashBench){ D.team.forEach(c=>{ if(c!==def && c.hp>0) c.hp=Math.max(0,c.hp-ab.splashBench); }); pushLog(`${ab.n} splashes ${ab.splashBench} to the bench.`); checkKO(D,dKey); }
     if(ab.forceFoeSwap){ const bench=D.team.map((c,i)=>({c,i})).filter(o=>o.i!==D.activeIdx && o.c.hp>0); if(bench.length){ const pk=bench[rnd(bench.length)]; doSwitch(D,pk.i); pushLog(`${ab.n} force-swaps ${who(D)}'s Active!`); } }
     if(ab.blankFoeRatings){ if(dKey==='you') S.you._ratingsBlank=true; pushLog(`${who(D)}'s Power Ratings are blanked by the flash!`); }
@@ -2562,7 +2673,7 @@ function deckCard(key){
   const names=DATA.characters[key].slice(0,3).map(c=>c.name).join(' · ');
   const avs=chars.map(c=>c.img?`<img class="deck-av" src="${c.img}" style="object-position:${c.imgpos||'50% 18%'}">`:`<span class="deck-av mono-av" style="background:${c.accent}">${initials(c.name)}</span>`).join('');
   const sel=APP.youDeck===key;
-  const accent={gatsby:'#1F6A6A',crucible:'#B53A2C',hamlet:'#6E3B73',frankenstein:'#3E6E50',sherlock:'#5A4A3A',othello:'#A62B2B',oz:'#00A86B',macbeth:'#9C2B2B',wonderland:'#B01E3C'}[key]||'#6E3B73';
+  const accent={gatsby:'#1F6A6A',crucible:'#B53A2C',hamlet:'#6E3B73',frankenstein:'#3E6E50',sherlock:'#5A4A3A',othello:'#A62B2B',oz:'#00A86B',macbeth:'#9C2B2B',wonderland:'#B01E3C',tewwg:'#C77D3A'}[key]||'#6E3B73';
   return `<button class="deck-opt ${sel?'sel':''}" data-deck="${key}" style="--da:${accent}">
     <div class="deck-avatars">${avs}</div>
     <div class="deck-nm">${setName(key)}</div>
@@ -2616,7 +2727,7 @@ function customScreen(){
     <div class="deck-pick-wrap">
       <h2>Choose your deck — pick a box off the shelf</h2>
       <div class="bookshelf">
-        <div class="shelf-row">${deckBox('gatsby')}${deckBox('crucible')}${deckBox('hamlet')}${deckBox('frankenstein')}${deckBox('sherlock')}${deckBox('othello')}${deckBox('oz')}${deckBox('macbeth')}${deckBox('wonderland')}</div>
+        <div class="shelf-row">${deckBox('gatsby')}${deckBox('crucible')}${deckBox('hamlet')}${deckBox('frankenstein')}${deckBox('sherlock')}${deckBox('othello')}${deckBox('oz')}${deckBox('macbeth')}${deckBox('wonderland')}${deckBox('tewwg')}</div>
         <div class="shelf-plank"></div>
       </div>
       <div class="opp-pick">
