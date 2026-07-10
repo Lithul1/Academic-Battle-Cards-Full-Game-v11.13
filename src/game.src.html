@@ -1938,10 +1938,10 @@ function fePeekChips(p,sideKey){ if(sideKey!=='you'||!S) return ''; let out='';
   return out?`<div class="fe-peekwrap">${out}</div>`:''; }
 function defaultBookmarks(){ const base=DATA.bookmarks.map((_,i)=>i); return base.concat([0,1,3,5,10,9]).slice(0,LIMITS.bm); }
 function defaultDeck(k){
-  // tewwg default fields ONE commander (Janie 1E) — Eatonville 1E warps the bookmark
-  // rules by default; it remains available in the Deck Builder.
-  const fe = (k==='tewwg') ? ['1e_janie'] : feFor(k);
-  return { d:k, ch:DATA.characters[k].map(c=>c.id), ab:DATA.abcs[k].map((_,i)=>i).slice(0,LIMITS.ab), bm:defaultBookmarks(), cr:[0,1,4,7].slice(0,LIMITS.cr), fe:fe };
+  // Full 62-card default: every category filled to its cap (ch 12 + ab 24 + bm 20 + cr 4 + fe 2).
+  // Decks with only one published 1st Edition default to 61 until their second commander exists.
+  const def={ d:k, ch:DATA.characters[k].map(c=>c.id).slice(0,LIMITS.ch), ab:DATA.abcs[k].map((_,i)=>i).slice(0,LIMITS.ab), bm:defaultBookmarks(), cr:[0,1,4,7].slice(0,LIMITS.cr), fe:feFor(k) };
+  return fillGaps(def);
 }
 function pickN(arr,n){ const p=arr.slice(), o=[]; while(o.length<n && p.length) o.push(p.splice(rnd(p.length),1)[0]); return o; }
 function randomBookmarks(){
@@ -1964,7 +1964,7 @@ function randomDeck(k){
     ab:pickN(DATA.abcs[k].map((_,i)=>i), Math.min(LIMITS.ab, DATA.abcs[k].length)),
     bm:randomBookmarks(),
     cr:pickN(DATA.crits.map((_,i)=>i), LIMITS.cr),
-    fe:(k==='tewwg')?['1e_janie']:feFor(k) };
+    fe:feFor(k) };
 }
 function deckCounts(def){
   return { ch:def.ch.length, ab:def.ab.length, bm:def.bm.length, cr:def.cr.length, fe:(def.fe||[]).length,
@@ -2002,9 +2002,7 @@ function newPlayer(name,def,st){
   const ids=def.ch.length?def.ch:DATA.characters[def.d].map(c=>c.id);
   const defs=ids.map(id=>DATA.characters[def.d].find(c=>c.id===id)).filter(Boolean);
   const pool=shuffle(clone(defs));
-  // Uniform team size: decks fielding fewer than 2 Commanders backfill the empty
-  // slot(s) with regular characters, so every team is (1+bench+2) strong.
-  const team=pool.slice(0,1+st.benchSize+Math.max(0,LIMITS.fe-((def.fe||[]).length))).map(d=>makeChar(d,st.hpScale));
+  const team=pool.slice(0,1+st.benchSize).map(d=>makeChar(d,st.hpScale));
   (def.fe||[]).slice(0,LIMITS.fe).forEach(id=>{ const fd=firstedById(id); if(fd) team.push(makeChar(fd,st.hpScale)); });
   const deck=makeDeck(def);
   return { name,setKey:def.d,team,activeIdx:0,deck,hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,crit:null,critTurn:{},critEver:{},flags:{},activeBm:[] };
