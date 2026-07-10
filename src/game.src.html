@@ -938,6 +938,14 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .sp-name{ position:absolute; left:50%; top:52%; transform:translate(-50%,-50%) rotate(180deg); writing-mode:vertical-rl; font-family:var(--cond); font-size:11px; letter-spacing:1px; color:#f2e6c4; text-shadow:0 1px 2px rgba(0,0,0,.7); white-space:nowrap; max-height:86%; overflow:hidden; }
 .sp-star{ position:absolute; top:3px; left:50%; transform:translateX(-50%); font-size:11px; }
 .lib-shelfboard{ height:10px; margin:0 2px; background:linear-gradient(#6a4e2c,#3f2d17); border-radius:2px; box-shadow:0 3px 0 rgba(0,0,0,.4); }
+/* ---- Honors tier selector ---- */
+.hon-pick{ background:rgba(24,14,8,.5); border:1px solid rgba(216,178,90,.3); border-radius:10px; padding:12px; margin:10px auto; max-width:560px; }
+.hon-h{ font-family:var(--cond); letter-spacing:1px; color:#d8b25a; font-size:14px; text-transform:uppercase; margin-bottom:8px; } .hon-h small{ color:#9a8a6a; text-transform:none; letter-spacing:.3px; }
+.hon-tiers{ display:flex; gap:6px; flex-wrap:wrap; }
+.hon-tier{ flex:1; min-width:96px; background:#2a2214; color:#e8dcc0; border:2px solid #5a4a2a; border-radius:8px; padding:8px 6px; cursor:pointer; font-family:var(--cond); letter-spacing:.5px; font-size:13px; }
+.hon-tier.on{ background:var(--gold,#d8b25a); color:#241a08; border-color:#fff2c8; box-shadow:0 0 12px rgba(216,178,90,.5); }
+.hon-tier.lock{ opacity:.5; cursor:not-allowed; }
+.hon-desc{ margin-top:8px; font-size:13px; color:#cdbb96; } .hon-ip{ color:#8fe08f; }
 .rest-opt:hover{ transform:translateY(-2px); } .rest-team{ justify-content:center; margin:10px 0; }
 .vault-list{ display:flex; flex-direction:column; gap:10px; margin:14px 0; }
 .vault-row{ display:flex; justify-content:space-between; align-items:center; background:#fbf3dd; border:2px solid #241f1b; border-radius:10px; padding:10px 12px; }
@@ -3785,6 +3793,15 @@ if(typeof document!=='undefined'){ if(document.body) initAudioCtl(); else docume
 let SCRIM = { active:false, view:'intro', kit:null, team:[], deck:{ab:[],bm:[],cr:[]}, artifacts:[], map:null, cleared:0, act:1, pending:null, draft:null };
 let META = { ip:0, unlocks:[], perks:[], loadout:[], commanders:[], packs:0 };
 
+/* ---- Honors Semesters: opt-in escalating difficulty tiers ---- */
+const HONORS = [
+  { name:'Normal',                         short:'Normal',    acc:0,    dmgMul:1.00, healMul:1.0, draftDelta:0,  permadeath:false, ipMul:1.0, blurb:'The standard campaign.' },
+  { name:'Honors I \u2014 Heavy Course Load',   short:'Honors I',  acc:0.05, dmgMul:1.12, healMul:1.0, draftDelta:0,  permadeath:false, ipMul:1.2, blurb:'Sharper Algorithm AI and tougher Cores. Reward: +20% Intellect Points.' },
+  { name:'Honors II \u2014 Comprehensive Exams', short:'Honors II', acc:0.09, dmgMul:1.18, healMul:0.5, draftDelta:-1, permadeath:false, ipMul:1.4, blurb:'Healing halved, one fewer draft pick, bosses hit harder. Unlocks the strongest Standing Orders. Reward: +40% IP.' },
+  { name:'Honors III \u2014 Publish or Perish', short:'Honors III',acc:0.12, dmgMul:1.28, healMul:0.5, draftDelta:-1, permadeath:true,  ipMul:1.6, blurb:'PERMADEATH \u2014 a single lost battle ends the run. Reward: +60% IP.' },
+];
+function honorsMods(){ return HONORS[(SCRIM.honors||0)] || HONORS[0]; }
+
 /* ---- Tenure Track: Standing Orders (perks) + collection ---- */
 const SCRIM_PERKS = {
   endowment:  { name:'The Endowment',    ic:'\ud83c\udffa', text:'Begin each run holding a random Ex Libris artifact.' },
@@ -3794,11 +3811,10 @@ const SCRIM_PERKS = {
   chair:      { name:'The Endowed Chair',ic:'\ud83e\ude91', text:'Begin each run holding TWO Ex Libris artifacts.', tenured:true },
   sabbatical: { name:'Sabbatical',       ic:'\ud83c\udf34', text:'Advancing to a new act fully heals your team.', tenured:true },
 };
-function tenureRank(){ const n=(META.commanders||[]).length; return n>=10?2:(n>=4?1:0); }
-function perkSlots(){ const r=tenureRank(); return 2+(r>=1?1:0)+(r>=2?1:0); }   // 2 -> 3 -> 4 (max)
+function tenureRank(){ const n=(META.commanders||[]).length; return n>=10?2:(n>=4?1:0); }function perkSlots(){ const r=tenureRank(); return 2+(r>=1?1:0)+(r>=2?1:0); }   // 2 -> 3 -> 4 (max)
 function perkOn(id){ return (META.loadout||[]).indexOf(id)>=0; }
 function validateLoadout(){
-  META.loadout=(META.loadout||[]).filter(id=>SCRIM_PERKS[id] && (META.perks||[]).indexOf(id)>=0 && (!SCRIM_PERKS[id].tenured || tenureRank()>=2)).slice(0,perkSlots());
+  META.loadout=(META.loadout||[]).filter(id=>SCRIM_PERKS[id] && (META.perks||[]).indexOf(id)>=0 && (!SCRIM_PERKS[id].tenured || tenuredUnlocked())).slice(0,perkSlots());
 }
 function scrimOpenPack(){
   const COST=50;
@@ -3879,8 +3895,8 @@ function scrimRollBosses(){
     picked.push(choice); });
   return picked;
 }
-function scrimActMul(){ const a=SCRIM.act||1; return a>=3?1.4:(a>=2?1.2:1.0); }
-function scrimAccFloor(){ const a=SCRIM.act||1; return a>=3?0.88:(a>=2?0.80:0.72); }
+function scrimActMul(){ const a=SCRIM.act||1; const base=a>=3?1.4:(a>=2?1.2:1.0); return base*honorsMods().dmgMul; }
+function scrimAccFloor(){ const a=SCRIM.act||1; const base=a>=3?0.88:(a>=2?0.80:0.72); return Math.min(0.98, base+honorsMods().acc); }
 function scrimRollFirstEds(n){
   const all=(DATA.firsteds||[]).map(f=>f.id);
   const have=SCRIM.team.filter(r=>r.fe).map(r=>r.id);
@@ -3896,17 +3912,20 @@ function scrimAdvanceAct(){
 }
 
 /* ---- persistence ---- */
-function metaLoad(){ try{ const j=window.localStorage.getItem('abc_meta'); if(j) META=Object.assign({ip:0,unlocks:[],perks:[],loadout:[],commanders:[],packs:0},JSON.parse(j)); }catch(e){}
+function metaLoad(){ try{ const j=window.localStorage.getItem('abc_meta'); if(j) META=Object.assign({ip:0,unlocks:[],perks:[],loadout:[],commanders:[],packs:0,honorsMax:0,honorsCleared:0},JSON.parse(j)); }catch(e){}
   META.stats=Object.assign({runs:0,wins:0,bossKills:0,bestAct:0,fastestMs:0},META.stats||{});
+  if(META.honorsMax==null) META.honorsMax=0; if(META.honorsCleared==null) META.honorsCleared=0;
   if(!META.patron){ META.patron={ name:'Author_1E_'+(100+rnd(900)), card:'#LUL-'+(100+rnd(900))+'-'+(100+rnd(900)), issued:new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) }; metaSave(); }
   if((META.unlocks||[]).indexOf('hp')>=0 && (META.perks||[]).indexOf('hardy')<0){ META.perks.push('hardy'); }   // legacy migration
   validateLoadout(); }
+// Tenured Standing Orders now require clearing Honors I+ (not just collection), keeping top-end power gated behind harder content.
+function tenuredUnlocked(){ return (META.honorsCleared||0)>=1; }
 function metaSave(){ try{ window.localStorage.setItem('abc_meta',JSON.stringify(META)); }catch(e){} }
-function scrimSave(){ try{ if(SCRIM.active) window.localStorage.setItem('abc_scrim_run',JSON.stringify({kit:SCRIM.kit,team:SCRIM.team,deck:SCRIM.deck,artifacts:SCRIM.artifacts,map:SCRIM.map,cleared:SCRIM.cleared,act:SCRIM.act,bosses:SCRIM.bosses,lf:SCRIM.lf||0,t0:SCRIM.t0||0})); }catch(e){} }
+function scrimSave(){ try{ if(SCRIM.active) window.localStorage.setItem('abc_scrim_run',JSON.stringify({kit:SCRIM.kit,team:SCRIM.team,deck:SCRIM.deck,artifacts:SCRIM.artifacts,map:SCRIM.map,cleared:SCRIM.cleared,act:SCRIM.act,bosses:SCRIM.bosses,lf:SCRIM.lf||0,t0:SCRIM.t0||0,honors:SCRIM.honors||0})); }catch(e){} }
 function scrimClearSave(){ try{ window.localStorage.removeItem('abc_scrim_run'); }catch(e){} }
 function scrimHasSave(){ try{ return !!window.localStorage.getItem('abc_scrim_run'); }catch(e){ return false; } }
 function scrimLoadSave(){ try{ const j=window.localStorage.getItem('abc_scrim_run'); if(!j) return false; const o=JSON.parse(j);
-  SCRIM.active=true; SCRIM.kit=o.kit; SCRIM.team=o.team||[]; SCRIM.deck=o.deck||{ab:[],bm:[],cr:[]}; SCRIM.artifacts=o.artifacts||[]; SCRIM.map=o.map; SCRIM.cleared=o.cleared||0; SCRIM.act=o.act||1; SCRIM.bosses=o.bosses||[]; SCRIM.lf=o.lf||0; SCRIM.t0=o.t0||Date.now(); SCRIM.view='map'; return true; }catch(e){ return false; } }
+  SCRIM.active=true; SCRIM.kit=o.kit; SCRIM.team=o.team||[]; SCRIM.deck=o.deck||{ab:[],bm:[],cr:[]}; SCRIM.artifacts=o.artifacts||[]; SCRIM.map=o.map; SCRIM.cleared=o.cleared||0; SCRIM.act=o.act||1; SCRIM.bosses=o.bosses||[]; SCRIM.lf=o.lf||0; SCRIM.t0=o.t0||Date.now(); SCRIM.honors=o.honors||0; SCRIM.view='map'; return true; }catch(e){ return false; } }
 
 /* ---- entry ---- */
 function scrimOpen(){ metaLoad(); SCRIM.view='intro'; APP.mode='scrim'; APP.screen='scrim'; render(); }
@@ -3915,7 +3934,7 @@ function scrimAfterRender(){ try{ scrimDrawConnectors(); }catch(e){} }
 /* ---- run setup ---- */
 function scrimStartKit(kitId){
   const kit=SCRIM_KITS[kitId]; if(!kit) return;
-  SCRIM.active=true; SCRIM.kit=kitId; SCRIM.artifacts=[]; SCRIM.cleared=0; SCRIM.act=1; SCRIM.bosses=scrimRollBosses(); SCRIM.lf=0; SCRIM.t0=Date.now();
+  SCRIM.active=true; SCRIM.kit=kitId; SCRIM.artifacts=[]; SCRIM.cleared=0; SCRIM.act=1; SCRIM.bosses=scrimRollBosses(); SCRIM.lf=0; SCRIM.t0=Date.now(); SCRIM.honors=Math.min(META.honorsMax||0, SCRIM._honorsSel||0);
   META.stats=META.stats||{runs:0,wins:0,bossKills:0,bestAct:0,fastestMs:0};
   META.stats.runs=(META.stats.runs||0)+1; metaSave();
   const dk=kit.deck;
@@ -3998,7 +4017,7 @@ function scrimOppPlayer(node){
 function scrimStartBattle(node){
   stopTurnTimer();
   const st=clone(APP.settings); st.koTarget=99; st.hpScale=1.0;
-  st.aiAccuracy = node.boss?SCRIM_BOSSES[node.boss].acc:(node.type==='elite'?Math.min(0.96,scrimAccFloor()+0.06):scrimAccFloor());
+  st.aiAccuracy = node.boss?Math.min(0.98,SCRIM_BOSSES[node.boss].acc+honorsMods().acc):(node.type==='elite'?Math.min(0.96,scrimAccFloor()+0.06):scrimAccFloor());
   if(node.boss==='sicsoc') st.turnTimer=15;
   st.handMin = (DEFAULTS.handMin||4) + (scrimHas('librarycard')?1:0);
   st.handSize = (DEFAULTS.handSize||5) + (scrimHas('librarycard')?1:0);
@@ -4032,8 +4051,9 @@ function scrimGrantArtifact(){
   return id;
 }
 function scrimEndRun(victory){
-  const gained = SCRIM.cleared*5 + (victory?60:0);
+  const gained = Math.round((SCRIM.cleared*5 + (victory?60:0)) * honorsMods().ipMul);
   META.stats.bestAct=Math.max(META.stats.bestAct||0, victory?4:(SCRIM.act||1));
+  if(victory){ const h=SCRIM.honors||0; META.honorsCleared=Math.max(META.honorsCleared||0,h); META.honorsMax=Math.min(HONORS.length-1, Math.max(META.honorsMax||0, h+1)); metaSave(); }
   if(victory){ META.stats.wins=(META.stats.wins||0)+1;
     const el=Date.now()-(SCRIM.t0||Date.now());
     if(el>30000) META.stats.fastestMs=META.stats.fastestMs?Math.min(META.stats.fastestMs,el):el; }
@@ -4055,6 +4075,7 @@ function handleScrim(cmd){
   const [op,a,b]=cmd.split(':');
   if(op==='back'){ stopTurnTimer(); APP.screen='menu'; APP.mode=null; render(); return; }
   if(op==='new'){ SCRIM.view='kit'; render(); return; }
+  if(op==='honsel'){ SCRIM._honorsSel=Math.min(META.honorsMax||0, +a); render(); return; }
   if(op==='kit'){ scrimStartKit(a); return; }
   if(op==='resume'){ if(scrimLoadSave()){ APP.mode='scrim'; APP.screen='scrim'; render(); } else toast('No saved run found.'); return; }
   if(op==='shop'){ SCRIM.view='shop'; render(); return; }
@@ -4062,14 +4083,14 @@ function handleScrim(cmd){
   if(op==='endrun'){ SCRIM.view='intro'; APP.screen='scrim'; render(); return; }
   if(op==='node'){ const c=+a, r=+b; if(!scrimReachable(c,r)){ toast('That node is not reachable yet.'); return; } scrimResolveNode(c,r); return; }
   if(op==='fairbuy'){ const lf=SCRIM.lf||0;
-    if(a==='healall'){ if(lf<3) return; SCRIM.lf=lf-3; SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.min(t.maxHp,t.curHp+25); }); toast('The team refuels. (−3 Late Fees)'); }
-    else if(a==='draft'){ if(lf<5) return; SCRIM.lf=lf-5; SCRIM.draft=scrimRollDraft(perkOn('officehours')?4:3); SCRIM.view='archives'; try{SFX.card('pack_open',0.7);}catch(e){} render(); scrimSave(); return; }
+    if(a==='healall'){ if(lf<3) return; SCRIM.lf=lf-3; const _h=Math.round(25*honorsMods().healMul); SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.min(t.maxHp,t.curHp+_h); }); toast('The team refuels +'+_h+'. (−3 Late Fees)'); }
+    else if(a==='draft'){ if(lf<5) return; SCRIM.lf=lf-5; SCRIM.draft=scrimRollDraft(Math.max(2,(perkOn('officehours')?4:3)+honorsMods().draftDelta)); SCRIM.view='archives'; try{SFX.card('pack_open',0.7);}catch(e){} render(); scrimSave(); return; }
     else if(a==='revive'){ if(lf<6) return; const dead=SCRIM.team.filter(t=>t.curHp<=0); if(!dead.length) return; SCRIM.lf=lf-6; dead[0].curHp=Math.round(dead[0].maxHp*0.5); toast('Back on the roster. (−6 Late Fees)'); }
     else if(a==='ip'){ if(lf<4) return; SCRIM.lf=lf-4; META.ip=(META.ip||0)+10; metaSave(); toast('+10 Intellect Points. (−4 Late Fees)'); }
     render(); scrimSave(); return; }
   if(op==='rest'){ const cur=S===null?null:null; // rest resolves on run team
     if(a==='heal1'){ const alive=SCRIM.team.filter(t=>t.curHp>0); if(alive.length){ let t=alive.sort((x,y)=>(x.curHp/x.maxHp)-(y.curHp/y.maxHp))[0]; t.curHp=t.maxHp; } }
-    else if(a==='healall'){ SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.min(t.maxHp,t.curHp+20); }); }
+    else if(a==='healall'){ const _h=Math.round(20*honorsMods().healMul); SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.min(t.maxHp,t.curHp+_h); }); }
     else if(a==='revive'){ const dead=SCRIM.team.filter(t=>t.curHp<=0); if(dead.length){ dead[0].curHp=Math.round(dead[0].maxHp*0.5); } }
     SCRIM.view='map'; render(); scrimSave(); return; }
   if(op==='draftpick'){ try{SFX.card('pack_take',0.75);}catch(e){} const k=+a; const ref=SCRIM.draft&&SCRIM.draft[k]; if(ref){ if(ref.t==='ab') SCRIM.deck.ab.push({d:ref.d,i:ref.i}); else if(ref.t==='bm') SCRIM.deck.bm.push(ref.i); else SCRIM.deck.cr.push(ref.i); } SCRIM.draft=null; SCRIM.view='map'; render(); scrimSave(); return; }
@@ -4084,7 +4105,7 @@ function handleScrim(cmd){
   if(op==='perk'){ const id=a;
     if((META.loadout||[]).indexOf(id)>=0){ META.loadout.splice(META.loadout.indexOf(id),1); }
     else { if((META.perks||[]).indexOf(id)<0) return;
-           if(SCRIM_PERKS[id].tenured && tenureRank()<2){ toast('Requires Tenure II (10 commanders collected).'); return; }
+           if(SCRIM_PERKS[id].tenured && !tenuredUnlocked()){ toast('Locked — graduate an Honors I run to equip tenured Standing Orders.'); return; }
            if(META.loadout.length>=perkSlots()){ toast('All Order slots are full — unequip one first.'); return; }
            META.loadout.push(id); }
     metaSave(); render(); return; }
@@ -4094,7 +4115,7 @@ function handleScrim(cmd){
 function scrimResolveNode(c,r){
   const node=SCRIM.map.cols[c][r]; SCRIM.pending={c,r};
   if(node.type==='scrim'||node.type==='elite'||node.type==='boss'){ scrimStartBattle(node); }
-  else if(node.type==='archives'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.draft=scrimRollDraft(perkOn('officehours')?4:3); SCRIM.view='archives'; try{SFX.card('pack_open',0.7);}catch(e){} render(); scrimSave(); }
+  else if(node.type==='archives'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.draft=scrimRollDraft(Math.max(2,(perkOn('officehours')?4:3)+honorsMods().draftDelta)); SCRIM.view='archives'; try{SFX.card('pack_open',0.7);}catch(e){} render(); scrimSave(); }
   else if(node.type==='rest'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.view='rest'; render(); scrimSave(); }
   else if(node.type==='fair'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.view='fair'; try{SFX.card('card_fan',0.6);}catch(e){} render(); scrimSave(); }
 }
@@ -4103,7 +4124,14 @@ function scrimAfterBattle(){
   S.you.team.forEach(c=>{ if(c._scrimIdx!=null && SCRIM.team[c._scrimIdx]) SCRIM.team[c._scrimIdx].curHp=Math.max(0,c.hp); });
   const won = !S.opp.team.some(x=>x.hp>0);
   const node=S.scrim.node;
-  if(!won){ scrimEndRun(false); return; }
+  if(!won){
+    if(honorsMods().permadeath){ scrimEndRun(false); return; }
+    // Non-permadeath: regroup — team revives at 40% and returns to the map to retry.
+    SCRIM.team.forEach(t=>{ t.curHp=Math.max(1,Math.round(t.maxHp*0.4)); });
+    if(node&&SCRIM.map){ const cell=SCRIM.map.cols?.[node.c]?.[node.r]; if(cell) cell.done=false; }
+    S=null; stopTurnTimer(); APP.screen='scrim'; SCRIM.pending=null; SCRIM.view='map';
+    toast('The sector overwhelms you \u2014 your scholars regroup at 40% HP.','bad'); render(); scrimSave(); return;
+  }
   const _lf = (node.boss?6:(node.type==='elite'?4:2)) + (perkOn('adjunct')?2:0);
   SCRIM.lf=(SCRIM.lf||0)+_lf; SCRIM._lfGain=_lf;
   if(SCRIM.pending){ scrimAdvanceTo(SCRIM.pending.c,SCRIM.pending.r); }
@@ -4114,12 +4142,12 @@ function scrimAfterBattle(){
     META.stats.bossKills=(META.stats.bossKills||0)+1; metaSave();
     S=null; stopTurnTimer(); APP.screen='scrim';
     if((SCRIM.act||1)>=3){ scrimEndRun(true); return; }
-    const ipGain=40; META.ip=(META.ip||0)+ipGain; metaSave(); SCRIM._bossIP=ipGain;
+    const ipGain=Math.round(40*honorsMods().ipMul); META.ip=(META.ip||0)+ipGain; metaSave(); SCRIM._bossIP=ipGain;
     SCRIM.bossReward=scrimRollFirstEds(3); SCRIM.pending=null;
     SCRIM.view='bossreward'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave(); return;
   }
   S=null; stopTurnTimer(); APP.screen='scrim';
-  SCRIM.pending=null; SCRIM.draft=scrimRollDraft(perkOn('officehours')?4:3); SCRIM.view='reward'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave();
+  SCRIM.pending=null; SCRIM.draft=scrimRollDraft(Math.max(2,(perkOn('officehours')?4:3)+honorsMods().draftDelta)); SCRIM.view='reward'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave();
 }
 function scrimBuyUnlock(id){
   const U={ hp:{cost:40,name:'Hardy Scholars (+10 starting Max HP)'}, kit:{cost:60,name:'Extra kit slot (cosmetic)'} };
@@ -4165,9 +4193,18 @@ function scrimKitScreen(){
     const chars=k.chars.map(cid=>{ const ch=DATA.characters[k.deck].find(x=>x.id===cid); return ch?ch.name:cid; }).join(' \u00b7 ');
     return `<button class="kit-card" data-scrim="kit:${id}"><div class="kit-ic">${k.ic}</div><div class="kit-nm">${k.name}</div><div class="kit-bl">${k.blurb}</div><div class="kit-ch">Starters: ${chars}</div><div class="kit-go">Begin \u203a</div></button>`;
   }).join('');
+  const sel=Math.min(META.honorsMax||0, SCRIM._honorsSel||0);
+  const maxH=META.honorsMax||0;
+  const tierBtns=HONORS.map((h,i)=>{ const unlocked=i<=maxH;
+    return `<button class="hon-tier ${sel===i?'on':''} ${unlocked?'':'lock'}" ${unlocked?`data-scrim="honsel:${i}"`:'disabled'} title="${unlocked?h.blurb:'Graduate the tier below to unlock.'}">${unlocked?h.short:'\ud83d\udd12 '+h.short}${h.permadeath?' \u2620':''}</button>`;
+  }).join('');
+  const cur=HONORS[sel];
   return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel">
     <button class="toolbtn scrim-back" data-scrim="endrun">\u2039 Back</button>
     <div class="scrim-title sm">Choose your Genre Kit</div>
+    <div class="hon-pick"><div class="hon-h">\ud83c\udf93 Honors Semester${maxH>0?'':' <small>(graduate a run to unlock harder tiers)</small>'}</div>
+      <div class="hon-tiers">${tierBtns}</div>
+      <div class="hon-desc">${cur.blurb}${cur.ipMul>1?` <b class="hon-ip">\u00d7${cur.ipMul.toFixed(1)} IP</b>`:''}</div></div>
     <p class="scrim-intro-copy">Each kit gives 2 starter characters, a small pool of ABC cards and 5 bookmarks. You\u2019ll grow from here.</p>
     <div class="kit-grid">${cards}</div>
   </div></div>`;
@@ -4214,7 +4251,7 @@ function scrimMapScreen(){
         <div class="guide-legend">${legend}</div>
         <div class="guide-run">
           <div>Run <b>${kit}</b></div><div>Act <b>${SCRIM.act}</b></div>
-          <div>Deck <b>${deckN}</b></div><div>IP <b>\ud83e\udde0 ${META.ip||0}</b></div><div>Fees <b>\ud83d\udcb3 ${SCRIM.lf||0}</b></div>
+          <div>Deck <b>${deckN}</b></div><div>IP <b>\ud83e\udde0 ${META.ip||0}</b></div><div>Fees <b>\ud83d\udcb3 ${SCRIM.lf||0}</b></div>${(SCRIM.honors||0)>0?`<div>\ud83c\udf93 <b>${HONORS[SCRIM.honors].short}${honorsMods().permadeath?' \u2620':''}</b></div>`:''}
         </div>
       </div>
       <div class="smap-spiral" aria-hidden="true"></div>
@@ -4346,6 +4383,7 @@ function scrimLibraryCard(){
       ${row('Furthest Progression', furthest, st.bestAct>=4?'CLEARED':'IN PROGRESS', st.bestAct>=4?'lc-gs':'lc-rs')}
       ${row('Fastest Graduation', fast, 'SPEEDY','lc-bs')}
       ${row('Distraction Bosses Defeated', st.bossKills||0, 'CLEANSED','lc-gs')}
+      ${row('Highest Honors Cleared', (META.honorsCleared||0)>0?HONORS[META.honorsCleared].short:'\u2014', (META.honorsCleared||0)>0?'HONORS':'STANDARD', (META.honorsCleared||0)>0?'lc-gs':'lc-rs')}
     </tbody></table>
     <div class="lc-foot">\ud83d\udd13 <b>Vault Progress:</b> ${catalog}% Catalog Unlocked &nbsp;\u00b7&nbsp; \ud83d\udce6 ${META.packs||0} Packs Opened</div>
     <div class="lc-barcode">|||| | ||||| ||| || |||| |||| | ||</div>
@@ -4356,13 +4394,13 @@ function scrimShopScreen(){
   const pull=SCRIM._pull;
   const pullHtml = pull?`<div class="vault-pull">${pull.kind==='commander'?'\ud83c\udf1f NEW COMMANDER':'\u2b50 '+(pull.kind==='perk'?'NEW STANDING ORDER':'RETURN')} — <b>${pull.name}</b> <button class="toolbtn" data-scrim="packok">OK</button></div>`:'';
   const info=SCRIM._perkInfo && SCRIM_PERKS[SCRIM._perkInfo];
-  const infoHtml = info?`<div class="vault-perkinfo"><b>${info.ic} ${info.name}</b>${info.tenured?' <small class="ten">TENURE II</small>':''} — ${info.text} <em>${(META.perks||[]).indexOf(SCRIM._perkInfo)>=0?(perkOn(SCRIM._perkInfo)?'(equipped)':'(owned — tap the chip to equip)'):'(not yet collected — found in Booster Packs)'}</em></div>`:'';
+  const infoHtml = info?`<div class="vault-perkinfo"><b>${info.ic} ${info.name}</b>${info.tenured?' <small class="ten">HONORS</small>':''} — ${info.text} <em>${(META.perks||[]).indexOf(SCRIM._perkInfo)>=0?(perkOn(SCRIM._perkInfo)?'(equipped)':'(owned — tap the chip to equip)'):'(not yet collected — found in Booster Packs)'}</em></div>`:'';
   const perkChips=Object.keys(SCRIM_PERKS).map(id=>{
     const p=SCRIM_PERKS[id], have=(META.perks||[]).indexOf(id)>=0, on=perkOn(id);
-    const locked=p.tenured && rank<2;
+    const locked=p.tenured && !tenuredUnlocked();
     const cls='vault-perk'+(on?' on':'')+(!have?' miss':'')+(locked?' locked':'');
     const click=have&&!locked?` data-scrim="perk:${id}"`:'';
-    return `<span class="vault-perkwrap"><button class="${cls}"${click}>${p.ic} ${have?p.name:'???'}${p.tenured?' <small class="ten">TENURE II</small>':''}${on?' \u2713':''}</button><button class="vault-info" data-scrim="perkinfo:${id}" title="What does this do?">\u2139</button></span>`;
+    return `<span class="vault-perkwrap"><button class="${cls}"${click}>${p.ic} ${have?p.name:'???'}${p.tenured?' <small class="ten">HONORS</small>':''}${on?' \u2713':''}</button><button class="vault-info" data-scrim="perkinfo:${id}" title="What does this do?">\u2139</button></span>`;
   }).join('');
   const shelf=(DATA.firsteds||[]).map((f,i)=>{const got=(META.commanders||[]).indexOf(f.id)>=0;
     const h=128+((i*29)%34);
@@ -4396,7 +4434,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, perkOn, tenureRank, perkSlots, validateLoadout, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
