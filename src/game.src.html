@@ -719,8 +719,9 @@ body[data-screen="play"] .turnclock{ font-size:clamp(13px,2vh,16px); padding:2px
 .menu-go{ font-size:24px; font-weight:800; opacity:.5; flex:none; }
 .menu-btn.soon{ cursor:not-allowed; opacity:.62; filter:grayscale(.4); }
 .menu-soon{ font-family:var(--cond); font-size:11px; letter-spacing:1px; text-transform:uppercase; background:var(--ink); color:var(--cream); padding:4px 9px; border-radius:10px; flex:none; }
-.sub-screen{ max-width:800px; }
-.sub-h{ font-family:var(--disp); font-size:24px; margin:8px 0 4px; color:var(--cream); }
+.sub-screen{ max-width:800px; color:var(--ink); }
+.sub-h{ font-family:var(--disp); font-size:24px; margin:8px 0 4px; color:var(--ink); }
+.sub-screen .title-sub{ color:var(--red-dk); }
 .title-logo.sm{ max-width:200px; }
 .sub-actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
 .diff-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:16px auto; max-width:720px; }
@@ -880,6 +881,46 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .smap-pages .smap-scroll{ flex:1 1 auto; overflow:hidden; }
 .smap{ flex-direction:column; width:100%; height:100%; min-width:0; gap:6px; justify-content:space-between; }
 .smap-col{ flex:1 1 0; flex-direction:row; align-items:center; justify-content:space-around; gap:0; }
+/* ===== Booster pack reveal overlay (tear / fan / flip) ===== */
+.pkr-ovl{ position:fixed; inset:0; background:rgba(28,22,16,.82); z-index:9990; display:none; align-items:center; justify-content:center; opacity:0; transition:opacity .25s ease; }
+.pkr-ovl.show{ display:flex; opacity:1; }
+.pkr-stage{ position:relative; width:min(760px,94vw); height:min(560px,88vh); display:flex; align-items:center; justify-content:center; }
+.pkr-pack{ position:absolute; width:224px; aspect-ratio:.98; z-index:8; cursor:pointer; transition:transform .5s ease,opacity .5s ease; }
+.pkr-pack.pkr-float{ animation:pkrFloat 2.6s ease-in-out infinite; }
+@keyframes pkrFloat{ 0%,100%{ transform:translateY(0) rotate(-1.5deg);} 50%{ transform:translateY(-8px) rotate(1.5deg);} }
+.pkr-base,.pkr-lid{ position:absolute; inset:0; background-size:100% 100%; background-repeat:no-repeat; filter:drop-shadow(0 6px 8px rgba(20,12,6,.5)); }
+.pkr-base{ clip-path:inset(22% 0 0 0); z-index:7; }
+.pkr-lid{ clip-path:inset(0 0 78% 0); z-index:9; transform-origin:50% 100%; transition:transform .6s cubic-bezier(.5,-.2,.4,1),opacity .6s ease; }
+.pkr-edge{ position:absolute; left:-2px; right:-2px; top:22%; height:14px; z-index:10; display:none; }
+.pkr-pack.torn .pkr-lid{ transform:translateY(-170px) rotate(-13deg); opacity:0; }
+.pkr-pack.torn .pkr-edge{ display:block; } .pkr-pack.torn{ animation:none; }
+.pkr-pack.gone{ opacity:0; transform:scale(.9); pointer-events:none; }
+.pkr-fan{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.pkr-card{ position:absolute; width:152px; height:222px; perspective:1100px; transform:translate(0,40px) scale(.6); opacity:0; transition:transform .6s cubic-bezier(.2,.85,.3,1),opacity .45s ease; cursor:pointer; }
+.pkr-fan.spread .pkr-card{ transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(1); opacity:1; }
+.pkr-fan.spread .pkr-card.feat{ transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(1.08); }
+.pkr-inner{ position:relative; width:152px; height:222px; transform-style:preserve-3d; transition:transform .65s cubic-bezier(.3,.9,.3,1); }
+.pkr-card.flipped .pkr-inner{ transform:rotateY(180deg); }
+.pkr-face,.pkr-back{ position:absolute; top:0; left:0; width:152px; height:222px; backface-visibility:hidden; border-radius:11px; overflow:hidden; }
+.pkr-back{ background-size:100% 100%; background-repeat:no-repeat; box-shadow:0 6px 0 rgba(40,25,12,.4); }
+.pkr-card.feat .pkr-face,.pkr-card.feat .pkr-back{ box-shadow:0 6px 0 rgba(40,25,12,.4),0 0 0 3px var(--gold); }
+.pkr-face{ transform:rotateY(180deg); background:#fbf3dd; border:2.5px solid #241f1b; padding:9px; display:flex; flex-direction:column; gap:5px; }
+.pkr-face .dc-top.ip{ background:#dfe6d0; color:#4a6a2a; } .pkr-face .dc-top.so{ background:#e6dcf0; color:#5a3a8a; } .pkr-face .dc-top.fe{ background:#f4dd9a; color:#7a5a10; border:1px solid #caa53a; }
+.pkr-port{ width:100%; height:112px; border:2px solid #241f1b; border-radius:6px; overflow:hidden; background:#241f1b; }
+.pkr-mono{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-family:var(--disp); font-size:36px; color:#fff; }
+.pkr-ip{ text-align:center; font-family:var(--disp); font-size:42px; color:#5a6a2a; margin:16px 0 2px; } .pkr-ip small{ font-size:15px; }
+.pkr-so{ font-size:44px; text-align:center; margin:12px 0 2px; }
+.pkr-holo{ position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:0; background:linear-gradient(115deg,transparent 30%,rgba(120,200,255,.5) 42%,rgba(255,180,240,.5) 50%,rgba(180,255,200,.5) 58%,transparent 70%); background-size:300% 300%; }
+.pkr-card.flipped .pkr-holo{ animation:pkrHs 1s ease-out 1; }
+.pkr-card.gold.flipped .pkr-holo{ animation:pkrHs 1s ease-out 1, pkrHm 3s linear infinite 1s; opacity:1; }
+@keyframes pkrHs{ 0%{opacity:0; background-position:120% 0;} 25%{opacity:1;} 100%{opacity:0; background-position:-40% 0;} }
+@keyframes pkrHm{ 0%{background-position:120% 0;} 100%{background-position:-40% 0;} }
+.pkr-hud{ position:absolute; bottom:2px; left:0; right:0; text-align:center; color:#f4ecd6; font-family:var(--cond); letter-spacing:2px; font-size:15px; }
+.pkr-hint{ animation:pkrHint 1.4s ease-in-out infinite; } @keyframes pkrHint{ 0%,100%{ opacity:.55;} 50%{ opacity:1;} }
+.pkr-done,.pkr-flipall{ font-family:var(--cond); letter-spacing:1px; cursor:pointer; }
+.pkr-done{ background:#f6e7bd; border:2.5px solid #241f1b; border-radius:9px; padding:9px 22px; box-shadow:0 3px 0 rgba(40,25,12,.4); display:none; font-size:15px; } .pkr-done.show{ display:inline-block; }
+.pkr-flipall{ background:#e9dcc0; border:2px solid #241f1b; border-radius:8px; padding:5px 12px; margin-left:10px; font-size:13px; display:none; } .pkr-flipall.show{ display:inline-block; }
+.vault-packimg{ width:46px; flex:none; filter:drop-shadow(0 2px 3px rgba(40,25,12,.4)); }
 
 .draft-grid{ display:grid; grid-template-columns:1fr; gap:12px; margin:12px 0; }
 @media(min-width:600px){ .draft-grid{ grid-template-columns:1fr 1fr 1fr; } }
@@ -1972,6 +2013,8 @@ window.OTHELLO_IMGPOS={"othello": "50% 18%", "desdemona": "50% 18%", "iago": "50
 window.ABC_LOGO="data:image/jpeg;base64,__ABCASSET_107__";
 window.ABC_EMBLEM="data:image/jpeg;base64,__ABCASSET_108__";
 window.ABC_BG="data:image/jpeg;base64,__ABCASSET_109__";
+window.PACK_ART={silver:"data:image/png;base64,__ABCASSET_933__",gold:"data:image/png;base64,__ABCASSET_934__"};
+window.CARD_BACK="data:image/png;base64,__ABCASSET_935__";
 window.ABC_CREST="data:image/jpeg;base64,__ABCASSET_110__";
 try{document.documentElement.style.setProperty('--abc-bg','url("'+window.ABC_BG+'")');}catch(e){}
 window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
@@ -2470,7 +2513,7 @@ function playBookmark(side,idx){
         P.hand.filter(c=>c!==card).slice(0,3).forEach(c=>{ const i=P.hand.indexOf(c); if(i>=0){P.hand.splice(i,1);P.discard.push(c);} });
         const gi=P.grave.indexOf(g); if(gi>=0) P.grave.splice(gi,1);
         g.hp=Math.max(10,Math.round(g.maxHp/2)); g.atkCharge=[];g.blkCharge=[];g.status={};
-        P.team.push(g); pushLog(`${who(P)} used Defibrillator — ${g.name} returns at ${g.hp} HP.`); commit(); render();
+        if(!P.team.includes(g)) P.team.push(g); pushLog(`${who(P)} used Defibrillator — ${g.name} returns at ${g.hp} HP.`); commit(); render();
       };
       if(isYou && P.grave.length>1) askPick('Revive which character?', P.grave.map(g=>({label:g.name,val:g.uid})), uid=>go(P.grave.find(g=>g.uid===uid)));
       else go(P.grave[0]);
@@ -3822,21 +3865,102 @@ function perkOn(id){ return (META.loadout||[]).indexOf(id)>=0; }
 function validateLoadout(){
   META.loadout=(META.loadout||[]).filter(id=>SCRIM_PERKS[id] && (META.perks||[]).indexOf(id)>=0 && (!SCRIM_PERKS[id].tenured || tenuredUnlocked())).slice(0,perkSlots());
 }
-function scrimOpenPack(){
-  const COST=50;
+const PACK_COST={ silver:50, gold:250 };
+const PACK_IP_COMMON=[5,10,10,15,15,25];
+/* Roll a 5-card pack: slots 1-3 IP bundles, slot 4 Standing Order (gold guaranteed; silver ~70%),
+   slot 5 feature (gold guaranteed Commander; silver 60% + pity every 3rd). Empty pools fall back to IP. */
+function scrimRollPack(type){
+  const picked=[];
+  const cmdPool=()=>(DATA.firsteds||[]).map(f=>f.id).filter(id=>(META.commanders||[]).indexOf(id)<0 && picked.indexOf(id)<0);
+  const perkPool=()=>Object.keys(SCRIM_PERKS).filter(id=>(META.perks||[]).indexOf(id)<0 && picked.indexOf(id)<0);
+  const rollIP=(amt)=>({t:'ip', amt:(amt||PACK_IP_COMMON[rnd(PACK_IP_COMMON.length)])});
+  const rollSO=()=>{ const pool=perkPool(); if(!pool.length) return rollIP(20); const id=pool[rnd(pool.length)]; picked.push(id); const p=SCRIM_PERKS[id]; return {t:'so',id,name:p.name,ic:p.ic,text:p.text}; };
+  const rollCmd=()=>{ const pool=cmdPool(); if(!pool.length) return (perkPool().length?rollSO():rollIP(30)); const id=pool[rnd(pool.length)]; picked.push(id); const f=firstedById(id); return {t:'cmd',id,name:f?f.name:id,fd:f}; };
+  const cards=[];
+  for(let i=0;i<3;i++) cards.push(rollIP());
+  cards.push( (type==='gold'||Math.random()<0.7) ? rollSO() : rollIP(20) );
+  const pity=((META.packs||0)%3===0);
+  if(type==='gold') cards.push(rollCmd());
+  else if(pity || Math.random()<0.6) cards.push(rollCmd());
+  else cards.push(perkPool().length?rollSO():rollIP(25));
+  return cards;
+}
+function scrimApplyPack(cards){
+  cards.forEach(c=>{
+    if(c.t==='ip') META.ip=(META.ip||0)+c.amt;
+    else if(c.t==='so'){ if((META.perks||[]).indexOf(c.id)<0) META.perks.push(c.id); }
+    else if(c.t==='cmd'){ if((META.commanders||[]).indexOf(c.id)<0) META.commanders.push(c.id); }
+  });
+}
+function scrimOpenPack(type){
+  type=(type==='gold')?'gold':'silver';
+  const COST=PACK_COST[type];
   if((META.ip||0)<COST){ toast('Not enough Intellect Points.'); return; }
   META.ip-=COST; META.packs=(META.packs||0)+1;
-  const cmdPool=(DATA.firsteds||[]).map(f=>f.id).filter(id=>(META.commanders||[]).indexOf(id)<0);
-  const perkPool=Object.keys(SCRIM_PERKS).filter(id=>(META.perks||[]).indexOf(id)<0);
-  const pity=(META.packs%3===0);                       // every 3rd pack guarantees a commander
-  let pull=null;
-  const rollCmd = ()=>{ const id=cmdPool[rnd(cmdPool.length)]; META.commanders.push(id); const f=firstedById(id); return {kind:'commander',id,name:f?f.name:id}; };
-  const rollPerk= ()=>{ const id=perkPool[rnd(perkPool.length)]; META.perks.push(id); return {kind:'perk',id,name:SCRIM_PERKS[id].name}; };
-  if(cmdPool.length && (pity || (Math.random()<0.6 || !perkPool.length))) pull=rollCmd();
-  else if(perkPool.length) pull=rollPerk();
-  else { META.ip+=15; pull={kind:'dust',name:'Library complete — +15 IP returned'}; }
-  validateLoadout(); metaSave(); SCRIM._pull=pull;
+  const cards=scrimRollPack(type);
+  scrimApplyPack(cards);
+  validateLoadout(); metaSave();
   try{SFX.card('pack_open',0.8);}catch(e){}
+  packOverlayShow(type,cards);
+}
+/* ---- pack reveal overlay (imperative; manages its own DOM, does NOT call render()) ---- */
+function packOverlayShow(type,cards){
+  if(typeof document==='undefined') return;
+  let o=document.getElementById('packOverlay');
+  if(!o){ o=document.createElement('div'); o.id='packOverlay'; o.className='pkr-ovl'; document.body.appendChild(o); }
+  const PA=(window.PACK_ART||{})[type]||'', BK=window.CARD_BACK||'';
+  const POS=[{tx:-300,ty:26,rot:-11},{tx:-152,ty:2,rot:-5.5},{tx:0,ty:-8,rot:0},{tx:152,ty:2,rot:5.5},{tx:300,ty:26,rot:11}];
+  const faces=cards.map((c,i)=>{
+    let inner;
+    if(c.t==='ip') inner=`<div class="dc-top ip">\ud83e\udde0 INTELLECT</div><div class="pkr-ip">+${c.amt}<small> IP</small></div><div class="dc-tx" style="text-align:center">Banked to your Vault.</div>`;
+    else if(c.t==='so') inner=`<div class="dc-top so">\ud83d\udccb STANDING ORDER</div><div class="pkr-so">${c.ic}</div><div class="dc-nm">${c.name}</div><div class="dc-tx">${c.text}</div>`;
+    else { const im=feImg(c.fd); const av=im?`<img src="${im.img}" style="width:100%;height:100%;object-fit:cover;object-position:${im.pos||'50% 18%'}">`:`<span class="pkr-mono" style="background:${(c.fd&&c.fd.accent)||'#444'}">${initials(c.name)}</span>`;
+      inner=`<div class="dc-top fe">\ud83d\udc51 1ST EDITION</div><div class="pkr-port">${av}</div><div class="dc-nm">${String(c.name||'').replace(/\s*\(1E\)/,'')}</div><div class="dc-tx">${(c.fd&&c.fd.passive&&c.fd.passive.name)||''}</div>`; }
+    const feat=(i===cards.length-1)?' feat':'', gold=(type==='gold')?' gold':'';
+    return `<div class="pkr-card${feat}${gold}" style="--tx:${POS[i].tx}px;--ty:${POS[i].ty}px;--rot:${POS[i].rot}deg" data-scrim="packflip:${i}"><div class="pkr-inner"><div class="pkr-back" style="background-image:url(${BK})"></div><div class="pkr-face">${inner}</div><div class="pkr-holo"></div></div></div>`;
+  }).join('');
+  o.innerHTML=`<div class="pkr-stage">
+    <div class="pkr-pack pkr-float" data-scrim="packtear">
+      <div class="pkr-base" style="background-image:url(${PA})"></div>
+      <div class="pkr-lid" style="background-image:url(${PA})"></div>
+      <svg class="pkr-edge" viewBox="0 0 224 14" preserveAspectRatio="none"><polygon points="0,14 9,3 18,13 27,4 36,14 45,3 54,13 63,4 72,14 81,3 90,13 99,4 108,14 117,3 126,13 135,4 144,14 153,3 162,13 171,4 180,14 189,3 198,13 207,4 216,14 224,7 224,14" fill="#eadfc0" stroke="#241f1b" stroke-width="1.5"/></svg>
+    </div>
+    <div class="pkr-fan">${faces}</div>
+    <div class="pkr-hud"><span class="pkr-hint">Tap the pack to tear it open</span>
+      <button class="pkr-flipall" data-scrim="packflipall">Flip all</button>
+      <button class="pkr-done" data-scrim="packdone">Add to Library \u203a</button></div>
+  </div>`;
+  requestAnimationFrame(()=>{ o.classList.add('show'); });
+}
+function packTear(){
+  const o=document.getElementById('packOverlay'); if(!o) return;
+  const pack=o.querySelector('.pkr-pack'); if(!pack||pack.classList.contains('torn')) return;
+  pack.classList.add('torn');
+  setTimeout(()=>{ const fan=o.querySelector('.pkr-fan'); if(fan) fan.classList.add('spread'); pack.classList.add('gone');
+    const h=o.querySelector('.pkr-hint'); if(h) h.textContent='Tap each card to flip \u00b7 chase card is last';
+    const fa=o.querySelector('.pkr-flipall'); if(fa) fa.classList.add('show'); }, 420);
+}
+function packFlip(i){
+  const o=document.getElementById('packOverlay'); if(!o) return;
+  const fan=o.querySelector('.pkr-fan'); if(!fan||!fan.classList.contains('spread')) return;
+  const rc=o.querySelector('.pkr-card[data-scrim="packflip:'+i+'"]'); if(!rc||rc.classList.contains('flipped')) return;
+  rc.classList.add('flipped'); try{SFX.card('pack_take',0.7);}catch(e){}
+  packCheckDone();
+}
+function packFlipAll(){
+  const o=document.getElementById('packOverlay'); if(!o) return;
+  const cards=[...o.querySelectorAll('.pkr-card')];
+  cards.forEach((rc,k)=>setTimeout(()=>{ if(!rc.classList.contains('flipped')){ rc.classList.add('flipped'); if(k===0){ try{SFX.card('pack_take',0.7);}catch(e){} } } if(k===cards.length-1) packCheckDone(); }, k*170));
+}
+function packCheckDone(){
+  const o=document.getElementById('packOverlay'); if(!o) return;
+  const all=[...o.querySelectorAll('.pkr-card')].every(rc=>rc.classList.contains('flipped'));
+  if(all){ const h=o.querySelector('.pkr-hint'); if(h) h.style.display='none';
+    const fa=o.querySelector('.pkr-flipall'); if(fa) fa.classList.remove('show');
+    const d=o.querySelector('.pkr-done'); if(d) d.classList.add('show'); }
+}
+function packClose(){
+  const o=document.getElementById('packOverlay'); if(o){ o.classList.remove('show'); setTimeout(()=>{ if(o&&o.parentNode) o.parentNode.removeChild(o); }, 250); }
   render();
 }
 
@@ -4104,8 +4228,11 @@ function handleScrim(cmd){
   if(op==='bossrewardpick'){ const k=+a; const feid=SCRIM.bossReward&&SCRIM.bossReward[k]; if(feid){ const fd=firstedById(feid); if(fd){ const mx=fd.hp||90; SCRIM.team.push({fe:true,id:feid,deck:fd.deck,curHp:mx,maxHp:mx}); if((META.commanders||[]).indexOf(feid)<0){ META.commanders.push(feid); metaSave(); toast('Commander recruited & added to your Library: '+fd.name); } else toast('Commander recruited: '+fd.name); try{SFX.card('pack_take',0.75);}catch(e){} } } scrimAdvanceAct(); return; }
   if(op==='bossrewardskip'){ scrimAdvanceAct(); return; }
   if(op==='vault'){ scrimBuyUnlock(a); return; }
-  if(op==='pack'){ scrimOpenPack(); return; }
-  if(op==='packok'){ SCRIM._pull=null; render(); return; }
+  if(op==='pack'){ scrimOpenPack(a||'silver'); return; }
+  if(op==='packtear'){ packTear(); return; }
+  if(op==='packflip'){ packFlip(+a); return; }
+  if(op==='packflipall'){ packFlipAll(); return; }
+  if(op==='packdone'){ packClose(); return; }
   if(op==='perkinfo'){ SCRIM._perkInfo=(SCRIM._perkInfo===a?null:a); render(); return; }
   if(op==='fecard'){ const f=firstedById(a); if(f) showPreview(buildFePreview(f)); return; }
   if(op==='perk'){ const id=a;
@@ -4397,8 +4524,7 @@ function scrimLibraryCard(){
 }
 function scrimShopScreen(){
   const rank=tenureRank(), slots=perkSlots(), owned=(META.commanders||[]).length, total=(DATA.firsteds||[]).length;
-  const pull=SCRIM._pull;
-  const pullHtml = pull?`<div class="vault-pull">${pull.kind==='commander'?'\ud83c\udf1f NEW COMMANDER':'\u2b50 '+(pull.kind==='perk'?'NEW STANDING ORDER':'RETURN')} — <b>${pull.name}</b> <button class="toolbtn" data-scrim="packok">OK</button></div>`:'';
+  const PA=(window.PACK_ART||{});
   const info=SCRIM._perkInfo && SCRIM_PERKS[SCRIM._perkInfo];
   const infoHtml = info?`<div class="vault-perkinfo"><b>${info.ic} ${info.name}</b>${info.tenured?' <small class="ten">HONORS</small>':''} — ${info.text} <em>${(META.perks||[]).indexOf(SCRIM._perkInfo)>=0?(perkOn(SCRIM._perkInfo)?'(equipped)':'(owned — tap the chip to equip)'):'(not yet collected — found in Booster Packs)'}</em></div>`:'';
   const perkChips=Object.keys(SCRIM_PERKS).map(id=>{
@@ -4415,10 +4541,11 @@ function scrimShopScreen(){
     <button class="toolbtn scrim-back" data-scrim="endrun">\u2039 Back</button>
     <div class="scrim-title sm">\ud83c\udfdb The Vault</div>
     ${scrimLibraryCard()}
-    ${pullHtml}
     <div class="vault-sec"><div class="vault-h">\ud83d\udce6 Booster Packs</div>
-      <div class="vault-row"><div class="vault-nm">First Edition Portfolio<small>Pulls a Commander (60%) or a Standing Order. Every 3rd pack guarantees a Commander.</small></div>
-      <button class="vault-buy" data-scrim="pack">50 IP</button></div></div>
+      <div class="vault-row"><div style="display:flex;align-items:center;gap:10px;flex:1">${PA.silver?`<img class="vault-packimg" src="${PA.silver}" alt="">`:''}<div class="vault-nm">First Edition Portfolio <small>5 cards \u00b7 IP bundles, a Standing Order, and a Commander chase (60% + pity every 3rd).</small></div></div>
+        <button class="vault-buy" data-scrim="pack:silver">50 IP</button></div>
+      <div class="vault-row" style="margin-top:8px"><div style="display:flex;align-items:center;gap:10px;flex:1">${PA.gold?`<img class="vault-packimg" src="${PA.gold}" alt="">`:''}<div class="vault-nm">Dean\u2019s List Portfolio <small>5 cards \u00b7 guaranteed Standing Order + Commander, holo finish.</small></div></div>
+        <button class="vault-buy" data-scrim="pack:gold">250 IP</button></div></div>
     <div class="vault-sec"><div class="vault-h">\ud83d\udccb Standing Orders <small>tap a chip to equip \u00b7 \u2139 for details</small></div>
       <div class="vault-perks">${perkChips}</div>${infoHtml}</div>
     <div class="vault-sec"><div class="vault-h">\ud83d\udcd6 The Library <small>${owned}/${total} Commanders \u00b7 tap a spine to inspect</small></div>
@@ -4440,7 +4567,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
