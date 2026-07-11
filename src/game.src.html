@@ -1018,6 +1018,24 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .bst-redact{ background:#3a322b; color:transparent; border-radius:2px; line-height:1.7; }
 .bst-loremsg{ margin-top:8px; font-style:normal; color:#8a5a1a; font-family:var(--cond); letter-spacing:.5px; }
 .bst-close{ display:block; width:100%; border:none; border-top:2px solid #241f1b; background:#f6e7bd; font-family:var(--cond); letter-spacing:1px; padding:10px; cursor:pointer; font-size:14px; }
+/* ---- Modern Hamlet edition (navy treatment) ---- */
+.char.mh-ed{--paper:#1b2540;--frame:#0a1020;--plate:#f4ecd6}
+.char.mh-ed .pc-hp{background:#0f1420}
+.char.mh-ed .pc-art{background:#0c1018}
+.char.mh-ed .pc-move.atk{background:#e8b6ad}
+.char.mh-ed .pc-move.blk{background:#aed4d4}
+.mh-sec{margin-top:14px}
+.mh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px;margin-top:8px}
+.mh-tile{position:relative;border:2.5px solid #0a1020;border-radius:9px;overflow:hidden;cursor:pointer;background:#0c1018;aspect-ratio:.82;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;box-shadow:0 3px 0 rgba(0,0,0,.5);padding:0;transition:transform .12s}
+.mh-tile:hover{transform:translateY(-3px)}
+.mh-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mh-nm{position:relative;z-index:2;width:100%;text-align:center;font-family:var(--cond);font-size:10px;letter-spacing:.4px;padding:3px 2px;background:linear-gradient(transparent,rgba(6,10,20,.92));color:#dfe7f4}
+.mh-tile.locked img{filter:grayscale(1) brightness(.3)}
+.mh-tile.locked .mh-nm{color:#5a6478}
+.mh-lockic{position:absolute;top:5px;right:6px;z-index:3;font-size:13px;opacity:.9}
+.pkr-vocab{font-family:var(--disp);font-size:28px;color:#1b2540;text-align:center;margin:16px 6px 4px;letter-spacing:.5px;word-break:break-word}
+.dc-top.mh{background:#1b2540;color:#f4ecd6}
+
 /* ---- Honors tier selector ---- */
 .hon-pick{ background:rgba(24,14,8,.5); border:1px solid rgba(216,178,90,.3); border-radius:10px; padding:12px; margin:10px auto; max-width:560px; }
 .hon-h{ font-family:var(--cond); letter-spacing:1px; color:#d8b25a; font-size:14px; text-transform:uppercase; margin-bottom:8px; } .hon-h small{ color:#9a8a6a; text-transform:none; letter-spacing:.3px; }
@@ -1993,6 +2011,12 @@ window.MACBETH_IMGPOS={"macbeth": "50% 20%","lady_macbeth": "50% 16%","banquo": 
 window.WONDERLAND_IMG={"alice": "data:image/jpeg;base64,__ABCASSET_150__","white_rabbit": "data:image/jpeg;base64,__ABCASSET_151__","mad_hatter": "data:image/jpeg;base64,__ABCASSET_152__","march_hare": "data:image/jpeg;base64,__ABCASSET_153__","dormouse": "data:image/jpeg;base64,__ABCASSET_154__","cheshire_cat": "data:image/jpeg;base64,__ABCASSET_155__","queen_hearts": "data:image/jpeg;base64,__ABCASSET_156__","king_hearts": "data:image/jpeg;base64,__ABCASSET_157__","knave_hearts": "data:image/jpeg;base64,__ABCASSET_158__","caterpillar": "data:image/jpeg;base64,__ABCASSET_159__","duchess": "data:image/jpeg;base64,__ABCASSET_160__","mock_turtle": "data:image/jpeg;base64,__ABCASSET_161__","gryphon": "data:image/jpeg;base64,__ABCASSET_162__"};
 window.WONDERLAND_IMGPOS={"alice": "50% 20%","white_rabbit": "50% 26%","mad_hatter": "50% 24%","march_hare": "50% 26%","dormouse": "50% 40%","cheshire_cat": "50% 40%","queen_hearts": "46% 28%","king_hearts": "44% 32%","knave_hearts": "46% 26%","caterpillar": "50% 34%","duchess": "56% 30%","mock_turtle": "50% 30%","gryphon": "50% 38%"};
 (function(){var D=window.DATA;if(!D)return;var Wi=window.WONDERLAND_IMG,P=window.WONDERLAND_IMGPOS||{};(D.characters.wonderland||[]).forEach(function(c){if(Wi[c.id]){c.img=Wi[c.id];c.imgpos=P[c.id]||"50% 22%";}});})();
+/* ===== Modern Hamlet expansion (edition #1): art maps + registry ===== */
+window.HAMLET_MODERN_IMG={"hamlet":"data:image/jpeg;base64,__ABCASSET_936__", "ghost_king":"data:image/jpeg;base64,__ABCASSET_937__", "fortinbras":"data:image/jpeg;base64,__ABCASSET_938__", "gertrude":"data:image/jpeg;base64,__ABCASSET_939__", "claudius":"data:image/jpeg;base64,__ABCASSET_940__", "laertes":"data:image/jpeg;base64,__ABCASSET_941__", "ophelia":"data:image/jpeg;base64,__ABCASSET_942__", "polonius":"data:image/jpeg;base64,__ABCASSET_943__", "rosencrantz_guildenstern":"data:image/jpeg;base64,__ABCASSET_944__", "horatio":"data:image/jpeg;base64,__ABCASSET_945__", "voltemand_cornelius":"data:image/jpeg;base64,__ABCASSET_946__", "osric":"data:image/jpeg;base64,__ABCASSET_947__", "yorick":"data:image/jpeg;base64,__ABCASSET_948__", "reynaldo":"data:image/jpeg;base64,__ABCASSET_949__", "elsinore":"data:image/jpeg;base64,__ABCASSET_950__"};
+window.HAMLET_MODERN_IMGPOS={"hamlet":"50% 16%", "ghost_king":"50% 20%", "fortinbras":"50% 16%", "gertrude":"50% 14%", "claudius":"50% 16%", "laertes":"50% 14%", "ophelia":"50% 18%", "polonius":"50% 16%", "rosencrantz_guildenstern":"50% 18%", "horatio":"50% 16%", "voltemand_cornelius":"50% 18%", "osric":"50% 14%", "yorick":"50% 20%", "reynaldo":"50% 16%", "elsinore":"50% 40%"};
+window.EXPANSIONS=window.EXPANSIONS||{};
+window.EXPANSIONS.modern_hamlet={name:"Modern Hamlet",base:"hamlet",theme:{paper:"#1b2540",frame:"#0a1020",plate:"#f4ecd6"},counts:{"characters": 15, "commanders": 4, "bookmarks": 4, "vocabABCs": 20, "total": 43},img:window.HAMLET_MODERN_IMG,imgpos:window.HAMLET_MODERN_IMGPOS,roster:[{"id": "hamlet", "name": "Hamlet", "hp": 90, "accent": "#2A3550", "atk": {"n": "The Mousetrap", "label": "45/3"}, "blk": {"n": "Antic Disposition", "label": "X/2"}, "cid": "mh:char:hamlet", "kind": "char"}, {"id": "claudius", "name": "Claudius", "hp": 140, "accent": "#7A2E3B", "atk": {"n": "Hostile Takeover", "label": "60/3"}, "blk": {"n": "Executive Privilege", "label": "X/3"}, "cid": "mh:char:claudius", "kind": "char"}, {"id": "gertrude", "name": "Gertrude", "hp": 120, "accent": "#8A6A8A", "atk": {"n": "The Rebrand", "label": "40/3"}, "blk": {"n": "Corner-Office Comfort", "label": "50/2"}, "cid": "mh:char:gertrude", "kind": "char"}, {"id": "ghost_king", "name": "The Ghost King", "hp": 50, "accent": "#5A6A7A", "atk": {"n": "Caught on Camera", "label": "50/2"}, "blk": {"n": "Remember Me", "label": "20/3"}, "cid": "mh:char:ghost_king", "kind": "char"}, {"id": "laertes", "name": "Laertes", "hp": 100, "accent": "#5A7A5A", "atk": {"n": "Fencing-Club Grudge", "label": "30/2"}, "blk": {"n": "NDA in Blood", "label": "30/3"}, "cid": "mh:char:laertes", "kind": "char"}, {"id": "ophelia", "name": "Ophelia", "hp": 70, "accent": "#8A6A9A", "atk": {"n": "Wired for Sound", "label": "20/2"}, "blk": {"n": "Downstream", "label": "X/1"}, "cid": "mh:char:ophelia", "kind": "char"}, {"id": "polonius", "name": "Polonius", "hp": 60, "accent": "#8A6A3C", "atk": {"n": "Memo Overload", "label": "30/3"}, "blk": {"n": "Behind the Two-Way Mirror", "label": "10/2"}, "cid": "mh:char:polonius", "kind": "char"}, {"id": "horatio", "name": "Horatio", "hp": 90, "accent": "#4F6D8A", "atk": {"n": "On the Record", "label": "30/2"}, "blk": {"n": "Good Night, Sweet Prince", "label": "X/3"}, "cid": "mh:char:horatio", "kind": "char"}, {"id": "fortinbras", "name": "Fortinbras", "hp": 80, "accent": "#4A5A8A", "atk": {"n": "Proxy War", "label": "30/3"}, "blk": {"n": "Foreign Holdings", "label": "30/3"}, "cid": "mh:char:fortinbras", "kind": "char"}, {"id": "elsinore", "name": "Elsinore Corp.", "hp": 120, "accent": "#5A6E6E", "atk": {"n": "Server-Farm Surge", "label": "X/2"}, "blk": {"n": "Lobby Security", "label": "20/2"}, "cid": "mh:char:elsinore", "kind": "char"}, {"id": "rosencrantz_guildenstern", "name": "Rosencrantz & Guildenstern", "hp": 50, "accent": "#6B5E4A", "atk": {"n": "Old Roommates", "label": "20/2"}, "blk": {"n": "Sealed Envelope", "label": "30/1"}, "cid": "mh:char:rosencrantz_guildenstern", "kind": "char"}, {"id": "osric", "name": "Osric", "hp": 110, "accent": "#D9D2C3", "atk": {"n": "Press Junket", "label": "40/2"}, "blk": {"n": "Spin Control", "label": "40/2"}, "cid": "mh:char:osric", "kind": "char"}, {"id": "voltemand_cornelius", "name": "Voltemand & Cornelius", "hp": 50, "accent": "#6E5A3C", "atk": {"n": "Due Diligence", "label": "20/1"}, "blk": {"n": "Diplomatic Immunity", "label": "20/2"}, "cid": "mh:char:voltemand_cornelius", "kind": "char"}, {"id": "yorick", "name": "Yorick", "hp": 50, "accent": "#B7B7B7", "atk": {"n": "Alas, Poor Yorick", "label": "60/2"}, "blk": {"n": "Gallows Humor", "label": "20/2"}, "cid": "mh:char:yorick", "kind": "char"}, {"id": "reynaldo", "name": "Reynaldo", "hp": 70, "accent": "#6D9EEB", "atk": {"n": "Surveillance Photo", "label": "20/2"}, "blk": {"n": "Cover Story", "label": "20/2"}, "cid": "mh:char:reynaldo", "kind": "char"}],abcs:[{"cid": "mh:abc:00", "kind": "abc", "word": "pernicious", "type": "ATTACK", "power": 3}, {"cid": "mh:abc:01", "kind": "abc", "word": "scourge", "type": "ATTACK", "power": 3}, {"cid": "mh:abc:02", "kind": "abc", "word": "malicious", "type": "ATTACK", "power": 2}, {"cid": "mh:abc:03", "kind": "abc", "word": "afflict", "type": "ATTACK", "power": 2}, {"cid": "mh:abc:04", "kind": "abc", "word": "contagion", "type": "ATTACK", "power": 2}, {"cid": "mh:abc:05", "kind": "abc", "word": "imminent", "type": "ATTACK", "power": 2}, {"cid": "mh:abc:06", "kind": "abc", "word": "prodigal", "type": "ATTACK", "power": 1}, {"cid": "mh:abc:07", "kind": "abc", "word": "knavish", "type": "ATTACK", "power": 2}, {"cid": "mh:abc:08", "kind": "abc", "word": "carnal", "type": "ATTACK", "power": 2}, {"cid": "mh:abc:09", "kind": "abc", "word": "portentous", "type": "ATTACK", "power": 3}, {"cid": "mh:abc:10", "kind": "abc", "word": "invulnerable", "type": "BLOCK", "power": 3}, {"cid": "mh:abc:11", "kind": "abc", "word": "sinews", "type": "BLOCK", "power": 2}, {"cid": "mh:abc:12", "kind": "abc", "word": "aloof", "type": "BLOCK", "power": 2}, {"cid": "mh:abc:13", "kind": "abc", "word": "vow", "type": "BLOCK", "power": 2}, {"cid": "mh:abc:14", "kind": "abc", "word": "discretion", "type": "BLOCK", "power": 2}, {"cid": "mh:abc:15", "kind": "abc", "word": "abatements", "type": "BLOCK", "power": 2}, {"cid": "mh:abc:16", "kind": "abc", "word": "ambiguous", "type": "BLOCK", "power": 1}, {"cid": "mh:abc:17", "kind": "abc", "word": "contrive", "type": "BLOCK", "power": 2}, {"cid": "mh:abc:18", "kind": "abc", "word": "beseech", "type": "BLOCK", "power": 1}, {"cid": "mh:abc:19", "kind": "abc", "word": "commingled", "type": "BLOCK", "power": 2}],bookmarks:[{"cid": "mh:bm:polaroid_mh", "kind": "bookmark", "name": "The Polaroid", "text": "Snap the evidence: look at the opponent's hand and draw a card."}, {"cid": "mh:bm:bug_mh", "kind": "bookmark", "name": "Surveillance Bug", "text": "Plant a listening device: inflict Smudge on the opposing Active."}, {"cid": "mh:bm:answermachine_mh", "kind": "bookmark", "name": "The Answering Machine", "text": "Replay the message: remove one negative status from an ally and grant them Highlight."}, {"cid": "mh:bm:restructure_mh", "kind": "bookmark", "name": "Corporate Restructuring", "text": "A shakeup: draw 2 cards, then discard 1."}],commanders:[{"cid": "mh:cmd:claudius_mh_1e", "kind": "cmd", "name": "Claudius, CEO (1E)", "from": "claudius"}, {"cid": "mh:cmd:ghost_mh_1e", "kind": "cmd", "name": "The Ghost, On Every Monitor (1E)", "from": "ghost_king"}, {"cid": "mh:cmd:ophelia_mh_1e", "kind": "cmd", "name": "Ophelia, Wired (1E)", "from": "ophelia"}, {"cid": "mh:cmd:polonius_mh_1e", "kind": "cmd", "name": "Polonius, Head of Security (1E)", "from": "polonius"}]};
+
 </script>
 <script>
 window.CHAR_IMG_NEW={"james_gatz": "data:image/jpeg;base64,__ABCASSET_164__", "meyer_wolfsheim": "data:image/jpeg;base64,__ABCASSET_165__", "owl_eyes": "data:image/jpeg;base64,__ABCASSET_166__", "klipspringer": "data:image/jpeg;base64,__ABCASSET_167__", "dan_cody": "data:image/jpeg;base64,__ABCASSET_168__", "catherine": "data:image/jpeg;base64,__ABCASSET_169__", "henry_gatz": "data:image/jpeg;base64,__ABCASSET_170__", "pammy_buchanan": "data:image/jpeg;base64,__ABCASSET_171__", "tom": "data:image/jpeg;base64,__ABCASSET_163__", "daisy": "data:image/jpeg;base64,__ABCASSET_15__", "gatsby": "data:image/jpeg;base64,__ABCASSET_16__", "myrtle": "data:image/jpeg;base64,__ABCASSET_17__", "nick": "data:image/jpeg;base64,__ABCASSET_18__", "george": "data:image/jpeg;base64,__ABCASSET_19__", "jordan": "data:image/jpeg;base64,__ABCASSET_20__", "abigail": "data:image/jpeg;base64,__ABCASSET_21__", "jproctor": "data:image/jpeg;base64,__ABCASSET_22__", "eproctor": "data:image/jpeg;base64,__ABCASSET_23__", "parris": "data:image/jpeg;base64,__ABCASSET_24__", "putnam": "data:image/jpeg;base64,__ABCASSET_25__", "giles": "data:image/jpeg;base64,__ABCASSET_26__", "tituba": "data:image/jpeg;base64,__ABCASSET_27__"};
@@ -3874,7 +3898,7 @@ if(typeof document!=='undefined'){ if(document.body) initAudioCtl(); else docume
 
 /* ================= LITERARY SCRIMMAGE (roguelike campaign) ================= */
 let SCRIM = { active:false, view:'intro', kit:null, team:[], deck:{ab:[],bm:[],cr:[]}, artifacts:[], map:null, cleared:0, act:1, pending:null, draft:null };
-let META = { ip:0, unlocks:[], perks:[], loadout:[], commanders:[], packs:0, bossSeen:[], bossKilled:[] };
+let META = { ip:0, unlocks:[], perks:[], loadout:[], commanders:[], packs:0, bossSeen:[], bossKilled:[], editionCards:[], mhPacks:0 };
 
 /* ---- Honors Semesters: opt-in escalating difficulty tiers ---- */
 const HONORS = [
@@ -3899,7 +3923,7 @@ function perkOn(id){ return (META.loadout||[]).indexOf(id)>=0; }
 function validateLoadout(){
   META.loadout=(META.loadout||[]).filter(id=>SCRIM_PERKS[id] && (META.perks||[]).indexOf(id)>=0 && (!SCRIM_PERKS[id].tenured || tenuredUnlocked())).slice(0,perkSlots());
 }
-const PACK_COST={ silver:50, gold:250 };
+const PACK_COST={ silver:50, gold:250, mhamlet:40 };
 const PACK_IP_COMMON=[5,10,10,15,15,25];
 /* Roll a 5-card pack: slots 1-3 IP bundles, slot 4 Standing Order (gold guaranteed; silver ~70%),
    slot 5 feature (gold guaranteed Commander; silver 60% + pity every 3rd). Empty pools fall back to IP. */
@@ -3926,6 +3950,35 @@ function scrimApplyPack(cards){
     else if(c.t==='cmd'){ if((META.commanders||[]).indexOf(c.id)<0) META.commanders.push(c.id); }
   });
 }
+function scrimRollMhPack(){
+  var E=window.EXPANSIONS.modern_hamlet, owned=META.editionCards||[], taken=[];
+  function av(a){return a.filter(function(x){return owned.indexOf(x.cid)<0&&taken.indexOf(x.cid)<0;});}
+  function pull(a){var p=av(a); if(!p.length)return null; var x=p[rnd(p.length)]; taken.push(x.cid); return x;}
+  var common=E.abcs, uncommon=E.roster.concat(E.bookmarks), rare=E.commanders;
+  function entry(x){ if(!x) return {t:'ip',amt:15};
+    if(x.kind==='abc') return {t:'edcard',kind:'abc',cid:x.cid,word:x.word,atype:x.type,power:x.power};
+    if(x.kind==='char') return {t:'edcard',kind:'char',cid:x.cid,id:x.id,name:x.name,move:x.atk.n,label:x.atk.label};
+    if(x.kind==='bookmark') return {t:'edcard',kind:'bookmark',cid:x.cid,name:x.name,text:x.text};
+    return {t:'edcard',kind:'cmd',cid:x.cid,name:x.name}; }
+  var cards=[],i;
+  for(i=0;i<3;i++) cards.push(entry(pull(common)||pull(uncommon)||pull(rare)));
+  cards.push(entry(pull(uncommon)||pull(common)||pull(rare)));
+  var pity=((META.mhPacks||0)%3===2);
+  var chase=(pity||Math.random()<0.4)?(pull(rare)||pull(uncommon)||pull(common)):(pull(uncommon)||pull(rare)||pull(common));
+  cards.push(entry(chase));
+  return cards;
+}
+function scrimApplyMhPack(cards){ cards.forEach(function(c){ if(c.t==='edcard'){ if((META.editionCards||[]).indexOf(c.cid)<0) META.editionCards.push(c.cid); } else if(c.t==='ip'){ META.ip=(META.ip||0)+c.amt; } }); }
+function scrimOpenMhPack(){
+  var E=window.EXPANSIONS.modern_hamlet, COST=PACK_COST.mhamlet;
+  if((META.editionCards||[]).length>=(E.counts.total||43)){ toast('Modern Hamlet set complete!'); return; }
+  if((META.ip||0)<COST){ toast('Not enough Intellect Points.'); return; }
+  META.ip-=COST; META.mhPacks=(META.mhPacks||0)+1; META.packs=(META.packs||0)+1;
+  var cards=scrimRollMhPack(); scrimApplyMhPack(cards);
+  try{validateLoadout();}catch(e){} metaSave();
+  try{SFX.card('pack_open',0.8);}catch(e){}
+  packOverlayShow('mhamlet',cards);
+}
 function scrimOpenPack(type){
   type=(type==='gold')?'gold':'silver';
   const COST=PACK_COST[type];
@@ -3942,12 +3995,20 @@ function packOverlayShow(type,cards){
   if(typeof document==='undefined') return;
   let o=document.getElementById('packOverlay');
   if(!o){ o=document.createElement('div'); o.id='packOverlay'; o.className='pkr-ovl'; document.body.appendChild(o); }
-  const PA=(window.PACK_ART||{})[type]||'', BK=window.CARD_BACK||'';
+  const PA=(window.PACK_ART||{})[type]||(window.PACK_ART||{}).silver||'', BK=window.CARD_BACK||'';
   const POS=[{tx:-300,ty:26,rot:-11},{tx:-152,ty:2,rot:-5.5},{tx:0,ty:-8,rot:0},{tx:152,ty:2,rot:5.5},{tx:300,ty:26,rot:11}];
   const faces=cards.map((c,i)=>{
     let inner;
     if(c.t==='ip') inner=`<div class="dc-top ip">\ud83e\udde0 INTELLECT</div><div class="pkr-ip">+${c.amt}<small> IP</small></div><div class="dc-tx" style="text-align:center">Banked to your Vault.</div>`;
     else if(c.t==='so') inner=`<div class="dc-top so">\ud83d\udccb STANDING ORDER</div><div class="pkr-so">${c.ic}</div><div class="dc-nm">${c.name}</div><div class="dc-tx">${c.text}</div>`;
+else if(c.t==='edcard'){
+      if(c.kind==='char'){ var Ex=window.EXPANSIONS.modern_hamlet, im2=(Ex.img||{})[c.id]||'', ip2=(Ex.imgpos||{})[c.id]||'50% 18%';
+        var av2=im2?'<img src="'+im2+'" style="width:100%;height:100%;object-fit:cover;object-position:'+ip2+'">':'<span class="pkr-mono" style="background:#1b2540">'+initials(c.name)+'</span>';
+        inner='<div class="dc-top mh">\uD83C\uDFAC CHARACTER</div><div class="pkr-port">'+av2+'</div><div class="dc-nm">'+c.name+'</div><div class="dc-tx">'+c.move+' \u00b7 '+c.label+'</div>'; }
+      else if(c.kind==='abc'){ var atk=(c.atype==='ATTACK'); inner='<div class="dc-top '+(atk?'ip':'so')+'">'+(atk?'\u2694 VOCAB ATTACK':'\u26CA VOCAB BLOCK')+'</div><div class="pkr-vocab">'+c.word+'</div><div class="dc-tx" style="text-align:center">Power '+c.power+' \u00b7 vocabulary card</div>'; }
+      else if(c.kind==='bookmark'){ inner='<div class="dc-top so">\uD83D\uDD16 BOOKMARK</div><div class="dc-nm" style="margin-top:20px">'+c.name+'</div><div class="dc-tx">'+c.text+'</div>'; }
+      else { inner='<div class="dc-top fe">\uD83D\uDC51 1ST EDITION</div><div class="dc-nm" style="margin-top:20px">'+String(c.name).replace(/\s*\(1E\)/,'')+'</div><div class="dc-tx">Modern Hamlet commander</div>'; }
+    }
     else { const im=feImg(c.fd); const av=im?`<img src="${im.img}" style="width:100%;height:100%;object-fit:cover;object-position:${im.pos||'50% 18%'}">`:`<span class="pkr-mono" style="background:${(c.fd&&c.fd.accent)||'#444'}">${initials(c.name)}</span>`;
       inner=`<div class="dc-top fe">\ud83d\udc51 1ST EDITION</div><div class="pkr-port">${av}</div><div class="dc-nm">${String(c.name||'').replace(/\s*\(1E\)/,'')}</div><div class="dc-tx">${(c.fd&&c.fd.passive&&c.fd.passive.name)||''}</div>`; }
     const feat=(i===cards.length-1)?' feat':'', gold=(type==='gold')?' gold':'';
@@ -4088,7 +4149,7 @@ function scrimAdvanceAct(){
 /* ---- persistence ---- */
 function metaLoad(){ try{ const j=window.localStorage.getItem('abc_meta'); if(j) META=Object.assign({ip:0,unlocks:[],perks:[],loadout:[],commanders:[],packs:0,honorsMax:0,honorsCleared:0,bossSeen:[],bossKilled:[]},JSON.parse(j)); }catch(e){}
   META.stats=Object.assign({runs:0,wins:0,bossKills:0,bestAct:0,fastestMs:0},META.stats||{});
-  META.bossSeen=META.bossSeen||[]; META.bossKilled=META.bossKilled||[];
+  META.bossSeen=META.bossSeen||[]; META.bossKilled=META.bossKilled||[]; META.editionCards=META.editionCards||[]; META.mhPacks=META.mhPacks||0;
   if(META.honorsMax==null) META.honorsMax=0; if(META.honorsCleared==null) META.honorsCleared=0;
   if(!META.patron){ META.patron={ name:'Author_1E_'+(100+rnd(900)), card:'#LUL-'+(100+rnd(900))+'-'+(100+rnd(900)), issued:new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) }; metaSave(); }
   if((META.unlocks||[]).indexOf('hp')>=0 && (META.perks||[]).indexOf('hardy')<0){ META.perks.push('hardy'); }   // legacy migration
@@ -4273,7 +4334,7 @@ function handleScrim(cmd){
   if(op==='bossrewardpick'){ const k=+a; const feid=SCRIM.bossReward&&SCRIM.bossReward[k]; if(feid){ const fd=firstedById(feid); if(fd){ const mx=fd.hp||90; SCRIM.team.push({fe:true,id:feid,deck:fd.deck,curHp:mx,maxHp:mx}); if((META.commanders||[]).indexOf(feid)<0){ META.commanders.push(feid); metaSave(); toast('Commander recruited & added to your Library: '+fd.name); } else toast('Commander recruited: '+fd.name); try{SFX.card('pack_take',0.75);}catch(e){} } } scrimAdvanceAct(); return; }
   if(op==='bossrewardskip'){ scrimAdvanceAct(); return; }
   if(op==='vault'){ scrimBuyUnlock(a); return; }
-  if(op==='pack'){ scrimOpenPack(a||'silver'); return; }
+  if(op==='pack'){ if(a==='mhamlet') scrimOpenMhPack(); else scrimOpenPack(a||'silver'); return; }
   if(op==='packtear'){ packTear(); return; }
   if(op==='packflip'){ packFlip(+a); return; }
   if(op==='packflipall'){ packFlipAll(); return; }
@@ -4281,6 +4342,7 @@ function handleScrim(cmd){
   if(op==='perkinfo'){ SCRIM._perkInfo=(SCRIM._perkInfo===a?null:a); render(); return; }
   if(op==='fecard'){ const f=firstedById(a); if(f) showPreview(buildFePreview(f)); return; }
   if(op==='bestiary'){ if(SCRIM_BOSSES[a] && (META.bossSeen||[]).indexOf(a)>=0) showPreview(bestiaryCard(a)); return; }
+  if(op==='mhcard'){ if((META.editionCards||[]).indexOf('mh:char:'+a)>=0) showPreview(mhCardFull(a)); else toast('Not collected yet \u2014 open a Modern Hamlet Portfolio.'); return; }
   if(op==='perk'){ const id=a;
     if((META.loadout||[]).indexOf(id)>=0){ META.loadout.splice(META.loadout.indexOf(id),1); }
     else { if((META.perks||[]).indexOf(id)<0) return;
@@ -4570,6 +4632,22 @@ function scrimLibraryCard(){
 }
 function bossThumb(id){ const b=SCRIM_BOSSES[id]; const img=((typeof window!=='undefined'&&window.ABC_BOSS_IMG)||{})[id]||'';
   return img?`<img class="bst-img" src="${img}" alt="">`:`<span class="bst-mono" style="background:${b.accent}">${initials(b.name)}</span>`; }
+function mhThumb(c){var E=window.EXPANSIONS.modern_hamlet;var im=(E.img||{})[c.id]||'';
+  var got=(META.editionCards||[]).indexOf('mh:char:'+c.id)>=0;
+  return '<button class="mh-tile'+(got?'':' locked')+'" data-scrim="mhcard:'+c.id+'" title="'+(got?c.name:'Locked')+'">'+(im?'<img src="'+im+'">':'')+'<span class="mh-nm">'+(got?c.name:'\u2014')+'</span>'+(got?'':'<span class="mh-lockic">\uD83D\uDD12</span>')+'</button>'; }
+function mhGallery(){var E=window.EXPANSIONS&&window.EXPANSIONS.modern_hamlet;if(!E)return'';
+  var owned=(META.editionCards||[]); var edn=owned.filter(function(x){return x.indexOf('mh:')===0;}).length;
+  var chG=E.roster.filter(function(c){return owned.indexOf('mh:char:'+c.id)>=0;}).length;
+  var tiles=E.roster.map(mhThumb).join('');
+  return '<div class="vault-sec mh-sec"><div class="vault-h">\uD83C\uDFAC Modern Hamlet <small>Edition #1 \u00b7 collected '+edn+'/'+(E.counts.total||43)+' \u00b7 characters '+chG+'/15</small></div><div class="mh-grid">'+tiles+'</div></div>'; }
+function mhCardFull(id){var E=window.EXPANSIONS.modern_hamlet;var c=null;for(var i=0;i<E.roster.length;i++){if(E.roster[i].id===id){c=E.roster[i];break;}}if(!c)return'';
+  var im=(E.img||{})[id]||'',ip=(E.imgpos||{})[id]||'50% 18%';var hp=Math.min(100,Math.round(c.hp/220*100));
+  return '<div class="char mh-ed" style="width:236px">'
+    +'<div class="pc-plate"><div class="pc-name">'+c.name+'</div><div class="pc-hp"><i style="width:'+hp+'%"></i><b>'+c.hp+'</b></div></div>'
+    +'<div class="pc-art"><img class="port-img" src="'+im+'" style="object-position:'+ip+'"></div>'
+    +'<div class="pc-moves"><div class="pc-move atk"><span class="mv-n">'+c.atk.n+'</span><span class="mv-l">'+c.atk.label+'</span></div>'
+    +'<div class="pc-move blk"><span class="mv-n">'+c.blk.n+'</span><span class="mv-l">'+c.blk.label+'</span></div></div></div>'; }
+
 function scrimBestiary(){
   const seen=META.bossSeen||[], killed=META.bossKilled||[];
   const tiles=SCRIM_BOSS_RANK.map(id=>{ const b=SCRIM_BOSSES[id]; const isSeen=seen.indexOf(id)>=0, isKill=killed.indexOf(id)>=0;
@@ -4622,12 +4700,15 @@ function scrimShopScreen(){
       <div class="vault-row"><div style="display:flex;align-items:center;gap:10px;flex:1">${PA.silver?`<img class="vault-packimg" src="${PA.silver}" alt="">`:''}<div class="vault-nm">First Edition Portfolio <small>5 cards \u00b7 IP bundles, a Standing Order, and a Commander chase (60% + pity every 3rd).</small></div></div>
         <button class="vault-buy" data-scrim="pack:silver">50 IP</button></div>
       <div class="vault-row" style="margin-top:8px"><div style="display:flex;align-items:center;gap:10px;flex:1">${PA.gold?`<img class="vault-packimg" src="${PA.gold}" alt="">`:''}<div class="vault-nm">Dean\u2019s List Portfolio <small>5 cards \u00b7 guaranteed Standing Order + Commander, holo finish.</small></div></div>
-        <button class="vault-buy" data-scrim="pack:gold">250 IP</button></div></div>
+        <button class="vault-buy" data-scrim="pack:gold">250 IP</button></div>
+      <div class="vault-row" style="margin-top:8px"><div style="display:flex;align-items:center;gap:10px;flex:1"><div class="vault-nm">Modern Hamlet Portfolio <small>5 cards \u00b7 collect the Modern Hamlet edition \u2014 vocab cards, characters, commanders (chase every 3rd).</small></div></div>
+        <button class="vault-buy" data-scrim="pack:mhamlet">40 IP</button></div></div>
     <div class="vault-sec"><div class="vault-h">\ud83d\udccb Standing Orders <small>tap a chip to equip \u00b7 \u2139 for details</small></div>
       <div class="vault-perks">${perkChips}</div>${infoHtml}</div>
     <div class="vault-sec"><div class="vault-h">\ud83d\udcd6 The Library <small>${owned}/${total} Commanders \u00b7 tap a spine to inspect</small></div>
       <div class="lib-shelf">${shelf}</div><div class="lib-shelfboard"></div></div>
     ${scrimBestiary()}
+    ${mhGallery()}
   </div></div>`;
 }
 function scrimDeadScreen(){
@@ -4645,7 +4726,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
