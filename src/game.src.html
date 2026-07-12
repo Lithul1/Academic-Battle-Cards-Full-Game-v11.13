@@ -3140,6 +3140,7 @@ function builderScreen(){
   }).join('') + edBmsCollected(k).map(o=>{
     const b=o.b, ct=(def.edbm&&def.edbm[b.cid])||0, th=o.ed.theme;
     return `<div class="bd-bm bd-ed" style="--edp:${th.paper};--edf:${th.frame}"><span class="bd-bmname">✦ ${b.name} · Modern</span>
+      <span class="bd-pv inline" data-bld="edprevbm:${b.cid.replace(/:/g,';')}" title="Preview card">🔍</span>
       <span class="bd-step"><button data-bld="edbm-:${b.cid.replace(/:/g,';')}">−</button><b>${ct}</b><button data-bld="edbm+:${b.cid.replace(/:/g,';')}">+</button></span>
       <span class="bd-bmtext">${b.text}</span></div>`;
   }).join('');
@@ -3152,7 +3153,7 @@ function builderScreen(){
   }).join('') + edCmdsCollected(k).map(o=>{
     const f=o.f, on=(def.fe||[]).includes(f.id), im=feImg(f), th=o.ed.theme;
     const av=im?`<img class="bd-cav" src="${im.img}" style="object-position:${im.pos||'50% 16%'}">`:`<span class="bd-cav mono-av" style="background:${f.accent}">${initials(f.name)}</span>`;
-    return `<button class="bd-chip crt fe bd-ed bd-edcard ${on?'on':''}" style="--edp:${th.paper};--edf:${th.frame}" data-bld="fe:${f.id}" title="${((f.passive&&f.passive.text)||'').replace(/"/g,'&quot;')}">${av}<span class="bd-nm">${f.name}<small class="fe-tag">${setName(o.ed.base)} · Modern</small></span><span class="bd-mk">${on?'\u2713':'+'}</span></button>`;
+    return `<button class="bd-chip crt fe bd-ed bd-edcard ${on?'on':''}" style="--edp:${th.paper};--edf:${th.frame}" data-bld="fe:${f.id}" title="${((f.passive&&f.passive.text)||'').replace(/"/g,'&quot;')}">${av}<span class="bd-nm">${f.name}<small class="fe-tag">${setName(o.ed.base)} · Modern</small></span><span class="bd-pv" data-bld="prevfe:${f.id}" title="Preview card">🔍</span><span class="bd-mk">${on?'\u2713':'+'}</span></button>`;
   }).join('');
   const crRow=DATA.crits.map((cr,i)=>{
     const on=def.cr.includes(i);
@@ -3819,9 +3820,11 @@ function handleBuilder(cmd){
     else { showPreview(buildCharPreview(DATA.characters[def.d].find(x=>x.id===arg), def.d)); }
     return; }
   else if(op==='edprevab'){ const cid=arg.replace(/;/g,':'); if(edHas(cid)){ const a=edAbcByCid(def.d,cid); if(a) showPreview(buildAbcPreview(a).replace('pv-card pvabc','pv-card pvabc ed-pv')); } return; }
+  else if(op==='edprevbm'){ const cid=arg.replace(/;/g,':'); if(edHas(cid)){ const b=edBmByCid(def.d,cid); if(b) showPreview(buildBmPreview(b).replace('pv-card','pv-card ed-pv')); } return; }
   else if(op==='prevab'){ showPreview(buildAbcPreview(DATA.abcs[def.d][+arg])); return; }
   else if(op==='prevcr'){ showPreview(buildCritPreview(DATA.crits[+arg])); return; }
-  else if(op==='prevfe'){ showPreview(buildFePreview(firstedById(arg))); return; }
+  else if(op==='prevfe'){ const f=firstedById(arg); if(!f) return; const isEd=!!f.cid;
+    showPreview(isEd?buildFePreview(f).replace('pv-card','pv-card ed-pv'):buildFePreview(f)); return; }
   else if(op==='prevbm'){ showPreview(buildBmPreview(DATA.bookmarks[+arg])); return; }
   render();
 }
