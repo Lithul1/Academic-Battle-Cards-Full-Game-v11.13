@@ -368,6 +368,12 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .pk-hd small{display:block;font-family:var(--cond);font-weight:normal;font-size:12px;color:#7a6a4a;margin-top:2px}
 .pk-note{font-family:var(--cond);font-size:12px;color:#6a5a3a;margin-top:9px;padding:7px 10px;background:#f6efd9;border:1.5px dashed #c0ab7d;border-radius:8px}
 .vault-buy.dim{opacity:.45}
+.pk-box.lk .pk-im img,.bdx.lk .bdx-im img{filter:grayscale(1) brightness(.42)}
+.pk-lock,.bdx-lock{position:absolute;inset:0;display:grid;place-items:center;font-size:22px;text-shadow:0 2px 6px rgba(0,0,0,.8)}
+.pk-im,.bdx-im{position:relative}
+.bdx.lk{filter:none}
+.bdx.lk:hover{transform:translateY(-3px)}
+.pk-box.lk .pk-pr{background:#6a5a3a;border-color:#8a7a5a}
 .dc-top.cr{background:#4a2f6a;color:#f0e6ff}
 .dc-top.fo{background:linear-gradient(90deg,#b98cd8,#7ad8d8);color:#241f1b}
 .bd-totals{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;justify-content:center}
@@ -2231,9 +2237,10 @@ function edCountFor(e){ var all=[].concat(e.battle.chars||[],e.battle.abcs||[],e
   all.forEach(function(o){ if(edHas(o.cid)) n++; }); return n; }
 function bdDeckBox(k,sel){ var img=(window.DECKBOX&&window.DECKBOX[k])||'';
   var eds=editionsForDeck(k); var dot=(eds.length&&edAnyCollected(eds[0]))?'<span class="bdx-dot">'+eds.length+'</span>':'';
-  return '<button class="bdx '+(sel?'sel':'')+'" data-bld="set:'+k+'" title="'+setName(k)+'">'
-    +'<span class="bdx-im"><img src="'+img+'" alt="'+setName(k)+'"></span>'
-    +'<span class="bdx-bdg">'+(sel?'\u2713':'')+setName(k)+'</span>'+dot+'</button>'; }
+  var lk=!deckUnlocked(k);
+  return '<button class="bdx '+(sel?'sel':'')+(lk?' lk':'')+'" data-bld="set:'+k+'" title="'+setName(k)+(lk?' \u2014 locked (buy a Deck License in the Vault)':'')+'">'
+    +'<span class="bdx-im"><img src="'+img+'" alt="'+setName(k)+'">'+(lk?'<span class="bdx-lock">\uD83D\uDD12</span>':'')+'</span>'
+    +'<span class="bdx-bdg">'+(sel?'\u2713':'')+setName(k)+'</span>'+(lk?'':dot)+'</button>'; }
 function bdExpansionShelf(k,open){ var eds=editionsForDeck(k); if(!eds.length) return '';
   var e=eds[0], flt=(APP.builder.edFilter||'all');
   var got=edAnyCollected(e), n=edCountFor(e), tot=(e.counts&&e.counts.total)||43;
@@ -2302,6 +2309,8 @@ function clampDeck(def){
   def.bm=(def.bm||[]).filter(i=>i>=0&&i<DATA.bookmarks.length).slice(0,LIMITS.bm);
   def.cr=(def.cr||[]).filter(i=>i>=0&&i<DATA.crits.length).slice(0,LIMITS.cr);
   def.fe=(def.fe||[]).filter(id=>firstedById(id)).filter((id,i,a)=>a.indexOf(id)===i).slice(0,LIMITS.fe);
+  def.ch=(def.ch||[]).filter(id=>deckOwnCh(k,id));
+  def.ab=(def.ab||[]).filter(i=>deckOwnAb(k,i));
   def.cr=(def.cr||[]).filter(i=>ownCrit(i));
   (function(){ const cnt={}; def.bm=(def.bm||[]).filter(i=>{ cnt[i]=(cnt[i]||0)+1; return cnt[i]<=bmOwned(i); }); })();
   def.ed=def.ed||{}; Object.keys(def.ed).forEach(id=>{ if(def.ed[id]&&!edCharFor(k,id)) delete def.ed[id]; });
@@ -3184,7 +3193,7 @@ function builderScreen(){
   def.ed=def.ed||{}; def.edab=def.edab||[]; def.edbm=def.edbm||{};
   const edFlt=(APP.builder.edFilter||'all'); const hasEd=editionsForDeck(k).length>0; const edName=hasEd?editionsForDeck(k)[0].name:'';
   const over=t=>c[t]>LIMITS[t]?'over':'';
-  const chRow=DATA.characters[k].map(ch=>{
+  const chRow=DATA.characters[k].filter(ch=>deckOwnCh(k,ch.id)).map(ch=>{
     const on=def.ch.includes(ch.id);
     const edm=edCharFor(k,ch.id);
     const isMod=!!(edm&&def.ed[ch.id]==='modern');
@@ -3196,7 +3205,7 @@ function builderScreen(){
     const tog=edm?`<span class="bd-edtog"${est}><span class="seg ${!isMod?'on':''}" data-bld="edbase:${ch.id}">Base</span><span class="seg ${isMod?'on':''}" data-bld="edmod:${ch.id}">Mod</span></span>`:'';
     return `<button class="bd-chip ch ${isMod?'bd-ed ':''}${on?'on':''}"${est} data-bld="ch:${ch.id}">${av}<span class="bd-info"><span class="bd-nm">${srcc.name}</span>${tog}</span><span class="bd-pv" data-bld="prevch:${ch.id}" title="Preview card">🔍</span><span class="bd-mk">${on?'✓':'+'}</span></button>`;
   }).join('');
-  const abRow=DATA.abcs[k].map((a,i)=>{
+  const abRow=DATA.abcs[k].map((a,i)=>({a,i})).filter(o=>deckOwnAb(k,o.i)).map(({a,i})=>{
     const on=def.ab.includes(i);
     return `<button class="bd-chip ab ${a.type.toLowerCase()} ${on?'on':''}" data-bld="ab:${i}" title="${a.q.replace(/"/g,'&quot;')}">
       <span class="bd-ty">${a.type==='ATTACK'?'⚔':'⛊'} ${a.power}</span><span class="bd-q">${a.q}</span><span class="bd-pv" data-bld="prevab:${i}" title="Preview card">🔍</span><span class="bd-mk">${on?'✓':'+'}</span></button>`;
@@ -3865,7 +3874,8 @@ function startBattle(){ beginBattle(); }
 function handleBuilder(cmd){
   const B=APP.builder; const def=B.def;
   const [op,arg]=cmd.split(':');
-  if(op==='set'){ if(def.d===arg){ B.fanOpen=(B.fanOpen===false); } else { B.def=defaultDeck(arg); B.code=''; B.edFilter='all'; B.fanOpen=true; } }
+  if(op==='set'){ if(!deckUnlocked(arg)){ toast(setName(arg)+' is locked \u2014 buy a Deck License in the Vault.'); return; }
+    if(def.d===arg){ B.fanOpen=(B.fanOpen===false); } else { B.def=defaultDeck(arg); B.code=''; B.edFilter='all'; B.fanOpen=true; } }
   else if(op==='edcycle'){ var order=['base','modern','all']; var cur=B.edFilter||'all';
     var nx=order[(order.indexOf(cur)+1)%3]; handleBuilder('edfilter:'+nx); return; }
   else if(op==='ch'){ const i=def.ch.indexOf(arg); if(i>=0) def.ch.splice(i,1); else if(def.ch.length<LIMITS.ch) def.ch.push(arg); B.code=''; }
@@ -4085,7 +4095,7 @@ if(typeof document!=='undefined'){ if(document.body) initAudioCtl(); else docume
 
 /* ================= LITERARY SCRIMMAGE (roguelike campaign) ================= */
 let SCRIM = { active:false, view:'intro', kit:null, team:[], deck:{ab:[],bm:[],cr:[]}, artifacts:[], map:null, cleared:0, act:1, pending:null, draft:null };
-let META = { ip:0, unlocks:[], perks:[], loadout:[], commanders:[], packs:0, bossSeen:[], bossKilled:[], editionCards:[], mhPacks:0, crits:null, bmCopies:null, foils:0, decks:[] };
+let META = { ip:0, unlocks:[], perks:[], loadout:[], commanders:[], packs:0, bossSeen:[], bossKilled:[], editionCards:[], mhPacks:0, crits:null, bmCopies:null, foils:0, decks:[], deckCards:{} };
 
 /* ---- Honors Semesters: opt-in escalating difficulty tiers ---- */
 const HONORS = [
@@ -4156,6 +4166,32 @@ function collInit(){
 }
 function ownCrit(i){ return (META.crits||[]).indexOf(+i)>=0; }
 function bmOwned(i){ return (META.bmCopies||{})[i]||0; }
+
+/* ---- Locked decks: license + starter kit ---- */
+window.LOCKED_DECKS=['sherlock','othello','wonderland'];
+window.DECK_LICENSE=350;
+function deckLocked(k){ return (window.LOCKED_DECKS||[]).indexOf(k)>=0; }
+function deckUnlocked(k){ return !deckLocked(k) || (META.decks||[]).indexOf(k)>=0; }
+function deckOwnCh(k,id){ if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ch||[]).indexOf(id)>=0; }
+function deckOwnAb(k,i){ if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ab||[]).indexOf(+i)>=0; }
+function licenseDeck(k){
+  collInit();
+  if(!deckLocked(k)||deckUnlocked(k)) return;
+  if((META.ip||0)<window.DECK_LICENSE){ toast('Not enough Intellect Points.'); return; }
+  META.ip-=window.DECK_LICENSE;
+  META.decks=META.decks||[]; META.decks.push(k);
+  /* Starter Kit: 6 characters + half the ABCs */
+  var chs=(DATA.characters[k]||[]).map(function(c){return c.id;});
+  var abs=(DATA.abcs[k]||[]).map(function(_,i){return i;});
+  function take(arr,n){ var a=arr.slice(), out=[]; while(out.length<n && a.length) out.push(a.splice(rnd(a.length),1)[0]); return out; }
+  META.deckCards=META.deckCards||{};
+  META.deckCards[k]={ ch:take(chs,6), ab:take(abs,Math.floor(abs.length/2)) };
+  metaSave();
+  try{SFX.card('pack_open',0.8);}catch(e){}
+  toast(setName(k)+' unlocked! Starter Kit: 6 characters + '+META.deckCards[k].ab.length+' trivia cards.');
+  render();
+}
+
 /* ---- generic set pools: every set has C / U / R ---- */
 function setPool(setId){
   if(setId==='base'){
@@ -4164,7 +4200,14 @@ function setPool(setId){
       C:DATA.bookmarks.map(function(b,i){return {k:'bm',id:i,name:b.name};}),
       U:DATA.crits.map(function(c,i){return {k:'cr',id:i,name:c.name};}).filter(function(o){return (window.START_CR||[]).indexOf(o.id)<0;})
          .concat(perks.map(function(p){return {k:'so',id:p,name:(SCRIM_PERKS[p]||{}).name||p};})),
-      R:(DATA.firsteds||[]).map(function(f){return {k:'cmd',id:f.id,name:f.name};})
+      R:(DATA.firsteds||[]).filter(function(f){return !deckLocked(f.deck);}).map(function(f){return {k:'cmd',id:f.id,name:f.name};})
+    };
+  }
+  if(deckLocked(setId)){
+    return {
+      C:(DATA.abcs[setId]||[]).map(function(a,i){return {k:'dab',deck:setId,id:i,name:'Trivia #'+(i+1),sub:a.type};}),
+      U:(DATA.characters[setId]||[]).map(function(c){return {k:'dch',deck:setId,id:c.id,name:c.name};}),
+      R:(DATA.firsteds||[]).filter(function(f){return f.deck===setId;}).map(function(f){return {k:'cmd',id:f.id,name:f.name};})
     };
   }
   var E=(window.EXPANSIONS||{})[setId];
@@ -4178,6 +4221,8 @@ function setPool(setId){
 }
 /* have we got it? */
 function hasCard(o){
+  if(o.k==='dch') return deckOwnCh(o.deck,o.id);
+  if(o.k==='dab') return deckOwnAb(o.deck,o.id);
   if(o.k==='bm') return bmOwned(o.id)>=window.BM_MAX_COPIES;      /* "complete" only at max copies */
   if(o.k==='cr') return ownCrit(o.id);
   if(o.k==='so') return (META.perks||[]).indexOf(o.id)>=0;
@@ -4185,6 +4230,9 @@ function hasCard(o){
   return edHas(o.cid);
 }
 function grantCard(o){
+  if(o.k==='dch'||o.k==='dab'){ META.deckCards=META.deckCards||{}; var d=META.deckCards[o.deck]=META.deckCards[o.deck]||{ch:[],ab:[]};
+    var arr=(o.k==='dch')?(d.ch=d.ch||[]):(d.ab=d.ab||[]);
+    if(arr.indexOf(o.id)<0){ arr.push(o.id); return true; } return false; }
   if(o.k==='bm'){ META.bmCopies[o.id]=Math.min(window.BM_MAX_COPIES,(META.bmCopies[o.id]||0)+1); return true; }
   if(o.k==='cr'){ if(!ownCrit(o.id)){ META.crits.push(+o.id); return true; } return false; }
   if(o.k==='so'){ if((META.perks||[]).indexOf(o.id)<0){ META.perks.push(o.id); return true; } return false; }
@@ -4248,6 +4296,8 @@ function openTierPack(setId,tier){
     var o=c.o;
     if(o.k==='cmd'){ var f=firstedById(o.id); return {t:'cmd',id:o.id,name:o.name,fd:f}; }
     if(o.k==='so'){ var p=(SCRIM_PERKS||{})[o.id]||{}; return {t:'so',id:o.id,name:o.name,ic:p.ic,text:p.text}; }
+    if(o.k==='dch'){ return {t:'dchar',deck:o.deck,id:o.id,name:o.name}; }
+    if(o.k==='dab'){ var aq=(DATA.abcs[o.deck]||[])[o.id]||{}; return {t:'dabc',deck:o.deck,id:o.id,atype:aq.type,q:aq.q}; }
     if(o.k==='cr'){ return {t:'crit',id:o.id,name:o.name,rar:c.r}; }
     if(o.k==='bm'){ return {t:'bmk',id:o.id,name:o.name,copies:bmOwned(o.id)}; }
     var E=(window.EXPANSIONS||{})[setId]||{}; var kind=(o.cid.split(':')[1]);
@@ -4266,6 +4316,7 @@ function openTierPack(setId,tier){
 
 function packSets(){
   var out=[{id:'base',name:'Faculty Lounge',sub:'Commanders \u00b7 Standing Orders \u00b7 Bookmarks \u00b7 Critical Lenses',box:(window.DECKBOX||{}).gatsby||''}];
+  (window.LOCKED_DECKS||[]).forEach(function(k){ out.push({id:k,name:setName(k),sub:'Locked deck \u00b7 characters, trivia, commanders',box:(window.DECKBOX||{})[k]||'',deck:true}); });
   var E=window.EXPANSIONS||{};
   for(var k in E){ if(E[k].battle) out.push({id:k,name:E[k].name,sub:'Expansion \u00b7 vocab, characters, commanders',box:E[k].box||''}); }
   return out;
@@ -4275,10 +4326,19 @@ function packShop(){
   var sets=packSets(), cur=APP.shopSet||'base';
   if(!sets.some(function(s){return s.id===cur;})) cur=sets[0].id;
   var boxes=sets.map(function(s){ var pr=setProgress(s.id); var sel=(s.id===cur);
-    return '<button class="pk-box '+(sel?'sel':'')+'" data-scrim="shopset:'+s.id+'" title="'+s.name+'">'
-      +(s.box?'<span class="pk-im"><img src="'+s.box+'"></span>':'<span class="pk-im pk-mono">'+s.name.charAt(0)+'</span>')
-      +'<span class="pk-nm">'+s.name+'</span><span class="pk-pr">'+pr.got+'/'+pr.total+'</span></button>'; }).join('');
+    var lk=(s.deck&&!deckUnlocked(s.id));
+    return '<button class="pk-box '+(sel?'sel':'')+(lk?' lk':'')+'" data-scrim="shopset:'+s.id+'" title="'+s.name+(lk?' (locked)':'')+'">'
+      +(s.box?'<span class="pk-im"><img src="'+s.box+'">'+(lk?'<span class="pk-lock">\uD83D\uDD12</span>':'')+'</span>':'<span class="pk-im pk-mono">'+s.name.charAt(0)+'</span>')
+      +'<span class="pk-nm">'+s.name+'</span><span class="pk-pr">'+(lk?'\uD83D\uDD12':pr.got+'/'+pr.total)+'</span></button>'; }).join('');
   var setObj=sets.filter(function(s){return s.id===cur;})[0]||sets[0];
+  if(setObj.deck && !deckUnlocked(cur)){
+    var pr0=setProgress(cur);
+    return '<div class="pk-shop"><div class="pk-shelf">'+boxes+'</div>'
+      +'<div class="pk-hd">'+setObj.name+' <small>\uD83D\uDD12 Locked \u00b7 '+pr0.total+' cards to collect</small></div>'
+      +'<div class="vault-row pk-row"><div style="display:flex;align-items:center;gap:10px;flex:1"><div class="vault-nm">\uD83C\uDF93 Deck License <small>Unlocks '+setName(cur)+' + a Starter Kit: 6 characters and half its trivia cards \u2014 playable right away.</small></div></div>'
+      +'<button class="vault-buy '+(((META.ip||0)>=window.DECK_LICENSE)?'':'dim')+'" data-scrim="license:'+cur+'">'+window.DECK_LICENSE+' IP</button></div>'
+      +'<div class="pk-note">Once licensed, Bronze/Silver/Gold packs let you collect the rest \u2014 including both commanders.</div></div>';
+  }
   var tiers=Object.keys(window.PACK_TIERS).map(function(t){ var T=window.PACK_TIERS[t];
     var afford=(META.ip||0)>=T.cost;
     var desc = t==='bronze' ? '3 common + 2 uncommon \u00b7 no commanders'
@@ -4344,7 +4404,11 @@ function packOverlayShow(type,cards){
     let inner;
     if(c.t==='ip') inner=`<div class="dc-top ip">\ud83e\udde0 INTELLECT</div><div class="pkr-ip">+${c.amt}<small> IP</small></div><div class="dc-tx" style="text-align:center">Banked to your Vault.</div>`;
     else if(c.t==='so') inner=`<div class="dc-top so">\ud83d\udccb STANDING ORDER</div><div class="pkr-so">${c.ic}</div><div class="dc-nm">${c.name}</div><div class="dc-tx">${c.text}</div>`;
-else if(c.t==='crit'){ inner='<div class="dc-top cr">\uD83D\uDD2C CRITICAL LENS</div><div class="dc-nm" style="margin-top:22px">'+c.name+'</div><div class="dc-tx">Critical theory lens \u00b7 equip in the Deck Builder</div>'; }
+else if(c.t==='dchar'){ var dc=(DATA.characters[c.deck]||[]).find(function(x){return x.id===c.id;})||{};
+      var dav=dc.img?'<img src="'+dc.img+'" style="width:100%;height:100%;object-fit:cover;object-position:'+(dc.imgpos||'50% 18%')+'">':'<span class="pkr-mono" style="background:'+(dc.accent||'#444')+'">'+initials(c.name)+'</span>';
+      inner='<div class="dc-top ip">\uD83C\uDFAD CHARACTER</div><div class="pkr-port">'+dav+'</div><div class="dc-nm">'+c.name+'</div><div class="dc-tx">'+setName(c.deck)+' \u00b7 '+((dc.atk||{}).n||'')+'</div>'; }
+    else if(c.t==='dabc'){ inner='<div class="dc-top '+(c.atype==='ATTACK'?'ip':'so')+'">'+(c.atype==='ATTACK'?'\u2694 ATTACK':'\u26CA BLOCK')+'</div><div class="dc-nm" style="margin-top:20px">'+setName(c.deck)+' Trivia</div><div class="dc-tx">'+(c.q||'')+'</div>'; }
+    else if(c.t==='crit'){ inner='<div class="dc-top cr">\uD83D\uDD2C CRITICAL LENS</div><div class="dc-nm" style="margin-top:22px">'+c.name+'</div><div class="dc-tx">Critical theory lens \u00b7 equip in the Deck Builder</div>'; }
     else if(c.t==='bmk'){ inner='<div class="dc-top so">\uD83D\uDD16 BOOKMARK</div><div class="dc-nm" style="margin-top:22px">'+c.name+'</div><div class="dc-tx">Copies owned: '+(c.copies||1)+' / '+window.BM_MAX_COPIES+'</div>'; }
     else if(c.t==='foil'){ inner='<div class="dc-top fo">\u2728 FOIL</div><div class="dc-nm" style="margin-top:22px">Foil Shard</div><div class="dc-tx">Set complete \u2014 shards convert to foil cards in The Bindery.</div>'; }
     else if(c.t==='edcard'){
@@ -4495,7 +4559,7 @@ function scrimAdvanceAct(){
 /* ---- persistence ---- */
 function metaLoad(){ try{ const j=window.localStorage.getItem('abc_meta'); if(j) META=Object.assign({ip:0,unlocks:[],perks:[],loadout:[],commanders:[],packs:0,honorsMax:0,honorsCleared:0,bossSeen:[],bossKilled:[]},JSON.parse(j)); }catch(e){}
   META.stats=Object.assign({runs:0,wins:0,bossKills:0,bestAct:0,fastestMs:0},META.stats||{});
-  META.bossSeen=META.bossSeen||[]; META.bossKilled=META.bossKilled||[]; META.editionCards=META.editionCards||[]; META.mhPacks=META.mhPacks||0; META.decks=META.decks||[]; collInit();
+  META.bossSeen=META.bossSeen||[]; META.bossKilled=META.bossKilled||[]; META.editionCards=META.editionCards||[]; META.mhPacks=META.mhPacks||0; META.decks=META.decks||[]; META.deckCards=META.deckCards||{}; collInit();
   if(META.honorsMax==null) META.honorsMax=0; if(META.honorsCleared==null) META.honorsCleared=0;
   if(!META.patron){ META.patron={ name:'Author_1E_'+(100+rnd(900)), card:'#LUL-'+(100+rnd(900))+'-'+(100+rnd(900)), issued:new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) }; metaSave(); }
   if((META.unlocks||[]).indexOf('hp')>=0 && (META.perks||[]).indexOf('hardy')<0){ META.perks.push('hardy'); }   // legacy migration
@@ -4683,6 +4747,7 @@ function handleScrim(cmd){
   if(op==='pack'){ if(a==='mhamlet') scrimOpenMhPack(); else scrimOpenPack(a||'silver'); return; }
   if(op==='shopset'){ APP.shopSet=a; render(); return; }
   if(op==='buy'){ var p=(a||'').split('|'); if(p.length===2) openTierPack(p[0],p[1]); return; }
+  if(op==='license'){ licenseDeck(a); return; }
   if(op==='packtear'){ packTear(); return; }
   if(op==='packflip'){ packFlip(+a); return; }
   if(op==='packflipall'){ packFlipAll(); return; }
@@ -5073,7 +5138,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
