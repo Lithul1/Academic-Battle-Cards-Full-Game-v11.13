@@ -802,6 +802,13 @@ body[data-screen="play"] .turnclock{ font-size:clamp(13px,2vh,16px); padding:2px
 .bd-bm.bd-ed{background:var(--edp,#1b2540);border-color:var(--edf,#0a1020);color:#eaf0fa}
 .bd-bm.bd-ed .bd-bmname{color:#f4ecd6}
 .bd-bm.bd-ed .bd-bmtext{color:#c8d4e6}
+/* navy skin for edition card previews (matches the Vault gallery card) */
+.pv-card.ed-pv{background:#1b2540;border-color:#0a1020;color:#eaf0fa}
+.pv-card.ed-pv .pv-nm,.pv-card.ed-pv .pv-abc-q{color:#f4ecd6}
+.pv-card.ed-pv .pv-abc-top{background:#0f1729;color:#f4ecd6;border-color:#0a1020}
+.pv-card.ed-pv .pv-mv-txt,.pv-card.ed-pv .pv-abc-foot{color:#c8d4e6}
+.pv-card.ed-pv .pv-opt{background:#26324f;color:#e4ecf8;border-color:#0a1020}
+.pv-card.ed-pv .pv-opt.correct{background:#2f6d4f;color:#fff}
 .bd-edfilter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 4px;font-family:var(--cond)}
 .bd-edfilter .lb{font-weight:bold;letter-spacing:1px;color:var(--navy,#1b2540)}
 .bd-edfilter .seg{font-size:12px;letter-spacing:.5px;padding:5px 11px;border:2px solid var(--ink);border-radius:7px;background:var(--cream);cursor:pointer}
@@ -3123,7 +3130,7 @@ function builderScreen(){
   }).join('') + edAbcsCollected(k).map(o=>{
     const a=o.a, on=(def.edab||[]).includes(a.cid), th=o.ed.theme;
     return `<button class="bd-chip ab ${a.type.toLowerCase()} bd-ed bd-edcard ${on?'on':''}" style="--edp:${th.paper};--edf:${th.frame}" data-bld="edab:${a.cid.replace(/:/g,';')}" title="${a.q.replace(/"/g,'&quot;')}">
-      <span class="bd-ty">${a.type==='ATTACK'?'⚔':'⛊'} ${a.power} · VOCAB</span><span class="bd-q">${a.q}</span><span class="bd-mk">${on?'✓':'+'}</span></button>`;
+      <span class="bd-ty">${a.type==='ATTACK'?'⚔':'⛊'} ${a.power} · VOCAB</span><span class="bd-q">${a.q}</span><span class="bd-pv" data-bld="edprevab:${a.cid.replace(/:/g,';')}" title="Preview card">🔍</span><span class="bd-mk">${on?'✓':'+'}</span></button>`;
   }).join('');
   const bmRow=DATA.bookmarks.map((b,i)=>{
     const ct=def.bm.filter(x=>x===i).length;
@@ -3806,7 +3813,12 @@ function handleBuilder(cmd){
   else if(op==='gencode'){ clampDeck(def); B.code=encodeDeck(def); }
   else if(op==='use'){ clampDeck(def); APP.customDeck=clone(def); APP.youDeck=def.d; APP.codeMsg={text:'Custom deck ready — choose Custom Play to take it into a match.',ok:true}; APP.screen='menu'; }
   else if(op==='copycode'){ const el=document.getElementById('bd-codeout'); if(el){ el.select&&el.select(); try{ navigator.clipboard&&navigator.clipboard.writeText(el.value); }catch(e){} } toast('Code copied'); return; }
-  else if(op==='prevch'){ showPreview(buildCharPreview(DATA.characters[def.d].find(x=>x.id===arg), def.d)); return; }
+  else if(op==='prevch'){
+    const em=(def.ed&&def.ed[arg]==='modern')?edCharFor(def.d,arg):null;
+    if(em){ showPreview(buildCharPreview(em.c, def.d).replace('pv-card pvchar','pv-card pvchar ed-pv')); }
+    else { showPreview(buildCharPreview(DATA.characters[def.d].find(x=>x.id===arg), def.d)); }
+    return; }
+  else if(op==='edprevab'){ const cid=arg.replace(/;/g,':'); if(edHas(cid)){ const a=edAbcByCid(def.d,cid); if(a) showPreview(buildAbcPreview(a).replace('pv-card pvabc','pv-card pvabc ed-pv')); } return; }
   else if(op==='prevab'){ showPreview(buildAbcPreview(DATA.abcs[def.d][+arg])); return; }
   else if(op==='prevcr'){ showPreview(buildCritPreview(DATA.crits[+arg])); return; }
   else if(op==='prevfe'){ showPreview(buildFePreview(firstedById(arg))); return; }
