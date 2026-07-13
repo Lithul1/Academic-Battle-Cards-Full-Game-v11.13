@@ -2355,10 +2355,36 @@ function clampDeck(def){
   def.bm=(def.bm||[]).filter(i=>i>=0&&i<DATA.bookmarks.length).slice(0,LIMITS.bm);
   def.cr=(def.cr||[]).filter(i=>i>=0&&i<DATA.crits.length).slice(0,LIMITS.cr);
   def.fe=(def.fe||[]).filter(id=>firstedById(id)).filter((id,i,a)=>a.indexOf(id)===i).slice(0,LIMITS.fe);
+  /* Ownership repair: strip what you don't own, then REPLACE it with cards you do own
+     (never silently leave a deck short — that produced decks with 0 bookmarks). */
+  const _was={ch:(def.ch||[]).length, ab:(def.ab||[]).length, cr:(def.cr||[]).length, bm:(def.bm||[]).length};
   def.ch=(def.ch||[]).filter(id=>deckOwnCh(k,id));
   def.ab=(def.ab||[]).filter(i=>deckOwnAb(k,i));
   def.cr=(def.cr||[]).filter(i=>ownCrit(i));
   (function(){ const cnt={}; def.bm=(def.bm||[]).filter(i=>{ cnt[i]=(cnt[i]||0)+1; return cnt[i]<=bmOwned(i); }); })();
+  def._repaired=(def.ch.length<_was.ch)||(def.ab.length<_was.ab)||(def.cr.length<_was.cr)||(def.bm.length<_was.bm);
+  if(def._repaired){
+    const capTo=(n,lim)=>Math.min(n,lim);
+    // characters
+    (function(){ const pool=poolCh(k).filter(id=>!def.ch.includes(id));
+      while(def.ch.length<capTo(_was.ch,LIMITS.ch) && pool.length) def.ch.push(pool.splice(rnd(pool.length),1)[0]); })();
+    // trivia
+    (function(){ const pool=poolAb(k).filter(i=>!def.ab.includes(i));
+      while(def.ab.length<capTo(_was.ab,LIMITS.ab) && pool.length) def.ab.push(pool.splice(rnd(pool.length),1)[0]); })();
+    // lenses
+    (function(){ const pool=poolCr().filter(i=>!def.cr.includes(i));
+      while(def.cr.length<capTo(_was.cr,LIMITS.cr) && pool.length) def.cr.push(pool.splice(rnd(pool.length),1)[0]); })();
+    // bookmarks (respect copies owned)
+    (function(){ const slots=poolBmSlots();
+      while(def.bm.length<capTo(_was.bm,LIMITS.bm)){
+        const u={}; def.bm.forEach(i=>u[i]=(u[i]||0)+1);
+        const avail=slots.filter(i=>(u[i]||0)<bmOwned(i));
+        if(!avail.length) break;
+        const fresh=avail.filter(i=>!(u[i]>0));
+        const pick=fresh.length?fresh:avail;
+        def.bm.push(pick[rnd(pick.length)]);
+      } })();
+  }
   def.ed=def.ed||{}; Object.keys(def.ed).forEach(id=>{ if(def.ed[id]&&!edCharFor(k,id)) delete def.ed[id]; });
   def.edab=(def.edab||[]).filter(cid=>edHas(cid)&&edAbcByCid(k,cid)).filter((c,i,a)=>a.indexOf(c)===i);
   def.edbm=def.edbm||{}; Object.keys(def.edbm).forEach(cid=>{ if(!(edHas(cid)&&edBmByCid(k,cid))) delete def.edbm[cid]; });
@@ -3976,7 +4002,7 @@ function handleBuilder(cmd){
   else if(op==='reset'){ B.def=defaultDeck(def.d); B.code=''; }
   else if(op==='fill'){ fillGaps(def); clampDeck(def); B.code=''; toast('Filled gaps with random cards.'); }
   else if(op==='gencode'){ clampDeck(def); B.code=encodeDeck(def); }
-  else if(op==='use'){ clampDeck(def); APP.customDeck=clone(def); APP.youDeck=def.d; APP.codeMsg={text:'Custom deck ready — choose Custom Play to take it into a match.',ok:true}; APP.screen='menu'; }
+  else if(op==='use'){ clampDeck(def); if(def._repaired) toast('Some cards in this deck aren\u2019t unlocked yet \u2014 swapped for cards you own.'); APP.customDeck=clone(def); APP.youDeck=def.d; APP.codeMsg={text:'Custom deck ready — choose Custom Play to take it into a match.',ok:true}; APP.screen='menu'; }
   else if(op==='copycode'){ const el=document.getElementById('bd-codeout'); if(el){ el.select&&el.select(); try{ navigator.clipboard&&navigator.clipboard.writeText(el.value); }catch(e){} } toast('Code copied'); return; }
   else if(op==='prevch'){
     const em=(def.ed&&def.ed[arg]==='modern')?edCharFor(def.d,arg):null;
