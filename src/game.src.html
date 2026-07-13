@@ -382,6 +382,19 @@ body.calm-fx *,body.calm-fx *::before,body.calm-fx *::after{animation:none!impor
 body.calm-fx .brv{animation:none!important}
 body.calm-fx .ready,body.calm-fx .met{box-shadow:0 0 0 3px var(--gold),0 3px 0 var(--red-dk)!important}
 body.calm-fx .thinking{opacity:1!important}
+/* ---- locked cards in the builder (visible + greyed + hint) ---- */
+.bd-chip.lockcard,.bd-bm.lockcard{opacity:.5;filter:grayscale(1);cursor:not-allowed;pointer-events:none;border-style:dashed}
+.lk-hint{display:block;font-family:var(--cond);font-size:10px;color:#7a6a4a;margin-top:2px}
+.bd-chip.lockcard .bd-nm{color:#5a4a3a}
+/* ---- collection meter ---- */
+.bd-meter{background:#f6efd9;border:2px solid var(--ink);border-radius:11px;padding:9px 12px;margin:10px 0 4px;box-shadow:0 3px 0 rgba(40,25,12,.35)}
+.bdm-hd{font-family:var(--cond);letter-spacing:.5px;font-size:14px;color:#3a2f18}
+.bdm-hd b{font-family:var(--disp);font-size:15px}.bdm-hd small{color:#7a6a4a}
+.bdm-bar{height:9px;background:#dccfa8;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden;margin:6px 0 5px}
+.bdm-bar i{display:block;height:100%;background:linear-gradient(90deg,#E3A92B,#c98b1e)}
+.bdm-sub{font-family:var(--cond);font-size:11px;color:#6a5a3a}
+.over-ip{font-family:var(--cond);font-size:15px;color:#E3A92B;margin-top:6px}
+.over-ip small{display:block;font-size:11px;color:#9d8f6a}
 .dc-top.cr{background:#4a2f6a;color:#f0e6ff}
 .dc-top.fo{background:linear-gradient(90deg,#b98cd8,#7ad8d8);color:#241f1b}
 .bd-totals{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;justify-content:center}
@@ -2229,7 +2242,7 @@ function firstedById(id){ var f=(DATA.firsteds||[]).find(x=>x.id===id); if(f) re
   var E=window.EXPANSIONS||{}; for(var k in E){ if(E[k].battle){ var m=(E[k].battle.commanders||[]).find(x=>x.id===id); if(m) return m; } } return null; }
 /* ---- Expansion edition helpers (edition-driven; augment matching base deck only) ---- */
 function editionsForDeck(k){ var E=window.EXPANSIONS||{}; return Object.keys(E).filter(function(id){return E[id].base===k&&E[id].battle;}).map(function(id){return E[id];}); }
-function edHas(cid){ return (META.editionCards||[]).indexOf(cid)>=0; }
+function edHas(cid){ return sbx() || (META.editionCards||[]).indexOf(cid)>=0; }
 function edCharFor(k,charId){ var eds=editionsForDeck(k); for(var i=0;i<eds.length;i++){ var c=(eds[i].battle.chars||[]).find(function(x){return x.id===charId;}); if(c&&edHas(c.cid)) return {ed:eds[i],c:c}; } return null; }
 function edResolveChar(def,id){ if(def.ed&&def.ed[id]){ var m=edCharFor(def.d,id); if(m) return m.c; } return DATA.characters[def.d].find(function(c){return c.id===id;}); }
 function edAbcByCid(k,cid){ var eds=editionsForDeck(k); for(var i=0;i<eds.length;i++){ var a=(eds[i].battle.abcs||[]).find(function(x){return x.cid===cid;}); if(a) return a; } return null; }
@@ -2276,10 +2289,15 @@ function fePeekChips(p,sideKey){ if(sideKey!=='you'||!S) return ''; let out='';
   if(pHasPassive(p,'peekFoeDraw') && S.opp && S.opp._lastDrawn){ out+=`<div class="fe-peek foe" title="Anticipatory Madness \u2014 opponent's last draw">\ud83d\udc41 Foe drew: <b>${cardTypeLabel(S.opp._lastDrawn)}</b></div>`; }
   return out?`<div class="fe-peekwrap">${out}</div>`:''; }
 function defaultBookmarks(){ const base=DATA.bookmarks.map((_,i)=>i); return base.concat([0,1,3,5,10,9]).slice(0,LIMITS.bm); }
+/* owned-aware pools (sandbox returns everything) */
+function poolCh(k){ return DATA.characters[k].filter(c=>deckOwnCh(k,c.id)).map(c=>c.id); }
+function poolAb(k){ return DATA.abcs[k].map((_,i)=>i).filter(i=>deckOwnAb(k,i)); }
+function poolCr(){ return DATA.crits.map((_,i)=>i).filter(i=>ownCrit(i)); }
+function poolBmSlots(){ const out=[]; DATA.bookmarks.forEach((_,i)=>{ const n=bmOwned(i); for(let c=0;c<n;c++) out.push(i); }); return out; }
 function defaultDeck(k){
   // Full 62-card default: every category filled to its cap (ch 12 + ab 24 + bm 20 + cr 4 + fe 2).
   // Decks with only one published 1st Edition default to 61 until their second commander exists.
-  const def={ d:k, ch:DATA.characters[k].map(c=>c.id).slice(0,LIMITS.ch), ab:DATA.abcs[k].map((_,i)=>i).slice(0,LIMITS.ab), bm:defaultBookmarks(), cr:[0,1,4,7].slice(0,LIMITS.cr), fe:feFor(k) };
+  const def={ d:k, ch:poolCh(k).slice(0,LIMITS.ch), ab:poolAb(k).slice(0,LIMITS.ab), bm:[], cr:poolCr().slice(0,LIMITS.cr), fe:feFor(k) };
   return fillGaps(def);
 }
 function pickN(arr,n){ const p=arr.slice(), o=[]; while(o.length<n && p.length) o.push(p.splice(rnd(p.length),1)[0]); return o; }
@@ -2293,17 +2311,37 @@ function randomBookmarks(){
   out.push(...pickN(R, 1+rnd(3)));      // 1-3 Rare
   const fill=CU.length?CU:DATA.bookmarks.map((_,i)=>i);
   while(out.length<LIMITS.bm) out.push(fill[rnd(fill.length)]);
-  return out.slice(0,LIMITS.bm);
+  // respect ownership + copy limits (sandbox: bmOwned() returns max)
+  const used={}; const legal=[];
+  out.forEach(i=>{ used[i]=(used[i]||0)+1; if(used[i]<=bmOwned(i)) legal.push(i); });
+  const slots=poolBmSlots();
+  while(legal.length<LIMITS.bm){
+    const u={}; legal.forEach(i=>u[i]=(u[i]||0)+1);
+    const avail=slots.filter(i=>(u[i]||0)<bmOwned(i));
+    if(!avail.length) break;
+    legal.push(avail[rnd(avail.length)]);
+  }
+  return legal.slice(0,LIMITS.bm);
 }
 function randomDeck(k){
   // Fresh composition each battle: random characters, trivia, crit lenses, and
   // rarity-capped bookmarks. Commanders unchanged (deck identity).
-  return { d:k,
-    ch:pickN(DATA.characters[k].map(c=>c.id), Math.min(LIMITS.ch, DATA.characters[k].length)),
-    ab:pickN(DATA.abcs[k].map((_,i)=>i), Math.min(LIMITS.ab, DATA.abcs[k].length)),
+  const pc=poolCh(k), pa=poolAb(k), pr=poolCr();
+  const d={ d:k,
+    ch:pickN(pc, Math.min(LIMITS.ch, pc.length)),
+    ab:pickN(pa, Math.min(LIMITS.ab, pa.length)),
     bm:randomBookmarks(),
-    cr:pickN(DATA.crits.map((_,i)=>i), LIMITS.cr),
-    fe:feFor(k) };
+    cr:pickN(pr, Math.min(LIMITS.cr, pr.length)),
+    fe:feFor(k), ed:{}, edab:[], edbm:{} };
+  // Quick Play: expansions are live — roll modern variants + vocab cards too
+  if(sbx()){ const eds=editionsForDeck(k);
+    if(eds.length && Math.random()<0.5){ const E=eds[0];
+      (E.battle.chars||[]).forEach(function(c){ if(d.ch.indexOf(c.id)>=0 && Math.random()<0.6) d.ed[c.id]='modern'; });
+      const va=(E.battle.abcs||[]).map(function(a){return a.cid;});
+      d.edab=pickN(va, Math.min(6, va.length));
+      d.ab=d.ab.slice(0, Math.max(0, LIMITS.ab-d.edab.length));
+    } }
+  return d;
 }
 function deckCounts(def){
   const eab=(def.edab||[]).length; const ebm=Object.values(def.edbm||{}).reduce((s,x)=>s+x,0);
@@ -2328,14 +2366,21 @@ function clampDeck(def){
 }
 function fillGaps(def){
   const k=def.d;
-  const allCh=DATA.characters[k].map(c=>c.id);
+  const allCh=poolCh(k);
   while(def.ch.length<LIMITS.ch){ const miss=allCh.filter(id=>!def.ch.includes(id)); if(!miss.length) break; def.ch.push(miss[rnd(miss.length)]); }
-  const allAb=DATA.abcs[k].map((_,i)=>i);
+  const allAb=poolAb(k);
   while(def.ab.length<LIMITS.ab){ const miss=allAb.filter(i=>!def.ab.includes(i)); if(!miss.length) break; def.ab.push(miss[rnd(miss.length)]); }
-  const allCr=DATA.crits.map((_,i)=>i);
+  const allCr=poolCr();
   while(def.cr.length<LIMITS.cr){ const miss=allCr.filter(i=>!def.cr.includes(i)); if(!miss.length) break; def.cr.push(miss[rnd(miss.length)]); }
-  const allBm=DATA.bookmarks.map((_,i)=>i);
-  while(def.bm.length<LIMITS.bm){ let miss=allBm.filter(i=>!def.bm.includes(i)); if(!miss.length) miss=allBm; def.bm.push(miss[rnd(miss.length)]); }
+  const slots=poolBmSlots();
+  while(def.bm.length<LIMITS.bm){
+    const used={}; def.bm.forEach(i=>used[i]=(used[i]||0)+1);
+    const avail=slots.filter(i=>(used[i]||0)<bmOwned(i));
+    const fresh=avail.filter(i=>!(used[i]>0));
+    const pick=(fresh.length?fresh:avail);
+    if(!pick.length) break;
+    def.bm.push(pick[rnd(pick.length)]);
+  }
   return def;
 }
 function makeDeck(def){
@@ -3196,12 +3241,29 @@ function guideScreen(){
 
 /* ---- deck builder / repository ---- */
 function critLabel(){ return DATA.crits.length?'':'none'; }
+function deckMeter(k){
+  if(sbx()) return '';
+  var chT=(DATA.characters[k]||[]).length, chG=(DATA.characters[k]||[]).filter(function(c){return deckOwnCh(k,c.id);}).length;
+  var abT=(DATA.abcs[k]||[]).length, abG=(DATA.abcs[k]||[]).map(function(_,i){return i;}).filter(function(i){return deckOwnAb(k,i);}).length;
+  var bmT=DATA.bookmarks.length, bmG=DATA.bookmarks.filter(function(_,i){return bmOwned(i)>0;}).length;
+  var crT=DATA.crits.length, crG=DATA.crits.filter(function(_,i){return ownCrit(i);}).length;
+  var eds=editionsForDeck(k), edG=0, edT=0;
+  eds.forEach(function(e){ var all=[].concat(e.battle.chars||[],e.battle.abcs||[],e.battle.bookmarks||[],e.battle.commanders||[]);
+    edT+=all.length; all.forEach(function(o){ if(edHas(o.cid)) edG++; }); });
+  var got=chG+abG+bmG+crG+edG, tot=chT+abT+bmT+crT+edT;
+  var pct=tot?Math.round(got/tot*100):0;
+  return '<div class="bd-meter"><div class="bdm-hd">\uD83D\uDCDA Collection \u2014 '+setName(k)+' <b>'+got+'/'+tot+'</b> <small>'+pct+'%</small></div>'
+    +'<div class="bdm-bar"><i style="width:'+pct+'%"></i></div>'
+    +'<div class="bdm-sub">Characters '+chG+'/'+chT+' \u00b7 Trivia '+abG+'/'+abT+' \u00b7 Bookmarks '+bmG+'/'+bmT+' \u00b7 Lenses '+crG+'/'+crT
+    +(edT?(' \u00b7 '+eds[0].name+' '+edG+'/'+edT):'')+'</div></div>';
+}
 function builderScreen(){
   const def=APP.builder.def, k=def.d, c=deckCounts(def);
   def.ed=def.ed||{}; def.edab=def.edab||[]; def.edbm=def.edbm||{};
   const edFlt=(APP.builder.edFilter||'all'); const hasEd=editionsForDeck(k).length>0; const edName=hasEd?editionsForDeck(k)[0].name:'';
   const over=t=>c[t]>LIMITS[t]?'over':'';
-  const chRow=DATA.characters[k].filter(ch=>deckOwnCh(k,ch.id)).map(ch=>{
+  const chRow=DATA.characters[k].map(ch=>{
+    if(!deckOwnCh(k,ch.id)) return `<div class="bd-chip ch lockcard" title="Locked — pull it from a ${setName(k)} pack"><span class="bd-av mono-av" style="background:${ch.accent}">${initials(ch.name)}</span><span class="bd-info"><span class="bd-nm">${ch.name}</span><span class="lk-hint">🔒 Uncommon · Bronze+ pack</span></span></div>`;
     const on=def.ch.includes(ch.id);
     const edm=edCharFor(k,ch.id);
     const isMod=!!(edm&&def.ed[ch.id]==='modern');
@@ -3213,7 +3275,8 @@ function builderScreen(){
     const tog=edm?`<span class="bd-edtog"${est}><span class="seg ${!isMod?'on':''}" data-bld="edbase:${ch.id}">Base</span><span class="seg ${isMod?'on':''}" data-bld="edmod:${ch.id}">Mod</span></span>`:'';
     return `<button class="bd-chip ch ${isMod?'bd-ed ':''}${on?'on':''}"${est} data-bld="ch:${ch.id}">${av}<span class="bd-info"><span class="bd-nm">${srcc.name}</span>${tog}</span><span class="bd-pv" data-bld="prevch:${ch.id}" title="Preview card">🔍</span><span class="bd-mk">${on?'✓':'+'}</span></button>`;
   }).join('');
-  const abRow=DATA.abcs[k].map((a,i)=>({a,i})).filter(o=>deckOwnAb(k,o.i)).map(({a,i})=>{
+  const abRow=DATA.abcs[k].map((a,i)=>{
+    if(!deckOwnAb(k,i)) return `<div class="bd-chip ab lockcard"><span class="bd-ty">🔒 LOCKED</span><span class="bd-q">Common · found in any ${setName(k)} pack</span></div>`;
     const on=def.ab.includes(i);
     return `<button class="bd-chip ab ${a.type.toLowerCase()} ${on?'on':''}" data-bld="ab:${i}" title="${a.q.replace(/"/g,'&quot;')}">
       <span class="bd-ty">${a.type==='ATTACK'?'⚔':'⛊'} ${a.power}</span><span class="bd-q">${a.q}</span><span class="bd-pv" data-bld="prevab:${i}" title="Preview card">🔍</span><span class="bd-mk">${on?'✓':'+'}</span></button>`;
@@ -3222,7 +3285,8 @@ function builderScreen(){
     return `<button class="bd-chip ab ${a.type.toLowerCase()} bd-ed bd-edcard ${on?'on':''}" style="--edp:${th.paper};--edf:${th.frame}" data-bld="edab:${a.cid.replace(/:/g,';')}" title="${a.q.replace(/"/g,'&quot;')}">
       <span class="bd-ty">${a.type==='ATTACK'?'⚔':'⛊'} ${a.power} · VOCAB</span><span class="bd-q">${a.q}</span><span class="bd-pv" data-bld="edprevab:${a.cid.replace(/:/g,';')}" title="Preview card">🔍</span><span class="bd-mk">${on?'✓':'+'}</span></button>`;
   }).join('');
-  const bmRow=DATA.bookmarks.map((b,i)=>({b,i})).filter(o=>bmOwned(o.i)>0).map(({b,i})=>{
+  const bmRow=DATA.bookmarks.map((b,i)=>{
+    if(bmOwned(i)<1) return `<div class="bd-bm lockcard"><span class="bd-bmname">🔒 ${b.name}</span><span class="lk-hint">Common · Faculty Lounge pack</span></div>`;
     const ct=def.bm.filter(x=>x===i).length;
     return `<div class="bd-bm"><span class="bd-bmname">✦ ${b.name} <small style="opacity:.6">×${bmOwned(i)}</small></span><span class="bd-pv inline" data-bld="prevbm:${i}" title="Preview card">🔍</span>
       <span class="bd-step"><button data-bld="bm-:${i}">−</button><b>${ct}</b><button data-bld="bm+:${i}">+</button></span>
@@ -3245,7 +3309,8 @@ function builderScreen(){
     const av=im?`<img class="bd-cav" src="${im.img}" style="object-position:${im.pos||'50% 16%'}">`:`<span class="bd-cav mono-av" style="background:${f.accent}">${initials(f.name)}</span>`;
     return `<button class="bd-chip crt fe bd-ed bd-edcard ${on?'on':''}" style="--edp:${th.paper};--edf:${th.frame}" data-bld="fe:${f.id}" title="${((f.passive&&f.passive.text)||'').replace(/"/g,'&quot;')}">${av}<span class="bd-nm">${f.name}<small class="fe-tag">${setName(o.ed.base)} · Modern</small></span><span class="bd-pv" data-bld="prevfe:${f.id}" title="Preview card">🔍</span><span class="bd-mk">${on?'\u2713':'+'}</span></button>`;
   }).join('');
-  const crRow=DATA.crits.map((cr,i)=>({cr,i})).filter(o=>ownCrit(o.i)).map(({cr,i})=>{
+  const crRow=DATA.crits.map((cr,i)=>{
+    if(!ownCrit(i)) return `<div class="bd-chip crt lockcard"><span class="bd-av mono-av" style="background:#4a4238">🔒</span><span class="bd-nm">${cr.name}<span class="lk-hint">Uncommon · Faculty Lounge</span></span></div>`;
     const on=def.cr.includes(i);
     const av=cr.img?`<img class="bd-cav" src="${cr.img}">`:`<span class="bd-cav mono-av" style="background:${cr.accent||'#444'}">${initials(cr.name)}</span>`;
     return `<button class="bd-chip crt ${on?'on':''}" data-bld="cr:${i}" title="${(cr.passive||'').replace(/"/g,'&quot;')}">${av}<span class="bd-nm">${cr.name}</span><span class="bd-pv" data-bld="prevcr:${i}" title="Preview card">🔍</span><span class="bd-mk">${on?'✓':'+'}</span></button>`;
@@ -3258,6 +3323,7 @@ function builderScreen(){
         ${DECK_ORDER.map(dk=>bdDeckBox(dk,k===dk)).join('')}
       </div>
     </div>
+    ${deckMeter(k)}
     <div class="bd-totals">
       <span class="${over('total')}">Total ${c.total}/${LIMITS.total}</span>
       <span class="${over('ch')}">Characters ${c.ch}/${LIMITS.ch}</span>
@@ -3771,10 +3837,13 @@ function pileModal(){
 }
 function overModal(){
   const win=S.winner==='you';
+  var qip=0;
+  if(win && APP.mode==='quick' && !S._ipPaid){ S._ipPaid=true; qip=5; META.ip=(META.ip||0)+qip; metaSave(); }
   return `<div class="modal-bg"><div class="over">
     <div class="over-title ${win?'win':'lose'}">${win?'You win!':'You lose'}</div>
     <div class="over-sub">${win?'Your shelf reigns supreme.':'Outclassed at the table — reshuffle and try again.'}</div>
     <div class="over-score">Your KOs ${S.you.kos} · Opponent KOs ${S.opp.kos}</div>
+    ${qip?`<div class="over-ip">🧠 +${qip} Intellect Points <small>(Quickplay bonus — Literary Scrimmage pays far more)</small></div>`:''}
     <div class="set-actions"><button class="bigbtn" data-do="rematch">Rematch</button><button data-do="title" class="vw-close">Change deck</button></div></div></div>`;
 }
 function settingsRows(s){
@@ -3999,7 +4068,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.opp){ APP.oppDeck=t.dataset.opp; render(); return; }
   if(t.dataset.diff){
     applyDifficultyToSettings(t.dataset.diff);
-    if(APP.mode==='quick'){ APP.customDeck=null; const keys=Object.keys(DATA.characters); APP.youDeck=keys[rnd(keys.length)]; APP.oppDeck='random'; beginBattle(); }
+    if(APP.mode==='quick'){ APP.customDeck=null; if(!APP.youDeck||APP.youDeck==='surprise'){ const keys=Object.keys(DATA.characters); APP.youDeck=keys[rnd(keys.length)]; } APP.oppDeck='random'; beginBattle(); }
     else { APP.screen='custom'; render(); }
     return;
   }
@@ -4175,16 +4244,17 @@ function collInit(){
   if(!META.bmCopies){ META.bmCopies={}; for(var k in window.START_BM) META.bmCopies[k]=window.START_BM[k]; }
   META.editionCards=META.editionCards||[]; META.foils=META.foils||0; META.packs=META.packs||0;
 }
-function ownCrit(i){ return (META.crits||[]).indexOf(+i)>=0; }
-function bmOwned(i){ return (META.bmCopies||{})[i]||0; }
+function sbx(){ try{ return APP.mode==='quick'; }catch(e){ return false; } }   /* Quick Play = full sandbox */
+function ownCrit(i){ return sbx() || (META.crits||[]).indexOf(+i)>=0; }
+function bmOwned(i){ return sbx() ? window.BM_MAX_COPIES : ((META.bmCopies||{})[i]||0); }
 
 /* ---- Locked decks: license + starter kit ---- */
 window.LOCKED_DECKS=['sherlock','othello','wonderland'];
 window.DECK_LICENSE=350;
 function deckLocked(k){ return (window.LOCKED_DECKS||[]).indexOf(k)>=0; }
-function deckUnlocked(k){ return !deckLocked(k) || (META.decks||[]).indexOf(k)>=0; }
-function deckOwnCh(k,id){ if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ch||[]).indexOf(id)>=0; }
-function deckOwnAb(k,i){ if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ab||[]).indexOf(+i)>=0; }
+function deckUnlocked(k){ return sbx() || !deckLocked(k) || (META.decks||[]).indexOf(k)>=0; }
+function deckOwnCh(k,id){ if(sbx()) return true; if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ch||[]).indexOf(id)>=0; }
+function deckOwnAb(k,i){ if(sbx()) return true; if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ab||[]).indexOf(+i)>=0; }
 function licenseDeck(k){
   collInit();
   if(!deckLocked(k)||deckUnlocked(k)) return;
@@ -5151,7 +5221,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
