@@ -395,6 +395,63 @@ body.calm-fx .thinking{opacity:1!important}
 .bdm-sub{font-family:var(--cond);font-size:11px;color:#6a5a3a}
 .over-ip{font-family:var(--cond);font-size:15px;color:#E3A92B;margin-top:6px}
 .over-ip small{display:block;font-size:11px;color:#9d8f6a}
+/* ================= STATUS BUBBLES + GLOSSARY (all sizes) ================= */
+.sbub{position:absolute;top:-9px;left:-11px;display:flex;flex-direction:column;gap:3px;z-index:16}
+.sb{width:21px;height:21px;border-radius:50%;background:#e07b28;border:2px solid var(--ink);color:#fff;
+  font-family:var(--disp);font-size:9px;display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.sb:hover{transform:scale(1.15)}
+.stx{max-width:280px}
+.stx h4{margin:0 0 6px;font-family:var(--disp);font-size:15px;color:var(--red);display:flex;align-items:center;gap:8px}
+.stx-ic{width:25px;height:25px;border-radius:50%;background:#e07b28;border:2px solid var(--ink);color:#fff;display:grid;place-items:center;font-size:11px;flex:none}
+.stx p{margin:0 0 8px;font-family:var(--cond);font-size:13px;color:#3a2f18;line-height:1.4}
+.stx-fix{background:#e8f2e8;border:1.5px dashed #4a7a4a;border-radius:7px;padding:6px 9px;font-family:var(--cond);font-size:12px;color:#2d5a2d}
+/* bench indicator circles — hidden on desktop, shown on mobile */
+.bm-hpc,.bm-stc{display:none}
+/* ================= MOBILE LAYOUT (<=760px) ================= */
+@media (max-width:760px){
+  .board-inner{padding:0 6px}
+  .side .row{display:flex;align-items:center;justify-content:center;gap:8px}
+  /* --- backstage: condensed indicator circles --- */
+  .bench{flex:0 0 60px;width:60px;display:flex;flex-direction:column;gap:6px;align-items:center}
+  .bench-mini{position:relative;width:52px;height:38px;padding:0;border-radius:7px;overflow:visible}
+  .bench-mini .bm-init{width:100%;height:100%;border-radius:5px;overflow:hidden;display:grid;place-items:center}
+  .bench-mini .bm-img{width:100%;height:100%;object-fit:cover}
+  .bench-mini .bm-hp,.bench-mini .bm-name{display:none}          /* replaced by circles */
+  .bm-hpc{display:grid;position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;
+    border:2px solid var(--ink);color:#fff;font-family:var(--disp);font-size:8px;place-items:center;z-index:3}
+  .bm-hpc.g{background:#3aa055}.bm-hpc.y{background:#e0a92b}.bm-hpc.r{background:#c0392b}.bm-hpc.k{background:#6b6b6b}
+  .bm-stc{display:grid;position:absolute;bottom:-7px;right:-7px;width:18px;height:18px;border-radius:50%;
+    background:#e07b28;border:2px solid var(--ink);color:#fff;font-family:var(--disp);font-size:8px;place-items:center;z-index:3;cursor:pointer}
+  .bench-mini.dead{filter:grayscale(1);opacity:.45}
+  /* --- active card: condensed FULL SIZE, centered --- */
+  .char{flex:0 0 154px;width:154px;margin:0 auto}
+  .pc-art{height:80px}
+  .pc-name{font-size:9px}
+  .pc-hp b{font-size:8px}
+  .mv-row,.pc-move{font-size:9px}
+  /* --- piles: deck -> bookmarks -> discard, condensed --- */
+  .piles{flex:0 0 60px;width:60px;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .deckstack,.deck-face{width:46px}
+  .discardpile{width:40px;height:32px}
+  /* --- hand: condensed fan --- */
+  .hand{display:flex;justify-content:center;align-items:flex-end;gap:0;padding:4px 0;min-height:66px}
+  .hand .card{width:46px;min-width:46px;height:62px;padding:3px;font-size:7px;
+    transition:transform .16s ease,box-shadow .16s ease;transform-origin:bottom center}
+  .hand .card:nth-child(1){transform:translateX(9px) rotate(-7deg)}
+  .hand .card:nth-child(2){transform:translateX(4px) rotate(-3.5deg)}
+  .hand .card:nth-child(4){transform:translateX(-4px) rotate(3.5deg)}
+  .hand .card:nth-child(5){transform:translateX(-9px) rotate(7deg)}
+  .hand .card:nth-child(6){transform:translateX(-13px) rotate(10deg)}
+  .hand .card:hover,.hand .card:active,.hand .card.sel{transform:translateY(-18px) scale(1.18) rotate(0deg)!important;z-index:30;
+    box-shadow:0 10px 18px rgba(0,0,0,.5)}
+  .hand .card .q,.hand .card .qtext{font-size:7px;line-height:1.1}
+  .hand-label,.hand-hint{font-size:9px}
+  /* tighten chrome */
+  .topbar{padding:4px 6px}
+  .brand small{font-size:9px}
+  .side-meta{font-size:9px}
+  .midline{padding:5px 6px}
+}
 .dc-top.cr{background:#4a2f6a;color:#f0e6ff}
 .dc-top.fo{background:linear-gradient(90deg,#b98cd8,#7ad8d8);color:#241f1b}
 .bd-totals{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;justify-content:center}
@@ -2192,7 +2249,7 @@ window.ABC_LOGO="data:image/jpeg;base64,__ABCASSET_107__";
 window.ABC_EMBLEM="data:image/jpeg;base64,__ABCASSET_108__";
 window.ABC_BG="data:image/jpeg;base64,__ABCASSET_109__";
 window.PACK_ART={silver:"data:image/png;base64,__ABCASSET_933__",gold:"data:image/png;base64,__ABCASSET_934__"};
-window.CARD_BACK="data:image/png;base64,__ABCASSET_935__";
+window.CARD_BACK="data:image/jpeg;base64,__ABCASSET_956__";
 window.ABC_CREST="data:image/jpeg;base64,__ABCASSET_110__";
 try{document.documentElement.style.setProperty('--abc-bg','url("'+window.ABC_BG+'")');}catch(e){}
 window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
@@ -3405,6 +3462,7 @@ function critChip(p,side){
 }
 function charTile(p,side){
   const ch=active(p); if(!ch) return '';
+  const sbub=statusBubbles(ch);
   const dead=ch.hp<=0, pct=Math.max(0,ch.hp/ch.maxHp*100);
   const canAct = side==='you' && S.turn==='you' && S.phase==='engage' && !S.over && !p.flags.attacked && !busy;
   const effCost = attackCostFor(side,ch.atk);
@@ -3414,6 +3472,7 @@ function charTile(p,side){
     ? `<img class="port-img" src="${ch.img}" alt="${ch.name}" style="object-position:${ch.imgpos||'50% 20%'}">`
     : `<span class="mono">${initials(ch.name)}</span>`;
   return `<div class="char ${side} ${dead?'dead':''}${ch.fe?' fe':''}${ch._boss?' boss':''}${side==='you'&&ch.hp>0?' drop-zone':''}" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"${side==='you'?` data-drop="1" data-charuid="${ch.uid}"`:''}>
+    ${sbub}
     <div class="pc-plate"><span class="pc-name">${ch._boss?'\u26a0 ALGORITHM CORE':ch.name}</span><span class="pc-hp"><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
     <div class="pc-art">${port}${ch.fe?`<span class="fe-badge" title="1st Edition \u2014 ${((ch.passive&&ch.passive.name)||'').replace(/"/g,'&quot;')}">1ST ED</span>`:''}<button class="pc-flip" data-benchinfo="${side}:${ch.uid}" title="Ability details">i</button></div>
     <div class="pips">${chargePips(ch)}</div>
@@ -3424,6 +3483,36 @@ function charTile(p,side){
         <span class="pc-mn">${ch.blk.n}</span><span class="pc-mc">${ch.blkCharge.length}/${ch.blk.cost??'–'}&#9932;</span><span class="pc-chip blue">${ch.blk.label||''}</span></div>
     </div></div>`;
 }
+
+/* ---- Status glossary (mechanics taken from the engine, not invented) ---- */
+window.STATUS_HELP={
+  tear:{n:'Tear',ic:'T',t:'Torn — this character takes <b>+10 extra damage</b> from every incoming attack.',
+        fix:'Use a bookmark like <b>Masking Tape</b>, or an ability that clears statuses.'},
+  rip:{n:'Rip',ic:'R',t:'Ripped — this character\u2019s <b>attack is disabled</b> and cannot be used.',
+       fix:'Use <b>Masking Tape</b>, or <b>swap the character out</b> \u2014 Rip clears when they leave the Active slot.'},
+  glue:{n:'Glue',ic:'G',t:'Glued — this character <b>cannot block</b>, even with enough charge on its block.',
+        fix:'Use a bookmark or ability that removes Glue.'},
+  burn:{n:'Burn',ic:'B',t:'Burning — loses <b>10 HP at the start of every turn</b>.',
+        fix:'Cleanse with a bookmark or ability, or swap the character out.'},
+  spill:{n:'Spill',ic:'S',t:'Spilled — takes <b>ongoing damage each turn</b> (usually 10 HP).',
+         fix:'Cleanse with a bookmark or ability that clears statuses.'},
+  smudge:{n:'Smudge',ic:'M',t:'Smudged — the next card you attach here is <b>spent clearing the Smudge</b> instead of charging the attack.',
+          fix:'Attach one card to burn it off, or clear it with a bookmark/ability.'}
+};
+function statusKeys(c){ var out=[]; if(!c||!c.status) return out;
+  ['tear','rip','glue','burn','spill','smudge'].forEach(function(k){ if(c.status[k]) out.push(k); }); return out; }
+function statusBubbles(c){
+  var ks=statusKeys(c); if(!ks.length) return '';
+  return '<span class="sbub">'+ks.map(function(k){
+    var h=window.STATUS_HELP[k];
+    return '<span class="sb" data-statushelp="'+k+'" title="'+h.n+'">'+h.ic+'</span>';
+  }).join('')+'</span>';
+}
+function statusHelpModal(k){
+  var h=window.STATUS_HELP[k]; if(!h) return;
+  showPreview('<div class="stx"><h4><span class="stx-ic">'+h.ic+'</span>'+h.n+'</h4><p>'+h.t+'</p>'
+    +'<div class="stx-fix">\u2714 How to clear it: '+h.fix+'</div></div>');
+}
 function benchTiles(p,mine){
   return p.team.map((c,i)=>{ if(i===p.activeIdx) return '';
     const dead=c.hp<=0, pct=Math.max(0,c.hp/c.maxHp*100);
@@ -3431,7 +3520,10 @@ function benchTiles(p,mine){
     return `<div class="bench-mini ${dead?'dead':''}${c.fe?' fe':''}${drop?' drop-zone':''}" title="${c.name}" data-benchinfo="${mine?'you':'opp'}:${c.uid}"${drop?` data-drop="1" data-charuid="${c.uid}"`:''}>
       <span class="bm-init" style="background:${c.accent}">${c.img?`<img class="bm-img" src="${c.img}" style="object-position:${c.imgpos||'50% 20%'}">`:initials(c.name)}${c.fe?'<span class="fe-mini" title="1st Edition">\u2726</span>':''}${mine&&!dead?`<button class="bm-swap" data-do="swap:${c.uid}" title="Bring to Active (one swap per turn)">\u21c4</button>`:''}</span>
       <div class="bm-hp"><div style="width:${pct}%"></div></div>
-      <span class="bm-name">${c.name.split(' ')[0]}</span></div>`; }).join('');
+      <span class="bm-name">${c.name.split(' ')[0]}</span>
+      <span class="bm-hpc ${dead?'k':(pct>=80?'g':(pct>=50?'y':'r'))}">${dead?'✕':c.hp}</span>
+      ${statusKeys(c).length?`<span class="bm-stc" data-statushelp="${statusKeys(c)[0]}">${window.STATUS_HELP[statusKeys(c)[0]].ic}</span>`:''}
+      </div>`; }).join('');
 }
 function cardBackHTML(){
   return `<span class="cb-medallion"><img src="${window.ABC_EMBLEM||''}" alt="ABC"></span><span class="cb-tag">ACADEMIC BATTLE CARDS</span>`;
@@ -4172,6 +4264,10 @@ document.addEventListener('pointerup',e=>{
   } else { _drag=null; }
 });
 document.addEventListener('pointercancel',()=>{ if(_drag) _endDrag(); });
+document.addEventListener('click',e=>{
+  const sh=e.target.closest('[data-statushelp]');
+  if(sh){ e.stopPropagation(); e.preventDefault(); statusHelpModal(sh.dataset.statushelp); }
+},true);
 document.addEventListener('input',e=>{
   const t=e.target; if(!t.dataset) return;
   if(t.dataset.audio!=null){
@@ -5247,7 +5343,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
