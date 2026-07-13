@@ -99,20 +99,20 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .pc-art .mono{font-family:var(--disp);font-size:44px;color:rgba(255,255,255,.92);text-shadow:2px 2px 0 rgba(0,0,0,.4)}
 .pc-art .port-img{width:100%;height:100%;object-fit:cover;display:block}
 /* ---- scrimmage boss: enlarged menacing tile ---- */
-.char.boss{border-color:#b5122a;box-shadow:0 0 0 2px #2a0a0e,0 6px 0 #3a0a0e,0 8px 22px rgba(120,10,20,.45);animation:bosspulse 2.4s ease-in-out infinite}
+.char.boss{border-color:#b5122a;box-shadow:0 0 0 2px #2a0a0e,0 6px 0 #3a0a0e,0 8px 20px rgba(140,20,32,.42)}
 @keyframes bosspulse{0%,100%{box-shadow:0 0 0 2px #2a0a0e,0 6px 0 #3a0a0e,0 8px 22px rgba(120,10,20,.35)}50%{box-shadow:0 0 0 2px #2a0a0e,0 6px 0 #3a0a0e,0 10px 26px rgba(200,30,50,.6)}}
 .char.boss .pc-name{background:linear-gradient(#2a0a0e,#4a0d14);color:#ffd9dd;border-color:#b5122a;font-size:12px;letter-spacing:1px;text-transform:uppercase;text-shadow:0 0 6px rgba(255,60,80,.5)}
 .char.boss .pc-art{height:168px;border-color:#b5122a;background:radial-gradient(120% 100% at 50% 20%,#241016,#0c0608)}
 body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 /* ---- boss reveal splash ---- */
-.brv-bg{background:radial-gradient(120% 90% at 50% 30%,rgba(60,6,10,.86),rgba(4,10,11,.94));z-index:60}
+.brv-bg{background:radial-gradient(120% 90% at 50% 30%,rgba(38,12,16,.9),rgba(8,11,13,.96));z-index:60}
 .brv{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;max-width:min(92vw,640px);animation:brvin .45s cubic-bezier(.2,.9,.25,1.4)}
 @keyframes brvin{0%{transform:scale(.7) translateY(14px);opacity:0}60%{opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
-.brv-tag{font-family:var(--disp);font-size:clamp(15px,4vw,22px);letter-spacing:3px;color:#ff5a6e;text-shadow:0 0 12px rgba(255,40,60,.7)}
+.brv-tag{font-family:var(--disp);font-size:clamp(15px,4vw,22px);letter-spacing:3px;color:#ff8f9c;text-shadow:0 1px 2px rgba(0,0,0,.85)}
 .brv-stage{width:100%;display:grid;place-items:center}
-.brv-art{max-width:min(88vw,600px);max-height:52vh;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 12px 26px rgba(0,0,0,.6)) drop-shadow(0 0 18px rgba(255,60,80,.25))}
-.brv-mono{width:min(70vw,300px);aspect-ratio:3/4;display:grid;place-items:center;font-family:var(--disp);font-size:56px;color:#fff;border-radius:14px;border:3px solid #b5122a;background:radial-gradient(120% 100% at 50% 25%,var(--accent,#444),#140a0c);box-shadow:0 0 26px rgba(200,30,50,.5)}
-.brv-name{font-family:var(--disp);font-size:clamp(26px,7vw,46px);color:#fff;line-height:1;text-shadow:0 2px 0 #000,0 0 16px rgba(255,80,90,.4)}
+.brv-art{max-width:min(88vw,600px);max-height:52vh;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(0,0,0,.6))}
+.brv-mono{width:min(70vw,300px);aspect-ratio:3/4;display:grid;place-items:center;font-family:var(--disp);font-size:56px;color:#fff;border-radius:14px;border:3px solid #b5122a;background:radial-gradient(120% 100% at 50% 25%,var(--accent,#444),#140a0c);box-shadow:0 6px 18px rgba(0,0,0,.5)}
+.brv-name{font-family:var(--disp);font-size:clamp(26px,7vw,46px);color:#fff;line-height:1;text-shadow:0 2px 0 #000}
 .brv-sub{font-family:var(--cond);font-style:italic;color:#e7c9cd;font-size:clamp(12px,3.4vw,16px);margin-top:-2px}
 .brv-shift{font-family:var(--cond);color:#f4e2e4;font-size:clamp(12px,3.3vw,15px);line-height:1.35;background:rgba(30,6,9,.6);border:1px solid rgba(200,60,70,.5);border-radius:9px;padding:8px 12px;max-width:min(88vw,520px)}
 .brv-shift b{color:#ff8a98}
@@ -142,7 +142,7 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .pc-chip.red{background:var(--red)} .pc-chip.blue{background:#3f7fd6}
 .pc-chip.sm{font-size:11px;padding:2px 6px;min-width:0}
 .pc-move.atk{background:#f3c7bf;color:var(--red-dk)}
-.pc-move.atk.ready{background:var(--red);color:var(--cream-hi);box-shadow:0 0 0 3px var(--gold),0 3px 0 var(--red-dk);animation:pulse 1.3s infinite}
+.pc-move.atk.ready{background:var(--red);color:var(--cream-hi);box-shadow:0 0 0 3px var(--gold),0 3px 0 var(--red-dk);animation:pulse 2.2s ease-in-out infinite}
 .pc-move.atk[disabled]{opacity:.62;cursor:not-allowed}
 .pc-move.blk{background:#bfe0e0;color:var(--teal-dk);cursor:default}
 /* ---- per-deck themes (frame & palette per novel; red/blue move chips kept for game consistency) ---- */
@@ -184,8 +184,8 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .bigbtn:active{transform:translateY(3px);box-shadow:none}
 .bigbtn.end{background:var(--red);color:var(--cream-hi);box-shadow:0 4px 0 var(--red-dk)}
 .hint{font-family:var(--cond);letter-spacing:1px;font-size:12px;color:#cfe7df;text-transform:uppercase}
-.thinking{font-family:var(--cond);letter-spacing:2px;color:var(--gold);text-transform:uppercase;animation:blink 1s infinite}
-@keyframes blink{50%{opacity:.4}}
+.thinking{font-family:var(--cond);letter-spacing:2px;color:var(--gold);text-transform:uppercase;animation:blink 2s ease-in-out infinite}
+@keyframes blink{50%{opacity:.72}}
 
 /* hand */
 .hand-wrap{position:fixed;left:0;right:0;bottom:0;padding:6px 10px 10px;background:linear-gradient(transparent,#0a2123 22%);z-index:30}
@@ -235,7 +235,7 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .lc-th i{color:var(--teal-dk);font-style:italic}
 .lc-thesis{align-self:flex-start;margin-top:3px;font-family:var(--cond);letter-spacing:.5px;font-size:11px;color:var(--ink);background:var(--gold);padding:4px 10px;border-radius:7px;border:2px solid var(--ink);box-shadow:0 2px 0 var(--gold-dk)}
 .lc-thesis.off{opacity:.45;box-shadow:none}
-.lc-thesis.met{background:var(--gold);box-shadow:0 2px 0 var(--gold-dk),0 0 12px rgba(230,200,120,.75);animation:pulse 1.4s infinite}
+.lc-thesis.met{background:var(--gold);box-shadow:0 2px 0 var(--gold-dk),0 0 12px rgba(230,200,120,.75);animation:pulse 2.2s ease-in-out infinite}
 .lc-thesis.unmet{background:#b9ad93;color:#4a4230;box-shadow:none}
 .bd-cav{width:34px;height:34px;border-radius:7px;object-fit:cover;object-position:50% 26%;border:1.5px solid var(--ink)}
 .bd-chip.crt.on{outline:2px solid var(--gold)}
@@ -374,6 +374,14 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .bdx.lk{filter:none}
 .bdx.lk:hover{transform:translateY(-3px)}
 .pk-box.lk .pk-pr{background:#6a5a3a;border-color:#8a7a5a}
+/* ---- Photosensitivity / eye-strain safety ---- */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+body.calm-fx *,body.calm-fx *::before,body.calm-fx *::after{animation:none!important}
+body.calm-fx .brv{animation:none!important}
+body.calm-fx .ready,body.calm-fx .met{box-shadow:0 0 0 3px var(--gold),0 3px 0 var(--red-dk)!important}
+body.calm-fx .thinking{opacity:1!important}
 .dc-top.cr{background:#4a2f6a;color:#f0e6ff}
 .dc-top.fo{background:linear-gradient(90deg,#b98cd8,#7ad8d8);color:#241f1b}
 .bd-totals{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;justify-content:center}
@@ -3783,6 +3791,8 @@ function settingsRows(s){
     ${row('ABC power adds to damage',`<input type="checkbox" data-set="powerAdds" ${s.powerAdds?'checked':''}>`)}
     ${row('Require trivia to attach',`<input type="checkbox" data-set="triviaOn" ${s.triviaOn?'checked':''}>`)}
     ${row('Auto-block (skip the defend prompt)',`<input type="checkbox" data-set="autoBlock" ${s.autoBlock?'checked':''}>`)}
+    <div class="set-row set-head"><span>Accessibility</span><span></span></div>
+    ${row('Reduce motion &amp; flashing',`<input type="checkbox" data-calm ${(META.calmFx?'checked':'')}>`)}
     <div class="set-row set-head"><span>Audio</span><span></span></div>
     <div class="set-row"><span>Music track</span><span class="trk-pick">
       <button type="button" class="trk-opt ${SFX.getTrack()==='lofi'?'on':''}" data-audio="track:lofi">Lofi</button>
@@ -4075,6 +4085,7 @@ document.addEventListener('input',e=>{
     else if(t.dataset.audio==='sfxvol') SFX.setSfxVol(v);
     render(); return;
   }
+  if(t.dataset.calm!=null){ META.calmFx=!!t.checked; metaSave(); applyCalmFx(); return; }
   if(t.dataset.set==null) return;
   const k=t.dataset.set; let v;
   if(t.type==='checkbox') v=t.checked; else if(t.type==='range') v=parseFloat(t.value); else v=t.value;
@@ -4559,13 +4570,14 @@ function scrimAdvanceAct(){
 /* ---- persistence ---- */
 function metaLoad(){ try{ const j=window.localStorage.getItem('abc_meta'); if(j) META=Object.assign({ip:0,unlocks:[],perks:[],loadout:[],commanders:[],packs:0,honorsMax:0,honorsCleared:0,bossSeen:[],bossKilled:[]},JSON.parse(j)); }catch(e){}
   META.stats=Object.assign({runs:0,wins:0,bossKills:0,bestAct:0,fastestMs:0},META.stats||{});
-  META.bossSeen=META.bossSeen||[]; META.bossKilled=META.bossKilled||[]; META.editionCards=META.editionCards||[]; META.mhPacks=META.mhPacks||0; META.decks=META.decks||[]; META.deckCards=META.deckCards||{}; collInit();
+  META.bossSeen=META.bossSeen||[]; META.bossKilled=META.bossKilled||[]; META.editionCards=META.editionCards||[]; META.mhPacks=META.mhPacks||0; META.decks=META.decks||[]; META.deckCards=META.deckCards||{}; collInit(); try{applyCalmFx();}catch(e){}
   if(META.honorsMax==null) META.honorsMax=0; if(META.honorsCleared==null) META.honorsCleared=0;
   if(!META.patron){ META.patron={ name:'Author_1E_'+(100+rnd(900)), card:'#LUL-'+(100+rnd(900))+'-'+(100+rnd(900)), issued:new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) }; metaSave(); }
   if((META.unlocks||[]).indexOf('hp')>=0 && (META.perks||[]).indexOf('hardy')<0){ META.perks.push('hardy'); }   // legacy migration
   validateLoadout(); }
 // Tenured Standing Orders now require clearing Honors I+ (not just collection), keeping top-end power gated behind harder content.
 function tenuredUnlocked(){ return (META.honorsCleared||0)>=1; }
+function applyCalmFx(){ try{ document.body.classList.toggle('calm-fx', !!META.calmFx); }catch(e){} }
 function metaSave(){ try{ window.localStorage.setItem('abc_meta',JSON.stringify(META)); }catch(e){} }
 function scrimSave(){ try{ if(SCRIM.active) window.localStorage.setItem('abc_scrim_run',JSON.stringify({kit:SCRIM.kit,team:SCRIM.team,deck:SCRIM.deck,artifacts:SCRIM.artifacts,map:SCRIM.map,cleared:SCRIM.cleared,act:SCRIM.act,bosses:SCRIM.bosses,lf:SCRIM.lf||0,t0:SCRIM.t0||0,honors:SCRIM.honors||0})); }catch(e){} }
 function scrimClearSave(){ try{ window.localStorage.removeItem('abc_scrim_run'); }catch(e){} }
@@ -4748,6 +4760,7 @@ function handleScrim(cmd){
   if(op==='shopset'){ APP.shopSet=a; render(); return; }
   if(op==='buy'){ var p=(a||'').split('|'); if(p.length===2) openTierPack(p[0],p[1]); return; }
   if(op==='license'){ licenseDeck(a); return; }
+  if(op==='calmfx'){ META.calmFx=!META.calmFx; metaSave(); applyCalmFx(); render(); return; }
   if(op==='packtear'){ packTear(); return; }
   if(op==='packflip'){ packFlip(+a); return; }
   if(op==='packflipall'){ packFlipAll(); return; }
@@ -5138,7 +5151,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
