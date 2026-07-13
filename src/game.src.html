@@ -407,50 +407,78 @@ body.calm-fx .thinking{opacity:1!important}
 .stx-fix{background:#e8f2e8;border:1.5px dashed #4a7a4a;border-radius:7px;padding:6px 9px;font-family:var(--cond);font-size:12px;color:#2d5a2d}
 /* bench indicator circles — hidden on desktop, shown on mobile */
 .bm-hpc,.bm-stc{display:none}
-/* ================= MOBILE LAYOUT (<=760px) ================= */
+/* ================= MOBILE: SINGLE-SCREEN LAYOUT (overrides the 560px pager) ================= */
+.cb-img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+.cardback .cb-img ~ .cb-medallion,.cardback .cb-img ~ .cb-tag{display:none}
 @media (max-width:760px){
-  .board-inner{padding:0 6px}
-  .side .row{display:flex;align-items:center;justify-content:center;gap:8px}
-  /* --- backstage: condensed indicator circles --- */
-  .bench{flex:0 0 60px;width:60px;display:flex;flex-direction:column;gap:6px;align-items:center}
-  .bench-mini{position:relative;width:52px;height:38px;padding:0;border-radius:7px;overflow:visible}
-  .bench-mini .bm-init{width:100%;height:100%;border-radius:5px;overflow:hidden;display:grid;place-items:center}
-  .bench-mini .bm-img{width:100%;height:100%;object-fit:cover}
-  .bench-mini .bm-hp,.bench-mini .bm-name{display:none}          /* replaced by circles */
-  .bm-hpc{display:grid;position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;
+  body[data-screen="play"] #game{padding:4px 6px;gap:3px}
+  body[data-screen="play"] .board{
+    flex-direction:column;overflow:hidden;scroll-snap-type:none;
+    justify-content:space-between;gap:3px;padding-bottom:0;
+  }
+  body[data-screen="play"] .board::after{content:none!important}
+  body[data-screen="play"] .board-inner{display:flex!important;flex-direction:column;width:100%;gap:3px}
+  body[data-screen="play"] .board .side{
+    min-height:0!important;flex:1;scroll-snap-align:none;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  body[data-screen="play"] .side-meta{display:block!important;text-align:center;font-size:9px;opacity:.75;margin-bottom:2px}
+  body[data-screen="play"] .row{display:flex;align-items:center;justify-content:center;gap:8px}
+  body[data-screen="play"] .midline{
+    position:static!important;bottom:auto;left:auto;right:auto;z-index:auto;
+    flex-direction:row;flex-wrap:wrap;justify-content:center;gap:5px;padding:5px 6px;box-shadow:none;
+  }
+  body[data-screen="play"] .char{flex:0 0 150px!important;width:150px!important;margin:0 auto}
+  body[data-screen="play"] .pc-art{height:76px!important}
+  body[data-screen="play"] .pc-name{font-size:9px}
+  body[data-screen="play"] .pc-hp b{font-size:8px}
+  body[data-screen="play"] .bench{flex:0 0 56px;width:56px;display:flex;flex-direction:column;gap:6px;align-items:center}
+  body[data-screen="play"] .bench-mini{position:relative;width:50px;height:36px;padding:0;border-radius:7px;overflow:visible}
+  body[data-screen="play"] .bench-mini .bm-init{width:100%;height:100%;border-radius:5px;overflow:hidden;display:grid;place-items:center}
+  body[data-screen="play"] .bench-mini .bm-img{width:100%;height:100%;object-fit:cover}
+  body[data-screen="play"] .bench-mini .bm-hp,body[data-screen="play"] .bench-mini .bm-name{display:none}
+  body[data-screen="play"] .bm-hpc{display:grid;position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;
     border:2px solid var(--ink);color:#fff;font-family:var(--disp);font-size:8px;place-items:center;z-index:3}
-  .bm-hpc.g{background:#3aa055}.bm-hpc.y{background:#e0a92b}.bm-hpc.r{background:#c0392b}.bm-hpc.k{background:#6b6b6b}
-  .bm-stc{display:grid;position:absolute;bottom:-7px;right:-7px;width:18px;height:18px;border-radius:50%;
+  body[data-screen="play"] .bm-hpc.g{background:#3aa055}
+  body[data-screen="play"] .bm-hpc.y{background:#e0a92b}
+  body[data-screen="play"] .bm-hpc.r{background:#c0392b}
+  body[data-screen="play"] .bm-hpc.k{background:#6b6b6b}
+  body[data-screen="play"] .bm-stc{display:grid;position:absolute;bottom:-7px;right:-7px;width:18px;height:18px;border-radius:50%;
     background:#e07b28;border:2px solid var(--ink);color:#fff;font-family:var(--disp);font-size:8px;place-items:center;z-index:3;cursor:pointer}
-  .bench-mini.dead{filter:grayscale(1);opacity:.45}
-  /* --- active card: condensed FULL SIZE, centered --- */
-  .char{flex:0 0 154px;width:154px;margin:0 auto}
-  .pc-art{height:80px}
-  .pc-name{font-size:9px}
-  .pc-hp b{font-size:8px}
-  .mv-row,.pc-move{font-size:9px}
-  /* --- piles: deck -> bookmarks -> discard, condensed --- */
-  .piles{flex:0 0 60px;width:60px;display:flex;flex-direction:column;align-items:center;gap:4px}
-  .deckstack,.deck-face{width:46px}
-  .discardpile{width:40px;height:32px}
-  /* --- hand: condensed fan --- */
-  .hand{display:flex;justify-content:center;align-items:flex-end;gap:0;padding:4px 0;min-height:66px}
-  .hand .card{width:46px;min-width:46px;height:62px;padding:3px;font-size:7px;
-    transition:transform .16s ease,box-shadow .16s ease;transform-origin:bottom center}
-  .hand .card:nth-child(1){transform:translateX(9px) rotate(-7deg)}
-  .hand .card:nth-child(2){transform:translateX(4px) rotate(-3.5deg)}
-  .hand .card:nth-child(4){transform:translateX(-4px) rotate(3.5deg)}
-  .hand .card:nth-child(5){transform:translateX(-9px) rotate(7deg)}
-  .hand .card:nth-child(6){transform:translateX(-13px) rotate(10deg)}
-  .hand .card:hover,.hand .card:active,.hand .card.sel{transform:translateY(-18px) scale(1.18) rotate(0deg)!important;z-index:30;
-    box-shadow:0 10px 18px rgba(0,0,0,.5)}
-  .hand .card .q,.hand .card .qtext{font-size:7px;line-height:1.1}
-  .hand-label,.hand-hint{font-size:9px}
-  /* tighten chrome */
-  .topbar{padding:4px 6px}
-  .brand small{font-size:9px}
-  .side-meta{font-size:9px}
-  .midline{padding:5px 6px}
+  body[data-screen="play"] .bench-mini.dead{filter:grayscale(1);opacity:.45}
+  body[data-screen="play"] .piles{flex:0 0 56px;width:56px;display:flex;flex-direction:column;align-items:center;gap:4px}
+  body[data-screen="play"] .deckstack{width:46px;height:62px}
+  body[data-screen="play"] .discardpile{width:40px;height:32px}
+  body[data-screen="play"] .hand-wrap{
+    position:static!important;left:auto;right:auto;bottom:auto;top:auto;z-index:auto;
+    display:flex;flex-direction:column;background:none;padding:0;flex:none;
+  }
+  body[data-screen="play"] .hand-toggle{display:none!important}
+  body[data-screen="play"] .hand-wrap .hand,
+  body[data-screen="play"] .hand-wrap.open .hand{
+    display:flex!important;max-height:none;overflow:visible!important;
+    justify-content:center;align-items:flex-end;gap:0;padding:6px 0 2px;background:none;border-top:none;box-shadow:none;
+  }
+  body[data-screen="play"] .hand .hc{
+    width:50px!important;min-width:50px!important;height:66px!important;padding:3px!important;font-size:7px;
+    transform-origin:bottom center;transition:transform .16s ease,box-shadow .16s ease;flex:none;
+  }
+  body[data-screen="play"] .hand .hc:nth-child(1){transform:translateX(10px) rotate(-8deg)}
+  body[data-screen="play"] .hand .hc:nth-child(2){transform:translateX(5px) rotate(-4deg)}
+  body[data-screen="play"] .hand .hc:nth-child(4){transform:translateX(-5px) rotate(4deg)}
+  body[data-screen="play"] .hand .hc:nth-child(5){transform:translateX(-10px) rotate(8deg)}
+  body[data-screen="play"] .hand .hc:nth-child(6){transform:translateX(-15px) rotate(12deg)}
+  body[data-screen="play"] .hand .hc:nth-child(7){transform:translateX(-20px) rotate(16deg)}
+  body[data-screen="play"] .hand .hc:hover,
+  body[data-screen="play"] .hand .hc:active,
+  body[data-screen="play"] .hand .hc.sel{transform:translateY(-20px) scale(1.25) rotate(0deg)!important;z-index:40;
+    box-shadow:0 10px 20px rgba(0,0,0,.55)}
+  body[data-screen="play"] .hc-q,body[data-screen="play"] .hc-text{font-size:7px;line-height:1.1}
+  body[data-screen="play"] .hc-name{font-size:8px}
+  body[data-screen="play"] .hc-top,body[data-screen="play"] .hc-foot{font-size:6px}
+  body[data-screen="play"] .topbar{padding:3px 6px}
+  body[data-screen="play"] .topbar small{display:none}
+  body[data-screen="play"] .logtoggle{transform:scale(.8);transform-origin:top right}
 }
 .dc-top.cr{background:#4a2f6a;color:#f0e6ff}
 .dc-top.fo{background:linear-gradient(90deg,#b98cd8,#7ad8d8);color:#241f1b}
@@ -3526,6 +3554,7 @@ function benchTiles(p,mine){
       </div>`; }).join('');
 }
 function cardBackHTML(){
+  if(window.CARD_BACK) return `<img class="cb-img" src="${window.CARD_BACK}" alt="ABC">`;
   return `<span class="cb-medallion"><img src="${window.ABC_EMBLEM||''}" alt="ABC"></span><span class="cb-tag">ACADEMIC BATTLE CARDS</span>`;
 }
 function deckStack(p,sideKey){
@@ -3877,7 +3906,7 @@ function fitBoard(){
   const board=document.querySelector('body[data-screen="play"] .board');
   const inner=board&&board.querySelector('.board-inner');
   if(!board||!inner) return;
-  if(window.matchMedia && window.matchMedia('(max-width:560px)').matches) { inner.style.transform=''; inner.style.width=''; return; } // pager mode scrolls by design
+  /* single-screen mobile: scale to fit rather than paging */ // pager mode scrolls by design
   inner.style.transform=''; inner.style.width='';
   const availH=board.clientHeight, availW=board.clientWidth;
   const needH=inner.scrollHeight, needW=inner.scrollWidth;
