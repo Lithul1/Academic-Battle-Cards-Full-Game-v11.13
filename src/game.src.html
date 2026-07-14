@@ -606,7 +606,8 @@ body.dragging-abc{cursor:grabbing}
   body.dragging-abc .drop-zone{outline:3px dashed rgba(230,184,92,.75)!important;outline-offset:3px}
   body.dragging-abc .drop-zone.dragover{outline:4px solid #E6B85C!important;box-shadow:0 0 22px rgba(230,184,92,.8)!important}
   /* the drag ghost should sit above the finger, not under it */
-  .drag-ghost{transform:translate(-50%,-160%)!important;font-size:15px!important;padding:8px 12px!important}
+  .drag-ghost{transform:translate(-50%,-135%)!important;font-size:14px!important;padding:6px 10px!important}
+  .drag-dot{position:fixed;z-index:9998;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:2px solid #E6B85C;background:rgba(230,184,92,.35);pointer-events:none;box-shadow:0 0 8px rgba(230,184,92,.7)}
 }
 .hv-acts{display:flex;gap:10px;align-items:center}
 .hv-play{font-family:var(--disp);font-size:14px;letter-spacing:1px;background:var(--gold);color:var(--ink);
@@ -3306,6 +3307,80 @@ function checkKO(p,side){
 }
 
 /* ---------------- AI ---------------- */
+
+/* ================= AI PROFILES — difficulty changes BEHAVIOUR, not just dice ================= */
+window.AI_PROFILES={
+  passfail:     {name:'Pass / Fail',     bm:['heal'],                                   commit:false, lethal:false, cleanse:false, retreat:false, inflictChance:0},
+  honorroll:    {name:'Honor Roll',      bm:['heal','boost','support'],                 commit:false, lethal:true,  cleanse:true,  retreat:false, inflictChance:0.35},
+  deanslist:    {name:"Dean's List",     bm:['heal','boost','support','status','item'], commit:true,  lethal:true,  cleanse:true,  retreat:true,  inflictChance:0.75},
+  valedictorian:{name:'Valedictorian',   bm:['heal','boost','support','status','item','utility','reset'],
+                                                                                        commit:true,  lethal:true,  cleanse:true,  retreat:true,  inflictChance:1.0}
+};
+/* the game's own taxonomy -> AI roles */
+window.BM_CLEANSE=['maskingtape','restoration','completerewrite','proofread'];
+window.BM_HEAL=['heal','defib','revised'];
+function aiProfile(){
+  var d=(APP && APP.diff) || (S && S.settings && S.settings.diffKey) || 'honorroll';
+  return window.AI_PROFILES[d] || window.AI_PROFILES.honorroll;
+}
+function bmRole(c){
+  if(!c || c.cat!=='bookmark') return null;
+  var e=c.effect, k=(c.kind||'').toLowerCase();
+  if(window.BM_CLEANSE.indexOf(e)>=0) return 'cleanse';
+  if(window.BM_HEAL.indexOf(e)>=0) return 'heal';
+  if(k==='status') return 'status';
+  if(k==='boost') return 'boost';
+  if(k==='support') return 'support';
+  if(k==='item') return 'item';
+  if(k==='reset') return 'reset';
+  return 'utility';
+}
+/* pick ONE bookmark to play, by priority, given the board */
+function aiPickBookmark(p, prof){
+  var act=active(p), foe=S.you, fa=active(foe);
+  var hand=p.hand.map(function(c,i){return {c:c,i:i,role:bmRole(c)};}).filter(function(o){return o.role;});
+  if(!hand.length) return -1;
+  var allow=function(role){ return prof.bm.indexOf(role)>=0 || role==='cleanse'&&prof.cleanse; };
+  var find=function(role,test){
+    for(var j=0;j<hand.length;j++){
+      var o=hand[j];
+      if(o.role!==role) continue;
+      if(!allow(role) && !(role==='cleanse'&&prof.cleanse)) continue;
+      if(test && !test(o.c)) continue;
+      return o.i;
+    }
+    return -1;
+  };
+  var hurt=act.hp<act.maxHp*0.45;
+  var statused=Object.keys(act.status||{}).some(function(k){return ['tear','rip','glue','burn','spill','smudge'].indexOf(k)>=0;});
+  var ready=act.atkCharge.length>=act.atk.cost;
+  var i;
+  /* 1. clear a crippling status (Rip disables the attack entirely) */
+  if(prof.cleanse && statused){ i=find('cleanse'); if(i>=0) return i; }
+  /* 2. survive */
+  if(hurt){ i=find('heal'); if(i>=0) return i; }
+  /* 3. about to swing -> buff it */
+  if(ready){ i=find('boost'); if(i>=0) return i;
+             i=find('item', function(c){return c.effect==='supercharge';}); if(i>=0) return i; }
+  /* 4. pressure the player with a status */
+  if(fa && fa.hp>0 && Math.random()<prof.inflictChance){ i=find('status'); if(i>=0) return i; }
+  /* 5. the player is charged and dangerous -> defend */
+  var foeReady=fa && fa.atkCharge && fa.atkCharge.length>=fa.atk.cost;
+  if(foeReady){ i=find('support'); if(i>=0) return i; }
+  /* 6. value / tempo */
+  i=find('item'); if(i>=0) return i;
+  i=find('utility'); if(i>=0) return i;
+  i=find('reset'); if(i>=0) return i;
+  return -1;
+}
+/* would this attack finish the enemy Active? */
+function aiLethal(p){
+  var act=active(p), fa=active(S.you); if(!act||!fa) return false;
+  if(act.atkCharge.length < act.atk.cost) return false;
+  var dmg=(act.atk.dmg||0) + (fa.status && fa.status.tear ? 10 : 0);
+  return dmg >= fa.hp;
+}
+
 function aiTurn(){
   if(!S||S.over) return; busy=true; armAiWatch(); doDraw();
   setTimeout(()=>{
@@ -3315,13 +3390,27 @@ function aiTurn(){
     if(!p.crit){ const ci=p.hand.findIndex(c=>c.cat==='crit'); if(ci>=0) playCrit('opp',ci); }
     // bring a 1st Edition anchor Active when it makes sense (once/turn)
     if(!p.flags.swapped && !active(p).status.glue){ const a=active(p); const feIdx=p.team.findIndex((c,i)=>i!==p.activeIdx && c.fe && c.hp>0 && !c.status.rip && !(c.passive&&c.passive.benchCostAura)); if(feIdx>=0 && (!a.fe) && (a.hp<=a.maxHp*0.5)){ doSwitch(p,feIdx); p.flags.swapped=true; pushLog(`Opponent brings ${p.team[feIdx].name} (1st Edition) to the front.`); } }
+    const prof=aiProfile();
+    // DEFENSIVE RETREAT: a Ripped active cannot attack at all — swap it out (Rip clears on leaving)
+    if(prof.retreat && !p.flags.swapped){
+      const a0=active(p);
+      const crippled = a0.status.rip || (a0.hp<a0.maxHp*0.25 && p.team.filter((c,i)=>i!==p.activeIdx && c.hp>0).length);
+      if(crippled){
+        const alt=p.team.findIndex((c,i)=>i!==p.activeIdx && c.hp>0 && !c.status.rip);
+        if(alt>=0){ try{ doSwitch(p,alt); p.flags.swapped=true; pushLog('Opponent pulls back a crippled character.'); }catch(e){} }
+      }
+    }
     const step=()=>{
       if(!S||S.over){ busy=false; return; }
       const act=active(p);
-      // play a supercharger if it has a ready attack
-      const sc=p.hand.findIndex(c=>c.cat==='bookmark'&&c.effect==='supercharge');
-      if(sc>=0 && act.atkCharge.length>=act.atk.cost && !p.flags.supercharge){ playBookmark('opp',sc); }
-      const needAtk=act.atkCharge.length<=act.blkCharge.length;
+      // ---- BOOKMARK BRAIN: priority-driven, uses the whole card pool (was: supercharge + heal only) ----
+      const bi=aiPickBookmark(p, prof);
+      if(bi>=0 && (p.flags.bmCount||0)<2){ try{ playBookmark('opp',bi); }catch(e){} }
+      // ---- CHARGE PLAN ----
+      // commit: build the ATTACK to lethal first, then block. (was: alternate atk/blk -> never threatened)
+      const needAtk = prof.commit
+        ? (act.atkCharge.length < act.atk.cost)
+        : (act.atkCharge.length <= act.blkCharge.length);
       let pick=p.hand.findIndex(c=>c.cat==='abc' && (needAtk?c.type==='ATTACK':c.type==='BLOCK'));
       if(pick<0) pick=p.hand.findIndex(c=>c.cat==='abc');
       if(p.attachesLeft>0 && pick>=0 && guard<9){ guard++;
@@ -3329,8 +3418,6 @@ function aiTurn(){
         const ok=useFree?true:(Math.random()<S.settings.aiAccuracy);
         attach('opp',pick,ok||!S.settings.triviaOn); setTimeout(step,400);
       } else {
-        const heal=p.hand.findIndex(c=>c.cat==='bookmark'&&c.effect==='heal');
-        if(act.hp<act.maxHp*0.4 && heal>=0) playBookmark('opp',heal);
         setTimeout(aiEngage,400);
       }
     }; step();
@@ -4212,8 +4299,8 @@ function flash(side){ const el=$(`.char.${side}`); if(el){ el.classList.remove('
 /* ---------------- events ---------------- */
 function deckForPlay(){
   if(APP.customDeck) return clone(APP.customDeck);
-  if(APP.mode==='quick') return randomDeck(APP.youDeck);            // quickplay: fresh composition every battle
-  if(APP.youDeck==='surprise'){ const k=DECK_ORDER[rnd(DECK_ORDER.length)]; return randomDeck(k); }  // custom-play randomizer
+  if(APP.youDeck==='surprise'){ const k=DECK_ORDER[rnd(DECK_ORDER.length)]; return randomDeck(k); }  // random SET (quick or custom)
+  if(APP.mode==='quick') return randomDeck(APP.youDeck);            // quickplay: fresh composition of the chosen set
   return defaultDeck(APP.youDeck);
 }
 const DIFFICULTY = {
@@ -4363,7 +4450,10 @@ function hidePreview(){ const o=document.getElementById('cardPreview'); if(o) o.
 let suppressNextClick=false;
 document.addEventListener('click',e=>{
   try{ SFX.unlock(); }catch(_){}
-  if(suppressNextClick){ suppressNextClick=false; return; }
+  if(suppressNextClick){ suppressNextClick=false;
+    // ...but never swallow a real UI control (close buttons etc.) — only bare board taps
+    if(!(e.target.closest && e.target.closest('[data-do]'))) return;
+  }
   if(e.target.classList && e.target.classList.contains('modal-bg') && S && S._benchView){ S._benchView=null; render(); return; }
   const t=e.target.closest('[data-do],[data-idx],[data-act],[data-ans],[data-def],[data-pick],[data-deck],[data-opp],[data-diff],[data-pile],[data-bld],[data-audio],[data-benchinfo],[data-scrim]');
   if(!t) return;
@@ -4427,6 +4517,7 @@ document.addEventListener('click',e=>{
 /* ---------- pointer drag: ABC card → any of your living characters (active or backstage) ---------- */
 let _drag=null;
 function _endDrag(){ if(_drag&&_drag.active) window._dragJustEnded=Date.now();
+  if(_drag&&_drag.dot&&_drag.dot.parentNode) _drag.dot.parentNode.removeChild(_drag.dot);
   try{ if(_drag&&_drag.capEl&&_drag.pid!=null) _drag.capEl.releasePointerCapture(_drag.pid); }catch(err){}
   document.body.classList.remove('maybe-drag');
   if(_drag&&_drag.ghost&&_drag.ghost.parentNode) _drag.ghost.parentNode.removeChild(_drag.ghost); document.body.classList.remove('dragging-abc'); document.querySelectorAll('.drop-zone.dragover').forEach(el=>el.classList.remove('dragover')); _drag=null; }
@@ -4444,10 +4535,14 @@ document.addEventListener('pointermove',e=>{
     if(Math.hypot(e.clientX-_drag.sx,e.clientY-_drag.sy) < (window.matchMedia('(pointer:coarse)').matches?14:8)) return;
     _drag.active=true;
     const g=document.createElement('div'); g.className='drag-ghost'; g.textContent=_drag.label;
-    document.body.appendChild(g); _drag.ghost=g; document.body.classList.add('dragging-abc');
+    document.body.appendChild(g); _drag.ghost=g;
+    const dot=document.createElement('div'); dot.className='drag-dot';
+    document.body.appendChild(dot); _drag.dot=dot;
+    document.body.classList.add('dragging-abc');
   }
   e.preventDefault();
   if(_drag.ghost){ _drag.ghost.style.left=e.clientX+'px'; _drag.ghost.style.top=e.clientY+'px'; }
+  if(_drag.dot){ _drag.dot.style.left=e.clientX+'px'; _drag.dot.style.top=e.clientY+'px'; }
   document.querySelectorAll('.drop-zone.dragover').forEach(el=>el.classList.remove('dragover'));
   const hit=document.elementFromPoint(e.clientX,e.clientY), dz=hit&&hit.closest('.drop-zone[data-charuid]');
   if(dz) dz.classList.add('dragover');
@@ -5543,7 +5638,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
