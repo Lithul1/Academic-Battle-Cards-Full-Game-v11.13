@@ -484,16 +484,22 @@ body.calm-fx .thinking{opacity:1!important}
 }
 /* ---- Hand-card preview: tap to read it before playing ---- */
 .hand-view{display:flex;flex-direction:column;align-items:center;gap:12px;max-height:92vh}
-.hv-card{display:flex;justify-content:center}
+.hv-card{display:block}                       /* NOT flex — .hc sizes by flex-basis, which was winning */
 .hand-view .hc{
-  width:250px!important;min-width:250px!important;height:auto!important;min-height:0!important;
-  max-height:none!important;padding:12px!important;font-size:15px!important;
-  transform:none!important;cursor:default;pointer-events:none;box-shadow:0 14px 34px rgba(0,0,0,.6)!important;
-  display:flex!important;flex-direction:column;gap:7px;
+  flex:none!important;flex-basis:auto!important;                 /* the real size lever */
+  width:min(86vw,290px)!important;min-width:0!important;
+  height:auto!important;min-height:0!important;max-height:none!important;
+  padding:14px!important;font-size:15px!important;
+  opacity:1!important;filter:none!important;                     /* spent cards were 45% transparent */
+  transform:none!important;cursor:default;pointer-events:none;
+  box-shadow:0 14px 34px rgba(0,0,0,.6)!important;
+  display:flex!important;flex-direction:column;gap:8px;overflow:visible!important;
 }
-.hand-view .hc-name{font-size:19px!important;line-height:1.15}
-.hand-view .hc-q,.hand-view .hc-text{font-size:14px!important;line-height:1.4;white-space:normal}
-.hand-view .hc-top,.hand-view .hc-foot{font-size:11px!important;letter-spacing:1px}
+.hand-view .hc-name{font-size:20px!important;line-height:1.2;white-space:normal!important}
+.hand-view .hc-q,.hand-view .hc-text{font-size:15px!important;line-height:1.45;white-space:normal!important;
+  -webkit-line-clamp:unset!important;overflow:visible!important;display:block!important}
+.hand-view .hc-top,.hand-view .hc-foot{font-size:12px!important;letter-spacing:1px;opacity:1!important}
+.hand-view .hc-art,.hand-view .hc img{max-width:100%;height:auto}
 .hv-acts{display:flex;gap:10px;align-items:center}
 .hv-play{font-family:var(--disp);font-size:14px;letter-spacing:1px;background:var(--gold);color:var(--ink);
   border:3px solid var(--ink);border-radius:10px;padding:10px 18px;box-shadow:0 4px 0 var(--gold-dk);cursor:pointer}
@@ -501,7 +507,7 @@ body.calm-fx .thinking{opacity:1!important}
 .hv-close{font-family:var(--cond);font-size:14px;letter-spacing:1px;background:var(--cream);color:var(--ink);
   border:3px solid var(--ink);border-radius:10px;padding:10px 16px;box-shadow:0 4px 0 rgba(40,25,12,.5);cursor:pointer}
 .hv-close:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(40,25,12,.5)}
-@media (max-width:760px){ .hand-view .hc{width:min(78vw,250px)!important;min-width:0!important} }
+
 .dc-top.cr{background:#4a2f6a;color:#f0e6ff}
 .dc-top.fo{background:linear-gradient(90deg,#b98cd8,#7ad8d8);color:#241f1b}
 .bd-totals{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;justify-content:center}
@@ -3958,7 +3964,7 @@ function handViewModal(){
   return `<div class="modal-bg" data-do="closehand"><div class="hand-view">
     <div class="hv-card">${handCard(c,i)}</div>
     <div class="hv-acts">
-      <button class="hv-play" data-do="playhand">\u25b6 Play this card</button>
+      <button class="hv-play" data-do="playhand">\u25b6 Play card</button>
       <button class="hv-close" data-do="closehand">Close \u2715</button>
     </div></div></div>`;
 }
