@@ -410,7 +410,7 @@ body.calm-fx .thinking{opacity:1!important}
 /* ================= MOBILE: SINGLE-SCREEN LAYOUT (overrides the 560px pager) ================= */
 .cb-img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
 .cardback .cb-img ~ .cb-medallion,.cardback .cb-img ~ .cb-tag{display:none}
-@media (max-width:760px){
+@media (max-width:760px), (pointer:coarse) and (max-width:1400px){
   body[data-screen="play"] #game{padding:4px 6px;gap:3px}
   body[data-screen="play"] .board{
     flex-direction:column;overflow:hidden;scroll-snap-type:none;
@@ -511,6 +511,71 @@ body.calm-fx .thinking{opacity:1!important}
 .hvi-row.th b{color:#8a6a2a}
 .hvi-row.rw{background:#e8f2e8;border-color:#3f6b4a}
 .hvi-row.rw b{color:#2d5a2d}
+/* ================= TABLET (iPad): same single-screen UI, scaled up ================= */
+@media (pointer:coarse) and (min-width:761px) and (max-width:1400px){
+  body[data-screen="play"] #game{padding:10px 14px;gap:8px}
+  body[data-screen="play"] .board{gap:8px}
+  body[data-screen="play"] .board-inner{gap:8px}
+  body[data-screen="play"] .row{gap:20px}
+  body[data-screen="play"] .side-meta{font-size:13px;margin-bottom:6px}
+  /* active card — the centrepiece, comfortably readable */
+  body[data-screen="play"] .side .char{flex:0 0 230px!important;width:230px!important}
+  body[data-screen="play"] .side .pc-art{height:130px!important}
+  body[data-screen="play"] .side .pc-name{font-size:14px}
+  body[data-screen="play"] .side .pc-hp b{font-size:12px}
+  /* backstage — bigger tiles + bigger indicator circles */
+  body[data-screen="play"] .bench{flex:0 0 90px;width:90px;gap:12px}
+  body[data-screen="play"] .bench-mini{width:80px;height:58px}
+  body[data-screen="play"] .bm-hpc{width:28px;height:28px;font-size:12px;top:-9px;right:-9px}
+  body[data-screen="play"] .bm-stc{width:25px;height:25px;font-size:11px;bottom:-9px;right:-9px}
+  body[data-screen="play"] .sb{width:28px;height:28px;font-size:12px}
+  body[data-screen="play"] .sbub{top:-12px;left:-14px;gap:5px}
+  /* piles */
+  body[data-screen="play"] .piles{flex:0 0 90px;width:90px;gap:8px}
+  body[data-screen="play"] .deckstack{width:72px;height:98px}
+  body[data-screen="play"] .discardpile{width:62px;height:50px}
+  /* hand — larger cards, gentler fan, easy to grab */
+  body[data-screen="play"] .hand-wrap .hand,
+  body[data-screen="play"] .hand-wrap.open .hand{padding:12px 0 6px}
+  body[data-screen="play"] .hand .hc{
+    width:96px!important;min-width:96px!important;height:126px!important;padding:7px!important;font-size:11px!important;
+  }
+  body[data-screen="play"] .hand .hc:nth-child(1){transform:translateX(8px) rotate(-6deg)}
+  body[data-screen="play"] .hand .hc:nth-child(2){transform:translateX(4px) rotate(-3deg)}
+  body[data-screen="play"] .hand .hc:nth-child(4){transform:translateX(-4px) rotate(3deg)}
+  body[data-screen="play"] .hand .hc:nth-child(5){transform:translateX(-8px) rotate(6deg)}
+  body[data-screen="play"] .hand .hc:nth-child(6){transform:translateX(-12px) rotate(9deg)}
+  body[data-screen="play"] .hand .hc:nth-child(7){transform:translateX(-16px) rotate(12deg)}
+  body[data-screen="play"] .hand .hc:hover,
+  body[data-screen="play"] .hand .hc:active,
+  body[data-screen="play"] .hand .hc.sel{transform:translateY(-26px) scale(1.16) rotate(0deg)!important}
+  body[data-screen="play"] .hc-q,body[data-screen="play"] .hc-text{font-size:11px;line-height:1.25}
+  body[data-screen="play"] .hc-name{font-size:12px}
+  body[data-screen="play"] .hc-top,body[data-screen="play"] .hc-foot{font-size:9px}
+  /* chrome + phase strip can breathe */
+  body[data-screen="play"] .topbar{padding:6px 12px}
+  body[data-screen="play"] .topbar small{display:inline}
+  body[data-screen="play"] .midline{gap:10px;padding:9px 12px;font-size:14px}
+  body[data-screen="play"] .logtoggle{transform:none}
+  /* previews scale with the screen */
+  .hand-view .hc{width:min(52vw,360px)!important;font-size:18px!important;padding:18px!important}
+  .hand-view .hc-name{font-size:24px!important}
+  .hand-view .hc-q,.hand-view .hc-text{font-size:17px!important}
+  .hv-info{width:min(52vw,360px)}
+  .hvi-row p{font-size:15px}
+  body[data-screen="play"] .bench-view.char{width:min(60vw,420px)!important}
+  .hv-play,.hv-close{font-size:17px;padding:13px 24px}
+  /* drop targets are already generous at this size */
+  body[data-screen="play"] .bench-mini.drop-zone::after{inset:-10px}
+}
+/* iPad landscape is short — keep everything on one screen */
+@media (pointer:coarse) and (min-width:1000px) and (max-height:840px){
+  body[data-screen="play"] .side .char{flex:0 0 200px!important;width:200px!important}
+  body[data-screen="play"] .side .pc-art{height:104px!important}
+  body[data-screen="play"] .hand .hc{width:84px!important;min-width:84px!important;height:110px!important}
+  body[data-screen="play"] .bench-mini{width:72px;height:50px}
+  body[data-screen="play"] .deckstack{width:62px;height:84px}
+}
 /* ================= TOUCH-DRAG COMFORT (iOS) ================= */
 /* iOS long-press pops the callout/magnifier and kills the drag — disable it on cards */
 .hc,.bench-mini,.char{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
@@ -520,7 +585,7 @@ body.maybe-drag .hand .hc:active,
 body.dragging-abc .hand .hc:active,
 body.dragging-abc .hand .hc:hover{transform:none!important;box-shadow:none!important}
 body.dragging-abc{cursor:grabbing}
-@media (max-width:760px){
+@media (max-width:760px), (pointer:coarse) and (max-width:1400px){
   /* every hand card: no scroll-hijack, no iOS text selection */
   body[data-screen="play"] .hand .hc{touch-action:none;-webkit-touch-callout:none}
   /* bigger, easier-to-hit cards + less overlap (they were 50px and heavily stacked) */
