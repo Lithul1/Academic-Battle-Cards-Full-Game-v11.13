@@ -500,6 +500,38 @@ body.calm-fx .thinking{opacity:1!important}
   -webkit-line-clamp:unset!important;overflow:visible!important;display:block!important}
 .hand-view .hc-top,.hand-view .hc-foot{font-size:12px!important;letter-spacing:1px;opacity:1!important}
 .hand-view .hc-art,.hand-view .hc img{max-width:100%;height:auto}
+/* ================= TOUCH-DRAG COMFORT (iOS) ================= */
+/* iOS long-press pops the callout/magnifier and kills the drag — disable it on cards */
+.hc,.bench-mini,.char{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.hc.abc.drag-src{touch-action:none}
+/* while a drag is starting/running, don't let the card leap around under the finger */
+body.maybe-drag .hand .hc:active,
+body.dragging-abc .hand .hc:active,
+body.dragging-abc .hand .hc:hover{transform:none!important;box-shadow:none!important}
+body.dragging-abc{cursor:grabbing}
+@media (max-width:760px){
+  /* every hand card: no scroll-hijack, no iOS text selection */
+  body[data-screen="play"] .hand .hc{touch-action:none;-webkit-touch-callout:none}
+  /* bigger, easier-to-hit cards + less overlap (they were 50px and heavily stacked) */
+  body[data-screen="play"] .hand .hc{width:58px!important;min-width:58px!important;height:74px!important}
+  body[data-screen="play"] .hand .hc:nth-child(1){transform:translateX(6px) rotate(-6deg)}
+  body[data-screen="play"] .hand .hc:nth-child(2){transform:translateX(3px) rotate(-3deg)}
+  body[data-screen="play"] .hand .hc:nth-child(4){transform:translateX(-3px) rotate(3deg)}
+  body[data-screen="play"] .hand .hc:nth-child(5){transform:translateX(-6px) rotate(6deg)}
+  body[data-screen="play"] .hand .hc:nth-child(6){transform:translateX(-9px) rotate(9deg)}
+  body[data-screen="play"] .hand .hc:nth-child(7){transform:translateX(-12px) rotate(12deg)}
+  /* DROP TARGETS: bench minis were 50x36 — far too small for a fingertip.
+     Grow the hit area invisibly without changing the visual size. */
+  body[data-screen="play"] .bench-mini.drop-zone::after{
+    content:"";position:absolute;inset:-12px;border-radius:12px;
+  }
+  body[data-screen="play"] .side .char.drop-zone{position:relative}
+  /* make the highlight unmistakable on a small screen */
+  body.dragging-abc .drop-zone{outline:3px dashed rgba(230,184,92,.75)!important;outline-offset:3px}
+  body.dragging-abc .drop-zone.dragover{outline:4px solid #E6B85C!important;box-shadow:0 0 22px rgba(230,184,92,.8)!important}
+  /* the drag ghost should sit above the finger, not under it */
+  .drag-ghost{transform:translate(-50%,-160%)!important;font-size:15px!important;padding:8px 12px!important}
+}
 .hv-acts{display:flex;gap:10px;align-items:center}
 .hv-play{font-family:var(--disp);font-size:14px;letter-spacing:1px;background:var(--gold);color:var(--ink);
   border:3px solid var(--ink);border-radius:10px;padding:10px 18px;box-shadow:0 4px 0 var(--gold-dk);cursor:pointer}
@@ -4297,21 +4329,26 @@ document.addEventListener('click',e=>{
   if(t.dataset.pick!=null){ const v=t.dataset.pick; resolvePick(isNaN(+v)?v:+v); return; }
   if(t.dataset.act==='attack'){ performAttack('you','atk'); return; }
   if(t.dataset.pile){ S.viewPile=t.dataset.pile; render(); return; }
-  if(t.dataset.idx!=null){ S._handView=+t.dataset.idx; render(); return; }
+  if(t.dataset.idx!=null){ if(window._dragJustEnded && Date.now()-window._dragJustEnded < 400) return; S._handView=+t.dataset.idx; render(); return; }
 });
 /* ---------- pointer drag: ABC card → any of your living characters (active or backstage) ---------- */
 let _drag=null;
-function _endDrag(){ if(_drag&&_drag.ghost&&_drag.ghost.parentNode) _drag.ghost.parentNode.removeChild(_drag.ghost); document.body.classList.remove('dragging-abc'); document.querySelectorAll('.drop-zone.dragover').forEach(el=>el.classList.remove('dragover')); _drag=null; }
+function _endDrag(){ if(_drag&&_drag.active) window._dragJustEnded=Date.now();
+  try{ if(_drag&&_drag.capEl&&_drag.pid!=null) _drag.capEl.releasePointerCapture(_drag.pid); }catch(err){}
+  document.body.classList.remove('maybe-drag');
+  if(_drag&&_drag.ghost&&_drag.ghost.parentNode) _drag.ghost.parentNode.removeChild(_drag.ghost); document.body.classList.remove('dragging-abc'); document.querySelectorAll('.drop-zone.dragover').forEach(el=>el.classList.remove('dragover')); _drag=null; }
 document.addEventListener('pointerdown',e=>{
   if(!S||S.turn!=='you'||S.phase!=='strategize'||busy) return;
   const el=e.target.closest('.hc.abc.drag-src[data-idx]'); if(!el) return;
   const idx=+el.dataset.idx, card=S.you.hand[idx]; if(!card) return;
   _drag={idx, sx:e.clientX, sy:e.clientY, pid:e.pointerId, active:false, label:`${card.type==='ATTACK'?'⚔':'⛊'} ${card.power}`};
+  try{ el.setPointerCapture(e.pointerId); _drag.capEl=el; }catch(err){}   /* keeps the drag alive when the finger leaves the card */
+  document.body.classList.add('maybe-drag');
 });
 document.addEventListener('pointermove',e=>{
   if(!_drag||_drag.pid!==e.pointerId) return;
   if(!_drag.active){
-    if(Math.hypot(e.clientX-_drag.sx,e.clientY-_drag.sy)<8) return;
+    if(Math.hypot(e.clientX-_drag.sx,e.clientY-_drag.sy) < (window.matchMedia('(pointer:coarse)').matches?14:8)) return;
     _drag.active=true;
     const g=document.createElement('div'); g.className='drag-ghost'; g.textContent=_drag.label;
     document.body.appendChild(g); _drag.ghost=g; document.body.classList.add('dragging-abc');
