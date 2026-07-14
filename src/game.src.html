@@ -483,7 +483,7 @@ body.calm-fx .thinking{opacity:1!important}
   body[data-screen="play"] .logtoggle{transform:scale(.8);transform-origin:top right}
 }
 /* ---- Hand-card preview: tap to read it before playing ---- */
-.hand-view{display:flex;flex-direction:column;align-items:center;gap:12px;max-height:92vh}
+.hand-view{display:flex;flex-direction:column;align-items:center;gap:11px;max-height:92vh;overflow-y:auto;padding:4px}
 .hv-card{display:block}                       /* NOT flex — .hc sizes by flex-basis, which was winning */
 .hand-view .hc{
   flex:none!important;flex-basis:auto!important;                 /* the real size lever */
@@ -500,6 +500,17 @@ body.calm-fx .thinking{opacity:1!important}
   -webkit-line-clamp:unset!important;overflow:visible!important;display:block!important}
 .hand-view .hc-top,.hand-view .hc-foot{font-size:12px!important;letter-spacing:1px;opacity:1!important}
 .hand-view .hc-art,.hand-view .hc img{max-width:100%;height:auto}
+/* card details under the preview (crit passive/thesis/reward, bookmark effect) */
+.hv-info{width:min(86vw,290px);display:flex;flex-direction:column;gap:7px}
+.hvi-row{background:var(--cream);border:2.5px solid var(--ink);border-radius:9px;padding:8px 10px;
+  box-shadow:0 3px 0 rgba(40,25,12,.45)}
+.hvi-row b{display:block;font-family:var(--cond);font-size:11px;letter-spacing:.6px;text-transform:uppercase;
+  color:#7a6a4a;margin-bottom:3px}
+.hvi-row p{margin:0;font-family:Georgia,serif;font-size:13.5px;line-height:1.4;color:#241F1B}
+.hvi-row.th{background:#f3ead4;border-color:#8a6a2a}
+.hvi-row.th b{color:#8a6a2a}
+.hvi-row.rw{background:#e8f2e8;border-color:#3f6b4a}
+.hvi-row.rw b{color:#2d5a2d}
 /* ================= TOUCH-DRAG COMFORT (iOS) ================= */
 /* iOS long-press pops the callout/magnifier and kills the drag — disable it on cards */
 .hc,.bench-mini,.char{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
@@ -3990,11 +4001,28 @@ function fitNames(){
   });
 }
 
+function handViewInfo(c){
+  if(!c) return '';
+  if(c.cat==='crit'){
+    var cr=(DATA.crits||[]).filter(function(x){return x.id===c.id||x.name===c.name;})[0]||c;
+    var out='';
+    if(cr.passive) out+='<div class="hvi-row"><b>\uD83D\uDD2C Passive \u2014 active while this lens is equipped</b><p>'+cr.passive+'</p></div>';
+    if(cr.thesis)  out+='<div class="hvi-row th"><b>\uD83C\uDFAF Thesis \u2014 complete this to earn the reward</b><p>'+cr.thesis+'</p></div>';
+    if(cr.reward)  out+='<div class="hvi-row rw"><b>\uD83C\uDF96 Reward</b><p>'+cr.reward+'</p></div>';
+    return out?'<div class="hv-info">'+out+'</div>':'';
+  }
+  if(c.cat==='bookmark'){
+    var t=c.text||c.desc||'';
+    return t?'<div class="hv-info"><div class="hvi-row"><b>\u2726 Effect</b><p>'+t+'</p></div></div>':'';
+  }
+  return '';
+}
 function handViewModal(){
   const i=S._handView; if(i==null) return '';
   const c=S.you.hand[i]; if(!c) return '';
   return `<div class="modal-bg" data-do="closehand"><div class="hand-view">
     <div class="hv-card">${handCard(c,i)}</div>
+    ${handViewInfo(c)}
     <div class="hv-acts">
       <button class="hv-play" data-do="playhand">\u25b6 Play card</button>
       <button class="hv-close" data-do="closehand">Close \u2715</button>
