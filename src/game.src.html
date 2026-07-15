@@ -4221,6 +4221,7 @@ function pickerModal(){
     <div class="pick-title">${S.picker.title}</div>
     <div class="pick-opts">${S.picker.options.map(o=>`<button class="pick-opt" data-pick="${o.val}">${o.label}</button>`).join('')}</div></div></div>`;
 }
+function closePile(){ if(S){ S.viewPile=null; render(); } }
 function pileModal(){
   const p=S[S.viewPile], shed=p.discard, ko=p.grave;
   const cardLine=c=> c.cat==='abc' ? `<span class="pl ${c.type.toLowerCase()}">${c.type==='ATTACK'?'⚔':'⛊'} ${c.type} · pwr ${c.power}</span>`
@@ -4231,7 +4232,7 @@ function pileModal(){
     <div class="vw-list">${ko.length?ko.map(c=>`<span class="pl ko">☠ ${c.name}</span>`).join(''):'<i>None yet</i>'}</div>
     <div class="vw-sec">Shed cards (${shed.length})</div>
     <div class="vw-list">${shed.length?shed.map(cardLine).join(''):'<i>None yet</i>'}</div>
-    <button data-do="close-pile" class="vw-close">Close</button></div></div>`;
+    <button class="vw-close" onclick="ABC_DEBUG.closePile&&ABC_DEBUG.closePile()">Close</button></div></div>`;
 }
 function overModal(){
   const win=S.winner==='you';
@@ -4343,8 +4344,7 @@ function beginBattle(stIn){
 function quickStart(diffKey){
   applyDifficultyToSettings(diffKey);
   APP.customDeck=null;
-  const keys=Object.keys(DATA.characters);
-  APP.youDeck=keys[rnd(keys.length)]; APP.oppDeck='random';
+  if(!APP.youDeck || APP.youDeck!=='surprise') APP.youDeck='surprise'; APP.oppDeck='random';  /* random SET each battle */
   beginBattle();
 }
 function startBattle(){ beginBattle(); }
@@ -4469,14 +4469,14 @@ document.addEventListener('click',e=>{
   if(t.dataset.opp){ APP.oppDeck=t.dataset.opp; render(); return; }
   if(t.dataset.diff){
     applyDifficultyToSettings(t.dataset.diff);
-    if(APP.mode==='quick'){ APP.customDeck=null; if(!APP.youDeck||APP.youDeck==='surprise'){ const keys=Object.keys(DATA.characters); APP.youDeck=keys[rnd(keys.length)]; } APP.oppDeck='random'; beginBattle(); }
+    if(APP.mode==='quick'){ APP.customDeck=null; APP.oppDeck='random'; beginBattle(); }
     else { APP.screen='custom'; render(); }
     return;
   }
   if(t.dataset.do){
     const d=t.dataset.do;
     if(d==='start') startBattle();
-    else if(d==='go-quick'){ APP.mode='quick'; APP.screen='difficulty'; render(); }
+    else if(d==='go-quick'){ APP.mode='quick'; APP.youDeck='surprise'; APP.customDeck=null; APP.screen='difficulty'; render(); }
     else if(d==='go-custom'){ APP.mode='custom'; APP.screen='difficulty'; render(); }
     else if(d==='go-scrim'){ scrimOpen(); }
     else if(d==='go-guide'){ APP.screen='guide'; render(); }
@@ -5638,7 +5638,7 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
-window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+window.ABC_DEBUG = { get S(){return S;}, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
