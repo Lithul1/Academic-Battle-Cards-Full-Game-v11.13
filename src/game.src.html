@@ -1172,6 +1172,15 @@ body[data-screen="scrim"]{ background:#e9dcc0; }
 .stk-rtype{ margin-left:auto; font-family:var(--cond); font-size:10px; letter-spacing:1px; background:#241f1b; color:#f3e8cd; padding:3px 8px; border-radius:5px; }
 .stk-rtype.exp{ background:#5b4a76; }
 .stk-rb{ font-size:14px; line-height:1.6; color:#3a322b; }
+/* ---- Transcript Code panel ---- */
+.toolbtn.go{ background:linear-gradient(var(--gold),#b8912f); color:#241c0e; border-color:#8a6c1e; font-weight:700; }
+.tr-sec .tr-row{ display:flex; gap:10px; flex-wrap:wrap; }
+.tr-box{ background:#faf7ef; border:1px solid rgba(40,25,12,.16); border-radius:10px; padding:12px 14px; }
+.tr-box.tr-warn{ border-color:#b5502c; background:#fbeee6; }
+.tr-lbl{ font-size:13px; color:#3a322b; margin-bottom:8px; line-height:1.45; }
+.tr-code{ width:100%; min-height:64px; resize:vertical; font-family:ui-monospace,'Courier New',monospace; font-size:11px; line-height:1.35;
+  color:#3a2f1a; background:#fffdf6; border:1px solid #c9bfa0; border-radius:7px; padding:8px 9px; word-break:break-all; margin-bottom:9px; box-sizing:border-box; }
+.tr-sum{ font-family:var(--cond); letter-spacing:.5px; color:#7a5a2a; font-size:13px; margin-bottom:9px; }
 @media(min-width:640px){
   .scrim-folder{ margin-top:32px; }
   .vtabs{ flex-wrap:nowrap; align-items:flex-end; gap:6px; padding-left:8px; }
@@ -5196,6 +5205,71 @@ function metaLoad(){ try{ const j=window.localStorage.getItem('abc_meta'); if(j)
 function tenuredUnlocked(){ return (META.honorsCleared||0)>=1; }
 function applyCalmFx(){ try{ document.body.classList.toggle('calm-fx', !!META.calmFx); }catch(e){} }
 function metaSave(){ try{ window.localStorage.setItem('abc_meta',JSON.stringify(META)); }catch(e){} }
+/* ---- Transcript Code: portable backup/restore of META progress ----
+   LUL2 = positional array (no JSON keys) + prefix-factored editionCards.
+   TRANSCRIPT_V2_ORDER is FROZEN and append-only: never reorder or remove entries
+   (that would invalidate existing codes) — only add new fields to the end. */
+const TRANSCRIPT_FIELDS=['ip','unlocks','perks','loadout','commanders','packs','mhPacks','foils','bossSeen','bossKilled','editionCards','decks','deckCards','crits','bmCopies','honorsMax','honorsCleared','stats','patron','calmFx'];
+const TRANSCRIPT_V2_ORDER=['ip','unlocks','perks','loadout','commanders','packs','mhPacks','foils','bossSeen','bossKilled','editionCards','decks','deckCards','crits','bmCopies','honorsMax','honorsCleared','stats','patron','calmFx'];
+function transcriptChecksum(str){ let h=5381; for(let i=0;i<str.length;i++){ h=((h*33)^str.charCodeAt(i))>>>0; } return ('0000'+h.toString(36)).slice(-4); }
+function edcFactor(arr){ const g={},order=[]; (arr||[]).forEach(x=>{ x=String(x); const i=x.lastIndexOf(':'); const p=i<0?'':x.slice(0,i+1); const leaf=i<0?x:x.slice(i+1); if(!g[p]){g[p]=[];order.push(p);} g[p].push(leaf); }); return order.map(p=>[p,g[p]]); }
+function edcUnfactor(f){ const out=[]; (f||[]).forEach(pair=>{ const p=(pair&&pair[0])||''; ((pair&&pair[1])||[]).forEach(leaf=>out.push(p+leaf)); }); return out; }
+function transcriptB64(j){ return window.btoa(unescape(encodeURIComponent(j))).replace(/=+$/,''); }
+function transcriptEncode(){
+  try{
+    const arr=TRANSCRIPT_V2_ORDER.map(k=>{ if(k==='editionCards') return edcFactor(META.editionCards); return META[k]!==undefined?META[k]:null; });
+    const payload=transcriptB64(JSON.stringify(arr));
+    return 'LUL2-'+payload+'-'+transcriptChecksum(payload);
+  }catch(e){ return ''; }
+}
+function transcriptDecode(code){
+  try{
+    let s=(code||'').trim().replace(/\s+/g,''); let ver=0;
+    if(s.indexOf('LUL2-')===0){ ver=2; s=s.slice(5); }
+    else if(s.indexOf('LUL1-')===0){ ver=1; s=s.slice(5); }
+    else return {err:'That doesn\u2019t look like a Transcript Code (it should start with LUL2-).'};
+    const dash=s.lastIndexOf('-'); if(dash<1) return {err:'This Transcript Code is missing its checksum \u2014 re-copy the whole thing.'};
+    const payload=s.slice(0,dash), check=s.slice(dash+1);
+    if(transcriptChecksum(payload)!==check) return {err:'This Transcript Code looks incomplete or altered \u2014 re-copy the entire code.'};
+    let b=payload; while(b.length%4) b+='=';
+    const o=JSON.parse(decodeURIComponent(escape(window.atob(b))));
+    let snap;
+    if(ver===2){
+      if(!Array.isArray(o)) return {err:'This Transcript Code could not be read (unrecognized format).'};
+      snap={v:2};
+      TRANSCRIPT_V2_ORDER.forEach((k,i)=>{ let val=o[i]; if(val===undefined) val=null;
+        if(k==='editionCards') snap[k]=edcUnfactor(val); else if(val!==null) snap[k]=val; });
+    } else {
+      if(!o||o.v!==1) return {err:'This Transcript Code could not be read (unrecognized format).'};
+      snap=o;
+    }
+    if(typeof snap.ip!=='number') return {err:'This Transcript Code could not be read (unrecognized format).'};
+    return {snap:snap};
+  }catch(e){ return {err:'This Transcript Code could not be read \u2014 check the paste and try again.'}; }
+}
+function transcriptApply(snap){
+  try{ TRANSCRIPT_FIELDS.forEach(k=>{ if(snap[k]!==undefined) META[k]=snap[k]; }); metaSave(); metaLoad(); }catch(e){}
+}
+function scrimTranscriptPanel(){
+  const t=SCRIM._transcript; let inner;
+  if(t&&t.mode==='export'){
+    inner='<div class="tr-box"><div class="tr-lbl">Your Transcript Code \u2014 copy it and keep it somewhere safe (Notes, an email to yourself):</div>'
+      +'<textarea class="tr-code" id="transcriptOut" readonly onclick="this.select()">'+t.code+'</textarea>'
+      +'<div class="tr-row"><button class="toolbtn go" data-scrim="tcopy">\uD83D\uDCCB Copy</button><button class="toolbtn" data-scrim="tclose">Done</button></div></div>';
+  } else if(t&&t.mode==='import'){
+    inner='<div class="tr-box"><div class="tr-lbl">Paste a Transcript Code to restore your progress:</div>'
+      +'<textarea class="tr-code" id="transcriptIn" placeholder="LUL2-\u2026" spellcheck="false"></textarea>'
+      +'<div class="tr-row"><button class="toolbtn go" data-scrim="trestore">Restore</button><button class="toolbtn" data-scrim="tclose">Cancel</button></div></div>';
+  } else if(t&&t.mode==='confirm'){
+    const s=t.snap;
+    inner='<div class="tr-box tr-warn"><div class="tr-lbl">Restore this transcript? This will <b>replace</b> your current progress on this device.</div>'
+      +'<div class="tr-sum">'+(s.ip||0)+' IP \u00b7 '+((s.commanders||[]).length)+' Commanders \u00b7 '+((s.editionCards||[]).length)+' expansion cards \u00b7 '+(s.packs||0)+' packs opened</div>'
+      +'<div class="tr-row"><button class="toolbtn go" data-scrim="tconfirm">Replace my progress</button><button class="toolbtn" data-scrim="tclose">Cancel</button></div></div>';
+  } else {
+    inner='<div class="tr-row"><button class="toolbtn" data-scrim="texport">\uD83D\uDCDC Export Transcript</button><button class="toolbtn" data-scrim="timport">\u21BA Restore Transcript</button></div>';
+  }
+  return '<div class="vault-sec tr-sec"><div class="vault-h">\uD83C\uDF93 Transcript Code <small>back up your progress or move it between devices</small></div>'+inner+'</div>';
+}
 function scrimSave(){ try{ if(SCRIM.active) window.localStorage.setItem('abc_scrim_run',JSON.stringify({kit:SCRIM.kit,team:SCRIM.team,deck:SCRIM.deck,artifacts:SCRIM.artifacts,map:SCRIM.map,cleared:SCRIM.cleared,act:SCRIM.act,bosses:SCRIM.bosses,lf:SCRIM.lf||0,t0:SCRIM.t0||0,honors:SCRIM.honors||0})); }catch(e){} }
 function scrimClearSave(){ try{ window.localStorage.removeItem('abc_scrim_run'); }catch(e){} }
 function scrimHasSave(){ try{ return !!window.localStorage.getItem('abc_scrim_run'); }catch(e){ return false; } }
@@ -5356,6 +5430,12 @@ function handleScrim(cmd){
   if(op==='shop'){ SCRIM.view='shop'; render(); return; }
   if(op==='vtab'){ SCRIM.vaultTab=a; SCRIM.view='shop'; render(); return; }
   if(op==='stack'){ SCRIM._stackSel=(SCRIM._stackSel===a?null:a); render(); return; }
+  if(op==='texport'){ SCRIM._transcript={mode:'export',code:transcriptEncode()}; render(); return; }
+  if(op==='timport'){ SCRIM._transcript={mode:'import'}; render(); return; }
+  if(op==='tclose'){ SCRIM._transcript=null; render(); return; }
+  if(op==='tcopy'){ try{ const el=document.getElementById('transcriptOut'); if(el){ el.select(); if(navigator.clipboard) navigator.clipboard.writeText(el.value); toast('Transcript Code copied.'); } }catch(e){} return; }
+  if(op==='trestore'){ const el=document.getElementById('transcriptIn'); const r=transcriptDecode(el?el.value:''); if(r.err){ toast(r.err); return; } SCRIM._transcript={mode:'confirm',snap:r.snap}; render(); return; }
+  if(op==='tconfirm'){ const t=SCRIM._transcript; if(t&&t.snap){ transcriptApply(t.snap); SCRIM._transcript=null; SCRIM.vaultTab='profile'; render(); toast('Progress restored from your Transcript Code.'); } return; }
   if(op==='tomap'){ SCRIM.view='map'; render(); return; }
   if(op==='endrun'){ scrimSave(); SCRIM.view='intro'; APP.screen='scrim'; render(); return; }
   if(op==='node'){ const c=+a, r=+b; if(!scrimReachable(c,r)){ toast('That node is not reachable yet.'); return; } scrimResolveNode(c,r); return; }
@@ -5857,7 +5937,8 @@ function scrimVProfile(){
     <div class="scrim-menu vault-runmenu">
       <button class="bigbtn go" data-scrim="new">\u2694 New Run</button>
       ${hasSave?`<button class="bigbtn" data-scrim="resume">\u21bb Resume Run</button>`:''}
-    </div>`;
+    </div>
+    ${scrimTranscriptPanel()}`;
 }
 function scrimVShop(){
   const PA=(window.PACK_ART||{});
