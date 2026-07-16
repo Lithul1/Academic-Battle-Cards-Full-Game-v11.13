@@ -1148,6 +1148,30 @@ body[data-screen="scrim"]{ background:#e9dcc0; }
   box-shadow:0 10px 0 rgba(40,25,12,.35), 0 18px 40px rgba(40,25,12,.3); filter:saturate(.92); position:relative; z-index:2; }
 .vault-tabtitle{ margin-top:2px; }
 .vault-runmenu{ margin:18px auto 4px; }
+/* ---- The Stacks (deck-box lore) ---- */
+.stk-sub{ font-size:13px; color:#5a4a2a; margin:2px 0 14px; }
+.stk-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:14px; }
+@media(min-width:640px){ .stk-grid{ grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:16px; } }
+.stk-book{ background:none; border:none; padding:0; cursor:pointer; text-align:center; font-family:inherit; }
+.stk-cover{ display:flex; align-items:center; justify-content:center; aspect-ratio:3/4; border-radius:4px 7px 7px 4px; overflow:hidden;
+  background:#14110d; border:1px solid #241f1b; box-shadow:3px 4px 9px rgba(20,12,4,.4), inset -5px 0 10px rgba(0,0,0,.25); position:relative; }
+.stk-cover::before{ content:""; position:absolute; left:5px; top:0; bottom:0; width:2px; background:rgba(0,0,0,.3); z-index:1; }
+.stk-cover.real img{ width:100%; height:100%; object-fit:cover; display:block; }
+.stk-cover.fb{ flex-direction:column; padding:10px; }
+.stk-fbt{ font-family:var(--disp); font-size:13px; line-height:1.1; color:#f4ecd6; text-shadow:0 1px 3px #000; }
+.stk-fba{ font-family:var(--cond); font-size:9px; letter-spacing:1px; text-transform:uppercase; color:rgba(232,220,192,.8); margin-top:6px; }
+.stk-book:hover .stk-cover{ transform:translateY(-3px); transition:transform .12s; }
+.stk-book.sel .stk-cover{ outline:2px solid var(--gold); outline-offset:1px; }
+.stk-cap{ display:block; font-family:var(--cond); font-size:11px; letter-spacing:.3px; color:#4a3d28; margin-top:6px; line-height:1.15; }
+.stk-cap .stk-yr{ color:#8a7d5e; }
+.stk-read{ margin-top:16px; background:#f7efd6; border:1px solid #c9bfa0; border-radius:10px; padding:15px 17px; }
+.stk-read.empty{ color:#8a7d5e; font-style:italic; }
+.stk-rh{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; border-bottom:2px solid #241f1b; padding-bottom:7px; margin-bottom:9px; }
+.stk-rt{ font-family:var(--disp); font-size:18px; color:#2a2116; }
+.stk-rm{ font-family:var(--cond); letter-spacing:.5px; font-size:12px; color:#8a7d5e; }
+.stk-rtype{ margin-left:auto; font-family:var(--cond); font-size:10px; letter-spacing:1px; background:#241f1b; color:#f3e8cd; padding:3px 8px; border-radius:5px; }
+.stk-rtype.exp{ background:#5b4a76; }
+.stk-rb{ font-size:14px; line-height:1.6; color:#3a322b; }
 @media(min-width:640px){
   .scrim-folder{ margin-top:32px; }
   .vtabs{ flex-wrap:nowrap; align-items:flex-end; gap:6px; padding-left:8px; }
@@ -5331,6 +5355,7 @@ function handleScrim(cmd){
   if(op==='resume'){ if(scrimLoadSave()){ APP.mode='scrim'; APP.screen='scrim'; render(); } else toast('No saved run found.'); return; }
   if(op==='shop'){ SCRIM.view='shop'; render(); return; }
   if(op==='vtab'){ SCRIM.vaultTab=a; SCRIM.view='shop'; render(); return; }
+  if(op==='stack'){ SCRIM._stackSel=(SCRIM._stackSel===a?null:a); render(); return; }
   if(op==='tomap'){ SCRIM.view='map'; render(); return; }
   if(op==='endrun'){ scrimSave(); SCRIM.view='intro'; APP.screen='scrim'; render(); return; }
   if(op==='node'){ const c=+a, r=+b; if(!scrimReachable(c,r)){ toast('That node is not reachable yet.'); return; } scrimResolveNode(c,r); return; }
@@ -5759,15 +5784,62 @@ function bestiaryCard(id){
     <button class="bst-close" data-pvclose>Close</button>
   </div>`;
 }
+/* ===== The Stacks: deck-box lore ===== */
+const STACKS_BOX = {
+  "gatsby":"data:image/jpeg;base64,__ABCASSET_988__",
+  "crucible":"data:image/jpeg;base64,__ABCASSET_989__",
+  "hamlet":"data:image/jpeg;base64,__ABCASSET_990__",
+  "frankenstein":"data:image/jpeg;base64,__ABCASSET_991__",
+  "sherlock":"data:image/jpeg;base64,__ABCASSET_992__",
+  "macbeth":"data:image/jpeg;base64,__ABCASSET_993__",
+  "wonderland":"data:image/jpeg;base64,__ABCASSET_994__",
+  "tewwg":"data:image/jpeg;base64,__ABCASSET_995__",
+  "modern_hamlet":"data:image/jpeg;base64,__ABCASSET_996__",
+  "frankenstein_2077":"data:image/jpeg;base64,__ABCASSET_997__",
+  "sengekokujo":"data:image/jpeg;base64,__ABCASSET_998__"
+};
+const STACKS_LORE = [
+  {id:"gatsby",t:"The Great Gatsby",a:"F. Scott Fitzgerald",y:"1925",ac:"#8a7326",type:"Deck",b:"Jay Gatsby throws lavish parties on Long Island, chasing a dream named Daisy — and the green light across the bay. A glittering, tragic portrait of the Jazz Age and the hollow underside of the American Dream."},
+  {id:"crucible",t:"The Crucible",a:"Arthur Miller",y:"1953",ac:"#8a3a2a",type:"Deck",b:"In 1692 Salem, a handful of girls' accusations spiral into a witch-hunt that devours a whole town. Miller turns the trials into a mirror for hysteria, conscience, and the price of standing by the truth when a mob wants a lie."},
+  {id:"hamlet",t:"Hamlet",a:"William Shakespeare",y:"c.1601",ac:"#2a3550",type:"Deck",b:"Commanded by his murdered father's ghost to take revenge, a Danish prince spirals through doubt, feigned madness, and delay. Shakespeare's towering tragedy of thought, mortality, and the cost of hesitation."},
+  {id:"frankenstein",t:"Frankenstein",a:"Mary Shelley",y:"1818",ac:"#2a4a38",type:"Deck",b:"A young scientist assembles life from dead matter, then recoils in horror from the creature he has made. Shelley's gothic masterwork keeps asking who the real monster is — the creation, or the maker who abandoned it."},
+  {id:"sherlock",t:"Sherlock Holmes",a:"Arthur Conan Doyle",y:"1887+",ac:"#2f5233",type:"Deck",b:"London's greatest consulting detective unravels the impossible through cold observation and deduction, with steadfast Dr. Watson at his side. The stories that invented modern detective fiction."},
+  {id:"othello",t:"Othello",a:"William Shakespeare",y:"c.1603",ac:"#7a2a22",type:"Deck",b:"A celebrated general is slowly poisoned against his own wife by the whispers of his ensign, Iago. A devastating tragedy of jealousy, manipulation, and trust twisted into ruin."},
+  {id:"oz",t:"The Wonderful Wizard of Oz",a:"L. Frank Baum",y:"1900",ac:"#2a6a44",type:"Deck",b:"Swept by a cyclone into a strange bright land, Dorothy and her mismatched companions follow the yellow brick road toward a wizard who may not be all he claims. A pioneering American fairy tale about heart, courage, and home."},
+  {id:"macbeth",t:"Macbeth",a:"William Shakespeare",y:"c.1606",ac:"#5a1a1a",type:"Deck",b:"Spurred by a witches' prophecy and his own ambition, a Scottish general murders his king to seize the crown — then comes apart under guilt and blood. Shakespeare's darkest study of power and its price."},
+  {id:"wonderland",t:"Alice in Wonderland",a:"Lewis Carroll",y:"1865",ac:"#3a5a8a",type:"Deck",b:"A curious girl tumbles down a rabbit hole into a nonsensical world of riddles, tea parties, and a short-tempered queen. Carroll's playful, logic-bending dream of childhood and its strange rules."},
+  {id:"tewwg",t:"Their Eyes Were Watching God",a:"Zora Neale Hurston",y:"1937",ac:"#b0762e",type:"Deck",b:"Janie Crawford tells the story of her search for love, voice, and selfhood across three marriages in early-20th-century Florida. A landmark of the Harlem Renaissance and of Black women's literature."},
+  {id:"modern_hamlet",t:"Elsinore Incorporated",a:"reskin of Hamlet",y:"Expansion",ac:"#7a2233",type:"Expansion",b:"A neon-lit corporate reimagining of Shakespeare's tragedy — Elsinore is a boardroom, the ghost haunts the servers, and the revenge plays out in glass towers and hostile takeovers."},
+  {id:"frankenstein_2077",t:"Frankenstein 2077",a:"reskin of Frankenstein",y:"Expansion",ac:"#2a3f6a",type:"Expansion",b:"Shelley's creation myth relocated to a cyberpunk future, where the creature is stitched from chrome and code and the old questions about creators and their monsters cut sharper than ever."},
+  {id:"sengekokujo",t:"Sengekokujō",a:"reskin of Macbeth",y:"Expansion",ac:"#7a3320",type:"Expansion",b:"A feudal-Japan retelling of Macbeth — samurai warlords, mountain-witch prophecies, and a blood-soaked grab for a shogun's power, told in ink-wash and steel."}
+];
+function scrimVStacks(){
+  const sel=SCRIM._stackSel;
+  const books=STACKS_LORE.map(s=>{
+    const box=STACKS_BOX[s.id];
+    const cover = box
+      ? `<span class="stk-cover real"><img src="${box}" alt="${s.t}"></span>`
+      : `<span class="stk-cover fb" style="background:linear-gradient(160deg,${s.ac},#0c0a06)"><span class="stk-fbt">${s.t}</span>${s.a.indexOf('reskin')===0?'':`<span class="stk-fba">${s.a}</span>`}</span>`;
+    return `<button class="stk-book ${sel===s.id?'sel':''}" data-scrim="stack:${s.id}">${cover}<span class="stk-cap">${s.t}<br><span class="stk-yr">${s.y}</span></span></button>`;
+  }).join('');
+  const s=STACKS_LORE.find(x=>x.id===sel);
+  const reader = s
+    ? `<div class="stk-read"><div class="stk-rh"><span class="stk-rt">${s.t}</span><span class="stk-rm">${s.a}${s.type==='Deck'&&s.y?' \u00b7 '+s.y:''}</span><span class="stk-rtype ${s.type==='Expansion'?'exp':''}">${s.type}</span></div><div class="stk-rb">${s.b}</div></div>`
+    : `<div class="stk-read empty">Tap a book to read about the work.</div>`;
+  return `<div class="scrim-title sm vault-tabtitle">\ud83d\udcda The Stacks</div>
+    <p class="stk-sub">The source works behind every deck &amp; expansion \u2014 tap a book to read its story.</p>
+    <div class="stk-grid">${books}</div>${reader}`;
+}
 function scrimVaultShell(){
   const tab=SCRIM.vaultTab||'profile';
-  const TABS=[['profile','Profile'],['shop','Shop'],['firsteds','1st Editions'],['bestiary','Bestiary'],['archive','Archive']];
+  const TABS=[['profile','Profile'],['shop','Shop'],['firsteds','1st Editions'],['stacks','The Stacks'],['bestiary','Bestiary'],['archive','Archive']];
   const tabBtns=`<button class="vtab back" data-scrim="back">\u2039 Back</button>`+
     TABS.map(t=>`<button class="vtab ${tab===t[0]?'on':''}" data-scrim="vtab:${t[0]}">${t[1]}</button>`).join('');
   let panel;
   switch(tab){
     case 'shop': panel=scrimVShop(); break;
     case 'firsteds': panel=scrimVFirstEds(); break;
+    case 'stacks': panel=scrimVStacks(); break;
     case 'bestiary': panel=`<div class="scrim-title sm vault-tabtitle">\ud83d\udc7e Bestiary</div>${scrimBestiary()}`; break;
     case 'archive': panel=`<div class="scrim-title sm vault-tabtitle">\ud83d\uddc2\ufe0f Archive</div>${mhGallery()}${expAllGalleries()}`; break;
     default: panel=scrimVProfile();
