@@ -1137,6 +1137,25 @@ body[data-screen="scrim"]{ background:#e9dcc0; }
 .scrim-ipline{ text-align:center; font-family:var(--cond); letter-spacing:1px; color:#5a4a2a; margin:8px 0; }
 .scrim-menu{ display:flex; flex-direction:column; gap:10px; max-width:320px; margin:14px auto 6px; }
 .scrim-note{ text-align:center; font-size:11px; color:#8a7250; margin-top:12px; }
+/* ---- Vault folder: tabbed home base (mobile-first: tabs wrap to rows) ---- */
+.scrim-folder{ width:min(940px,98vw); position:relative; }
+.vtabs{ display:flex; flex-wrap:wrap; gap:5px; position:relative; z-index:3; }
+.vtab{ font-family:var(--cond); font-size:12.5px; letter-spacing:1px; text-transform:uppercase;
+  background:#e3d7b2; color:#4a3d24; border:2px solid #241f1b; border-radius:9px; padding:7px 11px; cursor:pointer; }
+.vtab.on{ background:var(--gold); color:#241f1b; }
+.vtab.back{ background:#d8cba4; }
+.vbody{ background:#f3e8cd; border:3px solid #241f1b; border-radius:12px; margin-top:6px; padding:18px 16px 24px;
+  box-shadow:0 10px 0 rgba(40,25,12,.35), 0 18px 40px rgba(40,25,12,.3); filter:saturate(.92); position:relative; z-index:2; }
+.vault-tabtitle{ margin-top:2px; }
+.vault-runmenu{ margin:18px auto 4px; }
+@media(min-width:640px){
+  .scrim-folder{ margin-top:32px; }
+  .vtabs{ flex-wrap:nowrap; align-items:flex-end; gap:6px; padding-left:8px; }
+  .vtab{ font-size:15px; border-bottom:none; border-radius:11px 11px 0 0; padding:9px 16px 10px; position:relative; top:2px; box-shadow:inset 0 3px 0 #f0e6c6; transition:top .1s, background .1s; }
+  .vtab:hover{ background:#ece0bc; }
+  .vtab.on{ background:#f3e8cd; color:#241f1b; top:0; padding-top:12px; z-index:4; }
+  .vbody{ border-radius:4px 14px 14px 14px; margin-top:0; padding:22px 22px 28px; }
+}
 .kit-grid{ display:grid; grid-template-columns:1fr; gap:12px; margin-top:14px; }
 @media(min-width:640px){ .kit-grid{ grid-template-columns:1fr 1fr 1fr; } }
 .kit-card{ text-align:left; background:#faf7ef; border:1px solid rgba(40,25,12,.14); border-radius:14px; padding:15px 16px; cursor:pointer;
@@ -4678,7 +4697,7 @@ function initAudioCtl(){
 if(typeof document!=='undefined'){ if(document.body) initAudioCtl(); else document.addEventListener('DOMContentLoaded',initAudioCtl); }
 
 /* ================= LITERARY SCRIMMAGE (roguelike campaign) ================= */
-let SCRIM = { active:false, view:'intro', kit:null, team:[], deck:{ab:[],bm:[],cr:[]}, artifacts:[], map:null, cleared:0, act:1, pending:null, draft:null };
+let SCRIM = { active:false, view:'intro', vaultTab:'profile', kit:null, team:[], deck:{ab:[],bm:[],cr:[]}, artifacts:[], map:null, cleared:0, act:1, pending:null, draft:null };
 let META = { ip:0, unlocks:[], perks:[], loadout:[], commanders:[], packs:0, bossSeen:[], bossKilled:[], editionCards:[], mhPacks:0, crits:null, bmCopies:null, foils:0, decks:[], deckCards:{} };
 
 /* ---- Honors Semesters: opt-in escalating difficulty tiers ---- */
@@ -5160,7 +5179,7 @@ function scrimLoadSave(){ try{ const j=window.localStorage.getItem('abc_scrim_ru
   SCRIM.active=true; SCRIM.kit=o.kit; SCRIM.team=o.team||[]; SCRIM.deck=o.deck||{ab:[],bm:[],cr:[]}; SCRIM.artifacts=o.artifacts||[]; SCRIM.map=o.map; SCRIM.cleared=o.cleared||0; SCRIM.act=o.act||1; SCRIM.bosses=o.bosses||[]; SCRIM.lf=o.lf||0; SCRIM.t0=o.t0||Date.now(); SCRIM.honors=o.honors||0; SCRIM.view='map'; return true; }catch(e){ return false; } }
 
 /* ---- entry ---- */
-function scrimOpen(){ metaLoad(); SCRIM.view='intro'; APP.mode='scrim'; APP.screen='scrim'; render(); }
+function scrimOpen(){ metaLoad(); SCRIM.view='shop'; SCRIM.vaultTab='profile'; APP.mode='scrim'; APP.screen='scrim'; render(); }
 function scrimAfterRender(){ try{ scrimDrawConnectors(); }catch(e){} }
 
 /* ---- run setup ---- */
@@ -5311,6 +5330,7 @@ function handleScrim(cmd){
   if(op==='kit'){ scrimStartKit(a); return; }
   if(op==='resume'){ if(scrimLoadSave()){ APP.mode='scrim'; APP.screen='scrim'; render(); } else toast('No saved run found.'); return; }
   if(op==='shop'){ SCRIM.view='shop'; render(); return; }
+  if(op==='vtab'){ SCRIM.vaultTab=a; SCRIM.view='shop'; render(); return; }
   if(op==='tomap'){ SCRIM.view='map'; render(); return; }
   if(op==='endrun'){ scrimSave(); SCRIM.view='intro'; APP.screen='scrim'; render(); return; }
   if(op==='node'){ const c=+a, r=+b; if(!scrimReachable(c,r)){ toast('That node is not reachable yet.'); return; } scrimResolveNode(c,r); return; }
@@ -5414,9 +5434,9 @@ function scrimScreen(){
     case 'bossreward': return scrimBossRewardScreen();
     case 'rest': return scrimRestScreen();
     case 'fair': return scrimFairScreen();
-    case 'shop': return scrimShopScreen();
+    case 'shop': return scrimVaultShell();
     case 'dead': return scrimDeadScreen();
-    default: return scrimIntroScreen();
+    default: return scrimVaultShell();
   }
 }
 function scrimIntroScreen(){
@@ -5739,8 +5759,33 @@ function bestiaryCard(id){
     <button class="bst-close" data-pvclose>Close</button>
   </div>`;
 }
-function scrimShopScreen(){
-  const rank=tenureRank(), slots=perkSlots(), owned=(META.commanders||[]).length, total=(DATA.firsteds||[]).length;
+function scrimVaultShell(){
+  const tab=SCRIM.vaultTab||'profile';
+  const TABS=[['profile','Profile'],['shop','Shop'],['firsteds','1st Editions'],['bestiary','Bestiary'],['archive','Archive']];
+  const tabBtns=`<button class="vtab back" data-scrim="back">\u2039 Back</button>`+
+    TABS.map(t=>`<button class="vtab ${tab===t[0]?'on':''}" data-scrim="vtab:${t[0]}">${t[1]}</button>`).join('');
+  let panel;
+  switch(tab){
+    case 'shop': panel=scrimVShop(); break;
+    case 'firsteds': panel=scrimVFirstEds(); break;
+    case 'bestiary': panel=`<div class="scrim-title sm vault-tabtitle">\ud83d\udc7e Bestiary</div>${scrimBestiary()}`; break;
+    case 'archive': panel=`<div class="scrim-title sm vault-tabtitle">\ud83d\uddc2\ufe0f Archive</div>${mhGallery()}${expAllGalleries()}`; break;
+    default: panel=scrimVProfile();
+  }
+  return `<div class="scrim-wrap scrim-ink"><div class="scrim-folder">
+    <div class="vtabs">${tabBtns}</div>
+    <div class="vbody">${panel}</div>
+  </div></div>`;
+}
+function scrimVProfile(){
+  const hasSave=scrimHasSave();
+  return `${scrimLibraryCard()}
+    <div class="scrim-menu vault-runmenu">
+      <button class="bigbtn go" data-scrim="new">\u2694 New Run</button>
+      ${hasSave?`<button class="bigbtn" data-scrim="resume">\u21bb Resume Run</button>`:''}
+    </div>`;
+}
+function scrimVShop(){
   const PA=(window.PACK_ART||{});
   const info=SCRIM._perkInfo && SCRIM_PERKS[SCRIM._perkInfo];
   const infoHtml = info?`<div class="vault-perkinfo"><b>${info.ic} ${info.name}</b>${info.tenured?' <small class="ten">HONORS</small>':''} — ${info.text} <em>${(META.perks||[]).indexOf(SCRIM._perkInfo)>=0?(perkOn(SCRIM._perkInfo)?'(equipped)':'(owned — tap the chip to equip)'):'(not yet collected — found in Booster Packs)'}</em></div>`:'';
@@ -5751,26 +5796,23 @@ function scrimShopScreen(){
     const click=have&&!locked?` data-scrim="perk:${id}"`:'';
     return `<span class="vault-perkwrap"><button class="${cls}"${click}>${p.ic} ${have?p.name:'???'}${p.tenured?' <small class="ten">HONORS</small>':''}${on?' \u2713':''}</button><button class="vault-info" data-scrim="perkinfo:${id}" title="What does this do?">\u2139</button></span>`;
   }).join('');
-  const shelf=(DATA.firsteds||[]).map((f,i)=>{const got=(META.commanders||[]).indexOf(f.id)>=0;
-    const h=128+((i*29)%34);
-    return `<button class="lib-spine ${got?'got':''}" style="height:${h}px;--sp:${f.accent||'#5a4a3a'}" data-scrim="fecard:${f.id}" title="${f.name}">${got?'<span class="sp-star">\u2b50</span>':''}<span class="sp-name">${scrimSpineAbbrev(f.name)}</span></button>`;}).join('');
-  return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel vaultwide">
-    <button class="toolbtn scrim-back" data-scrim="endrun">\u2039 Back</button>
-    <div class="scrim-title sm">\ud83c\udfdb The Vault</div>
-    ${scrimLibraryCard()}
+  return `<div class="scrim-title sm vault-tabtitle">\ud83c\udfdb Shop</div>
     <div class="vault-sec"><div class="vault-h">\ud83d\udce6 Booster Packs</div>
       <div class="vault-row"><div style="display:flex;align-items:center;gap:10px;flex:1">${PA.silver?`<img class="vault-packimg" src="${PA.silver}" alt="">`:''}<div class="vault-nm">First Edition Portfolio <small>5 cards \u00b7 IP bundles, a Standing Order, and a Commander chase (60% + pity every 3rd).</small></div></div>
         <button class="vault-buy" data-scrim="pack:silver">50 IP</button></div>
       <div class="vault-row" style="margin-top:8px"><div style="display:flex;align-items:center;gap:10px;flex:1">${PA.gold?`<img class="vault-packimg" src="${PA.gold}" alt="">`:''}<div class="vault-nm">Dean\u2019s List Portfolio <small>5 cards \u00b7 guaranteed Standing Order + Commander, holo finish.</small></div></div>
         <button class="vault-buy" data-scrim="pack:gold">250 IP</button></div>${packShop()}</div>
     <div class="vault-sec"><div class="vault-h">\ud83d\udccb Standing Orders <small>tap a chip to equip \u00b7 \u2139 for details</small></div>
-      <div class="vault-perks">${perkChips}</div>${infoHtml}</div>
+      <div class="vault-perks">${perkChips}</div>${infoHtml}</div>`;
+}
+function scrimVFirstEds(){
+  const owned=(META.commanders||[]).length, total=(DATA.firsteds||[]).length;
+  const shelf=(DATA.firsteds||[]).map((f,i)=>{const got=(META.commanders||[]).indexOf(f.id)>=0;
+    const h=128+((i*29)%34);
+    return `<button class="lib-spine ${got?'got':''}" style="height:${h}px;--sp:${f.accent||'#5a4a3a'}" data-scrim="fecard:${f.id}" title="${f.name}">${got?'<span class="sp-star">\u2b50</span>':''}<span class="sp-name">${scrimSpineAbbrev(f.name)}</span></button>`;}).join('');
+  return `<div class="scrim-title sm vault-tabtitle">\ud83d\udcd6 1st Editions</div>
     <div class="vault-sec"><div class="vault-h">\ud83d\udcd6 The Library <small>${owned}/${total} Commanders \u00b7 tap a spine to inspect</small></div>
-      <div class="lib-shelf">${shelf}</div><div class="lib-shelfboard"></div></div>
-    ${scrimBestiary()}
-    ${mhGallery()}
-    ${expAllGalleries()}
-  </div></div>`;
+      <div class="lib-shelf">${shelf}</div><div class="lib-shelfboard"></div></div>`;
 }
 function scrimDeadScreen(){
   const v=SCRIM._victory;
