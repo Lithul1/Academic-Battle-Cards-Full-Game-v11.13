@@ -711,6 +711,23 @@ body.dragging-abc{cursor:grabbing}
 .cfx-float.status{font-size:14px;font-family:var(--cond);font-weight:700;letter-spacing:.5px;padding:4px 10px;border-radius:11px;border:2px solid #C99B57;background:rgba(22,17,12,.86);color:#F0DFB3;text-shadow:none;animation:cfxbadge 1.05s ease-out both}
 .cfx-float.status.neg{border-color:#d8714f;color:#ffd9c9}
 .cfx-float.status.pos{border-color:#6bbf6b;color:#d6f0d0}
+/* ---- battle juice: hp damage-trail, screen shake, hit-reaction, crit ---- */
+.pc-hp u{position:absolute;left:0;top:0;bottom:0;width:100%;background:linear-gradient(#e0503a,#a8281a);z-index:0;transition:width .5s ease .12s;border-radius:5px 0 0 5px}
+.pc-hp i{z-index:1;border-radius:5px 0 0 5px}
+.board.cfx-shake{animation:cfxBoardShake .3s ease}
+.board.cfx-shake-big{animation:cfxBoardShakeBig .44s ease}
+@keyframes cfxBoardShake{15%{transform:translate(-4px,2px)}35%{transform:translate(4px,-2px)}55%{transform:translate(-3px,1px)}75%{transform:translate(2px,-1px)}100%{transform:none}}
+@keyframes cfxBoardShakeBig{8%{transform:translate(-8px,4px) rotate(-.35deg)}22%{transform:translate(9px,-4px) rotate(.35deg)}40%{transform:translate(-6px,3px)}58%{transform:translate(6px,-2px)}76%{transform:translate(-3px,1px)}100%{transform:none}}
+.char.cfx-hurt .pc-art{animation:cfxHurt .34s ease}
+.char.cfx-crit .pc-art{animation:cfxCrit .4s ease}
+@keyframes cfxHurt{0%{filter:none;transform:none}12%{filter:brightness(2.1) saturate(.6);transform:translateX(-7px)}28%{filter:brightness(1.4);transform:translateX(6px)}45%{transform:translateX(-4px)}65%{transform:translateX(3px)}100%{filter:none;transform:none}}
+@keyframes cfxCrit{0%{filter:none;transform:none}10%{filter:brightness(1.3) sepia(1) hue-rotate(-35deg) saturate(5);transform:translateX(-11px) rotate(-1.2deg)}26%{filter:brightness(1.5);transform:translateX(9px) rotate(1deg)}44%{transform:translateX(-6px)}64%{transform:translateX(5px)}84%{transform:translateX(-2px)}100%{filter:none;transform:none}}
+@keyframes cfxHurtRM{0%{filter:none}30%{filter:brightness(1.8)}100%{filter:none}}
+.cfx-float.crit{font-size:40px;color:#ff6a4a;text-shadow:0 2px 0 #6a1000,0 0 12px rgba(255,80,40,.6)}
+@media (prefers-reduced-motion: reduce){
+  .board.cfx-shake,.board.cfx-shake-big{animation:none}
+  .char.cfx-hurt .pc-art,.char.cfx-crit .pc-art{animation:cfxHurtRM .3s ease}
+}
 @keyframes cfxfloat{0%{transform:translate(-50%,-30%) scale(.7);opacity:0}24%{opacity:1;transform:translate(-50%,-58%) scale(1.06)}68%{opacity:1}100%{transform:translate(-50%,-118%) scale(1);opacity:0}}
 @keyframes cfxbadge{0%{transform:translate(-50%,-20%) scale(.6);opacity:0}22%{opacity:1;transform:translate(-50%,-70%) scale(1.05)}70%{opacity:1}100%{transform:translate(-50%,-120%) scale(1);opacity:0}}
 
@@ -3613,7 +3630,7 @@ function answerTrivia(choice){
 function render(){
   const root=$('#game'); if(!root) return;
   try{ if(APP.screen==='play'&&S){ SFX.contextTrack(S.scrim?((S.scrim.node&&S.scrim.node.boss)?'boss':'hiphop9'):null); } else { SFX.contextTrack(null); } }catch(e){}
-  if(APP.screen==='play' && S){ document.body.setAttribute('data-screen','play'); sweepActiveBm(S.you); sweepActiveBm(S.opp); renderGame(root); return; }
+  if(APP.screen==='play' && S){ document.body.setAttribute('data-screen','play'); sweepActiveBm(S.you); sweepActiveBm(S.opp); renderGame(root); try{fxHpTrails();}catch(e){} return; }
   if(APP.screen==='scrim'){ document.body.setAttribute('data-screen','scrim'); document.body.setAttribute('data-scrimview',(SCRIM&&SCRIM.view)||''); root.innerHTML=scrimScreen(); scrimAfterRender&&scrimAfterRender(); return; }
   if(APP.screen==='builder'){ document.body.setAttribute('data-screen','builder'); root.innerHTML=builderScreen(); return; }
   document.body.setAttribute('data-screen','menu');
@@ -3875,7 +3892,7 @@ function critChip(p,side){
 function charTile(p,side){
   const ch=active(p); if(!ch) return '';
   const sbub=statusBubbles(ch);
-  const dead=ch.hp<=0, pct=Math.max(0,ch.hp/ch.maxHp*100);
+  const dead=ch.hp<=0, pct=Math.max(0,ch.hp/ch.maxHp*100); const _op=(ch._hpPrev!=null?ch._hpPrev:pct); ch._hpPrev=pct;
   const canAct = side==='you' && S.turn==='you' && S.phase==='engage' && !S.over && !p.flags.attacked && !busy;
   const effCost = attackCostFor(side,ch.atk);
   const effPool = hasCrit(side,'queer') ? (ch.atkCharge.length+ch.blkCharge.length) : ch.atkCharge.length;
@@ -3885,7 +3902,7 @@ function charTile(p,side){
     : `<span class="mono">${initials(ch.name)}</span>`;
   return `<div class="char ${side} ${dead?'dead':''}${ch.fe?' fe':''}${ch._boss?' boss':''}${side==='you'&&ch.hp>0?' drop-zone':''}" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"${side==='you'?` data-drop="1" data-charuid="${ch.uid}"`:''}>
     ${sbub}
-    <div class="pc-plate"><span class="pc-name">${ch._boss?'\u26a0 ALGORITHM CORE':ch.name}</span><span class="pc-hp"><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
+    <div class="pc-plate"><span class="pc-name">${ch._boss?'\u26a0 ALGORITHM CORE':ch.name}</span><span class="pc-hp"><u style="width:${_op}%"></u><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
     <div class="pc-art">${port}${ch.fe?`<span class="fe-badge" title="1st Edition \u2014 ${((ch.passive&&ch.passive.name)||'').replace(/"/g,'&quot;')}">1ST ED</span>`:''}<button class="pc-flip" data-benchinfo="${side}:${ch.uid}" title="Ability details">i</button></div>
     <div class="pips">${chargePips(ch)}</div>
     <div class="pc-moves">
@@ -4216,8 +4233,10 @@ function fxAt(side, html, dur){
   o.style.cssText=`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;
   o.innerHTML=html; document.body.appendChild(o); setTimeout(()=>o.remove(), dur||1100);
 }
-function fxAttack(side,dmg){ try{SFX.attack();}catch(e){} fxAt(side, `<div class="cfx-ring atk"></div><div class="cfx-slash"></div><div class="cfx-float atk">⚔ −${dmg}</div>`, 1000); }
-function fxDmgNum(side,dmg){ fxAt(side, `<div class="cfx-float atk">⚔ −${dmg}</div>`, 1000); }
+function cfxHurt(side,dmg){ if(typeof document==='undefined'||!side) return; const el=document.querySelector('.char.'+side); const big=dmg>=40; if(el&&el.classList){ el.classList.remove('cfx-hurt','cfx-crit'); void el.offsetWidth; el.classList.add(big?'cfx-crit':'cfx-hurt'); setTimeout(()=>{ try{el.classList.remove('cfx-hurt','cfx-crit');}catch(e){} },420); } const board=document.querySelector('.board'); if(board&&board.classList){ board.classList.remove('cfx-shake','cfx-shake-big'); void board.offsetWidth; board.classList.add(dmg>=55?'cfx-shake-big':'cfx-shake'); setTimeout(()=>{ try{board.classList.remove('cfx-shake','cfx-shake-big');}catch(e){} },470); } }
+function fxHpTrails(){ if(typeof document==='undefined') return; document.querySelectorAll('.pc-hp').forEach(bar=>{ const u=bar.querySelector('u'), i=bar.querySelector('i'); if(u&&i&&u.style.width!==i.style.width){ requestAnimationFrame(()=>{ try{u.style.width=i.style.width;}catch(e){} }); } }); }
+function fxAttack(side,dmg){ try{SFX.attack();}catch(e){} cfxHurt(side,dmg); const big=dmg>=40; fxAt(side, `<div class="cfx-ring atk"></div><div class="cfx-slash"></div><div class="cfx-float atk${big?' crit':''}">${big?('\u2212'+dmg+'!'):('\u2694 \u2212'+dmg)}</div>`, 1000); }
+function fxDmgNum(side,dmg){ cfxHurt(side,dmg); fxAt(side, `<div class="cfx-float atk">\u2694 \u2212${dmg}</div>`, 1000); }
 function fxBlock(side,amt){ try{SFX.block();}catch(e){} fxAt(side, `<div class="cfx-ring blk"></div><div class="cfx-float blk">⛊ ${amt>0?('−'+amt):'Negated'}</div>`, 1000); }
 function fxHeal(side,amt){ if(amt>0){ try{SFX.heal();}catch(e){} fxAt(side, `<div class="cfx-ring heal"></div><div class="cfx-float heal">✚ +${amt}</div>`, 1100); } }
 function fxStatus(side,label,kind){ try{SFX.status(kind);}catch(e){} fxAt(side, `<div class="cfx-float status ${kind||''}">✦ ${label}</div>`, 1050); }
