@@ -1183,6 +1183,17 @@ body[data-screen="scrim"]{ background:#e9dcc0; }
 .tr-code{ width:100%; min-height:64px; resize:vertical; font-family:ui-monospace,'Courier New',monospace; font-size:11px; line-height:1.35;
   color:#3a2f1a; background:#fffdf6; border:1px solid #c9bfa0; border-radius:7px; padding:8px 9px; word-break:break-all; margin-bottom:9px; box-sizing:border-box; }
 .tr-sum{ font-family:var(--cond); letter-spacing:.5px; color:#7a5a2a; font-size:13px; margin-bottom:9px; }
+/* ---- Office Hours event ---- */
+.evt{ text-align:center; max-width:560px; }
+.evt-ic{ font-size:44px; line-height:1; margin:4px 0 2px; }
+.evt-lf{ font-family:var(--cond); letter-spacing:1px; color:#8a7d5e; font-size:12px; }
+.evt-text{ font-size:14.5px; line-height:1.55; color:#3a322b; margin:12px auto 16px; max-width:480px; }
+.evt-choices{ display:flex; flex-direction:column; gap:9px; }
+.evt-choice{ font-family:var(--body); font-size:14px; background:#faf7ef; border:2px solid #241f1b; border-radius:10px; padding:11px 14px; cursor:pointer; text-align:left; transition:transform .1s, background .1s; }
+.evt-choice:hover{ background:var(--gold); transform:translateX(3px); }
+.evt-choice.evt-lock{ opacity:.5; cursor:not-allowed; }
+.evt-cost{ color:#a05a2a; font-family:var(--cond); font-size:12px; letter-spacing:.5px; }
+.evt-result{ font-size:15px; line-height:1.6; color:#3a322b; background:#f7efd6; border:1px solid #c9bfa0; border-radius:10px; padding:16px 18px; margin:12px auto 16px; max-width:480px; }
 @media(min-width:640px){
   .scrim-folder{ margin-top:32px; }
   .vtabs{ flex-wrap:nowrap; align-items:flex-end; gap:6px; padding-left:8px; }
@@ -2491,7 +2502,7 @@ window.ABC_CREST="data:image/jpeg;base64,__ABCASSET_110__";
 try{document.documentElement.style.setProperty('--abc-bg','url("'+window.ABC_BG+'")');}catch(e){}
 window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
 try{document.documentElement.style.setProperty('--abc-bg-qc','url("'+window.ABC_BG_QC+'")');}catch(e){}
-window.ABC_ICONS={archives:"data:image/png;base64,__ABCASSET_111__",rest:"data:image/png;base64,__ABCASSET_112__",start:"data:image/png;base64,__ABCASSET_113__",scrim:"data:image/png;base64,__ABCASSET_114__",elite:"data:image/png;base64,__ABCASSET_115__",boss:"data:image/png;base64,__ABCASSET_116__",fair:"data:image/png;base64,__ABCASSET_932__"};
+window.ABC_ICONS={archives:"data:image/png;base64,__ABCASSET_111__",rest:"data:image/png;base64,__ABCASSET_112__",start:"data:image/png;base64,__ABCASSET_113__",scrim:"data:image/png;base64,__ABCASSET_114__",elite:"data:image/png;base64,__ABCASSET_115__",boss:"data:image/png;base64,__ABCASSET_116__",fair:"data:image/png;base64,__ABCASSET_932__",office:"data:image/png;base64,__ABCASSET_999__"};
 window.ABC_SND={music_thereturn:"data:audio/mpeg;base64,__ABCASSET_125__",music_hiphop9:"data:audio/mpeg;base64,__ABCASSET_126__",sfx_card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",sfx_card_place:"data:audio/mpeg;base64,__ABCASSET_118__",sfx_card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",sfx_card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",sfx_book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",sfx_card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",sfx_pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",sfx_pack_take:"data:audio/mpeg;base64,__ABCASSET_124__",music_boss:"data:audio/mpeg;base64,__ABCASSET_127__"};
 window.ABC_BOSS_IMG={"dyefone":"data:image/webp;base64,__ABCASSET_909__","sandroid":"data:image/webp;base64,__ABCASSET_910__","sinstaram":"data:image/webp;base64,__ABCASSET_911__","claystation":"data:image/webp;base64,__ABCASSET_952__","pintendo":"data:image/webp;base64,__ABCASSET_953__","hexbox":"data:image/webp;base64,__ABCASSET_954__","sicsoc":"data:image/webp;base64,__ABCASSET_955__"};
 window.ABC_BOSS_IMGPOS={"dyefone":"44% 40%","sandroid":"48% 40%","sinstaram":"50% 40%"};
@@ -5125,7 +5136,7 @@ const SCRIM_KITS = {
   wonderland:{ name:'Nonsense Fabulist', ic:'\u2665', blurb:'Down the rabbit-hole into delightful madness.', deck:'wonderland', chars:['white_rabbit','cheshire_cat'] },
   tewwg:{ name:'Renaissance Voice', ic:'\ud83c\udf50', blurb:'Their Eyes Were Watching God \u2014 Janie\u2019s search for the horizon.', deck:'tewwg', chars:['janie','teacake'] },
 };
-const SCRIM_NODE = { start:{ic:'\u2605',name:'Start'}, scrim:{ic:'\u2694',name:'Scrimmage'}, archives:{ic:'\ud83d\udcda',name:'Study Break'}, rest:{ic:'\u2615',name:'Coffee Break'}, fair:{ic:'\ud83c\udfea',name:'Book Fair'}, elite:{ic:'\ud83c\udf93',name:'Thesis Defense'}, boss:{ic:'\ud83d\udea8',name:'Algorithm Boss'} };
+const SCRIM_NODE = { start:{ic:'\u2605',name:'Start'}, scrim:{ic:'\u2694',name:'Scrimmage'}, archives:{ic:'\ud83d\udcda',name:'Study Break'}, rest:{ic:'\u2615',name:'Coffee Break'}, fair:{ic:'\ud83c\udfea',name:'Book Fair'}, office:{ic:'\ud83d\udcbc',name:'Office Hours'}, elite:{ic:'\ud83c\udf93',name:'Thesis Defense'}, boss:{ic:'\ud83d\udea8',name:'Algorithm Boss'} };
 const SCRIM_ART = {
   gutenberg:{ name:'The Gutenberg Press', ic:'\ud83d\udcdc', tier:'common', text:'Your attacks deal +5 base damage.' },
   spine:{     name:'The Well-Worn Spine', ic:'\ud83d\udcd6', tier:'common', text:'+15 Max HP to your whole roster.' },
@@ -5313,6 +5324,7 @@ function scrimAfterRender(){ try{ scrimDrawConnectors(); }catch(e){} }
 function scrimStartKit(kitId){
   const kit=SCRIM_KITS[kitId]; if(!kit) return;
   SCRIM.active=true; SCRIM.kit=kitId; SCRIM.artifacts=[]; SCRIM.cleared=0; SCRIM.act=1; SCRIM.bosses=scrimRollBosses(); SCRIM.lf=0; SCRIM.t0=Date.now(); SCRIM.honors=Math.min(META.honorsMax||0, SCRIM._honorsSel||0);
+  SCRIM._eventsSeen=[]; SCRIM._noNextReward=false; SCRIM._overdueUsed=false; SCRIM.event=null; SCRIM._eventResult=null;
   META.stats=META.stats||{runs:0,wins:0,bossKills:0,bestAct:0,fastestMs:0};
   META.stats.runs=(META.stats.runs||0)+1; metaSave();
   const dk=kit.deck;
@@ -5355,10 +5367,11 @@ function scrimNodeType(c,N){
   if(c===N-2) return Math.random()<0.6?'rest':'scrim';
   const roll=Math.random();
   if(c<=1) return roll<0.8?'scrim':'archives';
-  if(roll<0.55) return 'scrim';
-  if(roll<0.70) return 'archives';
-  if(roll<0.80) return 'rest';
-  if(roll<0.88) return 'fair';
+  if(roll<0.52) return 'scrim';
+  if(roll<0.67) return 'archives';
+  if(roll<0.77) return 'rest';
+  if(roll<0.85) return 'fair';
+  if(roll<0.93) return 'office';
   return 'elite';
 }
 function scrimReachable(c,r){ const m=SCRIM.map; if(!m) return false; const cur=m.cols[m.pos.c][m.pos.r]; return c===m.pos.c+1 && cur.next && cur.next.indexOf(r)>=0 && !m.cols[c][r].done; }
@@ -5475,6 +5488,8 @@ function handleScrim(cmd){
   if(op==='shop'){ SCRIM.view='shop'; render(); return; }
   if(op==='vtab'){ SCRIM.vaultTab=a; SCRIM.view='shop'; render(); return; }
   if(op==='stack'){ SCRIM._stackSel=(SCRIM._stackSel===a?null:a); render(); return; }
+  if(op==='evchoose'){ scrimEventChoose(+a); return; }
+  if(op==='evdone'){ SCRIM._eventResult=null; SCRIM.event=null; SCRIM.view='map'; render(); scrimSave(); return; }
   if(op==='texport'){ SCRIM._transcript={mode:'export',code:transcriptEncode()}; render(); return; }
   if(op==='timport'){ SCRIM._transcript={mode:'import'}; render(); return; }
   if(op==='tclose'){ SCRIM._transcript=null; render(); return; }
@@ -5529,12 +5544,68 @@ function handleScrim(cmd){
   if(op==='rosetta'){ if(S&&S.pending&&S.scrim&&!S.scrim.rosettaUsed){ const type=S.pending.card.type; const decks=Object.keys(DATA.abcs); let pick=null,g=0; while(!pick&&g++<40){ const d=decks[rnd(decks.length)]; const x=DATA.abcs[d][rnd(DATA.abcs[d].length)]; if(x&&x.type===type) pick=x; } if(pick){ const c=S.pending.card; c.q=pick.q; c.opts=pick.opts.slice(); c.ans=pick.ans; S.scrim.rosettaUsed=true; pushLog('Rosetta Stone \u2014 the question is swapped.'); render(); } } return; }
   if(op==='afterbattle'){ scrimAfterBattle(); return; }
 }
+/* ---- Office Hours: event node ---- */
+const SCRIM_EVENTS = {
+  vending:{ title:'The Vending Machine', ic:'\uD83E\uDD64', text:'A dented machine hums in the faculty hallway, stocked with\u2026 something. A slot glows: INSERT LATE FEES.',
+    choices:[ {label:'Buy a mystery artifact', fx:'vend', need:3}, {label:'Walk away', fx:'leave'} ] },
+  extracredit:{ title:'Extra Credit', ic:'\u2795', text:'The professor peers over her glasses. \u201cOne bonus question. Get it right and you\u2019ll be rewarded \u2014 get it wrong and it\u2019ll cost you.\u201d',
+    choices:[ {label:'Attempt the bonus question', fx:'extra'}, {label:'Decline politely', fx:'leave'} ] },
+  professor:{ title:'The Professor\u2019s Office', ic:'\uD83C\uDFEB', text:'Office hours, and the professor is in a generous mood. \u201cPick one \u2014 don\u2019t be greedy.\u201d',
+    choices:[ {label:'+10 Max HP to your whole roster', fx:'php'}, {label:'A free card draft', fx:'pdraft'}, {label:'A random artifact', fx:'part'} ] },
+  overdue:{ title:'Overdue Books', ic:'\uD83D\uDCDA', text:'The head librarian taps a towering stack of overdue books and clears her throat.',
+    choices:[ {label:'Settle up', fx:'settle', need:5}, {label:'Refuse \u2014 and carry the distraction', fx:'curse'} ] },
+  substitute:{ title:'The Substitute', ic:'\uD83C\uDF93', text:'A guest lecturer offers to sit in for one of your scholars for the rest of the run.',
+    choices:[ {label:'Swap in a random 1st-Edition Commander', fx:'swap'}, {label:'Keep your roster as-is', fx:'leave'} ] },
+  lostfound:{ title:'Lost & Found', ic:'\uD83D\uDCE6', text:'A box of forgotten things. Two piles: loose papers, and odd trinkets. You can only reach into one.',
+    choices:[ {label:'The papers (a random card)', fx:'lfcard'}, {label:'The trinkets (a random artifact)', fx:'lfart'} ] },
+  studygroup:{ title:'The Study Group', ic:'\uD83E\uDD1D', text:'A cram session forms in the library. Join in and you\u2019ll be rested \u2014 but too tired to take notes in your next fight.',
+    choices:[ {label:'Join: heal to full', fx:'cram'}, {label:'Skip it', fx:'leave'} ] },
+  mysterymeat:{ title:'Cafeteria Mystery Meat', ic:'\uD83C\uDF7D', text:'Today\u2019s special is\u2026 ambitious. The line cook won\u2019t make eye contact.',
+    choices:[ {label:'Eat it (random outcome)', fx:'meat'}, {label:'Pass', fx:'leave'} ] },
+  careerfair:{ title:'Career Fair', ic:'\uD83D\uDCBC', text:'Recruiters are paying a premium for unspent Late Fees today.',
+    choices:[ {label:'Convert ALL Late Fees to IP (3\u00d7 rate)', fx:'career'}, {label:'Keep your Late Fees', fx:'leave'} ] },
+};
+function scrimRollEvent(){ const ids=Object.keys(SCRIM_EVENTS).filter(id=>(SCRIM._eventsSeen||[]).indexOf(id)<0); const pool=ids.length?ids:Object.keys(SCRIM_EVENTS); const id=pool[rnd(pool.length)]; SCRIM._eventsSeen=(SCRIM._eventsSeen||[]).concat(id); return id; }
+function scrimEventScreen(){
+  const ev=SCRIM_EVENTS[SCRIM.event]; if(!ev) return '<div class="scrim-wrap scrim-ink"><div class="scrim-panel">\u2014</div></div>';
+  if(SCRIM._eventResult){
+    return '<div class="scrim-wrap scrim-ink"><div class="scrim-panel evt"><div class="evt-ic">'+ev.ic+'</div><div class="scrim-title sm">'+ev.title+'</div><div class="evt-result">'+SCRIM._eventResult+'</div><button class="bigbtn go" data-scrim="evdone">Continue \u203a</button></div></div>';
+  }
+  const lf=SCRIM.lf||0;
+  const choices=ev.choices.map((c,i)=>{ const afford=!c.need||lf>=c.need; return '<button class="evt-choice'+(afford?'':' evt-lock')+'" data-scrim="evchoose:'+i+'"'+(afford?'':' disabled')+'>'+c.label+(c.need?' <span class="evt-cost">('+c.need+' Late Fees)</span>':'')+'</button>'; }).join('');
+  return '<div class="scrim-wrap scrim-ink"><div class="scrim-panel evt"><div class="evt-ic">'+ev.ic+'</div><div class="scrim-title sm">'+ev.title+'</div><div class="evt-lf">Late Fees: '+lf+'</div><p class="evt-text">'+ev.text+'</p><div class="evt-choices">'+choices+'</div></div></div>';
+}
+function scrimEventChoose(i){
+  const ev=SCRIM_EVENTS[SCRIM.event]; if(!ev) return; const ch=ev.choices[i]; if(!ch) return;
+  if(ch.need && (SCRIM.lf||0)<ch.need){ toast('Not enough Late Fees.'); return; }
+  let msg='';
+  const grantArt=(tiers)=>{ const id=scrimGrantArtifact(tiers||['common','uncommon']); return id?SCRIM_ART[id]:null; };
+  switch(ch.fx){
+    case 'leave': msg='You move on, unchanged.'; break;
+    case 'vend': { const a=grantArt(); if(a){ SCRIM.lf-=ch.need; msg='The machine clunks and drops <b>'+a.ic+' '+a.name+'</b>.'; } else { msg='The machine is empty \u2014 you keep your Late Fees.'; } break; }
+    case 'extra': { if(Math.random()<0.6){ if(Math.random()<0.5){ const a=grantArt(); if(a){ msg='Correct! You earn <b>'+a.ic+' '+a.name+'</b>.'; } else { META.ip=(META.ip||0)+15; metaSave(); msg='Correct! <b>+15 Intellect Points.</b>'; } } else { META.ip=(META.ip||0)+15; metaSave(); msg='Correct! <b>+15 Intellect Points.</b>'; } } else { SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.max(1,t.curHp-15); }); msg='Wrong \u2014 the class groans. <b>Your team takes 15 damage.</b>'; } break; }
+    case 'php': SCRIM.team.forEach(t=>{ t.maxHp+=10; if(t.curHp>0)t.curHp=Math.min(t.maxHp,t.curHp+10); }); msg='<b>+10 Max HP</b> to your whole roster.'; break;
+    case 'pdraft': SCRIM._eventResult=null; SCRIM.event=null; SCRIM.draft=scrimRollDraft(3); SCRIM.view='archives'; render(); scrimSave(); return;
+    case 'part': { const a=grantArt(); msg=a?('The professor hands you <b>'+a.ic+' '+a.name+'</b>.'):'You already own everything on offer.'; break; }
+    case 'settle': SCRIM.lf-=ch.need; msg='Settled. The librarian nods approvingly.'; break;
+    case 'curse': SCRIM.team.forEach(t=>{ t.maxHp=Math.max(20,t.maxHp-6); if(t.curHp>t.maxHp)t.curHp=t.maxHp; }); msg='The distraction lingers \u2014 <b>\u22126 Max HP</b> to your roster for the rest of the run.'; break;
+    case 'swap': { const feids=(DATA.firsteds||[]).map(f=>f.id).filter(id=>!SCRIM.team.some(t=>t.fe&&t.id===id)); if(!feids.length){ msg='No substitutes are available.'; break; } const feid=feids[rnd(feids.length)]; const fd=firstedById(feid); if(!fd){ msg='No substitutes are available.'; break; } const idx=SCRIM.team.findIndex(t=>!t.fe); const slot=idx>=0?idx:0; const mx=fd.hp||90; SCRIM.team[slot]={fe:true,id:feid,deck:fd.deck,curHp:mx,maxHp:mx}; if((META.commanders||[]).indexOf(feid)<0){ META.commanders.push(feid); metaSave(); } msg='A substitute steps in: <b>'+fd.name+'</b> joins your roster.'; break; }
+    case 'lfcard': { const decks=Object.keys(DATA.characters); const d=decks[rnd(decks.length)]; const ci=rnd(DATA.abcs[d].length); SCRIM.deck.ab.push({d:d,i:ci}); const cd=DATA.abcs[d][ci]; msg='From the papers: a new <b>'+(cd?cd.type:'ABC')+'</b> card joins your deck.'; break; }
+    case 'lfart': { const a=grantArt(); msg=a?('From the trinkets: <b>'+a.ic+' '+a.name+'</b>.'):'The trinket pile is bare.'; break; }
+    case 'cram': SCRIM.team.forEach(t=>{ t.curHp=t.maxHp; }); SCRIM._noNextReward=true; msg='Rested and ready \u2014 <b>team healed to full.</b> (Your next Scrimmage gives no card.)'; break;
+    case 'meat': { const r=rnd(3); if(r===0){ META.ip=(META.ip||0)+20; metaSave(); msg='Surprisingly good! <b>+20 Intellect Points.</b>'; } else if(r===1){ SCRIM.lf=(SCRIM.lf||0)+2; msg='You find a coupon inside. <b>+2 Late Fees.</b>'; } else { SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.max(1,t.curHp-10); }); msg='\u2026that was a mistake. <b>Your team loses 10 HP.</b>'; } break; }
+    case 'career': { const lf=SCRIM.lf||0; const ip=lf*3; META.ip=(META.ip||0)+ip; metaSave(); SCRIM.lf=0; msg='You cash out: <b>+'+ip+' Intellect Points</b> for '+lf+' Late Fees.'; break; }
+  }
+  SCRIM._eventResult=msg||'Done.'; render(); scrimSave();
+}
+
 function scrimResolveNode(c,r){
   const node=SCRIM.map.cols[c][r]; SCRIM.pending={c,r};
   if(node.type==='scrim'||node.type==='elite'||node.type==='boss'){ scrimStartBattle(node); }
   else if(node.type==='archives'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.draft=scrimRollDraft(Math.max(2,(perkOn('officehours')?4:3)+honorsMods().draftDelta)); SCRIM.view='archives'; try{SFX.card('pack_open',0.7);}catch(e){} render(); scrimSave(); }
   else if(node.type==='rest'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.view='rest'; render(); scrimSave(); }
   else if(node.type==='fair'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.view='fair'; try{SFX.card('card_fan',0.6);}catch(e){} render(); scrimSave(); }
+  else if(node.type==='office'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.event=scrimRollEvent(); SCRIM._eventResult=null; SCRIM.view='event'; try{SFX.card('card_fan',0.6);}catch(e){} render(); scrimSave(); }
 }
 function scrimAfterBattle(){
   if(!S) { SCRIM.view='map'; render(); return; }
@@ -5569,6 +5640,7 @@ function scrimAfterBattle(){
     SCRIM.view='bossreward'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave(); return;
   }
   S=null; stopTurnTimer(); APP.screen='scrim';
+  if(SCRIM._noNextReward){ SCRIM._noNextReward=false; SCRIM.pending=null; SCRIM.view='map'; toast('Too tired to take notes \u2014 no card this fight.'); render(); scrimSave(); return; }
   SCRIM.pending=null; SCRIM.draft=scrimRollDraft(Math.max(2,(perkOn('officehours')?4:3)+honorsMods().draftDelta)); SCRIM.view='reward'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave();
 }
 function scrimBuyUnlock(id){
@@ -5589,6 +5661,7 @@ function scrimScreen(){
     case 'bossreward': return scrimBossRewardScreen();
     case 'rest': return scrimRestScreen();
     case 'fair': return scrimFairScreen();
+    case 'event': return scrimEventScreen();
     case 'shop': return scrimVaultShell();
     case 'dead': return scrimDeadScreen();
     default: return scrimVaultShell();
