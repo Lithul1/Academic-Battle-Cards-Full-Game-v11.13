@@ -4067,7 +4067,8 @@ const SFX = (function(){
     procGain=ctx.createGain(); procGain.gain.value=1; procGain.connect(musGain);
     return true;
   }
-  function unlock(){ if(!build()) return; if(ctx.state==='suspended') ctx.resume(); if(!unlocked){ unlocked=true; if(musicOn) startMusic(); } }
+  function warmSfx(){ try{ Object.keys(FILEAUD).forEach(function(k){ if(k.indexOf('sfx_')===0) _loadBuf(k,function(){}); }); }catch(e){} }
+  function unlock(){ if(!build()) return; if(ctx.state==='suspended') ctx.resume(); if(!unlocked){ unlocked=true; warmSfx(); if(musicOn) startMusic(); } }
   function now(){ return ctx?ctx.currentTime:0; }
   function env(g,t,a,d,peak){ g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+a); g.gain.exponentialRampToValueAtTime(0.0001,t+a+d); }
   function beep(freq,t,dur,type,peak,slideTo,dest){
@@ -4233,7 +4234,7 @@ function fxAt(side, html, dur){
   o.style.cssText=`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;
   o.innerHTML=html; document.body.appendChild(o); setTimeout(()=>o.remove(), dur||1100);
 }
-function cfxHurt(side,dmg){ if(typeof document==='undefined'||!side) return; const el=document.querySelector('.char.'+side); const big=dmg>=40; if(el&&el.classList){ el.classList.remove('cfx-hurt','cfx-crit'); void el.offsetWidth; el.classList.add(big?'cfx-crit':'cfx-hurt'); setTimeout(()=>{ try{el.classList.remove('cfx-hurt','cfx-crit');}catch(e){} },420); } const board=document.querySelector('.board'); if(board&&board.classList){ board.classList.remove('cfx-shake','cfx-shake-big'); void board.offsetWidth; board.classList.add(dmg>=55?'cfx-shake-big':'cfx-shake'); setTimeout(()=>{ try{board.classList.remove('cfx-shake','cfx-shake-big');}catch(e){} },470); } }
+function cfxHurt(side,dmg){ if(typeof document==='undefined'||!side) return; const big=dmg>=40, bigShake=dmg>=55; requestAnimationFrame(function(){ const el=document.querySelector('.char.'+side); if(el&&el.classList){ el.classList.remove('cfx-hurt','cfx-crit'); void el.offsetWidth; el.classList.add(big?'cfx-crit':'cfx-hurt'); setTimeout(function(){ try{el.classList.remove('cfx-hurt','cfx-crit');}catch(e){} },420); } const board=document.querySelector('.board'); if(board&&board.classList){ board.classList.remove('cfx-shake','cfx-shake-big'); void board.offsetWidth; board.classList.add(bigShake?'cfx-shake-big':'cfx-shake'); setTimeout(function(){ try{board.classList.remove('cfx-shake','cfx-shake-big');}catch(e){} },470); } }); }
 function fxHpTrails(){ if(typeof document==='undefined') return; document.querySelectorAll('.pc-hp').forEach(bar=>{ const u=bar.querySelector('u'), i=bar.querySelector('i'); if(u&&i&&u.style.width!==i.style.width){ requestAnimationFrame(()=>{ try{u.style.width=i.style.width;}catch(e){} }); } }); }
 function fxAttack(side,dmg){ try{SFX.attack();}catch(e){} cfxHurt(side,dmg); const big=dmg>=40; fxAt(side, `<div class="cfx-ring atk"></div><div class="cfx-slash"></div><div class="cfx-float atk${big?' crit':''}">${big?('\u2212'+dmg+'!'):('\u2694 \u2212'+dmg)}</div>`, 1000); }
 function fxDmgNum(side,dmg){ cfxHurt(side,dmg); fxAt(side, `<div class="cfx-float atk">\u2694 \u2212${dmg}</div>`, 1000); }
@@ -4701,6 +4702,8 @@ function _endDrag(){ if(_drag&&_drag.active) window._dragJustEnded=Date.now();
   try{ if(_drag&&_drag.capEl&&_drag.pid!=null) _drag.capEl.releasePointerCapture(_drag.pid); }catch(err){}
   document.body.classList.remove('maybe-drag');
   if(_drag&&_drag.ghost&&_drag.ghost.parentNode) _drag.ghost.parentNode.removeChild(_drag.ghost); document.body.classList.remove('dragging-abc'); document.querySelectorAll('.drop-zone.dragover').forEach(el=>el.classList.remove('dragover')); _drag=null; }
+/* Keep the AudioContext awake: iOS/Safari re-suspends it aggressively, which delays SFX. Resume on any touch. */
+document.addEventListener('pointerdown', function(){ try{ SFX.unlock&&SFX.unlock(); }catch(e){} }, {passive:true});
 document.addEventListener('pointerdown',e=>{
   if(!S||S.turn!=='you'||S.phase!=='strategize'||busy) return;
   const el=e.target.closest('.hc.abc.drag-src[data-idx]'); if(!el) return;
