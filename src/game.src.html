@@ -93,7 +93,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .pc-name{flex:1;min-width:0;font-family:var(--disp);font-size:15px;letter-spacing:.3px;line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--plate,#fff);color:var(--plate-ink,var(--ink));border:2px solid var(--frame,var(--ink));border-radius:7px;padding:2px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pc-hp{position:relative;flex:0 0 auto;min-width:58px;display:grid;place-items:center;border:2px solid var(--frame,var(--ink));border-radius:7px;overflow:hidden;background:#2a2a2a}
 .pc-hp i{position:absolute;left:0;top:0;bottom:0;width:100%;background:var(--hp,#4f9fe0);transition:width .35s}
-.pc-hp b{position:relative;font-family:var(--cond);font-weight:700;font-size:12px;letter-spacing:.5px;color:var(--hp-ink,#fff);text-shadow:0 1px 1px rgba(0,0,0,.35);padding:2px 7px}
+.pc-hp b{position:relative;z-index:2;font-family:var(--cond);font-weight:700;font-size:12px;letter-spacing:.5px;color:var(--hp-ink,#fff);text-shadow:0 1px 1px rgba(0,0,0,.35);padding:2px 7px}
 .char.dead .pc-hp i{background:#8a8a8a}
 .pc-art{position:relative;height:132px;border:2px solid var(--frame,var(--ink));border-radius:8px;display:grid;place-items:center;overflow:hidden;background:var(--ground,linear-gradient(160deg,var(--accent),#1b1714))}
 .pc-art .mono{font-family:var(--disp);font-size:44px;color:rgba(255,255,255,.92);text-shadow:2px 2px 0 rgba(0,0,0,.4)}
