@@ -2917,6 +2917,11 @@ function startTurn(){
   p.flags.attacked = false;
   p.flags.swapped = false;
   p.flags.bmCount = 0;
+  if(S.scrim && p===S.you){
+    S.scrim._redRingTurn=false;
+    if(S.scrim.ruleShift==='sinstaram2'){ const a=active(S.you); if(a&&a.hp>0){ a.hp=Math.max(1,a.hp-5); pushLog('Sponsored Post \u2014 ad tax: your Active loses 5 HP.'); } }
+    if(S.scrim.ruleShift==='sicsoc2' && S.you.hand.length){ const lost=S.you.hand.shift(); if(lost){ S.you.discard.push(lost); pushLog('Doomscroll \u2014 the oldest card in your hand is discarded.'); } }
+  }
   S.phase='draw';
   pushLog(`— ${p===S.you?'Your':"Opponent's"} turn —`);
   // poison ticks at the start of each turn
@@ -2950,6 +2955,7 @@ function startTurn(){
       else boss.atk.dmg=boss._clayBase;
     }
     if(rs==='sinstaram' && boss && boss.hp>0){ boss.status.highlight=true; }
+    if(rs==='pintendo2' && boss && boss.hp>0){ boss.hp=Math.min(boss.maxHp,boss.hp+8); pushLog('Loot Box \u2014 the boss heals 8 HP.'); }
   }
   render();
   startTurnTimer();
@@ -2959,6 +2965,7 @@ function doDraw(){
   const p=me();
   let target=Math.max(S.settings.handMin, p.hand.length+1);  // normal +1, floored to handMin
   if(S.scrim && S.scrim.ruleShift==='sandroid' && me()===p) target+=2;  // Infinite Scroll
+  if(S.scrim && S.scrim.ruleShift==='e_popquiz' && me()===p) target=Math.max(1,target-1);  // Pop Quiz
   let drawn=0;
   while(p.hand.length<target){
     if(p.deck.length===0 && p.discard.length){ p.deck=shuffle(p.discard.splice(0)); pushLog('Deck empty — discard reshuffled.'); }
@@ -2978,7 +2985,9 @@ function endTurn(){ if(S.over) return;
     if(S.you._ratingsBlank) S.you._ratingsBlank=false;
   }
   if(S.over) return;
-  if(S.scrim && S.scrim.ruleShift==='sandroid' && S.turn==='you' && S.you.hand.length){ const n=S.you.hand.length; S.you.discard.push(...S.you.hand.splice(0)); pushLog(`The Infinite Scroll — ${n} unused card${n>1?'s':''} crumble to sand.`); } S.turn=foeKey(); startTurn(); }
+  if(S.scrim && S.scrim.ruleShift==='sandroid' && S.turn==='you' && S.you.hand.length){ const n=S.you.hand.length; S.you.discard.push(...S.you.hand.splice(0)); pushLog(`The Infinite Scroll — ${n} unused card${n>1?'s':''} crumble to sand.`); }
+  if(S.scrim && S.scrim.ruleShift==='sandroid2' && S.turn==='you' && S.you.hand.length){ const ri=rnd(S.you.hand.length); const lost=S.you.hand.splice(ri,1)[0]; if(lost){ S.you.discard.push(lost); pushLog('Sandstorm \u2014 a card in your hand is buried.'); } }
+  S.turn=foeKey(); startTurn(); }
 
 /* ---------------- attaching ABCs (trivia gate) ---------------- */
 function tryPlayHandCard(idx,targetUid){
@@ -3341,6 +3350,10 @@ function performAttack(side,abilKey){           // == beginAttack
   if(S.scrim && side==='you' && scrimHas('gutenberg')){ dmg+=5; pushLog('The Gutenberg Press — +5 base damage.'); }
   if(S.scrim && side==='you' && scrimHas('redpen')){ dmg=Math.round(dmg*1.1); }
   if(S.scrim && side==='you' && scrimHas('honorary')){ dmg=Math.round(dmg*1.15); }
+  if(S.scrim && side==='you'){
+    if(S.scrim.ruleShift==='claystation2') dmg=Math.round(dmg*0.8);
+    const _att=active(S.you); if(_att){ if(_att._slacker) dmg=Math.round(dmg*0.5); else if(_att._carry) dmg=Math.round(dmg*1.15); }
+  }
   if(hasCrit(side,'marxist') && (ab.cost===1||ab.cost===2) && def.atk && (def.atk.cost===3||def.atk.cost===4)){ dmg+=10; pushLog('Marxist Lens: +10 class-struggle damage.'); }
   if(A.flags.supercharge){ dmg*=2; A.flags.supercharge=false; pushLog('Supercharger: damage doubled!'); }
   if(att.status.highlight){ dmg+=20; delete att.status.highlight; pushLog(`${att.name} is Highlighted — +20 damage.`); }
@@ -3470,6 +3483,7 @@ function finishAttack(blocked,negated,forceNet){
 function checkKO(p,side){
   const a=active(p);
   if(a && a.hp<=0){
+    if(S.scrim && S.scrim.ruleShift==='e_waitlist' && side==='opp' && !S.scrim._waitlistUsed){ S.scrim._waitlistUsed=true; a.hp=Math.max(1,Math.round(a.maxHp*0.3)); pushLog('The Waitlist \u2014 the examiner claws back to 30% HP!'); if(typeof toast==='function') toast('The Waitlist revives!'); render(); return; }
     spawnKO(side, a.name);
     if(!p.grave.includes(a)) p.grave.push(a);
     const attacker=foeOf(side); attacker.kos++;
@@ -3622,6 +3636,12 @@ function answerTrivia(choice){
   try{SFX.card(correct?'card_place':'card_shove',0.7);}catch(e){}
   toast(correct?'Correct! Card attached.':'Wrong — card discarded.', correct?'good':'bad');
   if(!correct && S.scrim && S.scrim.ruleShift==='hexbox'){ S.you.hand.push({cat:'hex',name:'Hex',_hex:true,_new:true}); pushLog('Hexbox injects a Hex — purge it with a Bookmark or take 10 at end of turn.'); }
+  if(!correct && S.scrim){
+    const rs=S.scrim.ruleShift;
+    if(rs==='dyefone2' && S.you.hand.length){ const ri=Math.floor(Math.random()*S.you.hand.length); const lost=S.you.hand.splice(ri,1)[0]; if(lost){ S.you.discard.push(lost); pushLog('Read Receipts \u2014 a card slips from your hand.'); } }
+    if(rs==='hexbox2' && !S.scrim._redRingTurn){ S.scrim._redRingTurn=true; const a=active(S.you); if(a&&a.hp>0){ a.hp=Math.max(0,a.hp-5); pushLog('Red Ring \u2014 your Active takes 5.'); checkKO(S.you,'you'); } }
+    if(rs==='e_politics'){ const boss=active(S.opp); if(boss&&boss.hp>0){ boss.hp=Math.min(boss.maxHp,boss.hp+8); pushLog('Office Politics \u2014 the examiner heals 8 HP.'); } }
+  }
   if(!correct){ const me=S.you.team[S.you.activeIdx]; if(me&&me.fe&&me.passive&&me.passive.failDiscardRandom&&S.you.hand.length){ const ri=Math.floor(Math.random()*S.you.hand.length); const lost=S.you.hand.splice(ri,1)[0]; if(lost){ S.you.discard.push(lost); pushLog(`${me.name}'s composure shatters — a card slips from your hand.`); } } }
   attach('you',pend.handIdx,correct,pend.target);
 }
@@ -5185,33 +5205,40 @@ const SCRIM_ART_TIERS = { common:[], uncommon:[], rare:[], boss:[] };
 Object.keys(SCRIM_ART).forEach(id=>{ (SCRIM_ART_TIERS[SCRIM_ART[id].tier]||SCRIM_ART_TIERS.common).push(id); });
 const SCRIM_BOSSES = {
   sandroid:{ name:'Sandroid', sub:'The Sand-Based Android Phone', hp:210, accent:'#b8894a', deck:'frankenstein', acc:0.9,
-    ruleShift:'sandroid', shiftName:'The Infinite Scroll', shiftText:'You draw 2 extra cards each turn \u2014 but your leftover hand crumbles to sand at end of turn.',
+    ruleShift:'sandroid', altShift:'sandroid2', altName:'Sandstorm', altText:'At the end of each of your turns, a random card in your hand is buried.', shiftName:'The Infinite Scroll', shiftText:'You draw 2 extra cards each turn \u2014 but your leftover hand crumbles to sand at end of turn.',
     atk:{ n:'Quick-Sand Crash', t:'Deals 30 and buries your Active\u2019s charged Block ABC.', cost:2, dmg:30, stripBlocks:true, label:'30/2' },
     blk:{ n:'Shifting Dunes', t:'Blocks 20 incoming damage.', cost:2, block:20, label:'20/2' } },
   dyefone:{ name:'Dyefone', sub:'The Ink-Based Smartphone', hp:190, accent:'#3a3550', deck:'hamlet', acc:0.9,
-    ruleShift:'dyefone', shiftName:'Notification Inundation', shiftText:'Ink blots your trivia \u2014 some letters are censored, testing raw memory.',
+    ruleShift:'dyefone', altShift:'dyefone2', altName:'Read Receipts', altText:'Every wrong trivia answer also discards a random card from your hand.', shiftName:'Notification Inundation', shiftText:'Ink blots your trivia \u2014 some letters are censored, testing raw memory.',
     atk:{ n:'Blue-Light Blast', t:'Deals 40 and inflicts Smudge.', cost:2, dmg:40, inflict:'smudge', label:'40/2' },
     blk:{ n:'Glare', t:'Blocks 20 incoming damage.', cost:2, block:20, label:'20/2' } },
   claystation:{ name:'Claystation', sub:'The Unrendered Console', hp:200, accent:'#7a5a3c', deck:'oz', acc:0.9,
-    ruleShift:'claystation', shiftName:'Morphic Mirror', shiftText:'On its even turns, Claystation copies your team\u2019s single highest printed Attack.',
+    ruleShift:'claystation', altShift:'claystation2', altName:'Frame Drop', altText:'Rendering lag — your attacks deal 20% less damage.', shiftName:'Morphic Mirror', shiftText:'On its even turns, Claystation copies your team\u2019s single highest printed Attack.',
     atk:{ n:'Unrendered Smash', t:'Deals 50 and Pierces \u2014 ignores blocks and reductions.', cost:3, dmg:50, flags:['pierce'], label:'50/3' },
     blk:{ n:'Morphic Guard', t:'Reshapes itself to block 25 incoming damage.', cost:2, block:25, label:'25/2' } },
   sinstaram:{ name:'Sinsta-Ram', sub:'The Filtered Feed', hp:200, accent:'#b03a6a', deck:'wonderland', acc:0.9,
-    ruleShift:'sinstaram', shiftName:'Filtered Feed', shiftText:'Your Crit Lenses are locked, and the boss\u2019s own hits land Highlighted (+20).',
+    ruleShift:'sinstaram', altShift:'sinstaram2', altName:'Sponsored Post', altText:'An ad tax hits your Active for 5 HP at the start of each of your turns.', shiftName:'Filtered Feed', shiftText:'Your Crit Lenses are locked, and the boss\u2019s own hits land Highlighted (+20).',
     atk:{ n:'Blinding Flashbulb', t:'Deals 40 and blanks your Power Ratings for a turn.', cost:2, dmg:40, blankFoeRatings:1, label:'40/2' },
     blk:{ n:'Ring Light', t:'Blocks 20 incoming damage.', cost:2, block:20, label:'20/2' } },
   pintendo:{ name:'Pintendo', sub:'The Micro-Transaction Machine', hp:210, accent:'#c0392b', deck:'macbeth', acc:0.9,
-    ruleShift:'pintendo', shiftName:'First-Strike Protocol', shiftText:'The boss strikes first \u2014 you cannot block unless your Active is fully block-charged.',
+    ruleShift:'pintendo', altShift:'pintendo2', altName:'Loot Box', altText:'Pay-to-win — the boss heals 8 HP at the start of each of its turns.', shiftName:'First-Strike Protocol', shiftText:'The boss strikes first \u2014 you cannot block unless your Active is fully block-charged.',
     atk:{ n:'Micro-Transaction Needle', t:'Deals 10 for every Bookmark currently in your hand.', cost:2, dmg:10, dmgPerFoeBookmark:10, label:'10+/2' },
     blk:{ n:'Fast Guard', t:'A snap-purchase that blocks 20.', cost:1, block:20, label:'20/1' } },
   hexbox:{ name:'Hexbox', sub:'The Cursed Console', hp:220, accent:'#2f6d3a', deck:'crucible', acc:0.9,
-    ruleShift:'hexbox', shiftName:'Curse Injection', shiftText:'A wrong answer injects a Hex; hold it at end of turn and take 10. Spend a Bookmark to purge it.',
+    ruleShift:'hexbox', altShift:'hexbox2', altName:'Red Ring', altText:'Your first wrong answer each turn deals 5 damage to your Active.', shiftName:'Curse Injection', shiftText:'A wrong answer injects a Hex; hold it at end of turn and take 10. Spend a Bookmark to purge it.',
     atk:{ n:'Screaming Fan Curse', t:'Deals 20 to your Active and 10 to everyone on your bench.', cost:2, dmg:20, splashBench:10, label:'20/2' },
     blk:{ n:'Warp Field', t:'Blocks 20 incoming damage.', cost:2, block:20, label:'20/2' } },
   sicsoc:{ name:'SicSoc', sub:'The Doomscroll Network', hp:230, accent:'#1f6a6a', deck:'sherlock', acc:0.9,
-    ruleShift:'sicsoc', shiftName:'Doomscroll Clock', shiftText:'Your turns run on a 15-second timer \u2014 run out and take 20 as your turn ends.',
+    ruleShift:'sicsoc', altShift:'sicsoc2', altName:'Doomscroll', altText:'At the start of each of your turns, the oldest card in your hand is discarded.', shiftName:'Doomscroll Clock', shiftText:'Your turns run on a 15-second timer \u2014 run out and take 20 as your turn ends.',
     atk:{ n:'Viral Trend Shuffle', t:'Deals 30 and force-swaps your Active with a random bench character.', cost:2, dmg:30, forceFoeSwap:true, label:'30/2' },
     blk:{ n:'Trend Guard', t:'Blocks 20 incoming damage.', cost:2, block:20, label:'20/2' } },
+};
+const SCRIM_ELITES = {
+  e_group:{ name:'The Group Project', text:'You\u2019re carrying the load \u2014 one teammate slacks (deals half damage) while the rest pick up the slack (+15% damage).' },
+  e_latereg:{ name:'Late Registration', text:'You enrolled late \u2014 your opening hand is 2 cards smaller this fight.' },
+  e_popquiz:{ name:'The Pop Quiz', text:'Surprise assessment \u2014 you draw 1 fewer card each turn.' },
+  e_politics:{ name:'Office Politics', text:'The examiner plays the room \u2014 it gains 8 block every time you answer wrong.' },
+  e_waitlist:{ name:'The Waitlist', text:'It won\u2019t take no for an answer \u2014 the examiner revives once at 30% HP the first time it falls.' },
 };
 /* Boss difficulty ranks, gentlest -> harshest (drives tiered draw windows) */
 const SCRIM_BOSS_RANK = ['claystation','dyefone','sandroid','sinstaram','pintendo','hexbox','sicsoc'];
@@ -5427,6 +5454,23 @@ function scrimOppPlayer(node){
   return scrimPlayerShell('Opponent',dk,team,shuffle(buildRunDeck(rd)));
 }
 
+/* choose the rule shift for this battle: bosses roll base-or-alt; elites get a named modifier */
+function scrimApplyShift(node){
+  if(!S||!S.scrim) return;
+  if(node.boss){
+    const b=SCRIM_BOSSES[node.boss]; if(!b) return;
+    const useAlt = b.altShift && Math.random()<0.5;
+    S.scrim.ruleShift = useAlt ? b.altShift : b.ruleShift;
+    S.scrim.shiftName = useAlt ? b.altName : b.shiftName;
+    S.scrim.shiftText = useAlt ? b.altText : b.shiftText;
+  } else if(node.type==='elite'){
+    const ids=Object.keys(SCRIM_ELITES); const id=ids[rnd(ids.length)]; const e=SCRIM_ELITES[id];
+    S.scrim.ruleShift=id; S.scrim.eliteId=id; S.scrim.shiftName=e.name; S.scrim.shiftText=e.text;
+    if(id==='e_latereg'){ S.settings.handSize=Math.max(2,(S.settings.handSize||5)-2); }
+    if(id==='e_group'){ const liv=S.you.team.filter(c=>c.hp>0); if(liv.length){ const slacker=liv[rnd(liv.length)]; S.you.team.forEach(c=>{ if(c===slacker) c._slacker=true; else c._carry=true; }); } }
+    try{ toast('Thesis Defense: '+e.name); }catch(_e){}
+  }
+}
 /* ---- launch a battle node ---- */
 function scrimStartBattle(node){
   stopTurnTimer();
@@ -5443,10 +5487,11 @@ function scrimStartBattle(node){
   // Dean's Endorsement: your Active starts each battle with a random boon
   if(scrimHas('deansendorsement')&&you.team.length){ const act=you.team[you.activeIdx]||you.team[0]; if(act){ act.status=act.status||{}; const boon=['highlight','laminate','hardcover'][rnd(3)]; act.status[boon]=true; } }
   S = { settings:clone(st), turn:'you', phase:'deal', over:false, winner:null, pending:null, defend:false, picker:null, viewPile:null, poison:0, _logopen:false, _settings:false, fxShuffle:false,
-        you, opp, log:[], scrim:{ node, ruleShift: node.boss?SCRIM_BOSSES[node.boss].ruleShift:null, rosettaUsed:false } };
+        you, opp, log:[], scrim:{ node, ruleShift:null, shiftName:null, shiftText:null, eliteId:null, rosettaUsed:false } };
+  scrimApplyShift(node);
   APP.screen='play';
-  pushLog(node.boss?('\u26a0 ALGORITHM CORE \u2014 '+SCRIM_BOSSES[node.boss].name+'!'):(node.type==='elite'?'\ud83c\udf93 Thesis Defense \u2014 an elite fight!':'\u2694 A Scrimmage begins.'));
-  if(S.scrim.ruleShift){ const b=SCRIM_BOSSES[node.boss]; pushLog('Global Rule Shift \u2014 '+b.shiftName+': '+b.shiftText); }
+  pushLog(node.boss?('\u26a0 ALGORITHM CORE \u2014 '+SCRIM_BOSSES[node.boss].name+'!'):(node.type==='elite'?('\ud83c\udf93 Thesis Defense \u2014 '+(S.scrim.shiftName||'an elite fight')+'!'):'\u2694 A Scrimmage begins.'));
+  if(S.scrim.ruleShift){ pushLog((node.boss?'Global Rule Shift \u2014 ':'Elite Rule \u2014 ')+S.scrim.shiftName+': '+S.scrim.shiftText); }
   if(node.boss){ S._bossReveal=node.boss; if((META.bossSeen||[]).indexOf(node.boss)<0){ META.bossSeen.push(node.boss); metaSave(); } }
   render(); dealOpening();
 }
