@@ -2530,6 +2530,7 @@ window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
 try{document.documentElement.style.setProperty('--abc-bg-qc','url("'+window.ABC_BG_QC+'")');}catch(e){}
 window.ABC_ICONS={archives:"data:image/png;base64,__ABCASSET_111__",rest:"data:image/png;base64,__ABCASSET_112__",start:"data:image/png;base64,__ABCASSET_113__",scrim:"data:image/png;base64,__ABCASSET_114__",elite:"data:image/png;base64,__ABCASSET_115__",boss:"data:image/png;base64,__ABCASSET_116__",fair:"data:image/png;base64,__ABCASSET_932__",office:"data:image/png;base64,__ABCASSET_999__"};
 window.ABC_SOL_FACES={idle:"data:image/jpeg;base64,__ABCASSET_1000__",attack:"data:image/jpeg;base64,__ABCASSET_1001__",defend:"data:image/jpeg;base64,__ABCASSET_1002__",taunt:"data:image/jpeg;base64,__ABCASSET_1003__",enraged:"data:image/jpeg;base64,__ABCASSET_1004__",defeat:"data:image/jpeg;base64,__ABCASSET_1005__"};
+window.ABC_BOSS_IMG_ALT={sandroid:"data:image/jpeg;base64,__ABCASSET_1006__",dyefone:"data:image/jpeg;base64,__ABCASSET_1007__",claystation:"data:image/jpeg;base64,__ABCASSET_1008__",sinstaram:"data:image/jpeg;base64,__ABCASSET_1009__",pintendo:"data:image/jpeg;base64,__ABCASSET_1010__",hexbox:"data:image/jpeg;base64,__ABCASSET_1011__",sicsoc:"data:image/jpeg;base64,__ABCASSET_1012__"};
 window.ABC_SND={music_thereturn:"data:audio/mpeg;base64,__ABCASSET_125__",music_hiphop9:"data:audio/mpeg;base64,__ABCASSET_126__",sfx_card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",sfx_card_place:"data:audio/mpeg;base64,__ABCASSET_118__",sfx_card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",sfx_card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",sfx_book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",sfx_card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",sfx_pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",sfx_pack_take:"data:audio/mpeg;base64,__ABCASSET_124__",music_boss:"data:audio/mpeg;base64,__ABCASSET_127__"};
 window.ABC_BOSS_IMG={"dyefone":"data:image/webp;base64,__ABCASSET_909__","sandroid":"data:image/webp;base64,__ABCASSET_910__","sinstaram":"data:image/webp;base64,__ABCASSET_911__","claystation":"data:image/webp;base64,__ABCASSET_952__","pintendo":"data:image/webp;base64,__ABCASSET_953__","hexbox":"data:image/webp;base64,__ABCASSET_954__","sicsoc":"data:image/webp;base64,__ABCASSET_955__"};
 window.ABC_BOSS_IMGPOS={"dyefone":"44% 40%","sandroid":"48% 40%","sinstaram":"50% 40%"};
@@ -5329,8 +5330,8 @@ function scrimRollBosses(){
   // Campaign: all 7 Mal-gorithms, one per act, in difficulty-rank order (gentlest Act 1 -> harshest Act 7).
   return SCRIM_BOSS_RANK.slice();
 }
-function scrimActMul(){ const a=SCRIM.act||1; const base=1.0 + 0.07*(a-1); return base*honorsMods().dmgMul; }
-function scrimAccFloor(){ const a=SCRIM.act||1; const base=0.70 + 0.03*(a-1); return Math.min(0.98, base+honorsMods().acc); }
+function scrimActMul(){ if(SCRIM.doctoral){ const s=SCRIM.semester||1; return (1.35 + 0.13*(s-1))*honorsMods().dmgMul; } const a=SCRIM.act||1; const base=1.0 + 0.07*(a-1); return base*honorsMods().dmgMul; }
+function scrimAccFloor(){ if(SCRIM.doctoral){ const s=SCRIM.semester||1; return Math.min(0.98, 0.82 + 0.02*(s-1) + honorsMods().acc); } const a=SCRIM.act||1; const base=0.70 + 0.03*(a-1); return Math.min(0.98, base+honorsMods().acc); }
 function scrimRollFirstEds(n){
   const all=(DATA.firsteds||[]).map(f=>f.id);
   const have=SCRIM.team.filter(r=>r.fe).map(r=>r.id);
@@ -5344,6 +5345,13 @@ function scrimAdvanceAct(){
   SCRIM.pending=null; SCRIM.bossReward=null; SCRIM._gainedArt=null;
   SCRIM.view='map'; render(); scrimSave();
 }
+/* ---- The Doctoral Program (endless mode) ---- */
+function scrimRollDoctoralBoss(){ const pool=SCRIM_BOSS_RANK.filter(b=>b!==SCRIM._lastDocBoss); const pick=pool.length?pool[rnd(pool.length)]:SCRIM_BOSS_RANK[rnd(SCRIM_BOSS_RANK.length)]; SCRIM._lastDocBoss=pick; return pick; }
+const DOCTORAL_RANKS=[[1,'Doctoral Candidate'],[3,'ABD (All But Dissertation)'],[6,'PhD'],[8,'Post-Doc'],[11,'Distinguished Fellow'],[15,'Professor Emeritus']];
+function doctoralRank(sem){ let r=DOCTORAL_RANKS[0][1]; DOCTORAL_RANKS.forEach(function(x){ if(sem>=x[0]) r=x[1]; }); return r; }
+function scrimDoctoralNext(){ SCRIM.semester=(SCRIM.semester||1)+1; if(perkOn('sabbatical')) SCRIM.team.forEach(rec=>{ if(rec.curHp>0) rec.curHp=rec.maxHp; }); SCRIM.map=scrimGenMap(SCRIM.semester); SCRIM.pending=null; SCRIM.bossReward=null; SCRIM._gainedArt=null; SCRIM.view='map'; render(); scrimSave(); }
+function scrimEndDoctoral(defended){ const sem=SCRIM.semester||1; if(defended){ META.ip=(META.ip||0)+(SCRIM._tenureBonus||0); } META.stats.doctoralBest=Math.max(META.stats.doctoralBest||0, sem); metaSave(); SCRIM._doctoralDefended=defended; SCRIM._doctoralSem=sem; SCRIM._doctoralBonusPaid=defended?(SCRIM._tenureBonus||0):0; SCRIM._doctoralRank=doctoralRank(sem); SCRIM._wasDoctoral=true; SCRIM.active=false; scrimClearSave(); S=null; stopTurnTimer(); APP.screen='scrim'; SCRIM.view='dead'; render(); }
+function scrimDoctoralChoiceScreen(){ const sem=SCRIM.semester||1, bonus=SCRIM._tenureBonus||0; return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel evt"><div class="evt-ic">\ud83c\udf93</div><div class="scrim-title sm">Semester ${sem} Cleared</div><div class="evt-lf">${doctoralRank(sem)}</div><div class="evt-result">This program has banked <b>+${SCRIM._docTotal||0} IP</b> so far.<br>Un-banked <b>Tenure Bonus: ${bonus} IP</b> \u2014 paid only if you defend now, <b>forfeited if you fall.</b></div><div class="evt-choices"><button class="evt-choice" data-scrim="doctcontinue">Continue to Semester ${sem+1} \u2014 push your luck</button><button class="evt-choice" data-scrim="doctdefend">Defend your Dissertation \u2014 bank ${bonus} IP &amp; graduate</button></div></div></div>`; }
 
 /* ---- persistence ---- */
 function metaLoad(){ try{ const j=window.localStorage.getItem('abc_meta'); if(j) META=Object.assign({ip:0,unlocks:[],perks:[],loadout:[],commanders:[],packs:0,honorsMax:0,honorsCleared:0,bossSeen:[],bossKilled:[]},JSON.parse(j)); }catch(e){}
@@ -5437,6 +5445,7 @@ function scrimStartKit(kitId){
   const kit=SCRIM_KITS[kitId]; if(!kit) return;
   SCRIM.active=true; SCRIM.kit=kitId; SCRIM.artifacts=[]; SCRIM.cleared=0; SCRIM.act=1; SCRIM.bosses=scrimRollBosses(); SCRIM.lf=0; SCRIM.t0=Date.now(); SCRIM.honors=Math.min(META.honorsMax||0, SCRIM._honorsSel||0);
   SCRIM._eventsSeen=[]; SCRIM._noNextReward=false; SCRIM._overdueUsed=false; SCRIM.event=null; SCRIM._eventResult=null;
+  SCRIM.doctoral=!!SCRIM._doctoralPending; SCRIM._doctoralPending=false; SCRIM.semester=SCRIM.doctoral?1:0; SCRIM._tenureBonus=0; SCRIM._docTotal=0; SCRIM._lastDocBoss=null; SCRIM._wasDoctoral=false;
   META.stats=META.stats||{runs:0,wins:0,bossKills:0,bestAct:0,fastestMs:0};
   META.stats.runs=(META.stats.runs||0)+1; metaSave();
   const dk=kit.deck;
@@ -5474,7 +5483,7 @@ function scrimGenMap(act){
   const N=(act>=4?6:5), cols=[];
   cols.push([{type:'start',done:true}]);
   for(let c=1;c<N-1;c++){ const rows=2+rnd(2); const arr=[]; for(let r=0;r<rows;r++) arr.push({type:scrimNodeType(c,N)}); cols.push(arr); }
-  const bossId=(SCRIM.bosses&&SCRIM.bosses[act-1]) || (Math.random()<0.5?'sandroid':'dyefone');
+  const bossId = SCRIM.doctoral ? scrimRollDoctoralBoss() : ((SCRIM.bosses&&SCRIM.bosses[act-1]) || (Math.random()<0.5?'sandroid':'dyefone'));
   cols.push([{type:'boss',boss:bossId}]);
   for(let c=0;c<cols.length-1;c++){
     const nx=cols[c+1];
@@ -5521,7 +5530,7 @@ function scrimOppPlayer(node){
   if(node.boss){ const b=SCRIM_BOSSES[node.boss]; const mul=scrimActMul();
     const bAtk=clone(b.atk); if(bAtk.dmg!=null) bAtk.dmg=Math.round(bAtk.dmg*mul);
     const bimg=((typeof window!=='undefined'&&window.ABC_BOSS_IMG)||{})[node.boss]||'';
-    const bc=makeChar({id:'boss_'+node.boss,name:b.name,hp:Math.round(b.hp*mul),accent:b.accent,img:bimg,tags:['villain'],atk:bAtk,blk:clone(b.blk)},1.0); bc._boss=true; bc.sub=b.sub;
+    const bc=makeChar({id:'boss_'+node.boss,name:b.name,hp:Math.round(b.hp*mul*(SCRIM.doctoral?1.2:1)),accent:b.accent,img:bimg,tags:['villain'],atk:bAtk,blk:clone(b.blk)},1.0); bc._boss=true; bc.sub=b.sub;
     bc.imgpos=((typeof window!=='undefined'&&window.ABC_BOSS_IMGPOS)||{})[node.boss]||'50% 40%';
     return scrimPlayerShell(b.name,'boss',[bc],shuffle(buildRunDeck(scrimBossDeck(b)))); }
   const dk=node.oppDeck||scrimRandomDeck();
@@ -5539,10 +5548,11 @@ function scrimApplyShift(node){
   if(!S||!S.scrim) return;
   if(node.boss){
     const b=SCRIM_BOSSES[node.boss]; if(!b) return;
-    const useAlt = b.altShift && Math.random()<0.5;
+    const useAlt = b.altShift && (SCRIM.doctoral || Math.random()<0.5);
     S.scrim.ruleShift = useAlt ? b.altShift : b.ruleShift;
     S.scrim.shiftName = useAlt ? b.altName : b.shiftName;
     S.scrim.shiftText = useAlt ? b.altText : b.shiftText;
+    if(useAlt){ const alt=(typeof window!=='undefined'&&window.ABC_BOSS_IMG_ALT&&window.ABC_BOSS_IMG_ALT[node.boss]); if(alt){ const bc=active(S.opp); if(bc){ bc.img=alt; bc.imgpos='50% 22%'; } } }
   } else if(node.type==='elite'){
     const ids=Object.keys(SCRIM_ELITES); const id=ids[rnd(ids.length)]; const e=SCRIM_ELITES[id];
     S.scrim.ruleShift=id; S.scrim.eliteId=id; S.scrim.shiftName=e.name; S.scrim.shiftText=e.text;
@@ -5631,7 +5641,10 @@ function scrimDraftCard(ref){ if(ref.t==='ab') return DATA.abcs[ref.d][ref.i]; i
 function handleScrim(cmd){
   const [op,a,b]=cmd.split(':');
   if(op==='back'){ stopTurnTimer(); APP.screen='menu'; APP.mode=null; render(); return; }
-  if(op==='new'){ SCRIM.view='kit'; render(); return; }
+  if(op==='new'){ SCRIM._doctoralPending=false; SCRIM.view='kit'; render(); return; }
+  if(op==='doctoral'){ SCRIM._doctoralPending=true; SCRIM.view='kit'; render(); return; }
+  if(op==='doctcontinue'){ scrimDoctoralNext(); return; }
+  if(op==='doctdefend'){ scrimEndDoctoral(true); return; }
   if(op==='honsel'){ SCRIM._honorsSel=Math.min(META.honorsMax||0, +a); render(); return; }
   if(op==='kit'){ scrimStartKit(a); return; }
   if(op==='resume'){ if(scrimLoadSave()){ APP.mode='scrim'; APP.screen='scrim'; render(); } else toast('No saved run found.'); return; }
@@ -5767,6 +5780,7 @@ function scrimAfterBattle(){
       if(node&&SCRIM.map){ const cell=SCRIM.map.cols?.[node.c]?.[node.r]; if(cell) cell.done=false; }
       S=null; stopTurnTimer(); APP.screen='scrim'; SCRIM.pending=null; SCRIM.view='map';
       toast('Overdue Notice \u2014 you survive at 1 HP. (once per run)','bad'); render(); scrimSave(); return; }
+    if(SCRIM.doctoral){ scrimEndDoctoral(false); return; }
     if(honorsMods().permadeath){ scrimEndRun(false); return; }
     // Non-permadeath: regroup — team revives at 40% and returns to the map to retry.
     SCRIM.team.forEach(t=>{ t.curHp=Math.max(1,Math.round(t.maxHp*0.4)); });
@@ -5790,6 +5804,13 @@ function scrimAfterBattle(){
     META.stats.bossKills=(META.stats.bossKills||0)+1; if((META.bossKilled||[]).indexOf(node.boss)<0) META.bossKilled.push(node.boss); if((META.bossSeen||[]).indexOf(node.boss)<0) META.bossSeen.push(node.boss); metaSave();
     if(scrimHas('fellowship')){ SCRIM.team.forEach(t=>{ t.curHp=t.maxHp; }); }
     S=null; stopTurnTimer(); APP.screen='scrim';
+    if(SCRIM.doctoral){
+      const sem=SCRIM.semester||1;
+      const ipGain=Math.round(40*(1+0.4*sem)*honorsMods().ipMul); META.ip=(META.ip||0)+ipGain; SCRIM._bossIP=ipGain; SCRIM._docTotal=(SCRIM._docTotal||0)+ipGain;
+      SCRIM._tenureBonus=(SCRIM._tenureBonus||0)+Math.round(25*sem*honorsMods().ipMul);
+      META.stats.doctoralBest=Math.max(META.stats.doctoralBest||0, sem); metaSave();
+      SCRIM.pending=null; SCRIM.view='doctoralchoice'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave(); return;
+    }
     if((SCRIM.act||1)>=7){ scrimStartSuperBoss(); return; }
     const ipGain=Math.round(40*honorsMods().ipMul); META.ip=(META.ip||0)+ipGain; metaSave(); SCRIM._bossIP=ipGain;
     SCRIM.bossReward=scrimRollFirstEds(3); SCRIM.pending=null;
@@ -5818,6 +5839,7 @@ function scrimScreen(){
     case 'rest': return scrimRestScreen();
     case 'fair': return scrimFairScreen();
     case 'event': return scrimEventScreen();
+    case 'doctoralchoice': return scrimDoctoralChoiceScreen();
     case 'shop': return scrimVaultShell();
     case 'dead': return scrimDeadScreen();
     default: return scrimVaultShell();
@@ -5901,7 +5923,7 @@ function scrimMapScreen(){
         <div class="guide-title">MAP GUIDE</div>
         <div class="guide-legend">${legend}</div>
         <div class="guide-run">
-          <div>Run <b>${kit}</b></div><div>Act <b>${SCRIM.act}</b></div>
+          <div>Run <b>${kit}</b></div><div>${SCRIM.doctoral?('Semester <b>'+(SCRIM.semester||1)+'</b>'):('Act <b>'+SCRIM.act+'</b>')}</div>
           <div>Deck <b>${deckN}</b></div><div>IP <b>\ud83e\udde0 ${META.ip||0}</b></div><div>Fees <b>\ud83d\udcb3 ${SCRIM.lf||0}</b></div>${(SCRIM.honors||0)>0?`<div>\ud83c\udf93 <b>${HONORS[SCRIM.honors].short}${honorsMods().permadeath?' \u2620':''}</b></div>`:''}
         </div>
       </div>
@@ -6216,6 +6238,7 @@ function scrimVProfile(){
   return `${scrimLibraryCard()}
     <div class="scrim-menu vault-runmenu">
       <button class="bigbtn go" data-scrim="new">\u2694 New Run</button>
+      ${META.doctoralUnlocked?`<button class="bigbtn" data-scrim="doctoral">\ud83c\udf93 Doctoral Program</button>`:''}
       ${hasSave?`<button class="bigbtn" data-scrim="resume">\u21bb Resume Run</button>`:''}
     </div>
     ${scrimTranscriptPanel()}`;
@@ -6250,6 +6273,14 @@ function scrimVFirstEds(){
       <div class="lib-shelf">${shelf}</div><div class="lib-shelfboard"></div></div>`;
 }
 function scrimDeadScreen(){
+  if(SCRIM._wasDoctoral){
+    const def=SCRIM._doctoralDefended, sem=SCRIM._doctoralSem||1, rank=SCRIM._doctoralRank||'Doctoral Candidate', bonus=SCRIM._doctoralBonusPaid||0;
+    return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel">
+      <div class="scrim-title ${def?'':'sm'}">${def?'\ud83c\udf93 Dissertation Defended!':'Academic Burnout'}</div>
+      <p class="scrim-intro-copy">${def?('You walk away a <b>'+rank+'</b> after '+sem+' semester'+(sem>1?'s':'')+' \u2014 Tenure Bonus secured.'):('You pushed too far and fell in Semester '+sem+'. Your rank of <b>'+rank+'</b> stands, but the un-banked Tenure Bonus is forfeit.')}</p>
+      <div class="scrim-ipline">Program banked: <b>+${SCRIM._docTotal||0} IP</b>${def?(' + Tenure Bonus <b>+'+bonus+'</b>'):' \u00b7 <span style="color:#b5402a">Tenure Bonus lost</span>'} \u00b7 Total \ud83e\udde0 ${META.ip||0}</div>
+      <div class="scrim-menu"><button class="bigbtn go" data-scrim="back">\u2039 Back to Scrimmage</button></div></div></div>`;
+  }
   const v=SCRIM._victory;
   return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel">
     <div class="scrim-title ${v?'':'sm'}">${v?'\ud83c\udfc6 Sector Purged!':'The Library Falls'}</div>
