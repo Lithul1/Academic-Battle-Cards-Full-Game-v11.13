@@ -5005,13 +5005,15 @@ function openTierPack(setId,tier){
     var kmap={char:'char',abc:'abc',bm:'bookmark',cmd:'cmd'};
     var b=(E.battle||{});
     if(kind==='char'){ var cc=(b.chars||[]).find(function(x){return x.cid===o.cid;})||{};
-      return {t:'edcard',kind:'char',cid:o.cid,id:cc.id,name:cc.name,move:(cc.atk||{}).n,label:(cc.atk||{}).label}; }
+      var cim=(E.img||{})[cc.id]||cc.img||''; var cip=(E.imgpos||{})[cc.id]||cc.imgpos||'50% 18%';
+      return {t:'edcard',kind:'char',cid:o.cid,id:cc.id,name:cc.name,move:(cc.atk||{}).n,label:(cc.atk||{}).label,img:cim,imgpos:cip}; }
     if(kind==='abc'){ var aa=(b.abcs||[]).find(function(x){return x.cid===o.cid;})||{};
       return {t:'edcard',kind:'abc',cid:o.cid,word:aa.word,atype:aa.type,power:aa.power}; }
     if(kind==='bm'){ var bb=(b.bookmarks||[]).find(function(x){return x.cid===o.cid;})||{};
       return {t:'edcard',kind:'bookmark',cid:o.cid,name:bb.name,text:bb.text}; }
     var ff=(b.commanders||[]).find(function(x){return x.cid===o.cid;})||{};
-    return {t:'edcard',kind:'cmd',cid:o.cid,name:ff.name};
+    var fim=feImg(ff)||{};
+    return {t:'edcard',kind:'cmd',cid:o.cid,name:ff.name,img:fim.img||'',imgpos:fim.pos||'50% 16%',accent:ff.accent,setname:(E.name||'Expansion')};
   }));
 }
 
@@ -5113,12 +5115,12 @@ else if(c.t==='dchar'){ var dc=(DATA.characters[c.deck]||[]).find(function(x){re
     else if(c.t==='bmk'){ inner='<div class="dc-top so">\uD83D\uDD16 BOOKMARK</div><div class="dc-nm" style="margin-top:22px">'+c.name+'</div><div class="dc-tx">Copies owned: '+(c.copies||1)+' / '+window.BM_MAX_COPIES+'</div>'; }
     else if(c.t==='foil'){ inner='<div class="dc-top fo">\u2728 FOIL</div><div class="dc-nm" style="margin-top:22px">Foil Shard</div><div class="dc-tx">Set complete \u2014 shards convert to foil cards in The Bindery.</div>'; }
     else if(c.t==='edcard'){
-      if(c.kind==='char'){ var Ex=window.EXPANSIONS.modern_hamlet, im2=(Ex.img||{})[c.id]||'', ip2=(Ex.imgpos||{})[c.id]||'50% 18%';
+      if(c.kind==='char'){ var im2=c.img||'', ip2=c.imgpos||'50% 18%';
         var av2=im2?'<img src="'+im2+'" style="width:100%;height:100%;object-fit:cover;object-position:'+ip2+'">':'<span class="pkr-mono" style="background:#1b2540">'+initials(c.name)+'</span>';
         inner='<div class="dc-top mh">\uD83C\uDFAC CHARACTER</div><div class="pkr-port">'+av2+'</div><div class="dc-nm">'+c.name+'</div><div class="dc-tx">'+c.move+' \u00b7 '+c.label+'</div>'; }
       else if(c.kind==='abc'){ var atk=(c.atype==='ATTACK'); inner='<div class="dc-top '+(atk?'ip':'so')+'">'+(atk?'\u2694 VOCAB ATTACK':'\u26CA VOCAB BLOCK')+'</div><div class="pkr-vocab">'+c.word+'</div><div class="dc-tx" style="text-align:center">Power '+c.power+' \u00b7 vocabulary card</div>'; }
       else if(c.kind==='bookmark'){ inner='<div class="dc-top so">\uD83D\uDD16 BOOKMARK</div><div class="dc-nm" style="margin-top:20px">'+c.name+'</div><div class="dc-tx">'+c.text+'</div>'; }
-      else { inner='<div class="dc-top fe">\uD83D\uDC51 1ST EDITION</div><div class="dc-nm" style="margin-top:20px">'+String(c.name).replace(/\s*\(1E\)/,'')+'</div><div class="dc-tx">Elsinore Incorporated commander</div>'; }
+      else { var im3=c.img||''; var av3=im3?'<img src="'+im3+'" style="width:100%;height:100%;object-fit:cover;object-position:'+(c.imgpos||'50% 16%')+'">':'<span class="pkr-mono" style="background:'+(c.accent||'#444')+'">'+initials(c.name)+'</span>'; inner='<div class="dc-top fe">\uD83D\uDC51 1ST EDITION</div><div class="pkr-port">'+av3+'</div><div class="dc-nm">'+String(c.name).replace(/\s*\(1E\)/,'')+'</div><div class="dc-tx">'+(c.setname||'Expansion')+' commander</div>'; }
     }
     else { const im=feImg(c.fd); const av=im?`<img src="${im.img}" style="width:100%;height:100%;object-fit:cover;object-position:${im.pos||'50% 18%'}">`:`<span class="pkr-mono" style="background:${(c.fd&&c.fd.accent)||'#444'}">${initials(c.name)}</span>`;
       inner=`<div class="dc-top fe">\ud83d\udc51 1ST EDITION</div><div class="pkr-port">${av}</div><div class="dc-nm">${String(c.name||'').replace(/\s*\(1E\)/,'')}</div><div class="dc-tx">${(c.fd&&c.fd.passive&&c.fd.passive.name)||''}</div>`; }
