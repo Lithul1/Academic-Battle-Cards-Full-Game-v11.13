@@ -5270,15 +5270,11 @@ function scrimTriviaText(str){ if(S && S.scrim && S.scrim.ruleShift==='dyefone')
 function scrimRandomDeck(){ const k=Object.keys(DATA.characters); return k[rnd(k.length)]; }
 /* ---- act-loop helpers ---- */
 function scrimRollBosses(){
-  // 0-indexed rank windows: Act1 ranks1-4, Act2 ranks3-6, Act3 ranks5-7. No repeats within a run.
-  const windows=[[0,3],[2,5],[4,6]]; const picked=[];
-  windows.forEach(w=>{ const pool=[]; for(let i=w[0];i<=w[1];i++){ const id=SCRIM_BOSS_RANK[i]; if(picked.indexOf(id)<0) pool.push(id); }
-    let choice = pool.length ? pool[rnd(pool.length)] : (SCRIM_BOSS_RANK.filter(id=>picked.indexOf(id)<0)[0]);
-    picked.push(choice); });
-  return picked;
+  // Campaign: all 7 Mal-gorithms, one per act, in difficulty-rank order (gentlest Act 1 -> harshest Act 7).
+  return SCRIM_BOSS_RANK.slice();
 }
-function scrimActMul(){ const a=SCRIM.act||1; const base=a>=3?1.4:(a>=2?1.2:1.0); return base*honorsMods().dmgMul; }
-function scrimAccFloor(){ const a=SCRIM.act||1; const base=a>=3?0.88:(a>=2?0.80:0.72); return Math.min(0.98, base+honorsMods().acc); }
+function scrimActMul(){ const a=SCRIM.act||1; const base=1.0 + 0.07*(a-1); return base*honorsMods().dmgMul; }
+function scrimAccFloor(){ const a=SCRIM.act||1; const base=0.70 + 0.03*(a-1); return Math.min(0.98, base+honorsMods().acc); }
 function scrimRollFirstEds(n){
   const all=(DATA.firsteds||[]).map(f=>f.id);
   const have=SCRIM.team.filter(r=>r.fe).map(r=>r.id);
@@ -5419,7 +5415,7 @@ function scrimStartKit(kitId){
 /* ---- map generation (branching DAG, StS-style) ---- */
 function scrimGenMap(act){
   act=act||SCRIM.act||1;
-  const N=(act>=3?8:(act>=2?7:6)), cols=[];
+  const N=(act>=4?6:5), cols=[];
   cols.push([{type:'start',done:true}]);
   for(let c=1;c<N-1;c++){ const rows=2+rnd(2); const arr=[]; for(let r=0;r<rows;r++) arr.push({type:scrimNodeType(c,N)}); cols.push(arr); }
   const bossId=(SCRIM.bosses&&SCRIM.bosses[act-1]) || (Math.random()<0.5?'sandroid':'dyefone');
@@ -5546,7 +5542,8 @@ function scrimGrantArtifact(tiers){
 }
 function scrimEndRun(victory){
   const gained = Math.round((SCRIM.cleared*5 + (victory?60:0)) * honorsMods().ipMul);
-  META.stats.bestAct=Math.max(META.stats.bestAct||0, victory?4:(SCRIM.act||1));
+  META.stats.bestAct=Math.max(META.stats.bestAct||0, victory?8:(SCRIM.act||1));
+  if(victory){ META.doctoralUnlocked=true; }
   if(victory){ const h=SCRIM.honors||0; META.honorsCleared=Math.max(META.honorsCleared||0,h); META.honorsMax=Math.min(HONORS.length-1, Math.max(META.honorsMax||0, h+1)); metaSave(); }
   if(victory){ META.stats.wins=(META.stats.wins||0)+1;
     const el=Date.now()-(SCRIM.t0||Date.now());
@@ -5724,7 +5721,7 @@ function scrimAfterBattle(){
     META.stats.bossKills=(META.stats.bossKills||0)+1; if((META.bossKilled||[]).indexOf(node.boss)<0) META.bossKilled.push(node.boss); if((META.bossSeen||[]).indexOf(node.boss)<0) META.bossSeen.push(node.boss); metaSave();
     if(scrimHas('fellowship')){ SCRIM.team.forEach(t=>{ t.curHp=t.maxHp; }); }
     S=null; stopTurnTimer(); APP.screen='scrim';
-    if((SCRIM.act||1)>=3){ scrimEndRun(true); return; }
+    if((SCRIM.act||1)>=7){ scrimEndRun(true); return; }
     const ipGain=Math.round(40*honorsMods().ipMul); META.ip=(META.ip||0)+ipGain; metaSave(); SCRIM._bossIP=ipGain;
     SCRIM.bossReward=scrimRollFirstEds(3); SCRIM.pending=null;
     SCRIM.view='bossreward'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave(); return;
@@ -5948,7 +5945,7 @@ function scrimLibraryCard(){
   const nextAt=rank>=2?null:(rank>=1?10:4);
   const catalog=Math.round((((META.commanders||[]).length+(META.perks||[]).length)/((DATA.firsteds||[]).length+Object.keys(SCRIM_PERKS).length))*100);
   const fast=st.fastestMs?Math.floor(st.fastestMs/60000)+'m '+Math.floor((st.fastestMs%60000)/1000)+'s':'\u2014';
-  const furthest=st.bestAct>=4?'Graduated':(st.bestAct>0?('Act '+st.bestAct):'\u2014');
+  const furthest=st.bestAct>=8?'Graduated':(st.bestAct>0?('Act '+Math.min(7,st.bestAct)):'\u2014');
   const p=META.patron||{name:'Author_1E',card:'#LUL',issued:''};
   const row=(label,val,stamp,cls)=>`<tr><td class="lc-metric"><span>${label}</span><span class="lc-dots"></span><b>${val}</b></td><td class="lc-stampcell"><span class="lc-stamp ${cls}">${stamp}</span></td></tr>`;
   return `<div class="lc-card">
@@ -5966,7 +5963,7 @@ function scrimLibraryCard(){
     <table class="lc-table"><thead><tr><th style="width:72%;text-align:left">SCRIMMAGE HISTORY / LEDGER RECORDS</th><th style="width:28%">RETURN STAMP</th></tr></thead><tbody>
       ${row('Total Runs Attempted', st.runs||0, 'RECORDED','lc-rs')}
       ${row('Completed Runs (Graduated)', st.wins||0, st.wins?'GRADUATED':'PENDING', st.wins?'lc-bs':'lc-rs')}
-      ${row('Furthest Progression', furthest, st.bestAct>=4?'CLEARED':'IN PROGRESS', st.bestAct>=4?'lc-gs':'lc-rs')}
+      ${row('Furthest Progression', furthest, st.bestAct>=8?'CLEARED':'IN PROGRESS', st.bestAct>=8?'lc-gs':'lc-rs')}
       ${row('Fastest Graduation', fast, 'SPEEDY','lc-bs')}
       ${row('Distraction Bosses Defeated', st.bossKills||0, 'CLEANSED','lc-gs')}
       ${row('Highest Honors Cleared', (META.honorsCleared||0)>0?HONORS[META.honorsCleared].short:'\u2014', (META.honorsCleared||0)>0?'HONORS':'STANDARD', (META.honorsCleared||0)>0?'lc-gs':'lc-rs')}
