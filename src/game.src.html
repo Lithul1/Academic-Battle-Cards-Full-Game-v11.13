@@ -2931,6 +2931,12 @@ function startTurn(){
     S.scrim._redRingTurn=false;
     S._youTurns=(S._youTurns||0)+1;
     const _ob=S.opp&&active(S.opp); if(_ob&&_ob._overlord){ const rr=_ob.hp/_ob.maxHp; solFace(_ob, rr<=0.15?'defeat':(rr<=0.33?'enraged':'idle')); }
+    if(_ob&&_ob._overlord && S.you.hand.length>=6){
+      const hand=S.you.hand; const findOldest=(pred)=>{ for(let i=0;i<hand.length;i++){ if(pred(hand[i])) return i; } return -1; };
+      let di=findOldest(c=>c.cat==='abc'&&c.type==='ATTACK'); if(di<0) di=findOldest(c=>c.cat==='abc'&&c.type==='BLOCK'); if(di<0) di=findOldest(c=>c.cat==='bm'); if(di<0) di=0;
+      const lost=hand.splice(di,1)[0]; if(lost) S.you.discard.push(lost);
+      S._adrenaline=true; pushLog('\ud83c\udf00 Sensory Deluge \u2014 overwhelmed, you discard a card, but the adrenaline surges (next attack +10%).');
+    }
     if(S.scrim.ruleShift==='sinstaram2'){ const a=active(S.you); if(a&&a.hp>0){ a.hp=Math.max(1,a.hp-5); pushLog('Sponsored Post \u2014 ad tax: your Active loses 5 HP.'); } }
     if(S.scrim.ruleShift==='sicsoc2' && S.you.hand.length){ const lost=S.you.hand.shift(); if(lost){ S.you.discard.push(lost); pushLog('Doomscroll \u2014 the oldest card in your hand is discarded.'); } }
   }
@@ -3072,6 +3078,7 @@ const STATUS_NEG=['tear','rip','glue','spill','smudge','burn'];
 const LAMINATE_BLOCKS=['tear','rip','glue','spill'];
 function inflict(t,k,ignoreLam){
   if(!t||t.hp<=0) return false;
+  if(t._overlord && (k==='rip'||k==='smudge'||k==='burn'||k==='spill'||k==='glue') && Math.random()<0.5){ pushLog(`${t.name} resists ${statusName(k)} — the overload shrugs it off.`); return false; }
   if(t.wardNext && t.wardNext.includes(k)){ t.wardNext=null; pushLog(`${t.name} shrugs off ${statusName(k)} — shielded.`); return false; }
   if(!ignoreLam && t.status.laminate && LAMINATE_BLOCKS.includes(k)){ pushLog(`${t.name} is Laminated — ${k.charAt(0).toUpperCase()+k.slice(1)} prevented.`); return false; }
   t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'neg'); return true;
@@ -3368,6 +3375,7 @@ function performAttack(side,abilKey){           // == beginAttack
     const _att=active(S.you); if(_att){ if(_att._slacker) dmg=Math.round(dmg*0.5); else if(_att._carry) dmg=Math.round(dmg*1.15); }
     if(SCRIM.kit==='scifi' && def && def.status && Object.keys(def.status).some(k=>def.status[k])) dmg=Math.round(dmg*1.2);
     if(SCRIM.kit==='macbeth' && SCRIM._ambition) dmg=Math.round(dmg*(1+0.05*SCRIM._ambition));
+    if(S._adrenaline){ dmg=Math.round(dmg*1.1); S._adrenaline=false; pushLog('Adrenaline surge \u2014 +10% damage.'); }
   }
   if(hasCrit(side,'marxist') && (ab.cost===1||ab.cost===2) && def.atk && (def.atk.cost===3||def.atk.cost===4)){ dmg+=10; pushLog('Marxist Lens: +10 class-struggle damage.'); }
   if(A.flags.supercharge){ dmg*=2; A.flags.supercharge=false; pushLog('Supercharger: damage doubled!'); }
