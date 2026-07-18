@@ -1226,6 +1226,9 @@ body[data-screen="scrim"]{ background:#e9dcc0; }
 .kit-card:hover{ transform:translateY(-2px); box-shadow:0 4px 9px rgba(40,25,12,.13), 0 10px 22px rgba(40,25,12,.10); }
 .kit-ic{ font-size:30px; } .kit-nm{ font-family:var(--cond); font-size:18px; letter-spacing:.5px; }
 .kit-bl{ font-size:12px; color:#5a4a34; line-height:1.4; } .kit-ch{ font-size:11px; color:#8a5a1a; }
+.kit-sig{ font-size:11.5px; color:#2f5a3a; line-height:1.4; margin-top:6px; border-top:1px solid #d9cfb4; padding-top:6px; }
+.kit-sig b{ color:#1f6a3a; font-family:var(--cond,'Anton',sans-serif); letter-spacing:.3px; }
+.kit-kick{ font-size:11px; color:#7a5a2a; margin-top:3px; font-style:italic; }
 .kit-go{ margin-top:auto; font-family:var(--cond); color:#b5762a; letter-spacing:1px; }
 .scrim-hud{ display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between; align-items:center; background:#efe0bf; border:2px solid #241f1b; border-radius:10px; padding:8px 10px; margin:6px 0 12px; }
 .hud-team{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -2919,6 +2922,7 @@ function startTurn(){
   p.flags.bmCount = 0;
   if(S.scrim && p===S.you){
     S.scrim._redRingTurn=false;
+    S._youTurns=(S._youTurns||0)+1;
     if(S.scrim.ruleShift==='sinstaram2'){ const a=active(S.you); if(a&&a.hp>0){ a.hp=Math.max(1,a.hp-5); pushLog('Sponsored Post \u2014 ad tax: your Active loses 5 HP.'); } }
     if(S.scrim.ruleShift==='sicsoc2' && S.you.hand.length){ const lost=S.you.hand.shift(); if(lost){ S.you.discard.push(lost); pushLog('Doomscroll \u2014 the oldest card in your hand is discarded.'); } }
   }
@@ -2966,6 +2970,7 @@ function doDraw(){
   let target=Math.max(S.settings.handMin, p.hand.length+1);  // normal +1, floored to handMin
   if(S.scrim && S.scrim.ruleShift==='sandroid' && me()===p) target+=2;  // Infinite Scroll
   if(S.scrim && S.scrim.ruleShift==='e_popquiz' && me()===p) target=Math.max(1,target-1);  // Pop Quiz
+  if(S.scrim && SCRIM.kit==='drama' && me()===p && (S._youTurns||0)<=2) target+=1;  // The Play's the Thing
   let drawn=0;
   while(p.hand.length<target){
     if(p.deck.length===0 && p.discard.length){ p.deck=shuffle(p.discard.splice(0)); pushLog('Deck empty — discard reshuffled.'); }
@@ -3353,6 +3358,8 @@ function performAttack(side,abilKey){           // == beginAttack
   if(S.scrim && side==='you'){
     if(S.scrim.ruleShift==='claystation2') dmg=Math.round(dmg*0.8);
     const _att=active(S.you); if(_att){ if(_att._slacker) dmg=Math.round(dmg*0.5); else if(_att._carry) dmg=Math.round(dmg*1.15); }
+    if(SCRIM.kit==='scifi' && def && def.status && Object.keys(def.status).some(k=>def.status[k])) dmg=Math.round(dmg*1.2);
+    if(SCRIM.kit==='macbeth' && SCRIM._ambition) dmg=Math.round(dmg*(1+0.05*SCRIM._ambition));
   }
   if(hasCrit(side,'marxist') && (ab.cost===1||ab.cost===2) && def.atk && (def.atk.cost===3||def.atk.cost===4)){ dmg+=10; pushLog('Marxist Lens: +10 class-struggle damage.'); }
   if(A.flags.supercharge){ dmg*=2; A.flags.supercharge=false; pushLog('Supercharger: damage doubled!'); }
@@ -3484,6 +3491,8 @@ function checkKO(p,side){
   const a=active(p);
   if(a && a.hp<=0){
     if(S.scrim && S.scrim.ruleShift==='e_waitlist' && side==='opp' && !S.scrim._waitlistUsed){ S.scrim._waitlistUsed=true; a.hp=Math.max(1,Math.round(a.maxHp*0.3)); pushLog('The Waitlist \u2014 the examiner claws back to 30% HP!'); if(typeof toast==='function') toast('The Waitlist revives!'); render(); return; }
+    if(S.scrim && SCRIM.kit==='gothic' && side==='you' && !S._galvanicUsed){ S._galvanicUsed=true; a.hp=Math.max(1,Math.round(a.maxHp*0.25)); pushLog('Galvanic Spark \u2014 '+a.name+' is reanimated at 25% HP!'); if(typeof toast==='function') toast('Galvanic Spark!'); render(); return; }
+    if(S.scrim && SCRIM.kit==='macbeth' && side==='opp'){ SCRIM._ambition=Math.min(10,(SCRIM._ambition||0)+1); pushLog('Vaulting Ambition \u2014 your team grows stronger (+'+(SCRIM._ambition*5)+'% damage).'); }
     spawnKO(side, a.name);
     if(!p.grave.includes(a)) p.grave.push(a);
     const attacker=foeOf(side); attacker.kos++;
@@ -5173,12 +5182,12 @@ function packClose(){
 }
 
 const SCRIM_KITS = {
-  gothic:{ name:'Gothic Novelist', ic:'\u26b0', blurb:'Frankenstein and the sublime dread of creation.', deck:'frankenstein', chars:['victor','clerval'] },
-  scifi:{  name:'Sci-Fi Futurist', ic:'\u2604', blurb:'Othello reborn in neon \u2014 jealousy at lightspeed.', deck:'othello', chars:['cassio','montano'] },
-  drama:{  name:'Classical Dramatist', ic:'\u2694', blurb:'Hamlet and the tragic stage.', deck:'hamlet', chars:['horatio','laertes'] },
-  macbeth:{ name:'Scottish Tragedian', ic:'\ud83d\udde1', blurb:'Macbeth and the blood-price of ambition.', deck:'macbeth', chars:['banquo','macduff'] },
-  wonderland:{ name:'Nonsense Fabulist', ic:'\u2665', blurb:'Down the rabbit-hole into delightful madness.', deck:'wonderland', chars:['white_rabbit','cheshire_cat'] },
-  tewwg:{ name:'Renaissance Voice', ic:'\ud83c\udf50', blurb:'Their Eyes Were Watching God \u2014 Janie\u2019s search for the horizon.', deck:'tewwg', chars:['janie','teacake'] },
+  gothic:{ name:'Gothic Novelist', ic:'\u26b0', blurb:'Frankenstein and the sublime dread of creation.', deck:'frankenstein', chars:['victor','clerval'], sig:'Galvanic Spark', sigT:'First KO of your Active each battle — it reanimates at 25% HP.', kick:'Start: +15 Max HP to your whole roster.' },
+  scifi:{  name:'Sci-Fi Futurist', ic:'\u2604', blurb:'Othello reborn in neon \u2014 jealousy at lightspeed.', deck:'othello', chars:['cassio','montano'], sig:'Green-Eyed Protocol', sigT:'Enemies take +20% damage while suffering any status effect.', kick:'Start: the Red Pen artifact.' },
+  drama:{  name:'Classical Dramatist', ic:'\u2694', blurb:'Hamlet and the tragic stage.', deck:'hamlet', chars:['horatio','laertes'], sig:'The Play’s the Thing', sigT:'Draw +1 card on each of your first two turns per battle.', kick:'Start: the Legal Pad artifact.' },
+  macbeth:{ name:'Scottish Tragedian', ic:'\ud83d\udde1', blurb:'Macbeth and the blood-price of ambition.', deck:'macbeth', chars:['banquo','macduff'], sig:'Vaulting Ambition', sigT:'Each enemy you KO grants your team +5% damage for the rest of the run.', kick:'Start: the Tenure Track artifact.' },
+  wonderland:{ name:'Nonsense Fabulist', ic:'\u2665', blurb:'Down the rabbit-hole into delightful madness.', deck:'wonderland', chars:['white_rabbit','cheshire_cat'], sig:'Curiouser & Curiouser', sigT:'Start each battle with a random boon on your Active.', kick:'Start: a random Common artifact.' },
+  tewwg:{ name:'Renaissance Voice', ic:'\ud83c\udf50', blurb:'Their Eyes Were Watching God \u2014 Janie\u2019s search for the horizon.', deck:'tewwg', chars:['janie','teacake'], sig:'Far Horizon', sigT:'Your team heals 8 HP after every battle.', kick:'Start: the Sabbatical Journal artifact.' },
 };
 const SCRIM_NODE = { start:{ic:'\u2605',name:'Start'}, scrim:{ic:'\u2694',name:'Scrimmage'}, archives:{ic:'\ud83d\udcda',name:'Study Break'}, rest:{ic:'\u2615',name:'Coffee Break'}, fair:{ic:'\ud83c\udfea',name:'Book Fair'}, office:{ic:'\ud83d\udcbc',name:'Office Hours'}, elite:{ic:'\ud83c\udf93',name:'Thesis Defense'}, boss:{ic:'\ud83d\udea8',name:'Algorithm Boss'} };
 const SCRIM_ART = {
@@ -5393,6 +5402,16 @@ function scrimStartKit(kitId){
   if(perkOn('hardy')) SCRIM.team.forEach(rec=>{ rec.maxHp+=10; rec.curHp+=10; });
   if(perkOn('chair')){ scrimGrantArtifact(); scrimGrantArtifact(); }
   else if(perkOn('endowment')){ scrimGrantArtifact(); }
+  // Kit signature kicker (Option B): a small themed head-start
+  SCRIM._ambition=0;
+  (function(){ const k=SCRIM.kit; const give=(id)=>{ if(id && SCRIM.artifacts.indexOf(id)<0){ SCRIM.artifacts.push(id); scrimArtOnGain(id); } };
+    if(k==='gothic'){ SCRIM.team.forEach(rec=>{ rec.maxHp+=15; rec.curHp+=15; }); }
+    else if(k==='scifi'){ give('redpen'); }
+    else if(k==='drama'){ give('legalpad'); }
+    else if(k==='macbeth'){ give('tenuretrack'); }
+    else if(k==='wonderland'){ const pool=scrimArtPool(['common']); if(pool.length) give(pool[rnd(pool.length)]); }
+    else if(k==='tewwg'){ give('journal'); }
+  })();
   SCRIM.map = scrimGenMap(1);
   SCRIM.view='map'; render(); scrimSave();
 }
@@ -5488,6 +5507,7 @@ function scrimStartBattle(node){
   if(scrimHas('corneroffice')&&opp.team.length){ const t=opp.team.slice().sort((a,b)=>(b.maxHp||0)-(a.maxHp||0))[0]; const cut=Math.round((t.maxHp||0)*0.25); t.maxHp=Math.max(1,(t.maxHp||0)-cut); t.hp=Math.min(t.hp,t.maxHp); }
   // Dean's Endorsement: your Active starts each battle with a random boon
   if(scrimHas('deansendorsement')&&you.team.length){ const act=you.team[you.activeIdx]||you.team[0]; if(act){ act.status=act.status||{}; const boon=['highlight','laminate','hardcover'][rnd(3)]; act.status[boon]=true; } }
+  if(SCRIM.kit==='wonderland'&&you.team.length){ const act=you.team[you.activeIdx]||you.team[0]; if(act){ act.status=act.status||{}; const boon=['highlight','laminate','hardcover'][rnd(3)]; act.status[boon]=true; } }
   S = { settings:clone(st), turn:'you', phase:'deal', over:false, winner:null, pending:null, defend:false, picker:null, viewPile:null, poison:0, _logopen:false, _settings:false, fxShuffle:false,
         you, opp, log:[], scrim:{ node, ruleShift:null, shiftName:null, shiftText:null, eliteId:null, rosettaUsed:false } };
   scrimApplyShift(node);
@@ -5694,6 +5714,7 @@ function scrimAfterBattle(){
     toast('The sector overwhelms you \u2014 your scholars regroup at 40% HP.','bad'); render(); scrimSave(); return;
   }
   const _lf = (node.boss?6:(node.type==='elite'?4:2)) + (perkOn('adjunct')?2:0) + (scrimHas('tenuretrack')?2:0);
+  if(SCRIM.kit==='tewwg') SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.min(t.maxHp,t.curHp+8); });
   SCRIM.lf=(SCRIM.lf||0)+_lf; SCRIM._lfGain=_lf;
   if(SCRIM.pending){ scrimAdvanceTo(SCRIM.pending.c,SCRIM.pending.r); }
   let art=null;
@@ -5755,7 +5776,7 @@ function scrimIntroScreen(){
 function scrimKitScreen(){
   const cards=Object.keys(SCRIM_KITS).map(id=>{ const k=SCRIM_KITS[id];
     const chars=k.chars.map(cid=>{ const ch=DATA.characters[k.deck].find(x=>x.id===cid); return ch?ch.name:cid; }).join(' \u00b7 ');
-    return `<button class="kit-card" data-scrim="kit:${id}"><div class="kit-ic">${k.ic}</div><div class="kit-nm">${k.name}</div><div class="kit-bl">${k.blurb}</div><div class="kit-ch">Starters: ${chars}</div><div class="kit-go">Begin \u203a</div></button>`;
+    return `<button class="kit-card" data-scrim="kit:${id}"><div class="kit-ic">${k.ic}</div><div class="kit-nm">${k.name}</div><div class="kit-bl">${k.blurb}</div><div class="kit-ch">Starters: ${chars}</div>${k.sig?`<div class="kit-sig"><b>\u25c6 ${k.sig}</b> \u2014 ${k.sigT}</div>`:''}${k.kick?`<div class="kit-kick">\u2795 ${k.kick}</div>`:''}<div class="kit-go">Begin \u203a</div></button>`;
   }).join('');
   const sel=Math.min(META.honorsMax||0, SCRIM._honorsSel||0);
   const maxH=META.honorsMax||0;
