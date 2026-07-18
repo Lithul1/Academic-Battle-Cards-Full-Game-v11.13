@@ -724,6 +724,12 @@ body.dragging-abc{cursor:grabbing}
 @keyframes cfxCrit{0%{filter:none;transform:none}10%{filter:brightness(1.3) sepia(1) hue-rotate(-35deg) saturate(5);transform:translateX(-11px) rotate(-1.2deg)}26%{filter:brightness(1.5);transform:translateX(9px) rotate(1deg)}44%{transform:translateX(-6px)}64%{transform:translateX(5px)}84%{transform:translateX(-2px)}100%{filter:none;transform:none}}
 @keyframes cfxHurtRM{0%{filter:none}30%{filter:brightness(1.8)}100%{filter:none}}
 .cfx-float.crit{font-size:40px;color:#ff6a4a;text-shadow:0 2px 0 #6a1000,0 0 12px rgba(255,80,40,.6)}
+/* ---- Sensory Over-lord: oversized, imposing capstone tile ---- */
+.char.sol-big{ transform:scale(1.16); transform-origin:center bottom; z-index:6; }
+.char.sol-big .pc-art{ box-shadow:0 0 0 3px var(--gold,#E3A92B), 0 12px 30px rgba(0,0,0,.6); }
+.char.sol-big .pc-plate{ border-top:2px solid var(--gold,#E3A92B); }
+.char.sol-big .pc-name{ color:var(--gold,#E3A92B); letter-spacing:1.5px; }
+.char.sol-big .port-img{ transition:opacity .2s ease; }
 @media (prefers-reduced-motion: reduce){
   .board.cfx-shake,.board.cfx-shake-big{animation:none}
   .char.cfx-hurt .pc-art,.char.cfx-crit .pc-art{animation:cfxHurtRM .3s ease}
@@ -2523,6 +2529,7 @@ try{document.documentElement.style.setProperty('--abc-bg','url("'+window.ABC_BG+
 window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
 try{document.documentElement.style.setProperty('--abc-bg-qc','url("'+window.ABC_BG_QC+'")');}catch(e){}
 window.ABC_ICONS={archives:"data:image/png;base64,__ABCASSET_111__",rest:"data:image/png;base64,__ABCASSET_112__",start:"data:image/png;base64,__ABCASSET_113__",scrim:"data:image/png;base64,__ABCASSET_114__",elite:"data:image/png;base64,__ABCASSET_115__",boss:"data:image/png;base64,__ABCASSET_116__",fair:"data:image/png;base64,__ABCASSET_932__",office:"data:image/png;base64,__ABCASSET_999__"};
+window.ABC_SOL_FACES={idle:"data:image/jpeg;base64,__ABCASSET_1000__",attack:"data:image/jpeg;base64,__ABCASSET_1001__",defend:"data:image/jpeg;base64,__ABCASSET_1002__",taunt:"data:image/jpeg;base64,__ABCASSET_1003__",enraged:"data:image/jpeg;base64,__ABCASSET_1004__",defeat:"data:image/jpeg;base64,__ABCASSET_1005__"};
 window.ABC_SND={music_thereturn:"data:audio/mpeg;base64,__ABCASSET_125__",music_hiphop9:"data:audio/mpeg;base64,__ABCASSET_126__",sfx_card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",sfx_card_place:"data:audio/mpeg;base64,__ABCASSET_118__",sfx_card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",sfx_card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",sfx_book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",sfx_card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",sfx_pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",sfx_pack_take:"data:audio/mpeg;base64,__ABCASSET_124__",music_boss:"data:audio/mpeg;base64,__ABCASSET_127__"};
 window.ABC_BOSS_IMG={"dyefone":"data:image/webp;base64,__ABCASSET_909__","sandroid":"data:image/webp;base64,__ABCASSET_910__","sinstaram":"data:image/webp;base64,__ABCASSET_911__","claystation":"data:image/webp;base64,__ABCASSET_952__","pintendo":"data:image/webp;base64,__ABCASSET_953__","hexbox":"data:image/webp;base64,__ABCASSET_954__","sicsoc":"data:image/webp;base64,__ABCASSET_955__"};
 window.ABC_BOSS_IMGPOS={"dyefone":"44% 40%","sandroid":"48% 40%","sinstaram":"50% 40%"};
@@ -2923,6 +2930,7 @@ function startTurn(){
   if(S.scrim && p===S.you){
     S.scrim._redRingTurn=false;
     S._youTurns=(S._youTurns||0)+1;
+    const _ob=S.opp&&active(S.opp); if(_ob&&_ob._overlord){ const rr=_ob.hp/_ob.maxHp; solFace(_ob, rr<=0.15?'defeat':(rr<=0.33?'enraged':'idle')); }
     if(S.scrim.ruleShift==='sinstaram2'){ const a=active(S.you); if(a&&a.hp>0){ a.hp=Math.max(1,a.hp-5); pushLog('Sponsored Post \u2014 ad tax: your Active loses 5 HP.'); } }
     if(S.scrim.ruleShift==='sicsoc2' && S.you.hand.length){ const lost=S.you.hand.shift(); if(lost){ S.you.discard.push(lost); pushLog('Doomscroll \u2014 the oldest card in your hand is discarded.'); } }
   }
@@ -3581,7 +3589,9 @@ function aiLethal(p){
 }
 
 function aiTurn(){
-  if(!S||S.over) return; busy=true; armAiWatch(); doDraw();
+  if(!S||S.over) return; busy=true; armAiWatch();
+  if(active(S.opp)&&active(S.opp)._overlord){ overlordTurn(); return; }
+  doDraw();
   setTimeout(()=>{
     if(!S||S.over){ busy=false; return; }
     const p=S.opp; let guard=0;
@@ -3635,6 +3645,42 @@ function aiEngage(){
 }
 function armAiWatch(){ clearTimeout(aiWatch); aiWatch=setTimeout(function tick(){ if(!S||S.over||S.turn!=='opp') return; if(S.defend||S.pending){ aiWatch=setTimeout(tick,4000); return; } pushLog('Opponent stalled — safeguard ends the turn.'); busy=false; endAiTurn(); },9000); }
 function endAiTurn(){ clearTimeout(aiWatch); setTimeout(()=>{ if(!S) return; busy=false; if(!S.over){ S.turn='you'; startTurn(); } },700); }
+function solFace(boss,f){ boss._face=f; if(boss._faces&&boss._faces[f]) boss.img=boss._faces[f]; }
+function overlordTurn(){
+  if(!S||S.over){ busy=false; return; }
+  const p=S.opp, boss=active(p);
+  if(!boss||boss.hp<=0){ endAiTurn(); return; }
+  boss._turn=(boss._turn||0)+1;
+  const ratio=boss.hp/boss.maxHp, phase=ratio<=0.33?3:(ratio<=0.66?2:1);
+  const recalEvery=phase===3?3:5;
+  // ---- Recalibrate: cleanse own debuffs + small heal ----
+  if(boss._turn % recalEvery === 0){
+    boss.status=boss.status||{}; ['rip','poison','smudge','weaken','tear','burn','spill','glue','costUp'].forEach(k=>{ delete boss.status[k]; });
+    const heal=Math.round(boss.maxHp*0.05); boss.hp=Math.min(boss.maxHp, boss.hp+heal);
+    solFace(boss,'taunt'); pushLog('\u26a1 The Over-lord RECALIBRATES \u2014 purges its afflictions and heals '+heal+' HP.');
+    try{fxHeal('opp');}catch(e){}
+    S.phase='engage'; render(); setTimeout(endAiTurn,1000); return;
+  }
+  // ---- pick a move by phase rotation ----
+  const rot = (phase>=2) ? ['overload','disorient','overload','amplify'] : ['overload','amplify','disorient'];
+  const mv = rot[(boss._turn-1) % rot.length];
+  const baseDmg = {1:40,2:50,3:65}[phase];
+  if(mv==='amplify'){
+    boss.status=boss.status||{}; boss.status.highlight=true; if(phase===3) boss.status.laminate=true;
+    solFace(boss,'defend'); pushLog('\ud83d\udee1 The Over-lord AMPLIFIES \u2014 it powers up its next assault'+(phase===3?' and shields itself.':'.'));
+    S.phase='engage'; render(); setTimeout(endAiTurn,1000); return;
+  }
+  // overload / disorient are attacks routed through the normal pipeline (block + fx + KO)
+  let dmg = (mv==='disorient') ? 15 : baseDmg;
+  if(boss.status && boss.status.highlight){ dmg+=20; delete boss.status.highlight; }   // Amplify payoff
+  if(mv==='disorient'){ const you=active(S.you); if(you){ you.status=you.status||{}; you.status.weaken=Math.max(you.status.weaken||0, phase>=2?2:1); pushLog('\ud83c\udf00 DISORIENT \u2014 your Active is overstimulated (attacks weakened).'); } }
+  else { pushLog('\ud83d\udca5 SENSORY OVERLOAD!'); }
+  solFace(boss,'attack');
+  boss.atk={ n:(mv==='disorient'?'Disorient':'Sensory Overload'), dmg:dmg, cost:0, label:String(dmg) };
+  boss.atkCharge=[];
+  S.phase='engage'; render();
+  setTimeout(()=>{ if(!S||S.over){ busy=false; return; } if(performAttack('opp','atk')===false){ endAiTurn(); } }, 500);
+}
 
 /* ---------------- trivia ---------------- */
 function openTrivia(card,handIdx,targetUid){ busy=true; S.pending={card,handIdx,target:targetUid}; try{SFX.card('book_flip',0.7);}catch(e){} render(); }
@@ -3929,7 +3975,7 @@ function charTile(p,side){
   const port = ch.img
     ? `<img class="port-img" src="${ch.img}" alt="${ch.name}" style="object-position:${ch.imgpos||'50% 20%'}">`
     : `<span class="mono">${initials(ch.name)}</span>`;
-  return `<div class="char ${side} ${dead?'dead':''}${ch.fe?' fe':''}${ch._boss?' boss':''}${side==='you'&&ch.hp>0?' drop-zone':''}" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"${side==='you'?` data-drop="1" data-charuid="${ch.uid}"`:''}>
+  return `<div class="char ${side} ${dead?'dead':''}${ch.fe?' fe':''}${ch._boss?' boss':''}${ch._big?' sol-big':''}${side==='you'&&ch.hp>0?' drop-zone':''}" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"${side==='you'?` data-drop="1" data-charuid="${ch.uid}"`:''}>
     ${sbub}
     <div class="pc-plate"><span class="pc-name">${ch._boss?'\u26a0 ALGORITHM CORE':ch.name}</span><span class="pc-hp"><u style="width:${_op}%"></u><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
     <div class="pc-art">${port}${ch.fe?`<span class="fe-badge" title="1st Edition \u2014 ${((ch.passive&&ch.passive.name)||'').replace(/"/g,'&quot;')}">1ST ED</span>`:''}<button class="pc-flip" data-benchinfo="${side}:${ch.uid}" title="Ability details">i</button></div>
@@ -5251,6 +5297,8 @@ const SCRIM_ELITES = {
   e_politics:{ name:'Office Politics', text:'The examiner plays the room \u2014 it gains 8 block every time you answer wrong.' },
   e_waitlist:{ name:'The Waitlist', text:'It won\u2019t take no for an answer \u2014 the examiner revives once at 30% HP the first time it falls.' },
 };
+/* ---- Campaign capstone: The Sensory Over-lord ---- */
+const SUPER_BOSS = { id:'overlord', name:'The Sensory Over-lord', accent:'#3a2f28', hp:300, sub:'Commencement' };
 /* Boss difficulty ranks, gentlest -> harshest (drives tiered draw windows) */
 const SCRIM_BOSS_RANK = ['claystation','dyefone','sandroid','sinstaram','pintendo','hexbox','sicsoc'];
 /* Bestiary of Mal-gorithms — flavor lore, unlocked on defeat (back-port to catalog) */
@@ -5455,6 +5503,13 @@ function scrimYouPlayer(){ const team=[]; SCRIM.team.forEach((rec,i)=>{ rec._i=i
 function scrimNoHeal(bmIdxs){ return bmIdxs.filter(i=>!(DATA.bookmarks[i] && DATA.bookmarks[i].effect==='heal')); }
 function scrimBossDeck(b){ const dk=b.deck||scrimRandomDeck(); const def=defaultDeck(dk); return { ab:def.ab.map(i=>({d:dk,i})).slice(0,16), bm:scrimNoHeal(def.bm).slice(0,8), cr:[] }; }
 function scrimOppPlayer(node){
+  if(node.superboss){
+    const b=SUPER_BOSS; const F=(typeof window!=='undefined'&&window.ABC_SOL_FACES)||{};
+    const bc=makeChar({id:'overlord',name:b.name,hp:b.hp,accent:b.accent,tags:['villain'],
+      atk:{n:'Sensory Overload',dmg:40,cost:0,label:'40'},blk:{n:'Amplify',block:20,cost:2,label:'20/2'}},1.0);
+    bc._boss=true; bc._overlord=true; bc._big=true; bc.sub=b.sub; bc._faces=F; bc._face='idle'; bc.img=F.idle||''; bc.imgpos='50% 26%'; bc._turn=0;
+    return scrimPlayerShell(b.name,'boss',[bc], shuffle(buildRunDeck(scrimBossDeck({deck:scrimRandomDeck()}))));
+  }
   if(node.boss){ const b=SCRIM_BOSSES[node.boss]; const mul=scrimActMul();
     const bAtk=clone(b.atk); if(bAtk.dmg!=null) bAtk.dmg=Math.round(bAtk.dmg*mul);
     const bimg=((typeof window!=='undefined'&&window.ABC_BOSS_IMG)||{})[node.boss]||'';
@@ -5489,6 +5544,7 @@ function scrimApplyShift(node){
   }
 }
 /* ---- launch a battle node ---- */
+function scrimStartSuperBoss(){ SCRIM.pending=null; SCRIM.bossReward=null; SCRIM._gainedArt=null; SCRIM.view='map'; scrimStartBattle({type:'boss', superboss:true}); }
 function scrimStartBattle(node){
   stopTurnTimer();
   const st=clone(APP.settings); st.koTarget=99; st.hpScale=1.0;
@@ -5508,7 +5564,7 @@ function scrimStartBattle(node){
         you, opp, log:[], scrim:{ node, ruleShift:null, shiftName:null, shiftText:null, eliteId:null, rosettaUsed:false } };
   scrimApplyShift(node);
   APP.screen='play';
-  pushLog(node.boss?('\u26a0 ALGORITHM CORE \u2014 '+SCRIM_BOSSES[node.boss].name+'!'):(node.type==='elite'?('\ud83c\udf93 Thesis Defense \u2014 '+(S.scrim.shiftName||'an elite fight')+'!'):'\u2694 A Scrimmage begins.'));
+  pushLog(node.superboss?('\u26a0 COMMENCEMENT \u2014 THE SENSORY OVER-LORD RISES!'):(node.boss?('\u26a0 ALGORITHM CORE \u2014 '+SCRIM_BOSSES[node.boss].name+'!'):(node.type==='elite'?('\ud83c\udf93 Thesis Defense \u2014 '+(S.scrim.shiftName||'an elite fight')+'!'):'\u2694 A Scrimmage begins.')));
   if(S.scrim.ruleShift){ pushLog((node.boss?'Global Rule Shift \u2014 ':'Elite Rule \u2014 ')+S.scrim.shiftName+': '+S.scrim.shiftText); }
   if(node.boss){ S._bossReveal=node.boss; if((META.bossSeen||[]).indexOf(node.boss)<0){ META.bossSeen.push(node.boss); metaSave(); } }
   render(); dealOpening();
@@ -5717,11 +5773,16 @@ function scrimAfterBattle(){
   let art=null;
   if(node.type==='elite'||node.boss) art=scrimGrantArtifact(node.boss?['rare','boss']:['uncommon','rare']);
   SCRIM._gainedArt=art;
+  if(node.superboss){
+    META.stats.bossKills=(META.stats.bossKills||0)+1; metaSave();
+    S=null; stopTurnTimer(); APP.screen='scrim';
+    scrimEndRun(true); return;
+  }
   if(node.boss){
     META.stats.bossKills=(META.stats.bossKills||0)+1; if((META.bossKilled||[]).indexOf(node.boss)<0) META.bossKilled.push(node.boss); if((META.bossSeen||[]).indexOf(node.boss)<0) META.bossSeen.push(node.boss); metaSave();
     if(scrimHas('fellowship')){ SCRIM.team.forEach(t=>{ t.curHp=t.maxHp; }); }
     S=null; stopTurnTimer(); APP.screen='scrim';
-    if((SCRIM.act||1)>=7){ scrimEndRun(true); return; }
+    if((SCRIM.act||1)>=7){ scrimStartSuperBoss(); return; }
     const ipGain=Math.round(40*honorsMods().ipMul); META.ip=(META.ip||0)+ipGain; metaSave(); SCRIM._bossIP=ipGain;
     SCRIM.bossReward=scrimRollFirstEds(3); SCRIM.pending=null;
     SCRIM.view='bossreward'; try{SFX.card('card_fan',0.7);}catch(e){} render(); scrimSave(); return;
