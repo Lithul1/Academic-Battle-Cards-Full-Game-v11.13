@@ -3612,6 +3612,11 @@ function aiLethal(p){
 function aiTurn(){
   if(!S||S.over) return; busy=true; armAiWatch();
   if(active(S.opp)&&active(S.opp)._overlord){ overlordTurn(); return; }
+  const _b=active(S.opp);
+  if(_b&&_b._boss){ _b._turn=(_b._turn||0)+1;
+    if(_b._turn%5===0 && _b.status){ let cleaned=false; ['rip','smudge','burn','spill','glue','tear','weaken'].forEach(k=>{ if(_b.status[k]){ delete _b.status[k]; cleaned=true; } });
+      if(cleaned) pushLog('\u26a1 '+_b.name+' recalibrates \u2014 shaking off its afflictions.'); }
+  }
   doDraw();
   setTimeout(()=>{
     if(!S||S.over){ busy=false; return; }
@@ -5477,8 +5482,11 @@ function scrimStartKit(kitId){
   // so a naive "first 8" slice could leave a kit unable to attack or block. Pull 4 of each.
   const _src=DATA.abcs[dk]||[]; const _atk=[], _blk=[];
   _src.forEach((c,i)=>{ (c.type==='ATTACK'?_atk:_blk).push(i); });
-  const ab=[]; for(let i=0;i<4;i++){ if(_atk[i]!=null) ab.push({d:dk,i:_atk[i]}); if(_blk[i]!=null) ab.push({d:dk,i:_blk[i]}); }
-  for(let i=0; ab.length<8 && i<_src.length; i++){ if(!ab.some(x=>x.i===i)) ab.push({d:dk,i:i}); }
+  // Guarantee 8 ATTACK + 8 BLOCK so both starting characters can always be armed.
+  // If a deck defines fewer than 8 of a type, cycle through what it has to fill the count.
+  const ab=[]; const pull=(arr)=>{ if(!arr.length) return; for(let n=0;n<8;n++) ab.push({d:dk, i:arr[n % arr.length]}); };
+  pull(_atk); pull(_blk);
+  if(!ab.length){ for(let i=0;i<16 && i<_src.length;i++) ab.push({d:dk,i:i}); }
   const bm=[0,1,2,3,4].filter(i=>i<DATA.bookmarks.length);
   SCRIM.deck = { ab:ab, bm:bm, cr:[] };
   // Standing Orders (equipped perks) apply at run start:
@@ -5502,7 +5510,7 @@ function scrimStartKit(kitId){
 /* ---- map generation (branching DAG, StS-style) ---- */
 function scrimGenMap(act){
   act=act||SCRIM.act||1;
-  const N=(act>=4?6:5), cols=[];
+  const N=(act>=4?8:7), cols=[];
   cols.push([{type:'start',done:true}]);
   for(let c=1;c<N-1;c++){ const rows=2+rnd(2); const arr=[]; for(let r=0;r<rows;r++) arr.push({type:scrimNodeType(c,N)}); cols.push(arr); }
   const bossId = SCRIM.doctoral ? scrimRollDoctoralBoss() : ((SCRIM.bosses&&SCRIM.bosses[act-1]) || (Math.random()<0.5?'sandroid':'dyefone'));
@@ -5539,7 +5547,7 @@ function buildRunDeck(rd){ const deck=[];
   return deck; }
 function buildScrimChar(rec){ let def; if(rec.fe) def=firstedById(rec.id); else def=(DATA.characters[rec.deck]||[]).find(c=>c.id===rec.id); if(!def) return null; const c=makeChar(def,1.0); if(rec.maxHp) c.maxHp=rec.maxHp; c.hp=Math.max(0,Math.min(rec.curHp!=null?rec.curHp:c.maxHp,c.maxHp)); c._scrimIdx=rec._i; return c; }
 function scrimYouPlayer(){ const team=[]; SCRIM.team.forEach((rec,i)=>{ rec._i=i; const c=buildScrimChar(rec); if(c) team.push(c); }); const deck=shuffle(buildRunDeck(SCRIM.deck)); return scrimPlayerShell('You',SCRIM.kit,team,deck); }
-function scrimNoHeal(bmIdxs){ return bmIdxs.filter(i=>!(DATA.bookmarks[i] && DATA.bookmarks[i].effect==='heal')); }
+function scrimNoHeal(bmIdxs){ return bmIdxs.filter(i=>!(DATA.bookmarks[i] && (DATA.bookmarks[i].effect==='heal' || DATA.bookmarks[i].effect==='defib'))); }
 function scrimBossDeck(b){ const dk=b.deck||scrimRandomDeck(); const def=defaultDeck(dk); return { ab:def.ab.map(i=>({d:dk,i})).slice(0,16), bm:scrimNoHeal(def.bm).slice(0,8), cr:[] }; }
 function scrimOppPlayer(node){
   if(node.superboss){
@@ -5552,13 +5560,13 @@ function scrimOppPlayer(node){
   if(node.boss){ const b=SCRIM_BOSSES[node.boss]; const mul=scrimActMul();
     const bAtk=clone(b.atk); if(bAtk.dmg!=null) bAtk.dmg=Math.round(bAtk.dmg*mul);
     const bimg=((typeof window!=='undefined'&&window.ABC_BOSS_IMG)||{})[node.boss]||'';
-    const bc=makeChar({id:'boss_'+node.boss,name:b.name,hp:Math.round(b.hp*mul*(SCRIM.doctoral?1.2:1)),accent:b.accent,img:bimg,tags:['villain'],atk:bAtk,blk:clone(b.blk)},1.0); bc._boss=true; bc.sub=b.sub;
+    const bc=makeChar({id:'boss_'+node.boss,name:b.name,hp:Math.round(b.hp*mul*(SCRIM.doctoral?1.2:1.15)),accent:b.accent,img:bimg,tags:['villain'],atk:bAtk,blk:clone(b.blk)},1.0); bc._boss=true; bc.sub=b.sub;
     bc.imgpos=((typeof window!=='undefined'&&window.ABC_BOSS_IMGPOS)||{})[node.boss]||'50% 40%';
     return scrimPlayerShell(b.name,'boss',[bc],shuffle(buildRunDeck(scrimBossDeck(b)))); }
   const dk=node.oppDeck||scrimRandomDeck();
   const ids=shuffle(DATA.characters[dk].map(c=>c.id)).slice(0, node.type==='elite'?3:2);
   const depth=SCRIM.pending?SCRIM.pending.c:1;
-  const scale=(node.type==='elite'?0.95:Math.min(0.9,0.55+0.06*depth))*scrimActMul();
+  const scale=(node.type==='elite'?1.35:Math.min(1.3,0.8+0.08*depth))*scrimActMul();
   const team=ids.map(id=>{ const c=makeChar(DATA.characters[dk].find(x=>x.id===id),1.0); c.maxHp=Math.max(20,Math.round(c.maxHp*scale/10)*10); c.hp=c.maxHp; return c; });
   const def=defaultDeck(dk);
   const rd={ ab:def.ab.map(i=>({d:dk,i})).slice(0,14), bm:scrimNoHeal(def.bm).slice(0,10), cr:node.type==='elite'?def.cr.slice(0,2):[] };
