@@ -1448,6 +1448,18 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .bst-lore{ border-top:2px dashed #c9b58a; padding-top:9px; font-size:13px; line-height:1.5; color:#3a322b; }
 .bst-lh{ font-family:var(--cond); letter-spacing:1px; font-size:11px; color:#8a5a1a; text-transform:uppercase; display:block; margin-bottom:3px; }
 .bst-lore.locked{ color:#9a8a6a; font-style:italic; }
+.bst-altdot{ position:absolute; top:3px; right:4px; font-size:11px; color:#1f6a3a; text-shadow:0 0 3px #fff; }
+.bst-alt{ margin-top:10px; border-top:2px dashed #b9a06a; padding-top:9px; }
+.bst-alth{ font-family:var(--cond); letter-spacing:.8px; font-size:12px; color:#1f6a3a; text-transform:uppercase; margin-bottom:6px; }
+.bst-altart{ width:100%; max-height:180px; object-fit:cover; object-position:50% 22%; border:2px solid #241f1b; border-radius:8px; margin-bottom:7px; }
+.bst-shift.alt{ background:rgba(31,106,58,.10); }
+.bst-altlore{ font-size:12.5px; line-height:1.5; color:#3a322b; margin-top:6px; }
+.bst-tile.sol{ box-shadow:inset 0 0 0 2px var(--gold,#E3A92B); }
+.bst-tile.sol .bst-nm{ color:#b5402a; }
+.bst-thumb{ width:100%; height:100%; object-fit:cover; object-position:50% 24%; }
+.bst-card.sol{ box-shadow:0 0 0 3px var(--gold,#E3A92B), 0 14px 30px rgba(0,0,0,.5); }
+.bst-faces{ display:flex; gap:5px; margin:8px 0; flex-wrap:wrap; }
+.bst-face-mini{ width:46px; height:46px; object-fit:cover; object-position:50% 24%; border:2px solid #241f1b; border-radius:6px; }
 .bst-redact{ background:#3a322b; color:transparent; border-radius:2px; line-height:1.7; }
 .bst-loremsg{ margin-top:8px; font-style:normal; color:#8a5a1a; font-family:var(--cond); letter-spacing:.5px; }
 .bst-close{ display:block; width:100%; border:none; border-top:2px solid #241f1b; background:#f6e7bd; font-family:var(--cond); letter-spacing:1px; padding:10px; cursor:pointer; font-size:14px; }
@@ -5320,6 +5332,16 @@ const BOSS_LORE = {
   hexbox:'Sealed inside a warranty no one has ever read, the Cursed Console injects a hex with every wrong answer. Its cooling fans scream the names of overdue borrowers.',
   sicsoc:'The Doomscroll Network runs on a fifteen-second clock and a bottomless well. It shuffles your champions like a feed, certain that if it keeps you scrolling, you will never finish the case.'
 };
+const BOSS_ALT_LORE = {
+  sandroid:'In its <b>Sandstorm</b> form the Android stops grinding and starts scattering \u2014 burying the board in a haze of half-remembered feeds, so nothing settles long enough to matter.',
+  dyefone:'The <b>Read Receipts</b> form weaponizes being seen: every wrong answer is stamped, timestamped, and thrown back, punishing the smallest hesitation in public ink.',
+  claystation:'When the Unrendered Machine stutters into <b>Frame Drop</b>, reality skips. Blows land a beat late and a beat wrong, the whole duel lurching through dropped frames.',
+  sinstaram:'The Filtered Feed\u2019s <b>Sponsored Post</b> form interrupts everything for a word from its patrons \u2014 gilding itself mid-scroll while your champions wait through the ad.',
+  pintendo:'The Micro-Transaction Machine\u2019s <b>Loot Box</b> form gambles with your turns, rolling for extra plays and billing you the difference in blood.',
+  hexbox:'The Cursed Console\u2019s <b>Red Ring</b> form overheats into a death-spiral, screaming a fresh hex on every miss as its fans redline toward meltdown.',
+  sicsoc:'In full <b>Doomscroll</b> the Network abandons even the pretense of order \u2014 an endless, shuffling churn that reshuffles your champions faster than you can defend them.'
+};
+const OVERLORD_LORE = 'The Sensory Over-lord is what the algorithms dream of becoming \u2014 every feed, every screen, every notification fused into one crowned tyrant of pure distraction. It does not read; it drowns. Where a single Mal-gorithm steals a moment, the Over-lord floods whole libraries in noise, recalibrating itself faster than any mind can settle. To face it at Commencement is to defend not one book, but the very capacity to sit with one.';
 
 function scrimHas(id){ return SCRIM.active && SCRIM.artifacts.indexOf(id)>=0; }
 function scrimBlot(str){ let n=0; return String(str).replace(/[A-Za-z]/g, ch=>{ n++; return (n%4===0)?'\u2593':ch; }); }
@@ -5552,7 +5574,7 @@ function scrimApplyShift(node){
     S.scrim.ruleShift = useAlt ? b.altShift : b.ruleShift;
     S.scrim.shiftName = useAlt ? b.altName : b.shiftName;
     S.scrim.shiftText = useAlt ? b.altText : b.shiftText;
-    if(useAlt){ const alt=(typeof window!=='undefined'&&window.ABC_BOSS_IMG_ALT&&window.ABC_BOSS_IMG_ALT[node.boss]); if(alt){ const bc=active(S.opp); if(bc){ bc.img=alt; bc.imgpos='50% 22%'; } } }
+    if(useAlt){ META.bossAltSeen=META.bossAltSeen||[]; if(META.bossAltSeen.indexOf(node.boss)<0){ META.bossAltSeen.push(node.boss); metaSave(); } const alt=(typeof window!=='undefined'&&window.ABC_BOSS_IMG_ALT&&window.ABC_BOSS_IMG_ALT[node.boss]); if(alt){ const bc=active(S.opp); if(bc){ bc.img=alt; bc.imgpos='50% 22%'; } } }
   } else if(node.type==='elite'){
     const ids=Object.keys(SCRIM_ELITES); const id=ids[rnd(ids.length)]; const e=SCRIM_ELITES[id];
     S.scrim.ruleShift=id; S.scrim.eliteId=id; S.scrim.shiftName=e.name; S.scrim.shiftText=e.text;
@@ -5562,7 +5584,7 @@ function scrimApplyShift(node){
   }
 }
 /* ---- launch a battle node ---- */
-function scrimStartSuperBoss(){ SCRIM.pending=null; SCRIM.bossReward=null; SCRIM._gainedArt=null; SCRIM.view='map'; scrimStartBattle({type:'boss', superboss:true}); }
+function scrimStartSuperBoss(){ META.overlordSeen=true; metaSave(); SCRIM.pending=null; SCRIM.bossReward=null; SCRIM._gainedArt=null; SCRIM.view='map'; scrimStartBattle({type:'boss', superboss:true}); }
 function scrimStartBattle(node){
   stopTurnTimer();
   const st=clone(APP.settings); st.koTarget=99; st.hpScale=1.0;
@@ -5689,7 +5711,7 @@ function handleScrim(cmd){
   if(op==='packdone'){ packClose(); return; }
   if(op==='perkinfo'){ SCRIM._perkInfo=(SCRIM._perkInfo===a?null:a); render(); return; }
   if(op==='fecard'){ const f=firstedById(a); if(f) showPreview(buildFePreview(f)); return; }
-  if(op==='bestiary'){ if(SCRIM_BOSSES[a] && (META.bossSeen||[]).indexOf(a)>=0) showPreview(bestiaryCard(a)); return; }
+  if(op==='bestiary'){ if(a==='overlord'){ if(META.overlordSeen) showPreview(bestiaryCard('overlord')); return; } if(SCRIM_BOSSES[a] && (META.bossSeen||[]).indexOf(a)>=0) showPreview(bestiaryCard(a)); return; }
   if(op==='expcard'){ var Ex=window.EXPANSIONS[a]; if(Ex){ Ex._key=a; var pre=expPrefix(Ex);
       if((META.editionCards||[]).indexOf(pre+'char:'+b)>=0) showPreview(expCardFull(a,b)); else toast('Not collected yet \u2014 open a pack to find them.'); } return; }
   if(op==='exppack'){ scrimOpenExpPack(a); return; }
@@ -5796,7 +5818,7 @@ function scrimAfterBattle(){
   if(node.type==='elite'||node.boss) art=scrimGrantArtifact(node.boss?['rare','boss']:['uncommon','rare']);
   SCRIM._gainedArt=art;
   if(node.superboss){
-    META.stats.bossKills=(META.stats.bossKills||0)+1; metaSave();
+    META.stats.bossKills=(META.stats.bossKills||0)+1; META.overlordKilled=true; metaSave();
     S=null; stopTurnTimer(); APP.screen='scrim';
     scrimEndRun(true); return;
   }
@@ -6138,15 +6160,22 @@ function mhCardFull(id){var E=window.EXPANSIONS.modern_hamlet;var c=null;for(var
     +'<div class="pc-move blk"><span class="mv-n">'+c.blk.n+'</span><span class="mv-l">'+c.blk.label+'</span></div></div></div>'; }
 
 function scrimBestiary(){
-  const seen=META.bossSeen||[], killed=META.bossKilled||[];
+  const seen=META.bossSeen||[], killed=META.bossKilled||[]; const altSeen=META.bossAltSeen||[];
   const tiles=SCRIM_BOSS_RANK.map(id=>{ const b=SCRIM_BOSSES[id]; const isSeen=seen.indexOf(id)>=0, isKill=killed.indexOf(id)>=0;
     if(!isSeen) return `<div class="bst-tile locked"><span class="bst-face">?</span><span class="bst-nm">???</span></div>`;
-    return `<button class="bst-tile ${isKill?'killed':'seen'}" data-scrim="bestiary:${id}" title="${b.name}">${bossThumb(id)}<span class="bst-nm">${b.name}</span></button>`;
+    const altMark = altSeen.indexOf(id)>=0 ? `<span class="bst-altdot" title="Alternate form recorded">\u25c8</span>` : '';
+    return `<button class="bst-tile ${isKill?'killed':'seen'}" data-scrim="bestiary:${id}" title="${b.name}">${bossThumb(id)}${altMark}<span class="bst-nm">${b.name}</span></button>`;
   }).join('');
-  return `<div class="vault-sec"><div class="vault-h">\ud83d\udc7e Bestiary of Mal-gorithms <small>${killed.length} purged \u00b7 ${seen.length}/${SCRIM_BOSS_RANK.length} encountered \u00b7 tap a Core</small></div>
-    <div class="bst-grid">${tiles}</div></div>`;
+  const olSeen=META.overlordSeen, olKill=META.overlordKilled;
+  const olFace=(typeof window!=='undefined'&&window.ABC_SOL_FACES&&window.ABC_SOL_FACES.idle)||'';
+  const olTile = !olSeen
+    ? `<div class="bst-tile locked sol"><span class="bst-face">\u2605</span><span class="bst-nm">???</span></div>`
+    : `<button class="bst-tile sol ${olKill?'killed':'seen'}" data-scrim="bestiary:overlord" title="The Sensory Over-lord">${olFace?`<img class="bst-thumb" src="${olFace}" alt="Over-lord">`:'\ud83d\udc51'}<span class="bst-nm">Over-lord</span></button>`;
+  return `<div class="vault-sec"><div class="vault-h">\ud83d\udc7e Bestiary of Mal-gorithms <small>${killed.length} purged \u00b7 ${seen.length}/${SCRIM_BOSS_RANK.length} encountered \u00b7 ${altSeen.length}/${SCRIM_BOSS_RANK.length} alt-forms \u00b7 tap a Core</small></div>
+    <div class="bst-grid">${tiles}${olTile}</div></div>`;
 }
 function bestiaryCard(id){
+  if(id==='overlord') return overlordCard();
   const b=SCRIM_BOSSES[id]; if(!b) return '';
   const killed=(META.bossKilled||[]).indexOf(id)>=0;
   const img=((typeof window!=='undefined'&&window.ABC_BOSS_IMG)||{})[id]||'';
@@ -6154,6 +6183,14 @@ function bestiaryCard(id){
   const lore = killed
     ? `<div class="bst-lore"><span class="bst-lh">Dossier</span>${BOSS_LORE[id]||''}</div>`
     : `<div class="bst-lore locked"><span class="bst-lh">Dossier \u2014 sealed</span><span class="bst-redact">${String(BOSS_LORE[id]||'').replace(/[A-Za-z]/g,'\u2588')}</span><div class="bst-loremsg">Defeat this Core to unlock its lore.</div></div>`;
+  const altSeen=(META.bossAltSeen||[]).indexOf(id)>=0;
+  const altImg=((typeof window!=='undefined'&&window.ABC_BOSS_IMG_ALT)||{})[id]||'';
+  const altBlock = (altSeen && b.altName) ? `<div class="bst-alt">
+      <div class="bst-alth">\u25c8 Alternate Form \u2014 ${b.altName}</div>
+      ${altImg?`<img class="bst-altart" src="${altImg}" alt="${b.altName}">`:''}
+      <div class="bst-shift alt"><b>${b.altName}</b> \u2014 ${b.altText||''}</div>
+      ${killed?`<div class="bst-altlore">${BOSS_ALT_LORE[id]||''}</div>`:''}
+    </div>` : '';
   return `<div class="bst-card" data-pvclose>
     <div class="bst-tag">\u26a0 Algorithm Core${killed?' \u00b7 Purged':''}</div>
     <div class="bst-stage">${art}</div>
@@ -6161,6 +6198,27 @@ function bestiaryCard(id){
       <div class="bst-cname">${b.name}</div><div class="bst-csub">${b.sub||''}</div>
       <div class="bst-shift"><b>House Rule \u00b7 ${b.shiftName}</b> \u2014 ${b.shiftText}</div>
       <div class="bst-abs"><div class="bst-ab atk">\u2694 ${b.atk.n}<span class="bst-lab">${b.atk.label}</span></div><div class="bst-ab blk">\u26ca ${b.blk.n}<span class="bst-lab">${b.blk.label}</span></div></div>
+      ${lore}
+      ${altBlock}
+    </div>
+    <button class="bst-close" data-pvclose>Close</button>
+  </div>`;
+}
+function overlordCard(){
+  const killed=META.overlordKilled; const F=(typeof window!=='undefined'&&window.ABC_SOL_FACES)||{};
+  const art=F.idle?`<img class="bst-art" src="${F.idle}" alt="Sensory Over-lord">`:`<div class="bst-cardmono">SOL</div>`;
+  const facesRow=['attack','defend','taunt','enraged','defeat'].filter(k=>F[k]).map(k=>`<img class="bst-face-mini" src="${F[k]}" title="${k}" alt="${k}">`).join('');
+  const lore = killed
+    ? `<div class="bst-lore"><span class="bst-lh">Dossier</span>${OVERLORD_LORE}</div>`
+    : `<div class="bst-lore locked"><span class="bst-lh">Dossier \u2014 sealed</span><span class="bst-redact">${OVERLORD_LORE.replace(/[A-Za-z]/g,'\u2588')}</span><div class="bst-loremsg">Defeat the Over-lord at Commencement to unlock its lore.</div></div>`;
+  return `<div class="bst-card sol" data-pvclose>
+    <div class="bst-tag">\u2605 Super Boss \u00b7 Commencement${killed?' \u00b7 Graduated':''}</div>
+    <div class="bst-stage">${art}</div>
+    <div class="bst-cbody">
+      <div class="bst-cname">The Sensory Over-lord</div><div class="bst-csub">300 HP \u00b7 three phases</div>
+      <div class="bst-shift"><b>Recalibrate</b> \u2014 every few turns it purges its own afflictions and heals; resists rip / smudge / burn at half.</div>
+      <div class="bst-abs"><div class="bst-ab atk">\u2694 Sensory Overload<span class="bst-lab">40/50/65</span></div><div class="bst-ab blk">\u25c8 Amplify \u00b7 Disorient</div></div>
+      ${facesRow?`<div class="bst-faces">${facesRow}</div>`:''}
       ${lore}
     </div>
     <button class="bst-close" data-pvclose>Close</button>
