@@ -1462,6 +1462,11 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .bst-face-mini{ width:46px; height:46px; object-fit:cover; object-position:50% 24%; border:2px solid #241f1b; border-radius:6px; }
 .cr-fullart{ max-width:260px; margin:12px auto; border-radius:14px; overflow:hidden; box-shadow:0 0 0 3px var(--gold,#E3A92B),0 12px 28px rgba(0,0,0,.55); }
 .cr-fullart img{ display:block; width:100%; }
+.fa-card{ border-radius:12px; overflow:hidden; box-shadow:0 0 0 3px var(--gold,#E3A92B),0 8px 20px rgba(0,0,0,.5); margin-bottom:8px; }
+.fa-card img{ display:block; width:100%; }
+.fa-tier{ font-family:var(--cond,'Anton',sans-serif); font-size:10px; letter-spacing:1px; color:#b5402a; margin-left:4px; }
+.fa-lore{ margin-top:10px; border-top:2px dashed #c9b58a; padding-top:9px; font-size:12.5px; line-height:1.55; color:#3a322b; font-style:italic; }
+.fa-lore-h{ font-family:var(--cond,'Anton',sans-serif); font-style:normal; letter-spacing:.5px; color:#8a2a3a; font-size:14px; margin-bottom:5px; }
 .bst-redact{ background:#3a322b; color:transparent; border-radius:2px; line-height:1.7; }
 .bst-loremsg{ margin-top:8px; font-style:normal; color:#8a5a1a; font-family:var(--cond); letter-spacing:.5px; }
 .bst-close{ display:block; width:100%; border:none; border-top:2px solid #241f1b; background:#f6e7bd; font-family:var(--cond); letter-spacing:1px; padding:10px; cursor:pointer; font-size:14px; }
@@ -3480,6 +3485,7 @@ function finishAttack(blocked,negated,forceNet){
   if(ab.sacrifice && hasCrit(dKey,'feminist') && !symbolsOff() && net>30){ net=30; pushLog('Feminist Lens caps the Sacrifice attack at 30.'); }
   if(D._teamShield && net>0){ const _r=Math.min(net,D._teamShield); net-=_r; pushLog(`${who(D)}'s allies stand together — ${_r} damage reduced.`); }
   if(S.scrim && scrimHas('gradecurve') && S.opp && S.opp.team.indexOf(def)>=0 && net>def.hp && att.hp>0){ const over=net-def.hp, heal=Math.round(over/2); if(heal>0){ att.hp=Math.min(att.maxHp,att.hp+heal); pushLog('Grade Curve \u2014 overkill heals '+att.name+' +'+heal+'.'); } }
+  if(net>0 && blocked>0 && def.blk && def.blk.collateral){ const bench=D.team.filter((c,i)=>i!==D.activeIdx && c.hp>0); if(bench.length){ const bc=bench[rnd(bench.length)]; bc.hp=Math.max(0,bc.hp-net); pushLog(`Collateral Damage \u2014 ${net} overflow spills onto ${bc.name} backstage.`); net=0; if(bc.hp<=0) checkKO(D,dKey); } }
   def.hp=Math.max(0,def.hp-net);
   pushLog(`${att.name} uses ${ab.n}: ${net} damage to ${def.name}. (${def.hp}/${def.maxHp} HP)`);
   if(pierce) pushLog(`${ab.n} pierced the defense!`);
@@ -4697,6 +4703,19 @@ function buildCharPreview(ch,deck){ if(!ch) return '';
   </div>`;
 }
 function buildFePreview(f){ if(!f) return '';
+  const full=(typeof window!=='undefined'&&window.ABC_FULLART&&window.ABC_FULLART[f.id]);
+  if(full){
+    const mvf=(m,cls)=>m?`<div class="pv-move ${cls}"><div class="pv-mv-top"><b>${m.n}</b><span class="pv-cost">${m.label||''}</span></div><div class="pv-mv-txt">${m.t||''}</div></div>`:'';
+    const lore=(f.id==='otdesi_1e')?OTDESI_LORE:'';
+    return `<div class="pv-card pvchar fe fullart-pv" data-deck="${f.deck||''}" style="--accent:${f.accent}">
+      <div class="fa-card"><img src="${full}" alt="${f.name}"></div>
+      <div class="pv-name">${f.name} <span class="fe-badge">1ST ED</span> <span class="fa-tier">\u2605 ULTRA-RARE</span></div>
+      <div class="pv-hp">\u2764 ${f.hp} HP \u00b7 ${f.deck?setName(f.deck):'no deck yet'}</div>
+      <div class="pv-sec"><span>Passive \u2014 ${f.passive.name}</span>${f.passive.text}</div>
+      ${mvf(f.atk,'atk')}${mvf(f.atk2,'atk')}${mvf(f.blk,'blk')}
+      ${lore?`<div class="fa-lore">${lore}</div>`:''}
+    </div>`;
+  }
   const im=feImg(f); const img=im?`<img src="${im.img}" style="object-position:${im.pos||'50% 16%'}">`:`<span class="pvmono" style="background:${f.accent}">${initials(f.name)}</span>`;
   const mv=(m,cls)=>`<div class="pv-move ${cls}"><div class="pv-mv-top"><b>${m.n}</b><span class="pv-cost">${m.label||''}</span></div><div class="pv-mv-txt">${m.t||''}</div></div>`;
   return `<div class="pv-card pvchar fe" data-deck="${f.deck||''}" style="--accent:${f.accent}">
@@ -4922,11 +4941,11 @@ const PACK_IP_COMMON=[5,10,10,15,15,25];
    slot 5 feature (gold guaranteed Commander; silver 60% + pity every 3rd). Empty pools fall back to IP. */
 function scrimRollPack(type){
   const picked=[];
-  const cmdPool=()=>(DATA.firsteds||[]).map(f=>f.id).filter(id=>(META.commanders||[]).indexOf(id)<0 && picked.indexOf(id)<0);
+  const cmdPool=()=>(DATA.firsteds||[]).filter(f=>f.tier!=='ultra').map(f=>f.id).filter(id=>(META.commanders||[]).indexOf(id)<0 && picked.indexOf(id)<0);
   const perkPool=()=>Object.keys(SCRIM_PERKS).filter(id=>(META.perks||[]).indexOf(id)<0 && picked.indexOf(id)<0);
   const rollIP=(amt)=>({t:'ip', amt:(amt||PACK_IP_COMMON[rnd(PACK_IP_COMMON.length)])});
   const rollSO=()=>{ const pool=perkPool(); if(!pool.length) return rollIP(20); const id=pool[rnd(pool.length)]; picked.push(id); const p=SCRIM_PERKS[id]; return {t:'so',id,name:p.name,ic:p.ic,text:p.text}; };
-  const rollCmd=()=>{ const pool=cmdPool(); if(!pool.length) return (perkPool().length?rollSO():rollIP(30)); const id=pool[rnd(pool.length)]; picked.push(id); const f=firstedById(id); return {t:'cmd',id,name:f?f.name:id,fd:f}; };
+  const rollCmd=()=>{ const ultras=(DATA.firsteds||[]).filter(f=>f.tier==='ultra' && (META.commanders||[]).indexOf(f.id)<0 && picked.indexOf(f.id)<0); if(ultras.length && Math.random()<0.05){ const f=ultras[rnd(ultras.length)]; picked.push(f.id); return {t:'cmd',id:f.id,name:f.name,ultra:true}; } const pool=cmdPool(); if(!pool.length) return (perkPool().length?rollSO():rollIP(30)); const id=pool[rnd(pool.length)]; picked.push(id); const f=firstedById(id); return {t:'cmd',id,name:f?f.name:id,fd:f}; };
   const cards=[];
   for(let i=0;i<3;i++) cards.push(rollIP());
   cards.push( (type==='gold'||Math.random()<0.7) ? rollSO() : rollIP(20) );
@@ -5362,6 +5381,7 @@ const BOSS_ALT_LORE = {
   sicsoc:'In full <b>Doomscroll</b> the Network abandons even the pretense of order \u2014 an endless, shuffling churn that reshuffles your champions faster than you can defend them.'
 };
 const OVERLORD_LORE = 'The Sensory Over-lord is what the algorithms dream of becoming \u2014 every feed, every screen, every notification fused into one crowned tyrant of pure distraction. It does not read; it drowns. Where a single Mal-gorithm steals a moment, the Over-lord floods whole libraries in noise, recalibrating itself faster than any mind can settle. To face it at Commencement is to defend not one book, but the very capacity to sit with one.';
+const OTDESI_LORE = '<div class="fa-lore-h">O/D \u2014 \u201cA LF Comics Joint\u201d</div>Decorated Gulf War veteran O.T. returns to New York a war hero and falls in love with Desi, a passionate community activist and the daughter of powerful U.S. Senator Belisario. But as Issac, a fellow soldier from O.T.\u2019s unit, quietly manipulates loyalties with whispers of betrayal and ambition, love becomes a battlefield where politics, prejudice, and paranoia prove deadlier than any war. Set against the pulse of early 1990s New York, O/D transforms Shakespeare\u2019s tragedy into an urban political thriller where trust is currency, rumors are weapons, and one man\u2019s jealousy threatens to ignite an entire city.';
 
 function scrimHas(id){ return SCRIM.active && SCRIM.artifacts.indexOf(id)>=0; }
 function scrimBlot(str){ let n=0; return String(str).replace(/[A-Za-z]/g, ch=>{ n++; return (n%4===0)?'\u2593':ch; }); }
