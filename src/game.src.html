@@ -1460,6 +1460,8 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .bst-card.sol{ box-shadow:0 0 0 3px var(--gold,#E3A92B), 0 14px 30px rgba(0,0,0,.5); }
 .bst-faces{ display:flex; gap:5px; margin:8px 0; flex-wrap:wrap; }
 .bst-face-mini{ width:46px; height:46px; object-fit:cover; object-position:50% 24%; border:2px solid #241f1b; border-radius:6px; }
+.cr-fullart{ max-width:260px; margin:12px auto; border-radius:14px; overflow:hidden; box-shadow:0 0 0 3px var(--gold,#E3A92B),0 12px 28px rgba(0,0,0,.55); }
+.cr-fullart img{ display:block; width:100%; }
 .bst-redact{ background:#3a322b; color:transparent; border-radius:2px; line-height:1.7; }
 .bst-loremsg{ margin-top:8px; font-style:normal; color:#8a5a1a; font-family:var(--cond); letter-spacing:.5px; }
 .bst-close{ display:block; width:100%; border:none; border-top:2px solid #241f1b; background:#f6e7bd; font-family:var(--cond); letter-spacing:1px; padding:10px; cursor:pointer; font-size:14px; }
@@ -3360,8 +3362,8 @@ function doSwitch(p, newIdx, opts){
 function performAttack(side,abilKey){           // == beginAttack
   const A=S[side], att=active(A), ab=att[abilKey];
   if(!A.critTurn) A.critTurn={};
-  if(abilKey==='atk' && A.flags.skipAttack){ A.flags.skipAttack=false; var _fl=A.flags.skipAttackFlavor||"Hamlet's hesitation", _nm=A.flags.skipAttackName||"Anticipatory Madness"; if(side==='you') toast(_fl+" — attack skipped."); pushLog(`${who(A)} must skip the attack declaration (${_nm}).`); A.flags.skipAttackFlavor=null; A.flags.skipAttackName=null; return false; }
-  if(abilKey==='atk' && att.status.rip){ if(side==='you') toast(`${att.name}'s attack is Ripped — unusable until it leaves play.`); return false; }
+  if((abilKey==='atk'||abilKey==='atk2') && A.flags.skipAttack){ A.flags.skipAttack=false; var _fl=A.flags.skipAttackFlavor||"Hamlet's hesitation", _nm=A.flags.skipAttackName||"Anticipatory Madness"; if(side==='you') toast(_fl+" — attack skipped."); pushLog(`${who(A)} must skip the attack declaration (${_nm}).`); A.flags.skipAttackFlavor=null; A.flags.skipAttackName=null; return false; }
+  if((abilKey==='atk'||abilKey==='atk2') && att.status.rip){ if(side==='you') toast(`${att.name}'s attack is Ripped — unusable until it leaves play.`); return false; }
   let cost=attackCostFor(side,ab);
   if(att.status.costUp) cost+=1;
   const pool=()=> hasCrit(side,'queer') ? (att.atkCharge.length+att.blkCharge.length) : att.atkCharge.length;
@@ -3484,7 +3486,8 @@ function finishAttack(blocked,negated,forceNet){
   if(ab.sacrifice && !symbolsOff()){ att.hp=Math.max(0,att.hp-ab.sacrifice); pushLog(`${att.name} sacrifices ${ab.sacrifice} HP.`); }
   if(ab.stripBlocks && def.blkCharge.length){ const n=def.blkCharge.length; D.discard.push(...def.blkCharge.splice(0)); pushLog(`Quick-Sand Crash buries ${def.name}'s defense — ${n} Block ABC lost.`); }
   if(!symbolsOff()){
-    if(ab.inflict && def.hp>0){ [].concat(ab.inflict).forEach(function(_st){ if(inflict(def,_st,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(_st)}.`); }); }
+    if(ab.inflictIfHas && def.hp>0){ const _p=[].concat(ab.inflict)[0], _h=ab.inflictIfHas.has, _t=ab.inflictIfHas.then; if(def.status[_h]){ if(inflict(def,_t)) pushLog(`${def.name} already had ${statusName(_h)} \u2014 afflicted with ${statusName(_t)}!`); } else if(_p){ if(inflict(def,_p)) pushLog(`${def.name} is afflicted with ${statusName(_p)}.`); } }
+    if(ab.inflict && !ab.inflictIfHas && def.hp>0){ [].concat(ab.inflict).forEach(function(_st){ if(inflict(def,_st,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(_st)}.`); }); }
     if(atkCtx&&atkCtx.condInflict && def.hp>0){ if(inflict(def,atkCtx.condInflict,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(atkCtx.condInflict)}.`); }
     if(ab.inflictChoice && ab.inflictChoice.length && def.hp>0){ const opts=ab.inflictChoice; const pick=opts.find(s=>!def.status[s])||opts[rnd(opts.length)]; if(inflict(def,pick,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(pick)}.`); }
     if(ab.stripPos && def.hp>0 && def.status[ab.stripPos]){ delete def.status[ab.stripPos]; pushLog(`${def.name} loses ${statusName(ab.stripPos)}.`); }
@@ -4018,6 +4021,8 @@ function charTile(p,side){
     <div class="pc-moves">
       <button class="pc-move atk ${canAct&&atkReady?'ready':''}" data-act="attack" ${canAct&&atkReady?'':'disabled'}>
         <span class="pc-mn">${ch.atk.n}</span><span class="pc-mc">${ch.atkCharge.length}/${ch.atk.cost}&#9876;</span><span class="pc-chip red">${ch.atk.label||''}</span></button>
+      ${ch.atk2?`<button class="pc-move atk ${canAct&&ch.atkCharge.length>=ch.atk2.cost?'ready':''}" data-act="attack2" ${canAct&&ch.atkCharge.length>=ch.atk2.cost?'':'disabled'}>
+        <span class="pc-mn">${ch.atk2.n}</span><span class="pc-mc">${ch.atkCharge.length}/${ch.atk2.cost}&#9876;</span><span class="pc-chip red">${ch.atk2.label||''}</span></button>`:''}
       <div class="pc-move blk">
         <span class="pc-mn">${ch.blk.n}</span><span class="pc-mc">${ch.blkCharge.length}/${ch.blk.cost??'–'}&#9932;</span><span class="pc-chip blue">${ch.blk.label||''}</span></div>
     </div></div>`;
@@ -4802,6 +4807,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.def!=null){ resolveDefense(t.dataset.def==='1'); return; }
   if(t.dataset.pick!=null){ const v=t.dataset.pick; resolvePick(isNaN(+v)?v:+v); return; }
   if(t.dataset.act==='attack'){ performAttack('you','atk'); return; }
+  if(t.dataset.act==='attack2'){ performAttack('you','atk2'); return; }
   if(t.dataset.pile){ S.viewPile=t.dataset.pile; render(); return; }
   if(t.dataset.idx!=null){ if(window._dragJustEnded && Date.now()-window._dragJustEnded < 400) return; S._handView=+t.dataset.idx; render(); return; }
 });
@@ -5270,7 +5276,7 @@ const SCRIM_KITS = {
   wonderland:{ name:'Nonsense Fabulist', ic:'\u2665', blurb:'Down the rabbit-hole into delightful madness.', deck:'wonderland', chars:['white_rabbit','cheshire_cat'], sig:'Curiouser & Curiouser', sigT:'Start each battle with a random boon on your Active.', kick:'Start: a random Common artifact.' },
   tewwg:{ name:'Renaissance Voice', ic:'\ud83c\udf50', blurb:'Their Eyes Were Watching God \u2014 Janie\u2019s search for the horizon.', deck:'tewwg', chars:['janie','teacake'], sig:'Far Horizon', sigT:'Your team heals 8 HP after every battle.', kick:'Start: the Sabbatical Journal artifact.' },
 };
-const SCRIM_NODE = { start:{ic:'\u2605',name:'Start'}, scrim:{ic:'\u2694',name:'Scrimmage'}, archives:{ic:'\ud83d\udcda',name:'Study Break'}, rest:{ic:'\u2615',name:'Coffee Break'}, fair:{ic:'\ud83c\udfea',name:'Book Fair'}, office:{ic:'\ud83d\udcbc',name:'Office Hours'}, elite:{ic:'\ud83c\udf93',name:'Thesis Defense'}, boss:{ic:'\ud83d\udea8',name:'Algorithm Boss'} };
+const SCRIM_NODE = { start:{ic:'\u2605',name:'Start'}, scrim:{ic:'\u2694',name:'Scrimmage'}, archives:{ic:'\ud83d\udcda',name:'Study Break'}, rest:{ic:'\u2615',name:'Coffee Break'}, fair:{ic:'\ud83c\udfea',name:'Book Fair'}, office:{ic:'\ud83d\udcbc',name:'Office Hours'}, elite:{ic:'\ud83c\udf93',name:'Thesis Defense'}, boss:{ic:'\ud83d\udea8',name:'Algorithm Boss'}, corrupted:{ic:'\ud83d\udc94',name:'Corrupted Adaptation'} };
 const SCRIM_ART = {
   gutenberg:{ name:'The Gutenberg Press', ic:'\ud83d\udcdc', tier:'common', text:'Your attacks deal +5 base damage.' },
   spine:{     name:'The Well-Worn Spine', ic:'\ud83d\udcd6', tier:'common', text:'+15 Max HP to your whole roster.' },
@@ -5387,6 +5393,7 @@ const DOCTORAL_RANKS=[[1,'Doctoral Candidate'],[3,'ABD (All But Dissertation)'],
 function doctoralRank(sem){ let r=DOCTORAL_RANKS[0][1]; DOCTORAL_RANKS.forEach(function(x){ if(sem>=x[0]) r=x[1]; }); return r; }
 function scrimDoctoralNext(){ SCRIM.semester=(SCRIM.semester||1)+1; if(perkOn('sabbatical')) SCRIM.team.forEach(rec=>{ if(rec.curHp>0) rec.curHp=rec.maxHp; }); SCRIM.map=scrimGenMap(SCRIM.semester); SCRIM.pending=null; SCRIM.bossReward=null; SCRIM._gainedArt=null; SCRIM.view='map'; render(); scrimSave(); }
 function scrimEndDoctoral(defended){ const sem=SCRIM.semester||1; if(defended){ META.ip=(META.ip||0)+(SCRIM._tenureBonus||0); } META.stats.doctoralBest=Math.max(META.stats.doctoralBest||0, sem); metaSave(); SCRIM._doctoralDefended=defended; SCRIM._doctoralSem=sem; SCRIM._doctoralBonusPaid=defended?(SCRIM._tenureBonus||0):0; SCRIM._doctoralRank=doctoralRank(sem); SCRIM._wasDoctoral=true; SCRIM.active=false; scrimClearSave(); S=null; stopTurnTimer(); APP.screen='scrim'; SCRIM.view='dead'; render(); }
+function scrimCorruptedRewardScreen(){ const art=(typeof window!=='undefined'&&window.ABC_FULLART&&window.ABC_FULLART.otdesi_1e)||''; return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel"><div class="scrim-title">\ud83d\udc94 Adaptation Purged!</div><p class="scrim-intro-copy">You bested the Corrupted Adaptation \u2014 the ultra-rare commander <b>O.T. & Desi (1E)</b> joins your Library and this run\u2019s roster.</p>${art?`<div class="cr-fullart"><img src="${art}" alt="O.T. & Desi (1E)"></div>`:''}<div class="scrim-menu"><button class="bigbtn go" data-scrim="corruptedcont">Continue the run \u203a</button></div></div></div>`; }
 function scrimDoctoralChoiceScreen(){ const sem=SCRIM.semester||1, bonus=SCRIM._tenureBonus||0; return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel evt"><div class="evt-ic">\ud83c\udf93</div><div class="scrim-title sm">Semester ${sem} Cleared</div><div class="evt-lf">${doctoralRank(sem)}</div><div class="evt-result">This program has banked <b>+${SCRIM._docTotal||0} IP</b> so far.<br>Un-banked <b>Tenure Bonus: ${bonus} IP</b> \u2014 paid only if you defend now, <b>forfeited if you fall.</b></div><div class="evt-choices"><button class="evt-choice" data-scrim="doctcontinue">Continue to Semester ${sem+1} \u2014 push your luck</button><button class="evt-choice" data-scrim="doctdefend">Defend your Dissertation \u2014 bank ${bonus} IP &amp; graduate</button></div></div></div>`; }
 
 /* ---- persistence ---- */
@@ -5481,7 +5488,7 @@ function scrimStartKit(kitId){
   const kit=SCRIM_KITS[kitId]; if(!kit) return;
   SCRIM.active=true; SCRIM.kit=kitId; SCRIM.artifacts=[]; SCRIM.cleared=0; SCRIM.act=1; SCRIM.bosses=scrimRollBosses(); SCRIM.lf=0; SCRIM.t0=Date.now(); SCRIM.honors=Math.min(META.honorsMax||0, SCRIM._honorsSel||0);
   SCRIM._eventsSeen=[]; SCRIM._noNextReward=false; SCRIM._overdueUsed=false; SCRIM.event=null; SCRIM._eventResult=null;
-  SCRIM.doctoral=!!SCRIM._doctoralPending; SCRIM._doctoralPending=false; SCRIM.semester=SCRIM.doctoral?1:0; SCRIM._tenureBonus=0; SCRIM._docTotal=0; SCRIM._lastDocBoss=null; SCRIM._wasDoctoral=false;
+  SCRIM.doctoral=!!SCRIM._doctoralPending; SCRIM._doctoralPending=false; SCRIM.semester=SCRIM.doctoral?1:0; SCRIM._tenureBonus=0; SCRIM._docTotal=0; SCRIM._lastDocBoss=null; SCRIM._wasDoctoral=false; SCRIM._corruptedSpawned=false; SCRIM._corruptedWon=false;
   META.stats=META.stats||{runs:0,wins:0,bossKills:0,bestAct:0,fastestMs:0};
   META.stats.runs=(META.stats.runs||0)+1; metaSave();
   const dk=kit.deck;
@@ -5531,6 +5538,12 @@ function scrimGenMap(act){
     nx.forEach((_,i)=>{ if(!covered[i]){ const src=cols[c][rnd(cols[c].length)]; if(src.next.indexOf(i)<0){ src.next.push(i); src.next.sort((a,b)=>a-b); } } });
   }
   if(scrimHas('syllabus')){ const mid=[]; for(let c=1;c<cols.length-1;c++) cols[c].forEach(n=>{ if(n.type!=='archives'&&n.type!=='boss') mid.push(n); }); if(mid.length) mid[rnd(mid.length)].type='archives'; }
+  try{
+    if(!SCRIM.doctoral && !SCRIM._corruptedSpawned && (META.commanders||[]).indexOf('otdesi_1e')<0 && !(SCRIM.team||[]).some(t=>t&&t.id==='otdesi_1e') && Math.random()<0.10){
+      const midc=1+rnd(Math.max(1,N-3)); const cand=(cols[midc]||[]).filter(nd=>nd&&nd.type!=='boss'&&nd.type!=='start');
+      if(cand.length){ const nd=cand[rnd(cand.length)]; nd.type='corrupted'; nd.corrupted=true; SCRIM._corruptedSpawned=true; }
+    }
+  }catch(e){}
   return { cols, pos:{c:0,r:0} };
 }
 function scrimNodeType(c,N){
@@ -5559,6 +5572,12 @@ function scrimYouPlayer(){ const team=[]; SCRIM.team.forEach((rec,i)=>{ rec._i=i
 function scrimNoHeal(bmIdxs){ return bmIdxs.filter(i=>!(DATA.bookmarks[i] && (DATA.bookmarks[i].effect==='heal' || DATA.bookmarks[i].effect==='defib'))); }
 function scrimBossDeck(b){ const dk=b.deck||scrimRandomDeck(); const def=defaultDeck(dk); return { ab:def.ab.map(i=>({d:dk,i})).slice(0,16), bm:scrimNoHeal(def.bm).slice(0,8), cr:[] }; }
 function scrimOppPlayer(node){
+  if(node.corrupted){
+    const fd=firstedById('otdesi_1e');
+    const bc=makeChar({id:'otdesi_boss',name:'O.T. & Desi',hp:200,accent:fd.accent,img:fd.img,tags:['villain'],atk:clone(fd.atk),blk:clone(fd.blk)},1.0);
+    bc.atk2=clone(fd.atk2); bc.passive=clone(fd.passive); bc.fe=true; bc._boss=true; bc._corrupted=true; bc.imgpos='50% 18%'; bc.sub='Corrupted Adaptation';
+    return scrimPlayerShell('O.T. & Desi','othello',[bc], shuffle(buildRunDeck(scrimBossDeck({deck:'othello'}))));
+  }
   if(node.superboss){
     const b=SUPER_BOSS; const F=(typeof window!=='undefined'&&window.ABC_SOL_FACES)||{};
     const bc=makeChar({id:'overlord',name:b.name,hp:b.hp,accent:b.accent,tags:['villain'],
@@ -5621,7 +5640,7 @@ function scrimStartBattle(node){
         you, opp, log:[], scrim:{ node, ruleShift:null, shiftName:null, shiftText:null, eliteId:null, rosettaUsed:false } };
   scrimApplyShift(node);
   APP.screen='play';
-  pushLog(node.superboss?('\u26a0 COMMENCEMENT \u2014 THE SENSORY OVER-LORD RISES!'):(node.boss?('\u26a0 ALGORITHM CORE \u2014 '+SCRIM_BOSSES[node.boss].name+'!'):(node.type==='elite'?('\ud83c\udf93 Thesis Defense \u2014 '+(S.scrim.shiftName||'an elite fight')+'!'):'\u2694 A Scrimmage begins.')));
+  pushLog(node.corrupted?('\ud83d\udc94 CORRUPTED ADAPTATION \u2014 O.T. & Desi block your path! Defeat them to claim the card.'):(node.superboss?('\u26a0 COMMENCEMENT \u2014 THE SENSORY OVER-LORD RISES!'):(node.boss?('\u26a0 ALGORITHM CORE \u2014 '+SCRIM_BOSSES[node.boss].name+'!'):(node.type==='elite'?('\ud83c\udf93 Thesis Defense \u2014 '+(S.scrim.shiftName||'an elite fight')+'!'):'\u2694 A Scrimmage begins.'))));
   if(S.scrim.ruleShift){ pushLog((node.boss?'Global Rule Shift \u2014 ':'Elite Rule \u2014 ')+S.scrim.shiftName+': '+S.scrim.shiftText); }
   if(node.boss){ S._bossReveal=node.boss; if((META.bossSeen||[]).indexOf(node.boss)<0){ META.bossSeen.push(node.boss); metaSave(); } }
   render(); dealOpening();
@@ -5683,6 +5702,7 @@ function handleScrim(cmd){
   if(op==='new'){ SCRIM._doctoralPending=false; SCRIM.view='kit'; render(); return; }
   if(op==='doctoral'){ SCRIM._doctoralPending=true; SCRIM.view='kit'; render(); return; }
   if(op==='doctcontinue'){ scrimDoctoralNext(); return; }
+  if(op==='corruptedcont'){ const p=SCRIM._corruptedPos; if(p){ scrimAdvanceTo(p.c,p.r); } SCRIM.pending=null; SCRIM._corruptedPos=null; SCRIM.view='map'; render(); scrimSave(); return; }
   if(op==='doctdefend'){ scrimEndDoctoral(true); return; }
   if(op==='honsel'){ SCRIM._honorsSel=Math.min(META.honorsMax||0, +a); render(); return; }
   if(op==='kit'){ scrimStartKit(a); return; }
@@ -5803,7 +5823,7 @@ function scrimEventChoose(i){
 
 function scrimResolveNode(c,r){
   const node=SCRIM.map.cols[c][r]; SCRIM.pending={c,r};
-  if(node.type==='scrim'||node.type==='elite'||node.type==='boss'){ scrimStartBattle(node); }
+  if(node.type==='scrim'||node.type==='elite'||node.type==='boss'||node.type==='corrupted'){ scrimStartBattle(node); }
   else if(node.type==='archives'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.draft=scrimRollDraft(Math.max(2,(perkOn('officehours')?4:3)+honorsMods().draftDelta)); SCRIM.view='archives'; try{SFX.card('pack_open',0.7);}catch(e){} render(); scrimSave(); }
   else if(node.type==='rest'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.view='rest'; render(); scrimSave(); }
   else if(node.type==='fair'){ scrimAdvanceTo(c,r); SCRIM.pending=null; SCRIM.view='fair'; try{SFX.card('card_fan',0.6);}catch(e){} render(); scrimSave(); }
@@ -5834,6 +5854,14 @@ function scrimAfterBattle(){
   let art=null;
   if(node.type==='elite'||node.boss) art=scrimGrantArtifact(node.boss?['rare','boss']:['uncommon','rare']);
   SCRIM._gainedArt=art;
+  if(node.corrupted){
+    S=null; stopTurnTimer(); APP.screen='scrim';
+    const fd=firstedById('otdesi_1e'); const mx=fd.hp||120;
+    SCRIM.team.push({fe:true,id:'otdesi_1e',deck:fd.deck,curHp:mx,maxHp:mx});
+    if((META.commanders||[]).indexOf('otdesi_1e')<0){ META.commanders.push('otdesi_1e'); }
+    META.otdesiEarned=true; metaSave();
+    SCRIM._corruptedWon=true; SCRIM._corruptedPos={c:SCRIM.pending.c,r:SCRIM.pending.r}; SCRIM.view='corruptedreward'; try{SFX.card('pack_take',0.8);}catch(e){} render(); scrimSave(); return;
+  }
   if(node.superboss){
     META.stats.bossKills=(META.stats.bossKills||0)+1; META.overlordKilled=true; metaSave();
     S=null; stopTurnTimer(); APP.screen='scrim';
@@ -5879,6 +5907,7 @@ function scrimScreen(){
     case 'fair': return scrimFairScreen();
     case 'event': return scrimEventScreen();
     case 'doctoralchoice': return scrimDoctoralChoiceScreen();
+    case 'corruptedreward': return scrimCorruptedRewardScreen();
     case 'shop': return scrimVaultShell();
     case 'dead': return scrimDeadScreen();
     default: return scrimVaultShell();
