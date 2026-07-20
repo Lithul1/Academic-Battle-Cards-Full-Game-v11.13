@@ -6419,6 +6419,27 @@ function scrimDeadScreen(){
 }
 
 window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
+window.ABC_EXPORT = {
+  decks:()=>Object.keys(DATA.characters||{}),
+  chars:(deck)=>(DATA.characters[deck]||[]).map(c=>({id:c.id,name:c.name})),
+  charCard:(deck,id)=>{ const c=(DATA.characters[deck]||[]).find(x=>x.id===id); return c?buildCharPreview(c,deck):''; },
+  feList:()=>(DATA.firsteds||[]).map(f=>({id:f.id,name:f.name})),
+  feCard:(id)=>{ const f=firstedById(id); return f?buildFePreview(f):''; },
+  abcList:(deck)=>(DATA.abcs[deck]||[]).map((a,i)=>({i:i,term:(a.term||a.name||('#'+i))})),
+  abcCard:(deck,i)=>{ const a=(DATA.abcs[deck]||[])[i]; return a?buildAbcPreview(a):''; },
+  bmList:()=>(DATA.bookmarks||[]).map((b,i)=>({i:i,name:b.name})),
+  bmCard:(i)=>{ const b=(DATA.bookmarks||[])[i]; return b?buildBmPreview(b):''; },
+  bossList:()=>SCRIM_BOSS_RANK.slice(),
+  bossCard:(id)=>bestiaryCard(id),
+  overlordCard:()=>overlordCard(),
+  fullart:()=>window.ABC_FULLART||{},
+  charData:(deck,id)=>{ const c=(DATA.characters[deck]||[]).find(x=>x.id===id); if(!c)return null; const mv=m=>m?{n:m.n,t:m.t,label:m.label}:null; return {kind:'char',name:c.name,deck:deck,hp:c.hp,img:c.img||'',imgpos:c.imgpos||'50% 18%',accent:c.accent,passive:c.passive?{name:c.passive.name,text:c.passive.text}:null,atk:mv(c.atk),atk2:mv(c.atk2),blk:mv(c.blk)}; },
+  feData:(id)=>{ const f=firstedById(id); if(!f)return null; const im=(feImg(f)||{}); const mv=m=>m?{n:m.n,t:m.t,label:m.label}:null; return {kind:'fe',name:f.name,deck:f.deck,hp:f.hp,img:im.img||'',imgpos:im.pos||'50% 16%',fullart:(window.ABC_FULLART&&window.ABC_FULLART[f.id])||'',accent:f.accent,tier:f.tier||'',passive:f.passive?{name:f.passive.name,text:f.passive.text}:null,atk:mv(f.atk),atk2:mv(f.atk2),blk:mv(f.blk)}; },
+  abcData:(deck,i)=>{ const a=(DATA.abcs[deck]||[])[i]; if(!a)return null; return {kind:'abc',type:a.type,power:a.power,q:a.q,opts:a.opts,ans:a.ans}; },
+  bmData:(i)=>{ const b=(DATA.bookmarks||[])[i]; if(!b)return null; return {kind:'bm',name:b.name,bkind:b.kind,text:b.text,rarity:b.rarity||'',effect:b.effect||''}; },
+  critList:()=>(DATA.crits||[]).map((c,i)=>({i:i,name:c.name})),
+  critData:(i)=>{ const c=(DATA.crits||[])[i]; if(!c)return null; return {kind:'crit',name:c.name,img:c.img||'',accent:c.accent,passive:c.passive,thesis:c.thesis,reward:c.reward,rarity:c.rarity||''}; }
+};
 window.ABC_DEBUG = { get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
