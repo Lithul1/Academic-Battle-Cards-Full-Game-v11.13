@@ -2368,6 +2368,11 @@ const DATA = {
   ],
   // -------- 1ST EDITION (Commander) CARDS --------
   firsteds: [
+      { id:"otdesi_1e", name:"O.T. & Desi (1E)", deck:"othello", hp:120, accent:"#8a2a3a", img:"data:image/jpeg;base64,__ABCASSET_1014__", fe:true, tier:"ultra", base:["othello","othello"],
+        passive:{id:"dangerlove",name:"Dangerously In Love",text:"O.T. & Desi's attacks deal +10 damage, but they take +20 damage from incoming attacks. If either player has an active negative status, both values are doubled."},
+        atk:{n:"Ours to Ruin",t:"Inflict RIP. If the defender already has RIP, inflict GLUE instead. O.T. & Desi lose 60 HP after attacking.",cost:5,dmg:90,inflict:"rip",inflictIfHas:{has:"rip",then:"glue"},sacrifice:60,label:"90/5"},
+        atk2:{n:"Torn Asunder",t:"Inflicts TEAR. If tear is already applied to the defender, inflict RIP instead.",cost:4,dmg:40,inflict:"tear",inflictIfHas:{has:"tear",then:"rip"},label:"40/4"},
+        blk:{n:"Collateral Damage",t:"Damage beyond what the defender blocks spills onto one of your backstage cards.",cost:4,block:50,collateral:true,label:"50/4"} },
       { id:"holmes_1e", name:"Sherlock Holmes (1E)", deck:"sherlock", hp:100, accent:"#3E5A4A", img:"", fe:true, base:["sherlock","holmes"],
         passive:{id:"coldlogic",name:"Cold Logic",text:"Look at the top card of your deck at any time. But whenever you fail a trivia check to attach an ABC, discard 1 random card from your hand.",peekOwnDeck:true,failDiscardRandom:true},
         atk:{n:"Master of Deduction",t:"If the defending character has any negative status (Tear, Rip, Glue, Spill, Smudge, Burn), this attack gains Pierce.",cost:2,dmg:40,cond:[{test:"defenderHasStatus",then:{pierce:true}}],label:"40/2"},
@@ -2542,6 +2547,7 @@ window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
 try{document.documentElement.style.setProperty('--abc-bg-qc','url("'+window.ABC_BG_QC+'")');}catch(e){}
 window.ABC_ICONS={archives:"data:image/png;base64,__ABCASSET_111__",rest:"data:image/png;base64,__ABCASSET_112__",start:"data:image/png;base64,__ABCASSET_113__",scrim:"data:image/png;base64,__ABCASSET_114__",elite:"data:image/png;base64,__ABCASSET_115__",boss:"data:image/png;base64,__ABCASSET_116__",fair:"data:image/png;base64,__ABCASSET_932__",office:"data:image/png;base64,__ABCASSET_999__"};
 window.ABC_SOL_FACES={idle:"data:image/jpeg;base64,__ABCASSET_1000__",attack:"data:image/jpeg;base64,__ABCASSET_1001__",defend:"data:image/jpeg;base64,__ABCASSET_1002__",taunt:"data:image/jpeg;base64,__ABCASSET_1003__",enraged:"data:image/jpeg;base64,__ABCASSET_1004__",defeat:"data:image/jpeg;base64,__ABCASSET_1005__"};
+window.ABC_FULLART={otdesi_1e:"data:image/jpeg;base64,__ABCASSET_1013__"};
 window.ABC_BOSS_IMG_ALT={sandroid:"data:image/jpeg;base64,__ABCASSET_1006__",dyefone:"data:image/jpeg;base64,__ABCASSET_1007__",claystation:"data:image/jpeg;base64,__ABCASSET_1008__",sinstaram:"data:image/jpeg;base64,__ABCASSET_1009__",pintendo:"data:image/jpeg;base64,__ABCASSET_1010__",hexbox:"data:image/jpeg;base64,__ABCASSET_1011__",sicsoc:"data:image/jpeg;base64,__ABCASSET_1012__"};
 window.ABC_SND={music_thereturn:"data:audio/mpeg;base64,__ABCASSET_125__",music_hiphop9:"data:audio/mpeg;base64,__ABCASSET_126__",sfx_card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",sfx_card_place:"data:audio/mpeg;base64,__ABCASSET_118__",sfx_card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",sfx_card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",sfx_book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",sfx_card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",sfx_pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",sfx_pack_take:"data:audio/mpeg;base64,__ABCASSET_124__",music_boss:"data:audio/mpeg;base64,__ABCASSET_127__"};
 window.ABC_BOSS_IMG={"dyefone":"data:image/webp;base64,__ABCASSET_909__","sandroid":"data:image/webp;base64,__ABCASSET_910__","sinstaram":"data:image/webp;base64,__ABCASSET_911__","claystation":"data:image/webp;base64,__ABCASSET_952__","pintendo":"data:image/webp;base64,__ABCASSET_953__","hexbox":"data:image/webp;base64,__ABCASSET_954__","sicsoc":"data:image/webp;base64,__ABCASSET_955__"};
@@ -3364,6 +3370,9 @@ function performAttack(side,abilKey){           // == beginAttack
   if(!def||def.hp<=0){ toast('No target.'); return false; }
   if(ab.cleanseAlly){ const ally=A.team.find(c=>c.hp>0 && c.status[ab.cleanseAlly]); if(ally){ delete ally.status[ab.cleanseAlly]; pushLog(`${att.name} clears ${statusName(ab.cleanseAlly)} from ${ally.name}.`); } }
   let dmg=calcDamage(att,ab);
+  { const _neg=['rip','smudge','burn','spill','glue','tear','weaken']; const _hasNeg=(c)=>c&&c.status&&_neg.some(k=>c.status[k]); const _dbl=_hasNeg(att)||_hasNeg(def);
+    if(att.passive&&att.passive.id==='dangerlove') dmg+=_dbl?20:10;
+    if(def&&def.passive&&def.passive.id==='dangerlove') dmg+=_dbl?40:20; }
   if(hasCrit(side,'russian')){ dmg=att.hp; pushLog(`Russian Formalism: ${att.name}'s damage equals its HP (${dmg}).`); }
   let condPierce=false, condInflict=null, condFoeDiscard=0;
   if(ab.koScale){ const n=(S[side].grave||[]).length; if(n){ dmg+=ab.koScale*n; pushLog(`${att.name}: +${ab.koScale*n} damage from ${n} fallen.`); } }
@@ -5360,7 +5369,7 @@ function scrimRollBosses(){
 function scrimActMul(){ if(SCRIM.doctoral){ const s=SCRIM.semester||1; return (1.35 + 0.13*(s-1))*honorsMods().dmgMul; } const a=SCRIM.act||1; const base=1.0 + 0.07*(a-1); return base*honorsMods().dmgMul; }
 function scrimAccFloor(){ if(SCRIM.doctoral){ const s=SCRIM.semester||1; return Math.min(0.98, 0.82 + 0.02*(s-1) + honorsMods().acc); } const a=SCRIM.act||1; const base=0.70 + 0.03*(a-1); return Math.min(0.98, base+honorsMods().acc); }
 function scrimRollFirstEds(n){
-  const all=(DATA.firsteds||[]).map(f=>f.id);
+  const all=(DATA.firsteds||[]).filter(f=>f.tier!=='ultra').map(f=>f.id);
   const have=SCRIM.team.filter(r=>r.fe).map(r=>r.id);
   const pool=shuffle(all.filter(id=>have.indexOf(id)<0));
   return pool.slice(0,n);
