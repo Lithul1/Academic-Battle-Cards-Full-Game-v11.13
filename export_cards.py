@@ -28,16 +28,28 @@ import os, sys
 GAME_FILE = "dist/academic_battle_cards.html"
 OUT_DIR   = "cards"
 
-# MANIFEST - cards to export, in print order. Kinds:
-#   ("fe","<id>")   ("char","<deck>","<id>")   ("abc","<deck>",<index>)
-#   ("bm",<index>)  ("crit",<index>)
-# Bulk: ("ALL_FE",) ("ALL_CHARS","<deck>") ("ALL_ABCS","<deck>") ("ALL_BMS",) ("ALL_CRITS",)
+# MANIFEST - cards to export, in print order.
+# To include something, put it on its own line inside the MANIFEST = [ ... ] list below.
+# To turn a line off, put a # at the start of it.  (Do NOT add words after a line - only the tuple.)
+#
+# Individual: ("fe","<id>")  ("char","<deck>","<id>")  ("abc","<deck>",<index>)  ("bm",<index>)  ("crit",<index>)
+# Bulk:       ("ALL_FE",)  ("ALL_CHARS","<deck>")  ("ALL_ABCS","<deck>")  ("ALL_BMS",)  ("ALL_CRITS",)
+# Expansions: ("ALL_EXP_CHARS","<exp>")  ("ALL_EXP_ABCS","<exp>")  ("ALL_EXP_CMDRS","<exp>")  ("ALL_EXP_BMS","<exp>")
+#             where <exp> is one of: sengekokujo, modern_hamlet, frankenstein_2077
 MANIFEST = [
     ("fe", "otdesi_1e"),
     ("ALL_CRITS",),
     ("ALL_BMS",),
-    # ("ALL_CHARS","othello"),
-    # ("ALL_ABCS","othello"),
+
+    # --- base decks (remove the # to use) ---
+    # ("ALL_CHARS", "othello"),
+    # ("ALL_ABCS",  "othello"),
+
+    # --- expansions (remove the # to use) ---
+    # ("ALL_EXP_CHARS", "sengekokujo"),
+    # ("ALL_EXP_ABCS",  "sengekokujo"),
+    # ("ALL_EXP_CMDRS", "sengekokujo"),
+    # ("ALL_EXP_BMS",   "sengekokujo"),
 ]
 # ----------------------------------------
 
@@ -208,12 +220,17 @@ def render_html(d):
 def expand(manifest, page):
     out=[]
     for e in manifest:
+        if isinstance(e, str): e=(e,)   # tolerate ("ALL_FE") / "ALL_FE" without the trailing comma
         k=e[0]
         if k=="ALL_FE":      out+=[("fe",x["id"]) for x in page.evaluate("window.ABC_EXPORT.feList()")]
         elif k=="ALL_CHARS": out+=[("char",e[1],x["id"]) for x in page.evaluate(f"window.ABC_EXPORT.chars('{e[1]}')")]
         elif k=="ALL_ABCS":  out+=[("abc",e[1],x["i"]) for x in page.evaluate(f"window.ABC_EXPORT.abcList('{e[1]}')")]
         elif k=="ALL_BMS":   out+=[("bm",x["i"]) for x in page.evaluate("window.ABC_EXPORT.bmList()")]
         elif k=="ALL_CRITS": out+=[("crit",x["i"]) for x in page.evaluate("window.ABC_EXPORT.critList()")]
+        elif k=="ALL_EXP_CHARS": out+=[("expchar",e[1],x["id"]) for x in page.evaluate(f"window.ABC_EXPORT.expCharList('{e[1]}')")]
+        elif k=="ALL_EXP_ABCS":  out+=[("expabc",e[1],x["i"]) for x in page.evaluate(f"window.ABC_EXPORT.expAbcList('{e[1]}')")]
+        elif k=="ALL_EXP_CMDRS": out+=[("expcmdr",e[1],x["i"]) for x in page.evaluate(f"window.ABC_EXPORT.expCmdrList('{e[1]}')")]
+        elif k=="ALL_EXP_BMS":   out+=[("expbm",e[1],x["i"]) for x in page.evaluate(f"window.ABC_EXPORT.expBmList('{e[1]}')")]
         else: out.append(e)
     return out
 
@@ -224,6 +241,10 @@ def get_data(page, e):
     if k=="abc":  return page.evaluate(f"window.ABC_EXPORT.abcData('{e[1]}',{e[2]})"), f"abc_{e[1]}_{e[2]}"
     if k=="bm":   return page.evaluate(f"window.ABC_EXPORT.bmData({e[1]})"), f"bm_{e[1]}"
     if k=="crit": return page.evaluate(f"window.ABC_EXPORT.critData({e[1]})"), f"crit_{e[1]}"
+    if k=="expchar": return page.evaluate(f"window.ABC_EXPORT.expCharData('{e[1]}','{e[2]}')"), f"exp_{e[1]}_{e[2]}"
+    if k=="expabc":  return page.evaluate(f"window.ABC_EXPORT.expAbcData('{e[1]}',{e[2]})"), f"exp_{e[1]}_abc_{e[2]}"
+    if k=="expcmdr": return page.evaluate(f"window.ABC_EXPORT.expCmdrData('{e[1]}',{e[2]})"), f"exp_{e[1]}_cmdr_{e[2]}"
+    if k=="expbm":   return page.evaluate(f"window.ABC_EXPORT.expBmData('{e[1]}',{e[2]})"), f"exp_{e[1]}_bm_{e[2]}"
     return None,"?"
 
 def main():
