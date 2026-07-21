@@ -37,18 +37,18 @@ OUT_DIR   = "cards"
 # Expansions: ("ALL_EXP_CHARS","<exp>")  ("ALL_EXP_ABCS","<exp>")  ("ALL_EXP_CMDRS","<exp>")  ("ALL_EXP_BMS","<exp>")
 #             where <exp> is one of: sengekokujo, modern_hamlet, frankenstein_2077
 MANIFEST = [
-    ("fe", "otdesi_1e"),
-    ("ALL_CRITS",),
-    ("ALL_BMS",),
+  # ("fe", "otdesi_1e"),
+   # ("ALL_CRITS",),
+    # ("ALL_BMS",),
 
     # --- base decks (remove the # to use) ---
     # ("ALL_CHARS", "othello"),
     # ("ALL_ABCS",  "othello"),
 
     # --- expansions (remove the # to use) ---
-    # ("ALL_EXP_CHARS", "sengekokujo"),
+     ("ALL_EXP_CHARS", "sengekokujo"),
     # ("ALL_EXP_ABCS",  "sengekokujo"),
-    # ("ALL_EXP_CMDRS", "sengekokujo"),
+     ("ALL_EXP_CMDRS", "sengekokujo"),
     # ("ALL_EXP_BMS",   "sengekokujo"),
 ]
 # ----------------------------------------
