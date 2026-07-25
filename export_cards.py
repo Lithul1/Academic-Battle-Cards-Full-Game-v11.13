@@ -46,10 +46,14 @@ MANIFEST = [
     # ("ALL_ABCS",  "othello"),
 
     # --- expansions (remove the # to use) ---
-     ("ALL_EXP_CHARS", "sengekokujo"),
+    # ("ALL_EXP_CHARS", "sengekokujo"),
     # ("ALL_EXP_ABCS",  "sengekokujo"),
-     ("ALL_EXP_CMDRS", "sengekokujo"),
+    # ("ALL_EXP_CMDRS", "sengekokujo"),
     # ("ALL_EXP_BMS",   "sengekokujo"),
+    # ("ALL_EXP_CHARS", "modern_hamlet"),
+    # ("ALL_EXP_ABCS",  "modern_hamlet"),
+    # ("ALL_EXP_CMDRS", "modern_hamlet"),
+    # ("ALL_EXP_BMS",   "modern_hamlet"),
 ]
 # ----------------------------------------
 
