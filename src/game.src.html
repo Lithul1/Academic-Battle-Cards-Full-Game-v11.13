@@ -163,7 +163,7 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 
 /* bench */
 .bench{display:flex;flex-direction:column;gap:5px;width:62px}
-.bench-mini{background:var(--cream);border:2px solid var(--ink);border-radius:9px;padding:4px;text-align:center;box-shadow:0 3px 0 #0c2426}
+.bench-mini{position:relative;background:var(--cream);border:2px solid var(--ink);border-radius:9px;padding:4px;text-align:center;box-shadow:0 3px 0 #0c2426}
 .bench-mini.dead{filter:grayscale(.8);opacity:.5}
 .bm-init{display:grid;place-items:center;height:26px;border-radius:6px;color:#fff;font-family:var(--disp);font-size:16px;border:1.5px solid var(--ink);overflow:hidden}
 .bm-img{width:100%;height:100%;object-fit:cover;display:block}
@@ -1529,6 +1529,17 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
   font-family:var(--cond);font-size:12px;cursor:pointer}
 .hc-info:hover{background:var(--gold)}
 .hc.crit{position:relative}
+.bv-chg{margin:6px 0 2px;display:flex;flex-direction:column;gap:4px}
+.bv-chg.none{font-size:11px;color:#7a6a52;font-style:italic;text-align:center}
+.bv-chg-row{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.bvc-card{font-size:10px;background:var(--cream-hi);border:1.5px solid var(--ink);border-radius:5px;padding:2px 5px}
+.bv-chg-row.atk .bvc-card{border-color:var(--red)}
+.bv-chg-row.blk .bvc-card{border-color:var(--teal)}
+.bm-chg{position:absolute;left:2px;bottom:2px;z-index:4;display:flex;gap:2px;pointer-events:none}
+.bm-chg .chg{font-family:var(--cond);font-size:9px;line-height:1;padding:2px 3px;border-radius:4px;
+  border:1.5px solid var(--ink);color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.5);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.bm-chg .chg.atk{background:var(--red)}
+.bm-chg .chg.blk{background:var(--teal)}
 .dm-pb{display:flex;gap:4px;padding:0 5px 5px}
 .dm-pb button{flex:1;font-family:var(--cond);font-size:9px;letter-spacing:.5px;border:2px solid var(--ink);
   border-radius:5px;padding:3px 2px;cursor:pointer;background:var(--cream-hi);color:var(--ink)}
@@ -2885,6 +2896,7 @@ function dealOpening(){
 /* ================= DRAWN MODE — Phase 1 (opening seed / mulligan / placement) ================= */
 /* All of this is gated behind S.drawn and touches the PLAYER side only. */
 function dmEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+const DRAWN_BENCH_MAX=4;   /* Backstage slots (+1 Active = 5 on the field) */
 function drawnBench(p){ return p.team.filter((c,i)=>c.hp>0 && !(p._hasActive && i===p.activeIdx)).length; }
 /* Guarantee >=1 character in the opening hand — a bad shuffle can never brick you. */
 function seedOpeningHand(){
@@ -2921,7 +2933,7 @@ function drawnPlace(idx,where){
   const p=S.you, card=p.hand[idx];
   if(!card||card.cat!=='char'){ toast('Only characters can be placed.'); return; }
   if(where==='active'){ if(p._hasActive){ toast('Your Active slot is already filled.'); return; } }
-  else if(drawnBench(p)>=3){ toast('Backstage is full (3).'); return; }
+  else if(drawnBench(p)>=DRAWN_BENCH_MAX){ toast(`Backstage is full (${DRAWN_BENCH_MAX}).`); return; }
   const ch=makeChar(card._cdef, p._hpScale||1.0);
   p.hand.splice(idx,1); p.team.push(ch);
   if(where==='active'){ p.activeIdx=p.team.length-1; p._hasActive=true; }
@@ -2937,7 +2949,7 @@ function drawnPlayChar(idx){
   const p=S.you, card=p.hand[idx];
   if(!card||card.cat!=='char') return;
   const liveAct=drawnHasActive(p);
-  if(liveAct && drawnBench(p)>=3){ toast('Backstage is full (3).'); return; }
+  if(liveAct && drawnBench(p)>=DRAWN_BENCH_MAX){ toast(`Backstage is full (${DRAWN_BENCH_MAX}).`); return; }
   const ch=makeChar(card._cdef, p._hpScale||1.0);
   p.hand.splice(idx,1); p.team.push(ch);
   if(!liveAct){ p.activeIdx=p.team.length-1; p._hasActive=true; pushLog(`${ch.name} steps up to Active.`); }
@@ -4221,6 +4233,17 @@ function statusHelpModal(k){
   showPreview('<div class="stx"><h4><span class="stx-ic">'+h.ic+'</span>'+h.n+'</h4><p>'+h.t+'</p>'
     +'<div class="stx-fix">\u2714 How to clear it: '+h.fix+'</div></div>');
 }
+/* Charges persist while a character sits on the bench, so surface them:
+   red = attack charges, teal = block charges — same pairing as the ABC cards. */
+function chargeBadges(c){
+  if(!c||c.hp<=0) return '';
+  const a=(c.atkCharge||[]).length, b=(c.blkCharge||[]).length;
+  if(!a&&!b) return '';
+  let h='<span class="bm-chg">';
+  if(a) h+=`<span class="chg atk" title="${a} attack charge${a!==1?'s':''}">\u2694${a}</span>`;
+  if(b) h+=`<span class="chg blk" title="${b} block charge${b!==1?'s':''}">\u26ca${b}</span>`;
+  return h+'</span>';
+}
 function benchTiles(p,mine){
   return p.team.map((c,i)=>{ if(i===p.activeIdx) return '';
     const dead=c.hp<=0, pct=Math.max(0,c.hp/c.maxHp*100);
@@ -4233,6 +4256,7 @@ function benchTiles(p,mine){
       <span class="bm-name">${c.name.split(' ')[0]}</span>
       <span class="bm-hpc ${dead?'k':(pct>=80?'g':(pct>=50?'y':'r'))}">${dead?'✕':c.hp}</span>
       ${statusKeys(c).length?`<span class="bm-stc" data-statushelp="${statusKeys(c)[0]}">${window.STATUS_HELP[statusKeys(c)[0]].ic}</span>`:''}
+      ${chargeBadges(c)}
       </div>`; }).join('');
 }
 function cardBackHTML(){
@@ -4322,13 +4346,13 @@ function handCard(c,idx){
     const bench=drawnBench(you);
     const liveAct=!!(you._hasActive && you.team[you.activeIdx] && you.team[you.activeIdx].hp>0);
     const placing = S.phase==='place';
-    const cp=(straty||placing) && (bench<3 || !liveAct);
+    const cp=(straty||placing) && (bench<DRAWN_BENCH_MAX || !liveAct);
     const img=d.img?`<img class="hcc-img" src="${d.img}" alt="${c.name}">`:`<span class="hcc-mono" style="background:${c.accent||'#444'}">${initials(c.name)}</span>`;
     /* first hand (no Active yet): choose Active or Bench. Afterwards: Bench only. */
     const foot = placing
       ? `<div class="dm-pb"><button data-do="dmplace:${idx}:active" ${liveAct?'disabled':''}>\u2605 Active</button>`
-        + `<button data-do="dmplace:${idx}:bench" ${bench>=3?'disabled':''}>\u25bc Bench</button></div>`
-      : `<div class="hcc-foot">${!liveAct?'Tap \u2014 step up to Active':(bench<3?`Tap \u2014 send to Backstage (${bench}/3)`:'Backstage is full (3)')}</div>`;
+        + `<button data-do="dmplace:${idx}:bench" ${bench>=DRAWN_BENCH_MAX?'disabled':''}>\u25bc Bench</button></div>`
+      : `<div class="hcc-foot">${!liveAct?'Tap \u2014 step up to Active':(bench<DRAWN_BENCH_MAX?`Tap \u2014 send to Backstage (${bench}/${DRAWN_BENCH_MAX})`:`Backstage is full (${DRAWN_BENCH_MAX})`)}</div>`;
     /* inspect is always reachable, including mid-placement, so you can judge stats before committing */
     return `<div class="hc crit ${cp?'playable':'spent'}${deal}" ${placing?'':`data-idx="${idx}"`}>
       <button class="hc-info" data-do="dminfo:${idx}" title="Card details">\u24d8</button>
@@ -4691,8 +4715,24 @@ function benchInfoModal(){
     ${ch.fe&&ch.passive?`<div class="bv-passive"><div class="bv-ph">Passive \u2014 ${ch.passive.name}</div><p>${ch.passive.text||''}</p></div>`:''}
     <div class="bv-move atk"><div class="bv-h"><b>${ch.atk.n}</b><span class="pc-chip red sm">${ch.atk.label||''}</span></div><p>${ch.atk.t||''}</p></div>
     <div class="bv-move blk"><div class="bv-h"><b>${ch.blk.n}</b><span class="pc-chip blue sm">${ch.blk.label||''}</span></div><p>${ch.blk.t||''}</p></div>
+    ${benchChargeList(ch)}
     <button class="pcb-close" data-do="benchclose">Close &#10005;</button>
   </div></div>`;
+}
+/* Which ABCs are already attached to this benched character. Charges survive a
+   switch-out, so this is real information you'd otherwise be guessing at. */
+function benchChargeList(ch){
+  const a=(ch.atkCharge||[]), b=(ch.blkCharge||[]);
+  if(!a.length && !b.length) return '<div class="bv-chg none">No ABCs attached</div>';
+  const row=(list,cls,lab,need)=>{
+    if(!list.length) return '';
+    const names=list.map(c=>`<span class="bvc-card">${c.word||c.name||(c.q?String(c.q).slice(0,26):'ABC')}${c.power!=null?` \u00b7 ${c.power}`:''}</span>`).join('');
+    return `<div class="bv-chg-row ${cls}"><span class="pc-chip ${cls==='atk'?'red':'blue'} sm">${lab} ${list.length}${need?`/${need}`:''}</span>${names}</div>`;
+  };
+  return `<div class="bv-chg">
+    ${row(a,'atk','\u2694 Attack',(ch.atk&&ch.atk.cost)||0)}
+    ${row(b,'blk','\u26ca Block',(ch.blk&&ch.blk.cost)||0)}
+  </div>`;
 }
 function triviaModal(){
   const c=S.pending.card;
@@ -6672,7 +6712,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
-  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
+  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
   get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
