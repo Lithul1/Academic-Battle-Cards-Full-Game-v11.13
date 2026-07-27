@@ -3958,6 +3958,7 @@ function menuScreen(){
     <div class="menu-list">
       <button class="menu-btn" data-do="go-quick"><span class="menu-ic">⚡</span><span class="menu-tx"><b>Quickplay</b><small>Pick a difficulty — random decks for both sides</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="go-custom"><span class="menu-ic">♟</span><span class="menu-tx"><b>Custom Play</b><small>Choose difficulty, your deck, the opponent &amp; house rules</small></span><span class="menu-go">›</span></button>
+      <button class="menu-btn" data-do="go-drawn"><span class="menu-ic">🎴</span><span class="menu-tx"><b>Drawn Mode</b><small>Experimental — draw your team from the deck, then place them</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="go-scrim"><span class="menu-ic">🏆</span><span class="menu-tx"><b>Literary Scrimmage</b><small>A roguelike campaign — bosses, unlockables &amp; a branching map</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="builder"><span class="menu-ic">⚒</span><span class="menu-tx"><b>Deck Builder</b><small>Build, edit &amp; share custom decks</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="go-guide"><span class="menu-ic">📖</span><span class="menu-tx"><b>Quickstart Guide</b><small>How to play &amp; a rules refresher</small></span><span class="menu-go">›</span></button>
@@ -3972,7 +3973,7 @@ function difficultyScreen(){
       <span class="diff-blurb">${d.blurb}</span></button>`; }).join('');
   return `<div class="title-screen sub-screen">
     <img class="title-logo sm" src="${window.ABC_LOGO||''}" alt="Academic Battle Cards">
-    <h2 class="sub-h">${APP.mode==='quick'?'Quickplay':'Custom Play'} — choose a difficulty</h2>
+    <h2 class="sub-h">${APP.drawnMode?'Drawn Mode':(APP.mode==='quick'?'Quickplay':'Custom Play')} — choose a difficulty</h2>
     <p class="title-sub">Difficulty sets AI accuracy, turn time, and how strong the opponent's bookmarks are.</p>
     <div class="diff-grid">${cards}</div>
     <div class="sub-actions"><button class="toolbtn" data-do="menu">‹ Back to menu</button></div>
@@ -4967,9 +4968,10 @@ document.addEventListener('click',e=>{
   if(t.dataset.do){
     const d=t.dataset.do;
     if(d==='start') startBattle();
-    else if(d==='go-quick'){ APP.mode='quick'; APP.youDeck='surprise'; APP.customDeck=null; APP.screen='difficulty'; render(); }
-    else if(d==='go-custom'){ APP.mode='custom'; APP.screen='difficulty'; render(); }
-    else if(d==='go-scrim'){ scrimOpen(); }
+    else if(d==='go-quick'){ APP.mode='quick'; APP.drawnMode=false; APP.youDeck='surprise'; APP.customDeck=null; APP.screen='difficulty'; render(); }
+    else if(d==='go-custom'){ APP.mode='custom'; APP.drawnMode=false; APP.screen='difficulty'; render(); }
+    else if(d==='go-drawn'){ APP.mode='custom'; APP.drawnMode=true; APP.screen='difficulty'; render(); }
+    else if(d==='go-scrim'){ APP.drawnMode=false; scrimOpen(); }
     else if(d==='go-guide'){ APP.screen='guide'; render(); }
     else if(d==='difficulty'){ APP.screen='difficulty'; render(); }
     else if(d==='to-tune'){ APP.screen='tune'; render(); }
