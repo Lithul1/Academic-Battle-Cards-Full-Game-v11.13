@@ -1505,6 +1505,36 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .vault-buy.owned{ background:#cfc3a0; cursor:default; }
 .scrim-over.win .over-title{ color:#3fae4a; } .scrim-over.lose .over-title{ color:#b5462b; }
 .tri-rosetta{ margin-top:10px; width:100%; background:#f5e6bf; border:2px solid #caa53a; border-radius:8px; padding:8px; cursor:pointer; font-family:var(--cond); letter-spacing:.5px; }
+/* ---------- DRAWN MODE: opening / placement (Phase 1) ---------- */
+.dm-wrap{max-width:1000px;margin:0 auto;padding:14px}
+.dm-phase{font-family:var(--cond);letter-spacing:1px;color:var(--gold);font-size:15px;margin:14px 0 8px;border-bottom:1px solid #4a4136;padding-bottom:4px}
+.dm-tag{display:inline-block;background:#3a352c;color:var(--gold);font-family:var(--cond);font-size:11px;padding:2px 8px;border-radius:5px;margin-left:6px}
+.dm-hand{display:flex;flex-wrap:wrap;gap:10px}
+.dm-card{width:120px;min-height:160px;border:3px solid var(--ink);border-radius:10px;background:var(--paper,#f3e8cd);color:var(--ink);padding:8px;display:flex;flex-direction:column;box-shadow:0 4px 10px rgba(0,0,0,.4);position:relative}
+.dm-card.char{border-color:#7a5a10;box-shadow:0 0 0 2px var(--gold),0 4px 10px rgba(0,0,0,.4)}
+.dm-card .dm-type{font-family:var(--cond);font-size:9px;letter-spacing:1px;color:#8a5a1a}
+.dm-card.abc .dm-type{color:#b5402a}
+.dm-card.abcb .dm-type{color:#2a5a96}
+.dm-card.bm .dm-type{color:#5a4a2a}
+.dm-card .dm-nm{font-family:var(--disp);font-size:13px;line-height:1.05;margin-top:3px;flex:1}
+.dm-card .dm-meta{font-size:10px;color:#5a4a34;margin-top:4px}
+.dm-card .dm-pow{position:absolute;top:6px;right:8px;font-family:var(--disp);font-size:16px;color:#b5402a}
+.dm-card.abcb .dm-pow{color:#2a5a96}
+.dm-card .dm-btns{display:flex;gap:4px;margin-top:6px}
+.dm-card .dm-btns button{flex:1;font-family:var(--cond);font-size:9px;letter-spacing:.5px;border:2px solid var(--ink);border-radius:5px;padding:3px 2px;cursor:pointer;background:#e8dcc0;color:var(--ink)}
+.dm-card .dm-btns button:hover:not(:disabled){background:var(--gold)}
+.dm-card .dm-btns button:disabled{opacity:.35;cursor:not-allowed}
+.dm-btn{font-family:var(--cond);letter-spacing:1px;font-size:14px;border:3px solid var(--ink);border-radius:8px;padding:9px 18px;cursor:pointer;background:var(--gold);color:var(--ink);margin:4px 6px 4px 0}
+.dm-btn.ghost{background:#3a352c;color:var(--paper,#f3e8cd)}
+.dm-btn:disabled{opacity:.4;cursor:not-allowed}
+.dm-board{display:flex;gap:20px;margin-top:8px;flex-wrap:wrap}
+.dm-zone{border:2px dashed #6a5d48;border-radius:10px;padding:10px;min-height:180px}
+.dm-zone.act{border-color:var(--gold)}
+.dm-zone h3{font-family:var(--cond);letter-spacing:1px;font-size:12px;color:var(--gold);margin:0 0 8px}
+.dm-slots{display:flex;gap:8px}
+.dm-slot{width:110px;height:150px;border:2px dashed #4a4136;border-radius:8px;display:grid;place-items:center;color:#6a5d48;font-family:var(--cond);font-size:10px}
+.dm-note{margin-top:14px;font-size:12px;color:#b7a988;line-height:1.6;background:#241f1b;border-left:3px solid var(--gold);padding:10px 14px;border-radius:6px}
+.dm-mull{color:#e0b050}
 </style>
 </head>
 <body>
@@ -2833,12 +2863,123 @@ function dealOpening(){
     const n=S.settings.handSize; let i=0;
     const step=()=>{
       if(!S){ return; }
-      if(i>=n){ busy=false; S.turn='you'; S.phase='draw'; pushLog('Cards dealt. Your turn — DRAW phase.'); render(); startTurnTimer(); return; }
+      if(i>=n){ busy=false; S.turn='you';
+        if(S.drawn){ seedOpeningHand(); S.phase='mull'; S.mullCount=1; pushLog('Opening hand dealt — mulligan or keep.'); render(); return; }
+        S.phase='draw'; pushLog('Cards dealt. Your turn — DRAW phase.'); render(); startTurnTimer(); return; }
       dealOne('you'); flickDeck('you'); render();
       setTimeout(()=>{ if(!S){ return; } dealOne('opp'); flickDeck('opp'); render(); i++; setTimeout(step,150); }, 170);
     };
     step();
   }, 800);
+}
+/* ================= DRAWN MODE — Phase 1 (opening seed / mulligan / placement) ================= */
+/* All of this is gated behind S.drawn and touches the PLAYER side only. */
+function dmEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function drawnBench(p){ return p.team.length-(p._hasActive?1:0); }
+/* Guarantee >=1 character in the opening hand — a bad shuffle can never brick you. */
+function seedOpeningHand(){
+  const p=S&&S.you; if(!p||!p.hand) return false;
+  if(p.hand.some(c=>c.cat==='char')) return false;
+  const ci=p.deck.findIndex(c=>c.cat==='char'); if(ci<0) return false;
+  const hi=p.hand.findIndex(c=>c.cat!=='char'); if(hi<0) return false;
+  const ch=p.deck.splice(ci,1)[0];
+  p.deck.push(p.hand[hi]); p.hand[hi]=ch; shuffle(p.deck);
+  pushLog('Seeded \u2014 the opening always holds at least one character.');
+  return true;
+}
+function drawnMulligan(){
+  if(!S||!S.drawn||S.phase!=='mull'||busy) return;
+  if((S.mullCount||0)>=3){ toast('No mulligans left \u2014 keep this hand.'); return; }
+  const p=S.you;
+  p.deck=shuffle(p.deck.concat(p.hand.splice(0)));
+  for(let k=0;k<S.settings.handSize;k++) dealOne('you');
+  seedOpeningHand();
+  S.mullCount=(S.mullCount||0)+1;
+  pushLog(`Mulligan \u2014 attempt ${S.mullCount} of 3.`);
+  try{SFX.card('card_shuffle',0.6);}catch(e){}
+  render();
+}
+function drawnKeepHand(){
+  if(!S||!S.drawn||S.phase!=='mull'||busy) return;
+  S.phase='place'; pushLog('Place an Active (and up to 3 Backstage) to begin.'); render();
+}
+function drawnPlace(idx,where){
+  if(!S||!S.drawn||S.phase!=='place'||busy) return;
+  const p=S.you, card=p.hand[idx];
+  if(!card||card.cat!=='char'){ toast('Only characters can be placed.'); return; }
+  if(where==='active'){ if(p._hasActive){ toast('Your Active slot is already filled.'); return; } }
+  else if(drawnBench(p)>=3){ toast('Backstage is full (3).'); return; }
+  const ch=makeChar(card._cdef, p._hpScale||1.0);
+  p.hand.splice(idx,1); p.team.push(ch);
+  if(where==='active'){ p.activeIdx=p.team.length-1; p._hasActive=true; }
+  pushLog(`${ch.name} takes the ${where==='active'?'Active slot':'Backstage'}.`);
+  try{SFX.card('card_slide',0.6);}catch(e){}
+  render();
+}
+function drawnBeginMatch(){
+  if(!S||!S.drawn||S.phase!=='place'||busy) return;
+  if(!S.you._hasActive){ toast('Place an Active character first.'); return; }
+  S.phase='draw'; pushLog('Cards dealt. Your turn \u2014 DRAW phase.'); render(); startTurnTimer();
+}
+/* Mid-game character play: hand -> Backstage. EMERGENCY exception: if there is no
+   living Active, the character steps straight up (prevents an empty-active death spiral). */
+function drawnPlayChar(idx){
+  if(!S||!S.drawn) return;
+  const p=S.you, card=p.hand[idx];
+  if(!card||card.cat!=='char') return;
+  const liveAct=!!(p._hasActive && p.team[p.activeIdx] && p.team[p.activeIdx].hp>0);
+  if(liveAct && drawnBench(p)>=3){ toast('Backstage is full (3).'); return; }
+  const ch=makeChar(card._cdef, p._hpScale||1.0);
+  p.hand.splice(idx,1); p.team.push(ch);
+  if(!liveAct){ p.activeIdx=p.team.length-1; p._hasActive=true; pushLog(`${ch.name} steps up to Active.`); }
+  else pushLog(`${ch.name} joins the Backstage.`);
+  try{SFX.card('card_slide',0.6);}catch(e){}
+  render();
+}
+function dmCardHTML(c,idx,place){
+  const isB=c.cat==='abc'&&c.type==='BLOCK';
+  const cls=c.cat==='char'?'char':(c.cat==='abc'?(isB?'abcb':'abc'):'bm');
+  const chip=c.cat==='char'?'CHARACTER':(c.cat==='abc'?(isB?'BLOCK ABC':'ATTACK ABC'):(c.cat==='crit'?'CRIT LENS':'BOOKMARK'));
+  const pow=(c.cat==='abc'&&c.power!=null)?`<div class="dm-pow">${c.power}</div>`:'';
+  const nm=dmEsc(c.cat==='char'?c.name:(c.name||c.word||(c.q?String(c.q).slice(0,42):'\u2014')));
+  const meta=c.cat==='char'?`\u2764 ${c.hp} HP`:(c.cat==='abc'&&c.power!=null?`Power ${c.power}`:'artifact');
+  let btns='';
+  if(place&&c.cat==='char'){
+    const p=S.you;
+    btns=`<div class="dm-btns"><button data-do="dmplace:${idx}:active" ${p._hasActive?'disabled':''}>\u2605 Active</button>`
+       + `<button data-do="dmplace:${idx}:bench" ${drawnBench(p)>=3?'disabled':''}>\u25bc Bench</button></div>`;
+  }
+  return `<div class="dm-card ${cls}">${pow}<div class="dm-type">${chip}</div><div class="dm-nm">${nm}</div><div class="dm-meta">${meta}</div>${btns}</div>`;
+}
+function drawnOpeningScreen(){
+  const p=S.you;
+  if(S.phase==='mull'){
+    const n=p.hand.filter(c=>c.cat==='char').length, m=S.mullCount||1;
+    return `<div class="dm-wrap">
+      <div class="dm-phase">OPENING HAND <span class="dm-tag">DRAWN MODE</span>
+        <span class="dm-mull"> \u2014 attempt ${m}/3 \u00b7 ${n} character${n!==1?'s':''} in hand (seeded \u22651)</span></div>
+      <div class="dm-hand">${p.hand.map((c,i)=>dmCardHTML(c,i,false)).join('')}</div>
+      <div style="margin-top:14px">
+        <button class="dm-btn ghost" data-do="dmmull" ${m>=3?'disabled':''}>Mulligan</button>
+        <button class="dm-btn" data-do="dmkeep">Keep this hand \u203a</button></div>
+      <div class="dm-note"><b>Seed guarantee:</b> the opening always contains at least one character, so a bad shuffle can never brick you. <b>Mulligan</b> reshuffles for a fresh 5 (dig-deeper), up to 3 attempts \u2014 no forfeit loss.</div>
+    </div>`;
+  }
+  const act=p._hasActive?p.team[p.activeIdx]:null;
+  const bench=p.team.filter((c,i)=>!(p._hasActive&&i===p.activeIdx));
+  const slot=c=>c?`<div class="dm-card char"><div class="dm-type">CHARACTER</div><div class="dm-nm">${dmEsc(c.name)}</div><div class="dm-meta">\u2764 ${c.hp} HP</div></div>`:'<div class="dm-slot">empty</div>';
+  let bs=''; for(let i=0;i<3;i++) bs+=slot(bench[i]);
+  return `<div class="dm-wrap">
+    <div class="dm-phase">PLACEMENT <span class="dm-tag">DRAWN MODE</span></div>
+    <div class="dm-board">
+      <div class="dm-zone act"><h3>ACTIVE</h3><div class="dm-slots">${slot(act)}</div></div>
+      <div class="dm-zone"><h3>BACKSTAGE (${bench.length}/3)</h3><div class="dm-slots">${bs}</div></div>
+    </div>
+    <div class="dm-phase">YOUR HAND</div>
+    <div class="dm-hand">${p.hand.map((c,i)=>dmCardHTML(c,i,true)).join('')}</div>
+    <div style="margin-top:14px"><button class="dm-btn" data-do="dmbegin" ${p._hasActive?'':'disabled'}>Begin the match \u203a</button></div>
+    <div class="dm-note">Place at least an <b>Active</b> to begin. Backstage holds up to <b>3</b>. On the first hand you place directly; mid-game, new characters must route <b>hand \u2192 backstage \u2192 active</b>.</div>
+  </div>`;
 }
 const setName = k => k==='gatsby'?'The Great Gatsby':k==='crucible'?'The Crucible':k==='hamlet'?'Hamlet':k==='frankenstein'?'Frankenstein':k==='sherlock'?'Sherlock Holmes':k==='othello'?'Othello':k==='oz'?'The Wonderful Wizard of Oz':k==='macbeth'?'Macbeth':k==='wonderland'?'Alice in Wonderland':k==='tewwg'?'Their Eyes Were Watching God':k;
 const otherDeck = k => (Object.keys(DATA.characters).find(x=>x!==k)) || k;
@@ -3051,6 +3192,7 @@ function tryPlayHandCard(idx,targetUid){
   if(busy || S.turn!=='you' || S.phase!=='strategize') return;
   const p=S.you, card=p.hand[idx]; if(!card) return;
   if(card.cat==='hex'){ const bmi=p.hand.findIndex(c=>c.cat==='bookmark'); if(bmi>=0){ p.discard.push(p.hand.splice(bmi,1)[0]); const hi=p.hand.indexOf(card); if(hi>=0) p.discard.push(p.hand.splice(hi,1)[0]); pushLog('You purge the Hex, spending a Bookmark.'); try{SFX.card('card_place',0.6);}catch(e){} render(); } else toast('Need a Bookmark in hand to purge the Hex.'); return; }
+  if(card.cat==='char'){ drawnPlayChar(idx); return; }
   if(card.cat==='bookmark'){ playBookmark('you',idx); return; }
   if(card.cat==='crit'){ playCrit('you',idx); return; }
   if(p.attachesLeft<=0){ toast('No attaches left this turn.'); return; }
@@ -3560,7 +3702,13 @@ function checkKO(p,side){
     const next=p.team.findIndex(c=>c.hp>0);
     if(next>=0){ doSwitch(p,next); pushLog(`${p.team[next].name} steps up.`); }
   }
-  if(!p.team.some(c=>c.hp>0)){ S.over=true; if(!S.winner) S.winner=(side==='you')?'opp':'you'; pushLog(`${who(foeOf(side))} wins the match!`); }
+  if(!p.team.some(c=>c.hp>0)){
+    /* DRAWN MODE: an empty board is only a loss if no character remains to field. */
+    const canField = S.drawn && p._drawn &&
+      (p.hand.some(c=>c.cat==='char') || p.deck.some(c=>c.cat==='char') || p.discard.some(c=>c.cat==='char'));
+    if(canField){ p._hasActive=false; pushLog(`${who(p)} has no one on the field — play a character to continue.`); }
+    else { S.over=true; if(!S.winner) S.winner=(side==='you')?'opp':'you'; pushLog(`${who(foeOf(side))} wins the match!`); }
+  }
   if(S.over) stopTurnTimer();
 }
 
@@ -3761,6 +3909,9 @@ function answerTrivia(choice){
 function render(){
   const root=$('#game'); if(!root) return;
   try{ if(APP.screen==='play'&&S){ SFX.contextTrack(S.scrim?((S.scrim.node&&S.scrim.node.boss)?'boss':'hiphop9'):null); } else { SFX.contextTrack(null); } }catch(e){}
+  /* DRAWN MODE: opening/placement run BEFORE the board exists — never reach renderGame with an empty team. */
+  if(APP.screen==='play' && S && S.drawn && (S.phase==='mull'||S.phase==='place')){
+    document.body.setAttribute('data-screen','play'); root.innerHTML=drawnOpeningScreen(); return; }
   if(APP.screen==='play' && S){ document.body.setAttribute('data-screen','play'); sweepActiveBm(S.you); sweepActiveBm(S.opp); renderGame(root); try{fxHpTrails();}catch(e){} return; }
   if(APP.screen==='scrim'){ document.body.setAttribute('data-screen','scrim'); document.body.setAttribute('data-scrimview',(SCRIM&&SCRIM.view)||''); root.innerHTML=scrimScreen(); scrimAfterRender&&scrimAfterRender(); return; }
   if(APP.screen==='builder'){ document.body.setAttribute('data-screen','builder'); root.innerHTML=builderScreen(); return; }
@@ -4163,6 +4314,19 @@ function handCard(c,idx){
       <div class="hcc-port">${img}</div>
       <div class="hcc-nm">${c.name}</div>
       <div class="hcc-foot">${you.crit?'A Lens is already active':'Tap to deploy'}</div></div>`;
+  }
+  if(c.cat==='char'){
+    const d=c._cdef||{};
+    const bench=drawnBench(you);
+    const liveAct=!!(you._hasActive && you.team[you.activeIdx] && you.team[you.activeIdx].hp>0);
+    const cp=straty && (bench<3 || !liveAct);
+    const img=d.img?`<img class="hcc-img" src="${d.img}" alt="${c.name}">`:`<span class="hcc-mono" style="background:${c.accent||'#444'}">${initials(c.name)}</span>`;
+    const foot=!liveAct?'Tap — step up to Active':(bench<3?`Tap — send to Backstage (${bench}/3)`:'Backstage is full (3)');
+    return `<div class="hc crit ${cp?'playable':'spent'}${deal}" data-idx="${idx}">
+      <div class="hc-top crt">\u2605 CHARACTER</div>
+      <div class="hcc-port">${img}</div>
+      <div class="hcc-nm">${c.name}</div>
+      <div class="hcc-foot">${foot}</div></div>`;
   }
   const playable=straty && (you.flags.bmCount||0)<2;
   return `<div class="hc bm ${c.kind.toLowerCase()} ${playable?'playable':'spent'}${deal}" data-idx="${idx}">
@@ -4811,6 +4975,10 @@ document.addEventListener('click',e=>{
     else if(d==='to-tune'){ APP.screen='tune'; render(); }
     else if(d==='custom'){ APP.screen='custom'; render(); }
     else if(d==='menu'){ stopTurnTimer(); APP.screen='menu'; S=null; render(); }
+    else if(d==='dmmull') drawnMulligan();
+    else if(d==='dmkeep') drawnKeepHand();
+    else if(d==='dmbegin') drawnBeginMatch();
+    else if(d.startsWith('dmplace:')){ const q=d.split(':'); drawnPlace(+q[1], q[2]); }
     else if(d==='draw') doDraw();
     else if(d==='engage') toEngage();
     else if(d==='end') endTurn();
@@ -6465,7 +6633,9 @@ window.ABC_EXPORT = {
   expBmData:function(k,i){ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; const x=b&&b.bookmarks&&b.bookmarks[i]; if(!x)return null; return {kind:'bm',name:x.name,bkind:x.kind,text:x.text,rarity:this._rar(x.rarity),effect:x.effect||''}; }
 };
 window.ABC_DEBUG = {
-  forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;}, get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+  forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
+  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBeginMatch, drawnOpeningScreen, drawnBench, drawnPlayChar, checkKO, makeChar,
+  get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
