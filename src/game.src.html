@@ -5186,8 +5186,20 @@ function collInit(){
   META.editionCards=META.editionCards||[]; META.foils=META.foils||0; META.packs=META.packs||0;
 }
 function sbx(){ try{ return APP.mode==='quick'; }catch(e){ return false; } }   /* Quick Play = full sandbox */
-function ownCrit(i){ return sbx() || (META.crits||[]).indexOf(+i)>=0; }
-function bmOwned(i){ return sbx() ? window.BM_MAX_COPIES : ((META.bmCopies||{})[i]||0); }
+/* ---- STARTER FLOOR ---------------------------------------------------------
+   A guaranteed minimum beneath every collection. Nothing is written to the save,
+   so it can never be lost to cleared storage, a new device, or a changed file path,
+   and existing players get it with no migration. Earned copies always win.
+   Base bookmarks 0-11 (the pre-rarity core set): 3 copies each, except the four
+   swingiest (First Aid Kit, Cliffnotes, Truce, Crown of Denmark) held at 2 so an
+   opening deck can't stack them. 32 available for 20 slots. */
+const STARTER_BM = { 0:2, 4:2, 5:2, 10:2,            // watchlist - capped at 2
+                     1:3, 2:3, 3:3, 6:3, 7:3, 8:3, 9:3, 11:3 };
+const STARTER_CR = [6,7,10,13];   // Archetypal, Formalism, Reader-Response, Biographical
+function starterBm(i){ return STARTER_BM[+i]||0; }
+function starterCr(i){ return STARTER_CR.indexOf(+i)>=0; }
+function ownCrit(i){ return sbx() || starterCr(i) || (META.crits||[]).indexOf(+i)>=0; }
+function bmOwned(i){ return sbx() ? window.BM_MAX_COPIES : Math.max(starterBm(i), (META.bmCopies||{})[i]||0); }
 
 /* ---- Locked decks: license + starter kit ---- */
 window.LOCKED_DECKS=['sherlock','othello','wonderland'];
@@ -6660,7 +6672,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
-  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, metaLoad, defaultDeck, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
+  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
   get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
