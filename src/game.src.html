@@ -1505,36 +1505,29 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .vault-buy.owned{ background:#cfc3a0; cursor:default; }
 .scrim-over.win .over-title{ color:#3fae4a; } .scrim-over.lose .over-title{ color:#b5462b; }
 .tri-rosetta{ margin-top:10px; width:100%; background:#f5e6bf; border:2px solid #caa53a; border-radius:8px; padding:8px; cursor:pointer; font-family:var(--cond); letter-spacing:.5px; }
-/* ---------- DRAWN MODE: opening / placement (Phase 1) ---------- */
-.dm-wrap{max-width:1000px;margin:0 auto;padding:14px}
-.dm-phase{font-family:var(--cond);letter-spacing:1px;color:var(--gold);font-size:15px;margin:14px 0 8px;border-bottom:1px solid #4a4136;padding-bottom:4px}
-.dm-tag{display:inline-block;background:#3a352c;color:var(--gold);font-family:var(--cond);font-size:11px;padding:2px 8px;border-radius:5px;margin-left:6px}
-.dm-hand{display:flex;flex-wrap:wrap;gap:10px}
-.dm-card{width:120px;min-height:160px;border:3px solid var(--ink);border-radius:10px;background:var(--paper,#f3e8cd);color:var(--ink);padding:8px;display:flex;flex-direction:column;box-shadow:0 4px 10px rgba(0,0,0,.4);position:relative}
-.dm-card.char{border-color:#7a5a10;box-shadow:0 0 0 2px var(--gold),0 4px 10px rgba(0,0,0,.4)}
-.dm-card .dm-type{font-family:var(--cond);font-size:9px;letter-spacing:1px;color:#8a5a1a}
-.dm-card.abc .dm-type{color:#b5402a}
-.dm-card.abcb .dm-type{color:#2a5a96}
-.dm-card.bm .dm-type{color:#5a4a2a}
-.dm-card .dm-nm{font-family:var(--disp);font-size:13px;line-height:1.05;margin-top:3px;flex:1}
-.dm-card .dm-meta{font-size:10px;color:#5a4a34;margin-top:4px}
-.dm-card .dm-pow{position:absolute;top:6px;right:8px;font-family:var(--disp);font-size:16px;color:#b5402a}
-.dm-card.abcb .dm-pow{color:#2a5a96}
-.dm-card .dm-btns{display:flex;gap:4px;margin-top:6px}
-.dm-card .dm-btns button{flex:1;font-family:var(--cond);font-size:9px;letter-spacing:.5px;border:2px solid var(--ink);border-radius:5px;padding:3px 2px;cursor:pointer;background:#e8dcc0;color:var(--ink)}
-.dm-card .dm-btns button:hover:not(:disabled){background:var(--gold)}
-.dm-card .dm-btns button:disabled{opacity:.35;cursor:not-allowed}
-.dm-btn{font-family:var(--cond);letter-spacing:1px;font-size:14px;border:3px solid var(--ink);border-radius:8px;padding:9px 18px;cursor:pointer;background:var(--gold);color:var(--ink);margin:4px 6px 4px 0}
-.dm-btn.ghost{background:#3a352c;color:var(--paper,#f3e8cd)}
-.dm-btn:disabled{opacity:.4;cursor:not-allowed}
-.dm-board{display:flex;gap:20px;margin-top:8px;flex-wrap:wrap}
-.dm-zone{border:2px dashed #6a5d48;border-radius:10px;padding:10px;min-height:180px}
-.dm-zone.act{border-color:var(--gold)}
-.dm-zone h3{font-family:var(--cond);letter-spacing:1px;font-size:12px;color:var(--gold);margin:0 0 8px}
-.dm-slots{display:flex;gap:8px}
-.dm-slot{width:110px;height:150px;border:2px dashed #4a4136;border-radius:8px;display:grid;place-items:center;color:#6a5d48;font-family:var(--cond);font-size:10px}
-.dm-note{margin-top:14px;font-size:12px;color:#b7a988;line-height:1.6;background:#241f1b;border-left:3px solid var(--gold);padding:10px 14px;border-radius:6px}
-.dm-mull{color:#e0b050}
+/* ---------- DRAWN MODE: inline opening (face-down reveal, popup, on-card placement) ---------- */
+.hc.dm-fd{padding:0;cursor:pointer;background:var(--teal-dk)}
+.dm-fd-in{width:100%;height:100%;display:grid;place-items:center;border-radius:9px;
+  background:repeating-linear-gradient(45deg,var(--teal-dk) 0 9px,#17565a 9px 18px)}
+.dm-fd-in span{font-family:var(--disp);font-size:24px;color:var(--gold);text-shadow:2px 2px 0 rgba(0,0,0,.45);
+  border:3px solid var(--gold);border-radius:50%;width:50px;height:50px;display:grid;place-items:center}
+.hc.dm-fd:hover{transform:translateY(-10px);box-shadow:0 12px 0 #0c2426,0 0 0 3px var(--gold)}
+.dm-pb{display:flex;gap:4px;padding:0 5px 5px}
+.dm-pb button{flex:1;font-family:var(--cond);font-size:9px;letter-spacing:.5px;border:2px solid var(--ink);
+  border-radius:5px;padding:3px 2px;cursor:pointer;background:var(--cream-hi);color:var(--ink)}
+.dm-pb button:hover:not(:disabled){background:var(--gold)}
+.dm-pb button:disabled{opacity:.3;cursor:not-allowed}
+.hc.dm-lock{opacity:.42;filter:saturate(.5);cursor:not-allowed;position:relative}
+.hc.dm-lock::after{content:'PLACE AN ACTIVE FIRST';position:absolute;left:0;right:0;bottom:0;
+  background:rgba(36,31,27,.9);color:var(--gold);font-family:var(--cond);font-size:8.5px;
+  letter-spacing:.5px;text-align:center;padding:3px;z-index:2}
+.dm-pop{background:var(--cream-hi);border:3px solid var(--ink);border-radius:14px;
+  box-shadow:0 8px 0 rgba(40,25,12,.5);max-width:430px;padding:16px 18px;text-align:center}
+.dm-pop-h{font-family:var(--disp);font-size:17px;margin-bottom:3px}
+.dm-pop-a{font-family:var(--cond);letter-spacing:1px;font-size:12px;color:var(--red-dk);margin-bottom:8px}
+.dm-pop-b{font-size:12.5px;line-height:1.55;color:#4a3f31;margin:0 0 12px}
+.dm-flipall{font-family:var(--cond);letter-spacing:1px;font-size:12px;border:2px solid var(--ink);
+  border-radius:7px;padding:4px 12px;cursor:pointer;background:var(--cream-hi);color:var(--ink);margin-left:8px}
 </style>
 </head>
 <body>
@@ -2864,7 +2857,7 @@ function dealOpening(){
     const step=()=>{
       if(!S){ return; }
       if(i>=n){ busy=false; S.turn='you';
-        if(S.drawn){ seedOpeningHand(); S.phase='mull'; S.mullCount=1; pushLog('Opening hand dealt — mulligan or keep.'); render(); return; }
+        if(S.drawn){ seedOpeningHand(); S.you.hand.forEach(c=>c._faceDown=true); S.phase='reveal'; S.mullCount=1; pushLog('Opening hand dealt — flip your cards.'); render(); return; }
         S.phase='draw'; pushLog('Cards dealt. Your turn — DRAW phase.'); render(); startTurnTimer(); return; }
       dealOne('you'); flickDeck('you'); render();
       setTimeout(()=>{ if(!S){ return; } dealOne('opp'); flickDeck('opp'); render(); i++; setTimeout(step,150); }, 170);
@@ -2888,20 +2881,23 @@ function seedOpeningHand(){
   return true;
 }
 function drawnMulligan(){
-  if(!S||!S.drawn||S.phase!=='mull'||busy) return;
+  if(!S||!S.drawn||S.phase!=='reveal'||busy) return;
   if((S.mullCount||0)>=3){ toast('No mulligans left \u2014 keep this hand.'); return; }
   const p=S.you;
   p.deck=shuffle(p.deck.concat(p.hand.splice(0)));
   for(let k=0;k<S.settings.handSize;k++) dealOne('you');
   seedOpeningHand();
+  S.you.hand.forEach(c=>c._faceDown=true);
+  S.phase='reveal'; S._mullPop=false;
   S.mullCount=(S.mullCount||0)+1;
   pushLog(`Mulligan \u2014 attempt ${S.mullCount} of 3.`);
   try{SFX.card('card_shuffle',0.6);}catch(e){}
   render();
 }
 function drawnKeepHand(){
-  if(!S||!S.drawn||S.phase!=='mull'||busy) return;
-  S.phase='place'; pushLog('Place an Active (and up to 3 Backstage) to begin.'); render();
+  if(!S||!S.drawn||S.phase!=='reveal'||busy) return;
+  S._mullPop=false; S.phase='place';
+  pushLog('Place an Active to take the field.'); render();
 }
 function drawnPlace(idx,where){
   if(!S||!S.drawn||S.phase!=='place'||busy) return;
@@ -2914,12 +2910,8 @@ function drawnPlace(idx,where){
   if(where==='active'){ p.activeIdx=p.team.length-1; p._hasActive=true; }
   pushLog(`${ch.name} takes the ${where==='active'?'Active slot':'Backstage'}.`);
   try{SFX.card('card_slide',0.6);}catch(e){}
+  if(drawnHasActive(p) && S.phase==='place'){ S.phase='draw'; pushLog('Your turn \u2014 DRAW phase.'); render(); startTurnTimer(); return; }
   render();
-}
-function drawnBeginMatch(){
-  if(!S||!S.drawn||S.phase!=='place'||busy) return;
-  if(!S.you._hasActive){ toast('Place an Active character first.'); return; }
-  S.phase='draw'; pushLog('Cards dealt. Your turn \u2014 DRAW phase.'); render(); startTurnTimer();
 }
 /* Mid-game character play: hand -> Backstage. EMERGENCY exception: if there is no
    living Active, the character steps straight up (prevents an empty-active death spiral). */
@@ -2927,7 +2919,7 @@ function drawnPlayChar(idx){
   if(!S||!S.drawn) return;
   const p=S.you, card=p.hand[idx];
   if(!card||card.cat!=='char') return;
-  const liveAct=!!(p._hasActive && p.team[p.activeIdx] && p.team[p.activeIdx].hp>0);
+  const liveAct=drawnHasActive(p);
   if(liveAct && drawnBench(p)>=3){ toast('Backstage is full (3).'); return; }
   const ch=makeChar(card._cdef, p._hpScale||1.0);
   p.hand.splice(idx,1); p.team.push(ch);
@@ -2936,50 +2928,36 @@ function drawnPlayChar(idx){
   try{SFX.card('card_slide',0.6);}catch(e){}
   render();
 }
-function dmCardHTML(c,idx,place){
-  const isB=c.cat==='abc'&&c.type==='BLOCK';
-  const cls=c.cat==='char'?'char':(c.cat==='abc'?(isB?'abcb':'abc'):'bm');
-  const chip=c.cat==='char'?'CHARACTER':(c.cat==='abc'?(isB?'BLOCK ABC':'ATTACK ABC'):(c.cat==='crit'?'CRIT LENS':'BOOKMARK'));
-  const pow=(c.cat==='abc'&&c.power!=null)?`<div class="dm-pow">${c.power}</div>`:'';
-  const nm=dmEsc(c.cat==='char'?c.name:(c.name||c.word||(c.q?String(c.q).slice(0,42):'\u2014')));
-  const meta=c.cat==='char'?`\u2764 ${c.hp} HP`:(c.cat==='abc'&&c.power!=null?`Power ${c.power}`:'artifact');
-  let btns='';
-  if(place&&c.cat==='char'){
-    const p=S.you;
-    btns=`<div class="dm-btns"><button data-do="dmplace:${idx}:active" ${p._hasActive?'disabled':''}>\u2605 Active</button>`
-       + `<button data-do="dmplace:${idx}:bench" ${drawnBench(p)>=3?'disabled':''}>\u25bc Bench</button></div>`;
-  }
-  return `<div class="dm-card ${cls}">${pow}<div class="dm-type">${chip}</div><div class="dm-nm">${nm}</div><div class="dm-meta">${meta}</div>${btns}</div>`;
+/* ---- inline opening: flip reveal -> keep/mulligan popup -> place on the board ---- */
+function drawnHasActive(p){ return !!(p._hasActive && p.team[p.activeIdx] && p.team[p.activeIdx].hp>0); }
+/* charges/bookmarks are meaningless with nobody on the field — lock them until an Active exists */
+function drawnLocked(){ return !!(S && S.drawn && S.you._drawn && !drawnHasActive(S.you)); }
+function drawnFlip(i){
+  if(!S||!S.drawn||S.phase!=='reveal') return;
+  const c=S.you.hand[i]; if(!c||!c._faceDown) return;
+  c._faceDown=false; try{SFX.card('pack_take',0.7);}catch(e){}
+  if(!S.you.hand.some(x=>x._faceDown)){ S._mullPop=true; }
+  render();
 }
-function drawnOpeningScreen(){
-  const p=S.you;
-  if(S.phase==='mull'){
-    const n=p.hand.filter(c=>c.cat==='char').length, m=S.mullCount||1;
-    return `<div class="dm-wrap">
-      <div class="dm-phase">OPENING HAND <span class="dm-tag">DRAWN MODE</span>
-        <span class="dm-mull"> \u2014 attempt ${m}/3 \u00b7 ${n} character${n!==1?'s':''} in hand (seeded \u22651)</span></div>
-      <div class="dm-hand">${p.hand.map((c,i)=>dmCardHTML(c,i,false)).join('')}</div>
-      <div style="margin-top:14px">
-        <button class="dm-btn ghost" data-do="dmmull" ${m>=3?'disabled':''}>Mulligan</button>
-        <button class="dm-btn" data-do="dmkeep">Keep this hand \u203a</button></div>
-      <div class="dm-note"><b>Seed guarantee:</b> the opening always contains at least one character, so a bad shuffle can never brick you. <b>Mulligan</b> reshuffles for a fresh 5 (dig-deeper), up to 3 attempts \u2014 no forfeit loss.</div>
-    </div>`;
-  }
-  const act=p._hasActive?p.team[p.activeIdx]:null;
-  const bench=p.team.filter((c,i)=>!(p._hasActive&&i===p.activeIdx));
-  const slot=c=>c?`<div class="dm-card char"><div class="dm-type">CHARACTER</div><div class="dm-nm">${dmEsc(c.name)}</div><div class="dm-meta">\u2764 ${c.hp} HP</div></div>`:'<div class="dm-slot">empty</div>';
-  let bs=''; for(let i=0;i<3;i++) bs+=slot(bench[i]);
-  return `<div class="dm-wrap">
-    <div class="dm-phase">PLACEMENT <span class="dm-tag">DRAWN MODE</span></div>
-    <div class="dm-board">
-      <div class="dm-zone act"><h3>ACTIVE</h3><div class="dm-slots">${slot(act)}</div></div>
-      <div class="dm-zone"><h3>BACKSTAGE (${bench.length}/3)</h3><div class="dm-slots">${bs}</div></div>
-    </div>
-    <div class="dm-phase">YOUR HAND</div>
-    <div class="dm-hand">${p.hand.map((c,i)=>dmCardHTML(c,i,true)).join('')}</div>
-    <div style="margin-top:14px"><button class="dm-btn" data-do="dmbegin" ${p._hasActive?'':'disabled'}>Begin the match \u203a</button></div>
-    <div class="dm-note">Place at least an <b>Active</b> to begin. Backstage holds up to <b>3</b>. On the first hand you place directly; mid-game, new characters must route <b>hand \u2192 backstage \u2192 active</b>.</div>
-  </div>`;
+function drawnFlipAll(){
+  if(!S||!S.drawn||S.phase!=='reveal') return;
+  const fd=S.you.hand.filter(c=>c._faceDown);
+  fd.forEach((c,k)=>setTimeout(()=>{
+    if(!S||S.phase!=='reveal') return;
+    c._faceDown=false; if(k===0){ try{SFX.card('pack_take',0.7);}catch(e){} }
+    if(k===fd.length-1) S._mullPop=true;
+    render();
+  }, k*110));
+}
+function drawnMullModal(){
+  const n=S.you.hand.filter(c=>c.cat==='char').length, m=S.mullCount||1;
+  return `<div class="modal-bg"><div class="dm-pop">
+    <div class="dm-pop-h">Keep this hand?</div>
+    <div class="dm-pop-a">Attempt ${m} of 3</div>
+    <p class="dm-pop-b">You drew <b>${n} character${n!==1?'s':''}</b>. The opening is always seeded with at least one, so a bad shuffle can never brick you.${m>=3?' <b>This is your last hand</b> — no mulligans remain.':' A mulligan reshuffles for a fresh five.'}</p>
+    <div><button class="toolbtn" data-do="dmmull" ${m>=3?'disabled':''}>Mulligan</button>
+    <button class="bigbtn" data-do="dmkeep">Keep this hand \u203a</button></div>
+  </div></div>`;
 }
 const setName = k => k==='gatsby'?'The Great Gatsby':k==='crucible'?'The Crucible':k==='hamlet'?'Hamlet':k==='frankenstein'?'Frankenstein':k==='sherlock'?'Sherlock Holmes':k==='othello'?'Othello':k==='oz'?'The Wonderful Wizard of Oz':k==='macbeth'?'Macbeth':k==='wonderland'?'Alice in Wonderland':k==='tewwg'?'Their Eyes Were Watching God':k;
 const otherDeck = k => (Object.keys(DATA.characters).find(x=>x!==k)) || k;
@@ -3193,6 +3171,7 @@ function tryPlayHandCard(idx,targetUid){
   const p=S.you, card=p.hand[idx]; if(!card) return;
   if(card.cat==='hex'){ const bmi=p.hand.findIndex(c=>c.cat==='bookmark'); if(bmi>=0){ p.discard.push(p.hand.splice(bmi,1)[0]); const hi=p.hand.indexOf(card); if(hi>=0) p.discard.push(p.hand.splice(hi,1)[0]); pushLog('You purge the Hex, spending a Bookmark.'); try{SFX.card('card_place',0.6);}catch(e){} render(); } else toast('Need a Bookmark in hand to purge the Hex.'); return; }
   if(card.cat==='char'){ drawnPlayChar(idx); return; }
+  if(drawnLocked()){ toast('Place a character as your Active first.'); return; }
   if(card.cat==='bookmark'){ playBookmark('you',idx); return; }
   if(card.cat==='crit'){ playCrit('you',idx); return; }
   if(p.attachesLeft<=0){ toast('No attaches left this turn.'); return; }
@@ -3519,6 +3498,7 @@ function doSwitch(p, newIdx, opts){
   }
 }
 function performAttack(side,abilKey){           // == beginAttack
+  if(S&&S.drawn){ const _ap=S[arguments[0]]||S.you; if(!_ap||!_ap.team[_ap.activeIdx]||_ap.team[_ap.activeIdx].hp<=0){ toast&&toast('No Active character on the field.'); return false; } }
   const A=S[side], att=active(A), ab=att[abilKey];
   if(!A.critTurn) A.critTurn={};
   if((abilKey==='atk'||abilKey==='atk2') && A.flags.skipAttack){ A.flags.skipAttack=false; var _fl=A.flags.skipAttackFlavor||"Hamlet's hesitation", _nm=A.flags.skipAttackName||"Anticipatory Madness"; if(side==='you') toast(_fl+" — attack skipped."); pushLog(`${who(A)} must skip the attack declaration (${_nm}).`); A.flags.skipAttackFlavor=null; A.flags.skipAttackName=null; return false; }
@@ -3909,9 +3889,6 @@ function answerTrivia(choice){
 function render(){
   const root=$('#game'); if(!root) return;
   try{ if(APP.screen==='play'&&S){ SFX.contextTrack(S.scrim?((S.scrim.node&&S.scrim.node.boss)?'boss':'hiphop9'):null); } else { SFX.contextTrack(null); } }catch(e){}
-  /* DRAWN MODE: opening/placement run BEFORE the board exists — never reach renderGame with an empty team. */
-  if(APP.screen==='play' && S && S.drawn && (S.phase==='mull'||S.phase==='place')){
-    document.body.setAttribute('data-screen','play'); root.innerHTML=drawnOpeningScreen(); return; }
   if(APP.screen==='play' && S){ document.body.setAttribute('data-screen','play'); sweepActiveBm(S.you); sweepActiveBm(S.opp); renderGame(root); try{fxHpTrails();}catch(e){} return; }
   if(APP.screen==='scrim'){ document.body.setAttribute('data-screen','scrim'); document.body.setAttribute('data-scrimview',(SCRIM&&SCRIM.view)||''); root.innerHTML=scrimScreen(); scrimAfterRender&&scrimAfterRender(); return; }
   if(APP.screen==='builder'){ document.body.setAttribute('data-screen','builder'); root.innerHTML=builderScreen(); return; }
@@ -4292,6 +4269,10 @@ function handCard(c,idx){
   const straty=S.turn==='you'&&S.phase==='strategize'&&!busy;
   const you=S.you;
   const deal=c._new?' deal-in':''; if(c._new) c._new=false;
+  if(c._faceDown){
+    return `<div class="hc dm-fd playable${deal}" data-do="dmflip:${idx}">
+      <div class="dm-fd-in"><span>A</span></div></div>`;
+  }
   if(c.cat==='hex'){
     const canPurge=straty && you.hand.some(x=>x.cat==='bookmark');
     return `<div class="hc hex ${canPurge?'playable':'spent'}${deal}" data-idx="${idx}">
@@ -4299,10 +4280,11 @@ function handCard(c,idx){
       <div class="hc-name">Cursed Interruption</div>
       <div class="hc-text">${canPurge?'Tap — spend a Bookmark to purge':'Hold it and take 10 at end of turn'}</div></div>`;
   }
+  const _lk=(drawnLocked()&&c.cat!=='char')?' dm-lock':'';
   if(c.cat==='abc'){
-    const playable=straty && you.attachesLeft>0;
+    const playable=straty && you.attachesLeft>0 && !drawnLocked();
     const pw = you._ratingsBlank ? '<span class="pw">?</span>' : `<span class="pw">${c.power}</span>`;
-    return `<div class="hc abc ${c.type.toLowerCase()} ${playable?'playable drag-src':'spent'}${deal}" data-idx="${idx}">
+    return `<div class="hc abc ${c.type.toLowerCase()} ${playable?'playable drag-src':'spent'}${deal}${_lk}" data-idx="${idx}">
       <div class="hc-top">${c.type==='ATTACK'?'⚔ ATTACK':'⛊ BLOCK'}${pw}</div>
       <div class="hc-q">${c.q}</div>
       <div class="hc-foot">${c.type==='ATTACK'?'Answer to charge an attack':'Answer to charge a block'}</div></div>`;
@@ -4320,17 +4302,22 @@ function handCard(c,idx){
     const d=c._cdef||{};
     const bench=drawnBench(you);
     const liveAct=!!(you._hasActive && you.team[you.activeIdx] && you.team[you.activeIdx].hp>0);
-    const cp=straty && (bench<3 || !liveAct);
+    const placing = S.phase==='place';
+    const cp=(straty||placing) && (bench<3 || !liveAct);
     const img=d.img?`<img class="hcc-img" src="${d.img}" alt="${c.name}">`:`<span class="hcc-mono" style="background:${c.accent||'#444'}">${initials(c.name)}</span>`;
-    const foot=!liveAct?'Tap — step up to Active':(bench<3?`Tap — send to Backstage (${bench}/3)`:'Backstage is full (3)');
-    return `<div class="hc crit ${cp?'playable':'spent'}${deal}" data-idx="${idx}">
+    /* first hand (no Active yet): choose Active or Bench. Afterwards: Bench only. */
+    const foot = placing
+      ? `<div class="dm-pb"><button data-do="dmplace:${idx}:active" ${liveAct?'disabled':''}>\u2605 Active</button>`
+        + `<button data-do="dmplace:${idx}:bench" ${bench>=3?'disabled':''}>\u25bc Bench</button></div>`
+      : `<div class="hcc-foot">${!liveAct?'Tap \u2014 step up to Active':(bench<3?`Tap \u2014 send to Backstage (${bench}/3)`:'Backstage is full (3)')}</div>`;
+    return `<div class="hc crit ${cp?'playable':'spent'}${deal}" ${placing?'':`data-idx="${idx}"`}>
       <div class="hc-top crt">\u2605 CHARACTER</div>
       <div class="hcc-port">${img}</div>
       <div class="hcc-nm">${c.name}</div>
-      <div class="hcc-foot">${foot}</div></div>`;
+      ${foot}</div>`;
   }
-  const playable=straty && (you.flags.bmCount||0)<2;
-  return `<div class="hc bm ${c.kind.toLowerCase()} ${playable?'playable':'spent'}${deal}" data-idx="${idx}">
+  const playable=straty && (you.flags.bmCount||0)<2 && !drawnLocked();
+  return `<div class="hc bm ${c.kind.toLowerCase()} ${playable?'playable':'spent'}${deal}${_lk}" data-idx="${idx}">
     <div class="hc-top bmk">✦ ${c.kind}${c.rarity?` · ${({C:'⚪ C',U:'🟢 U',R:'🔵 R',E:'🟣 E',L:'👑 L'})[c.rarity]||c.rarity}`:''}</div><div class="hc-name">${c.name}</div><div class="hc-text">${c.text}</div></div>`;
 }
 /* ---- transient animation overlays (cosmetic, self-cleaning) ---- */
@@ -4564,7 +4551,9 @@ function renderGame(root){
   const phaseHud=phases.map(ph=>`<div class="ph ${S.phase===ph&&S.turn==='you'?'on':''} ${S.turn==='opp'?'dim':''}">${ph}</div>`).join('<span class="ph-arrow">›</span>');
   let actionBtn='';
   if(S.turn==='you'&&!S.over&&!busy){
-    if(S.phase==='draw') actionBtn=`<button class="bigbtn" data-do="draw">Draw a card</button>`;
+    if(S.phase==='reveal') actionBtn=`<span class="hint">Tap your cards to reveal them</span><button class="dm-flipall" data-do="dmflipall">Flip all</button>`;
+    else if(S.phase==='place') actionBtn=`<span class="hint">Choose an Active to take the field</span>`;
+    else if(S.phase==='draw') actionBtn=`<button class="bigbtn" data-do="draw">Draw a card</button>`;
     else if(S.phase==='strategize') actionBtn=`<button class="bigbtn" data-do="engage">Done — go to Engage ›</button><span class="hint">Attaches left: ${you.attachesLeft} · Bookmarks: ${2-(you.flags.bmCount||0)} left</span>`;
     else if(S.phase==='engage') actionBtn=`<button class="bigbtn end" data-do="end">End turn ›</button><span class="hint">Tap your lit attack to strike</span>`;
   } else if(S.turn==='opp'&&!S.over){ actionBtn=`<span class="thinking">Opponent is thinking…</span>`; }
@@ -4600,7 +4589,8 @@ function renderGame(root){
    ${S.over?(S.scrim?scrimOverModal():overModal()):''}
    ${S._settings?settingsModal():''}
    ${S._benchView?benchInfoModal():''}
-   ${S._handView!=null?handViewModal():''}`;
+   ${S._handView!=null?handViewModal():''}
+   ${S.drawn&&S._mullPop?drawnMullModal():''}`;
   fitNames();
   fitBoard();
 }
@@ -4977,9 +4967,10 @@ document.addEventListener('click',e=>{
     else if(d==='to-tune'){ APP.screen='tune'; render(); }
     else if(d==='custom'){ APP.screen='custom'; render(); }
     else if(d==='menu'){ stopTurnTimer(); APP.screen='menu'; S=null; render(); }
+    else if(d.startsWith('dmflip:')){ drawnFlip(+d.split(':')[1]); }
+    else if(d==='dmflipall') drawnFlipAll();
     else if(d==='dmmull') drawnMulligan();
     else if(d==='dmkeep') drawnKeepHand();
-    else if(d==='dmbegin') drawnBeginMatch();
     else if(d.startsWith('dmplace:')){ const q=d.split(':'); drawnPlace(+q[1], q[2]); }
     else if(d==='draw') doDraw();
     else if(d==='engage') toEngage();
@@ -5023,6 +5014,7 @@ function _endDrag(){ if(_drag&&_drag.active) window._dragJustEnded=Date.now();
 document.addEventListener('pointerdown', function(){ try{ SFX.unlock&&SFX.unlock(); }catch(e){} }, {passive:true});
 document.addEventListener('pointerdown',e=>{
   if(!S||S.turn!=='you'||S.phase!=='strategize'||busy) return;
+  if(drawnLocked()) return;
   const el=e.target.closest('.hc.abc.drag-src[data-idx]'); if(!el) return;
   const idx=+el.dataset.idx, card=S.you.hand[idx]; if(!card) return;
   _drag={idx, sx:e.clientX, sy:e.clientY, pid:e.pointerId, active:false, label:`${card.type==='ATTACK'?'⚔':'⛊'} ${card.power}`};
@@ -6636,7 +6628,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
-  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBeginMatch, drawnOpeningScreen, drawnBench, drawnPlayChar, checkKO, makeChar,
+  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
   get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
