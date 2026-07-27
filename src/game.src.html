@@ -4699,7 +4699,7 @@ function buildCharPreview(ch,deck){ if(!ch) return '';
     <div class="pv-port">${img}</div>
     <div class="pv-name">${ch.name}</div>
     <div class="pv-hp">❤ ${ch.hp} HP${(ch.tags||[]).includes('villain')?' · <em>Villain</em>':''}</div>
-    ${mv(ch.atk,'atk')}${mv(ch.blk,'blk')}
+    ${mv(ch.atk,'atk')}${ch.atk2?mv(ch.atk2,'atk'):''}${mv(ch.blk,'blk')}
   </div>`;
 }
 function buildFePreview(f){ if(!f) return '';
@@ -4723,7 +4723,7 @@ function buildFePreview(f){ if(!f) return '';
     <div class="pv-name">${f.name} <span class="fe-badge">1ST ED</span></div>
     <div class="pv-hp">\u2764 ${f.hp} HP \u00b7 ${f.deck?setName(f.deck):'no deck yet'}</div>
     <div class="pv-sec"><span>Passive \u2014 ${f.passive.name}</span>${f.passive.text}</div>
-    ${mv(f.atk,'atk')}${mv(f.blk,'blk')}
+    ${mv(f.atk,'atk')}${f.atk2?mv(f.atk2,'atk'):''}${mv(f.blk,'blk')}
   </div>`;
 }
 function buildAbcPreview(a){ if(!a) return '';
@@ -5588,7 +5588,7 @@ function buildRunDeck(rd){ const deck=[];
   (rd.bm||[]).forEach((i,n)=>{ const b=DATA.bookmarks[i]; if(b) deck.push({cat:'bookmark',...clone(b),cid:'b'+n+Math.random().toString(36).slice(2,5)}); });
   (rd.cr||[]).forEach((i,n)=>{ const c=DATA.crits[i]; if(c) deck.push({cat:'crit',...clone(c),cid:'c'+n+Math.random().toString(36).slice(2,5)}); });
   return deck; }
-function buildScrimChar(rec){ let def; if(rec.fe) def=firstedById(rec.id); else def=(DATA.characters[rec.deck]||[]).find(c=>c.id===rec.id); if(!def) return null; const c=makeChar(def,1.0); if(rec.maxHp) c.maxHp=rec.maxHp; c.hp=Math.max(0,Math.min(rec.curHp!=null?rec.curHp:c.maxHp,c.maxHp)); c._scrimIdx=rec._i; return c; }
+function buildScrimChar(rec){ let def; if(rec.fe) def=firstedById(rec.id); else def=(DATA.characters[rec.deck]||[]).find(c=>c.id===rec.id); if(!def) return null; const c=makeChar(def,1.0); if(def.atk2&&!c.atk2) c.atk2=clone(def.atk2); if(rec.maxHp) c.maxHp=rec.maxHp; c.hp=Math.max(0,Math.min(rec.curHp!=null?rec.curHp:c.maxHp,c.maxHp)); c._scrimIdx=rec._i; return c; }
 function scrimYouPlayer(){ const team=[]; SCRIM.team.forEach((rec,i)=>{ rec._i=i; const c=buildScrimChar(rec); if(c) team.push(c); }); const deck=shuffle(buildRunDeck(SCRIM.deck)); return scrimPlayerShell('You',SCRIM.kit,team,deck); }
 function scrimNoHeal(bmIdxs){ return bmIdxs.filter(i=>!(DATA.bookmarks[i] && (DATA.bookmarks[i].effect==='heal' || DATA.bookmarks[i].effect==='defib'))); }
 function scrimBossDeck(b){ const dk=b.deck||scrimRandomDeck(); const def=defaultDeck(dk); return { ab:def.ab.map(i=>({d:dk,i})).slice(0,16), bm:scrimNoHeal(def.bm).slice(0,8), cr:[] }; }
