@@ -2576,7 +2576,7 @@ const DEFAULTS = {
   koTarget:3, handMin:4, turnTimer:60,
 };
 let S = null;                 // game state (null until a battle starts)
-let APP = { screen:'menu', mode:null, difficulty:'honorroll', youDeck:'gatsby', oppDeck:'random', settings:clone(DEFAULTS) };
+let APP = { screen:'menu', mode:null, difficulty:'honorroll', youDeck:'gatsby', oppDeck:'random', settings:clone(DEFAULTS), drawnMode:false };
 let busy = false;
 let aiWatch = null;           // safety net: force-ends a stalled AI turn
 let atkCtx = null;            // in-flight attack context
@@ -2776,22 +2776,34 @@ function makeDeck(def){
   Object.keys(def.edbm||{}).forEach((cid)=>{ const ct=def.edbm[cid]; const b=edBmByCid(def.d,cid); if(b){ for(let n=0;n<ct;n++) deck.push({cat:'bookmark',...clone(b),cid:'eb'+n+Math.random().toString(36).slice(2,5)}); } });
   return shuffle(deck);
 }
-function newPlayer(name,def,st){
+function newPlayer(name,def,st,drawn){
   const ids=def.ch.length?def.ch:DATA.characters[def.d].map(c=>c.id);
   const defs=ids.map(id=>edResolveChar(def,id)).filter(Boolean);
   const pool=shuffle(clone(defs));
   const team=pool.slice(0,1+st.benchSize).map(d=>makeChar(d,st.hpScale));
   (def.fe||[]).slice(0,LIMITS.fe).forEach(id=>{ const fd=firstedById(id); if(fd) team.push(makeChar(fd,st.hpScale)); });
   const deck=makeDeck(def);
+  if(drawn){
+    /* DRAWN MODE (player side only): characters live in the deck as cat:'char' cards.
+       The board (team[]) starts EMPTY and is filled during the placement phase. */
+    const mk=(d,isFe)=>({ cat:'char', charId:d.id, name:d.name, accent:d.accent||'#444', hp:d.hp,
+                          fe:!!isFe, _cdef:d,
+                          cid:'h'+d.id+'_'+Math.random().toString(36).slice(2,6) });
+    const chCards=pool.map(d=>mk(d,false));
+    (def.fe||[]).slice(0,LIMITS.fe).forEach(id=>{ const fd=firstedById(id); if(fd) chCards.push(mk(fd,true)); });
+    return { name,setKey:def.d,team:[],activeIdx:0,deck:shuffle(deck.concat(chCards)),hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,crit:null,critTurn:{},critEver:{},flags:{},activeBm:[],_hpScale:st.hpScale,_drawn:true };
+  }
   return { name,setKey:def.d,team,activeIdx:0,deck,hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,crit:null,critTurn:{},critEver:{},flags:{},activeBm:[] };
 }
 function newGame(st,youDef,oppDef){
   stopTurnTimer();
   youDef=clampDeck(youDef||defaultDeck(st.youSet));
   oppDef=clampDeck(oppDef||defaultDeck(st.oppSet));
+  const drawn = !!APP.drawnMode;
   S = { settings:clone(st), turn:'you', phase:'deal', over:false, winner:null,
         pending:null, defend:false, picker:null, viewPile:null, poison:0, _logopen:false, _settings:false, fxShuffle:false,
-        you:newPlayer('You',youDef,st), opp:newPlayer('Opponent',oppDef,st), log:[] };
+        drawn:drawn, mullCount:0,
+        you:newPlayer('You',youDef,st,drawn), opp:newPlayer('Opponent',oppDef,st,false), log:[] };
   APP.screen='play';
   pushLog(`New game — You (${setName(youDef.d)}) vs Opponent (${setName(oppDef.d)}).`);
   render();
@@ -6419,7 +6431,7 @@ function scrimDeadScreen(){
   </div></div>`;
 }
 
-window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null}; render(); };
+window.ABC_BOOT = ()=>{ APP={screen:'menu',mode:null,difficulty:'honorroll',youDeck:'gatsby',oppDeck:'random',settings:clone(DEFAULTS),customDeck:null,codeMsg:null,drawnMode:false}; render(); };
 window.ABC_EXPORT = {
   decks:()=>Object.keys(DATA.characters||{}),
   chars:(deck)=>(DATA.characters[deck]||[]).map(c=>({id:c.id,name:c.name})),
@@ -6453,7 +6465,7 @@ window.ABC_EXPORT = {
   expBmData:function(k,i){ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; const x=b&&b.bookmarks&&b.bookmarks[i]; if(!x)return null; return {kind:'bm',name:x.name,bkind:x.kind,text:x.text,rarity:this._rar(x.rarity),effect:x.effect||''}; }
 };
 window.ABC_DEBUG = {
-  forceCorrupted:false, get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+  forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;}, get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
