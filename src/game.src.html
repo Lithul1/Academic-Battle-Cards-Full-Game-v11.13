@@ -1524,6 +1524,11 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .dm-fd-in span{font-family:var(--disp);font-size:24px;color:var(--gold);text-shadow:2px 2px 0 rgba(0,0,0,.45);
   border:3px solid var(--gold);border-radius:50%;width:50px;height:50px;display:grid;place-items:center}
 .hc.dm-fd:hover{transform:translateY(-10px);box-shadow:0 12px 0 #0c2426,0 0 0 3px var(--gold)}
+.hc-info{position:absolute;top:3px;right:3px;z-index:3;width:19px;height:19px;padding:0;line-height:1;
+  border:2px solid var(--ink);border-radius:50%;background:var(--cream-hi);color:var(--ink);
+  font-family:var(--cond);font-size:12px;cursor:pointer}
+.hc-info:hover{background:var(--gold)}
+.hc.crit{position:relative}
 .dm-pb{display:flex;gap:4px;padding:0 5px 5px}
 .dm-pb button{flex:1;font-family:var(--cond);font-size:9px;letter-spacing:.5px;border:2px solid var(--ink);
   border-radius:5px;padding:3px 2px;cursor:pointer;background:var(--cream-hi);color:var(--ink)}
@@ -2880,7 +2885,7 @@ function dealOpening(){
 /* ================= DRAWN MODE — Phase 1 (opening seed / mulligan / placement) ================= */
 /* All of this is gated behind S.drawn and touches the PLAYER side only. */
 function dmEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function drawnBench(p){ return p.team.length-(p._hasActive?1:0); }
+function drawnBench(p){ return p.team.filter((c,i)=>c.hp>0 && !(p._hasActive && i===p.activeIdx)).length; }
 /* Guarantee >=1 character in the opening hand — a bad shuffle can never brick you. */
 function seedOpeningHand(){
   const p=S&&S.you; if(!p||!p.hand) return false;
@@ -4219,6 +4224,8 @@ function statusHelpModal(k){
 function benchTiles(p,mine){
   return p.team.map((c,i)=>{ if(i===p.activeIdx) return '';
     const dead=c.hp<=0, pct=Math.max(0,c.hp/c.maxHp*100);
+    /* Drawn Mode: the Backstage is a bench, not a graveyard — KO'd cards go to the pile. */
+    if(dead && S && S.drawn && p._drawn) return '';
     const drop=mine&&!dead;
     return `<div class="bench-mini ${dead?'dead':''}${c.fe?' fe':''}${drop?' drop-zone':''}" title="${c.name}" data-benchinfo="${mine?'you':'opp'}:${c.uid}"${drop?` data-drop="1" data-charuid="${c.uid}"`:''}>
       <span class="bm-init" style="background:${c.accent}">${c.img?`<img class="bm-img" src="${c.img}" style="object-position:${c.imgpos||'50% 20%'}">`:initials(c.name)}${c.fe?'<span class="fe-mini" title="1st Edition">\u2726</span>':''}${mine&&!dead?`<button class="bm-swap" data-do="swap:${c.uid}" title="Bring to Active (one swap per turn)">\u21c4</button>`:''}</span>
@@ -4322,7 +4329,9 @@ function handCard(c,idx){
       ? `<div class="dm-pb"><button data-do="dmplace:${idx}:active" ${liveAct?'disabled':''}>\u2605 Active</button>`
         + `<button data-do="dmplace:${idx}:bench" ${bench>=3?'disabled':''}>\u25bc Bench</button></div>`
       : `<div class="hcc-foot">${!liveAct?'Tap \u2014 step up to Active':(bench<3?`Tap \u2014 send to Backstage (${bench}/3)`:'Backstage is full (3)')}</div>`;
+    /* inspect is always reachable, including mid-placement, so you can judge stats before committing */
     return `<div class="hc crit ${cp?'playable':'spent'}${deal}" ${placing?'':`data-idx="${idx}"`}>
+      <button class="hc-info" data-do="dminfo:${idx}" title="Card details">\u24d8</button>
       <div class="hc-top crt">\u2605 CHARACTER</div>
       <div class="hcc-port">${img}</div>
       <div class="hcc-nm">${c.name}</div>
@@ -4644,6 +4653,16 @@ function handViewInfo(c){
     if(cr.reward)  out+='<div class="hvi-row rw"><b>\uD83C\uDF96 Reward</b><p>'+cr.reward+'</p></div>';
     return out?'<div class="hv-info">'+out+'</div>':'';
   }
+  if(c.cat==='char'){
+    const d=c._cdef||{}; let out='';
+    out+='<div class="hvi-row"><b>\u2764 Health</b><p>'+(d.hp||c.hp||'?')+' HP</p></div>';
+    if(d.atk) out+='<div class="hvi-row"><b>\u2694 '+(d.atk.n||'Attack')+' \u2014 '+(d.atk.label||'')+'</b><p>'+(d.atk.t||'')+'</p></div>';
+    if(d.atk2) out+='<div class="hvi-row"><b>\u2694 '+(d.atk2.n||'Attack 2')+' \u2014 '+(d.atk2.label||'')+'</b><p>'+(d.atk2.t||'')+'</p></div>';
+    if(d.blk) out+='<div class="hvi-row"><b>\u26ca '+(d.blk.n||'Block')+' \u2014 '+(d.blk.label||'')+'</b><p>'+(d.blk.t||'')+'</p></div>';
+    if(d.passive) out+='<div class="hvi-row th"><b>\u2605 '+(d.passive.name||'Passive')+'</b><p>'+(d.passive.text||'')+'</p></div>';
+    if(d.tags&&d.tags.length) out+='<div class="hvi-row"><b>\u2691 Tags</b><p>'+d.tags.join(' \u00b7 ')+'</p></div>';
+    return out?'<div class="hv-info">'+out+'</div>':'';
+  }
   if(c.cat==='bookmark'){
     var t=c.text||c.desc||'';
     return t?'<div class="hv-info"><div class="hvi-row"><b>\u2726 Effect</b><p>'+t+'</p></div></div>':'';
@@ -4657,7 +4676,7 @@ function handViewModal(){
     <div class="hv-card">${handCard(c,i)}</div>
     ${handViewInfo(c)}
     <div class="hv-acts">
-      <button class="hv-play" data-do="playhand">\u25b6 Play card</button>
+      ${(S.drawn&&S.phase==='place')?'':`<button class="hv-play" data-do="playhand">\u25b6 Play card</button>`}
       <button class="hv-close" data-do="closehand">Close \u2715</button>
     </div></div></div>`;
 }
@@ -4979,6 +4998,7 @@ document.addEventListener('click',e=>{
     else if(d==='to-tune'){ APP.screen='tune'; render(); }
     else if(d==='custom'){ APP.screen='custom'; render(); }
     else if(d==='menu'){ stopTurnTimer(); APP.screen='menu'; S=null; render(); }
+    else if(d.startsWith('dminfo:')){ S._handView=+d.split(':')[1]; render(); }
     else if(d.startsWith('dmflip:')){ drawnFlip(+d.split(':')[1]); }
     else if(d==='dmflipall') drawnFlipAll();
     else if(d==='dmmull') drawnMulligan();
@@ -6640,7 +6660,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
-  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
+  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, metaLoad, defaultDeck, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
   get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
