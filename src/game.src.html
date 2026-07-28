@@ -2380,17 +2380,17 @@ const DATA = {
 
   // -------- BOOKMARK CARDS (support / item) --------
   bookmarks: [
-    { id:'firstaid', name:'First Aid Kit', kind:'ITEM', text:'Restore one of your characters to full HP.', effect:'heal' },
+    { id:'firstaid', name:'First Aid Kit', kind:'ITEM', text:'Restore one of your characters to full HP.', effect:'heal' , rarity:'R' },
     { id:'supercharge', name:'Supercharger', kind:'ITEM', text:'Your next attack deals double damage (unless it is blocked).', effect:'supercharge' },
     { id:'ironcurtain', name:'Iron Curtain', kind:'SUPPORT', text:'Block all damage to your Active on the next attack.', effect:'ironcurtain' },
     { id:'papercut', name:'Papercut', kind:'ITEM', text:'Discard up to 3 cards, then draw that many.', effect:'papercut' },
-    { id:'cliffnotes', name:'Cliffnotes', kind:'SUPPORT', text:'Your next ABC attaches with no trivia question.', effect:'cliffnotes' },
-    { id:'truce', name:'Truce', kind:'SUPPORT', text:"Skip the opponent's next attack.", effect:'truce' },
+    { id:'cliffnotes', name:'Cliffnotes', kind:'SUPPORT', text:'Your next ABC attaches with no trivia question.', effect:'cliffnotes' , rarity:'R' },
+    { id:'truce', name:'Truce', kind:'SUPPORT', text:"Skip the opponent's next attack.", effect:'truce' , rarity:'R' },
     { id:'peekaboo', name:'Peek-a-Boo', kind:'SUPPORT', text:'Both players shuffle their hands into their decks and draw 5.', effect:'peekaboo' },
     { id:'defib', name:'Defibrillator', kind:'ITEM', text:'Discard 3 cards to revive a knocked-out character to your bench at half HP.', effect:'defib' },
     { id:'poison', name:'Vial of Poison', kind:'ITEM', text:'Both Active characters lose 20 HP at the start of the next 2 turns.', effect:'poison' },
     { id:'overexp', name:'Over Exposure', kind:'SUPPORT', text:"Discard 2 random cards from the opponent's hand.", effect:'overexp' },
-    { id:'crown', name:'Crown of Denmark', kind:'ITEM', text:'Gain 3 extra ABC attaches this turn.', effect:'crown' },
+    { id:'crown', name:'Crown of Denmark', kind:'ITEM', text:'Gain 3 extra ABC attaches this turn.', effect:'crown' , rarity:'E' },
     { id:'trading', name:'Trading Places', kind:'SUPPORT', text:'Swap your Active with a benched character.', effect:'trading' },
     { id:'tornchapter', name:'Torn Chapter', kind:'STATUS', rarity:'C', text:'Inflict Tear on the enemy Active. While Torn, it takes +10 damage from all attacks.', effect:'tear' },
     { id:'loosebinding', name:'Loose Binding', kind:'STATUS', rarity:'U', text:"Inflict Tear; the target's next attack costs +1 Attack ABC.", effect:'loosebind' },
@@ -2423,6 +2423,7 @@ const DATA = {
     { id:'horizonspromise', name:"Horizon's Promise", kind:'BOOST', rarity:'U', text:'Give one of your characters Highlight — its next attack deals +20.', effect:'horizonspromise' },
     { id:'mucksurvival', name:'Muck Survival', kind:'UTILITY', rarity:'E', text:'Remove Burn, Spill, and Tear from one character and heal 30 HP.', effect:'mucksurvival' },
     { id:'trialverdict', name:'Trial Verdict', kind:'UTILITY', rarity:'L', text:"Strip all positive status from the opponent's Active, then inflict Smudge.", effect:'trialverdict' },
+    { id:'inkofvitality', name:'Ink of Vitality', kind:'ITEM', text:'Restore half of one character\u2019s maximum HP.', effect:'healhalf', rarity:'C' },
   ],
   // -------- 1ST EDITION (Commander) CARDS --------
   firsteds: [
@@ -3312,6 +3313,17 @@ function playBookmark(side,idx){
   const hold=(tag,uid)=>{ const i=P.hand.indexOf(card); if(i>=0) P.hand.splice(i,1); card._tag=tag; card._uid=uid||null; (P.activeBm||(P.activeBm=[])).push(card); };
   const commit=()=>{ P.flags.bmCount=(P.flags.bmCount||0)+1; P.flags.bmThisTurn=true; if(!P.critTurn)P.critTurn={}; P.critTurn.bm=true; const _eat=feOnField(P).find(c=>c.passive&&c.passive.onBookmarkHealTeam); if(_eat){ const amt=_eat.passive.onBookmarkHealTeam; let any=false; P.team.forEach(c=>{ if(c.hp>0&&c.hp<c.maxHp){ const b0=c.hp; c.hp=Math.min(c.maxHp,c.hp+amt); if(c.hp>b0){ fxHeal(sideOfChar(c),c.hp-b0); any=true; } } }); if(any) pushLog('Strength in Community — every ally heals '+amt+'.'); } };
   switch(card.effect){
+    case 'healhalf':{
+      const living=P.team.filter(c=>c.hp>0);
+      const go=t=>{ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ toast&&toast(`${t.name} cannot be healed.`); pushLog(`${t.name} refuses aid \u2014 Total Isolation.`); remove(); commit(); render(); return; }
+        const before=t.hp; const amt=Math.max(1,Math.round(t.maxHp/2));
+        healChar(t, amt);
+        pushLog(`${who(P)} used Ink of Vitality \u2014 ${t.name} recovers ${t.hp-before} HP.`);
+        fxHeal(sideOfChar(t),t.hp-before); remove(); commit(); render(); };
+      if(isYou && living.length>1) askPick('Restore which character?', living.map(c=>({label:`${c.name}  ${c.hp}/${c.maxHp}`,val:c.uid})), uid=>go(living.find(c=>c.uid===uid)));
+      else { const t=living.sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]; t?go(t):remove(); }
+      return;
+    }
     case 'heal':{
       const living=P.team.filter(c=>c.hp>0);
       const go=t=>{ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ toast&&toast(`${t.name} cannot be healed.`); pushLog(`${t.name} refuses aid — Total Isolation.`); remove(); commit(); render(); return; } const before=t.hp; t.hp=t.maxHp; pushLog(`${who(P)} used First Aid Kit — ${t.name} restored to full.`); fxHeal(sideOfChar(t),t.hp-before); remove(); commit(); render(); };
@@ -5233,8 +5245,13 @@ function sbx(){ try{ return APP.mode==='quick'; }catch(e){ return false; } }   /
    Base bookmarks 0-11 (the pre-rarity core set): 3 copies each, except the four
    swingiest (First Aid Kit, Cliffnotes, Truce, Crown of Denmark) held at 2 so an
    opening deck can't stack them. 32 available for 20 slots. */
-const STARTER_BM = { 0:2, 4:2, 5:2, 10:2,            // watchlist - capped at 2
-                     1:3, 2:3, 3:3, 6:3, 7:3, 8:3, 9:3, 11:3 };
+const STARTER_BM = { 1:4, 2:4, 3:4, 6:4, 7:4, 8:4, 9:4, 11:4,   // the 8 base Commons, max copies
+                     43:3 };                                    // Ink of Vitality - the Common heal,
+                                                                // held at 3 so an opening deck can't
+                                                                // stack 4 heals plus Defibrillator
+/* First Aid Kit (R), Cliffnotes (R), Truce (R) and Crown of Denmark (E) are deliberately NOT
+   granted - re-tiered above Common on 2026-07-27, they are now things you earn. Ink of Vitality
+   covers the starter heal at half strength, so First Aid Kit stays a real upgrade. */
 const STARTER_CR = [6,7,10,13];   // Archetypal, Formalism, Reader-Response, Biographical
 function starterBm(i){ return STARTER_BM[+i]||0; }
 function starterCr(i){ return STARTER_CR.indexOf(+i)>=0; }
@@ -6712,7 +6729,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
-  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
+  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, playBookmark, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
   get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
