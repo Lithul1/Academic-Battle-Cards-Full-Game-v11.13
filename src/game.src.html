@@ -4865,6 +4865,14 @@ const DIFFICULTY = {
 const DIFF_ORDER = ['passfail','honorroll','deanslist','valedictorian'];
 function bmRarity(b){ return b.rarity||'C'; }
 function bmIdxByRarity(rs){ const o=[]; DATA.bookmarks.forEach((b,i)=>{ if(rs.includes(bmRarity(b))) o.push(i); }); return o; }
+/* The opponent's lenses must not be drawn from the player's collection: poolCr() is
+   ownership-gated, so before this the AI's lens variety tracked whatever YOU had unlocked
+   (unlock Deconstruction, and the AI could suddenly use it against you). Count is unchanged
+   at LIMITS.cr; only the pool it draws from is decoupled. Crits carry no rarity field, so
+   difficulty cannot weight them the way it weights bookmarks. */
+function buildOppCrits(){
+  return pickN(DATA.crits.map((_,i)=>i), LIMITS.cr);
+}
 function buildOppBookmarks(diff){
   const commons=bmIdxByRarity(['C']), ur=bmIdxByRarity(['U','R']), epics=bmIdxByRarity(['E']), legends=bmIdxByRarity(['L']);
   const N=LIMITS.bm, out=[], pick=a=>a[rnd(a.length)];
@@ -4891,6 +4899,7 @@ function beginBattle(stIn){
   const diff=DIFFICULTY[APP.difficulty]||DIFFICULTY.honorroll;
   const oppDef=(APP.mode==='quick'||APP.youDeck==='surprise')?randomDeck(st.oppSet):defaultDeck(st.oppSet);
   oppDef.bm=buildOppBookmarks(diff);   // opponent bookmarks stay difficulty-tuned for challenge
+  oppDef.cr=buildOppCrits();           // ...and its lenses stay independent of YOUR vault (see below)
   newGame(st, youDef, oppDef);
 }
 function quickStart(diffKey){
@@ -6729,7 +6738,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
-  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, playBookmark, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
+  seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, buildOppCrits, buildOppBookmarks, get LIMITS_CR(){return LIMITS.cr;}, playBookmark, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
   get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
