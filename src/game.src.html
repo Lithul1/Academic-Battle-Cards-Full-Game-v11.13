@@ -3133,10 +3133,11 @@ function startTurn(){
     ['you','opp'].forEach(k=>{ const a=active(S[k]); if(a&&a.hp>0){ a.hp=Math.max(0,a.hp-20); pushLog(`Poison: ${a.name} loses 20 HP.`);} });
     S.poison--; ['you','opp'].forEach(k=>checkKO(S[k],k));
   }
-  // Burn / Spill tick (lose 10 HP); expire this player's timed statuses (Hardcover, Laminate, Glue, Tear cost-up)
-  ['you','opp'].forEach(k=>{ S[k].team.forEach(c=>{
+  // Burn / Spill tick (lose 10 HP, once per round); expire this player's timed statuses (Hardcover, Laminate, Glue, Tear cost-up)
+  // ticks once per round: only the player whose turn is starting
+  { const _tk=S.turn; S[_tk].team.forEach(c=>{
     if(c.hp>0 && (c.status.burn||c.status.spill)){ let loss=0; if(c.status.burn)loss=10; if(c.status.spill)loss=Math.max(loss,c.status.spillAmt||10); c.hp=Math.max(0,c.hp-loss); pushLog(`${c.status.burn?'Burn':'Spill'}: ${c.name} loses ${loss} HP.`); }
-  }); checkKO(S[k],k); });
+  }); checkKO(S[_tk],_tk); }
   p.team.forEach(c=>{ ['hardcover','laminate','glue','costUp'].forEach(s=>{ if(c.status[s]) delete c.status[s]; }); });
   p.team.forEach(c=>{ if(c.hp>0) c.turnsInPlay++; });
   feOnField(p).forEach(c=>{ if(c.passive&&c.passive.profileToggle && !c.status.highlight && !c.status.laminate){ grant(c,'highlight'); pushLog(`${c.name} shifts profile — Highlighted this turn.`); } });
