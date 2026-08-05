@@ -3126,6 +3126,7 @@ function startTurn(){
     if(S.scrim.ruleShift==='sinstaram2'){ const a=active(S.you); if(a&&a.hp>0){ a.hp=Math.max(1,a.hp-5); pushLog('Sponsored Post \u2014 ad tax: your Active loses 5 HP.'); } }
     if(S.scrim.ruleShift==='sicsoc2' && S.you.hand.length){ const lost=S.you.hand.shift(); if(lost){ S.you.discard.push(lost); pushLog('Doomscroll \u2014 the oldest card in your hand is discarded.'); } }
   }
+  S._turnNo=(S._turnNo||0)+1;
   S.phase='draw';
   pushLog(`— ${p===S.you?'Your':"Opponent's"} turn —`);
   // poison ticks at the start of each turn
@@ -3138,6 +3139,44 @@ function startTurn(){
   { const _tk=S.turn; S[_tk].team.forEach(c=>{
     if(c.hp>0 && (c.status.burn||c.status.spill)){ let loss=0; if(c.status.burn)loss=10; if(c.status.spill)loss=Math.max(loss,c.status.spillAmt||10); c.hp=Math.max(0,c.hp-loss); pushLog(`${c.status.burn?'Burn':'Spill'}: ${c.name} loses ${loss} HP.`); }
   }); checkKO(S[_tk],_tk); }
+  // ---- Siphon: drains the victim at the start of its own turn, feeds the owner ----
+  { const _sk=S.turn, _P=S[_sk]; _P._leechTurn=0;
+    _P.team.forEach(c=>{ const sp=c.status&&c.status.siphon; if(!sp||c.hp<=0) return;
+      const own=siphonOwner(sp), mode=sp.mode||'hp';
+      if(mode==='charge'){
+        const pool = c.blkCharge.length ? c.blkCharge : (c.atkCharge.length ? c.atkCharge : null);
+        if(pool && own && own.c && own.c.hp>0 && !_P._siphonStole){
+          const card=pool.shift(); own.P.discard.push(card); own.c.atkCharge.push(card); _P._siphonStole=true;
+          pushLog(`\u2604 Siphon: ${own.c.name} draws a charge off ${c.name} and attaches it free.`);
+        } else if(!pool){
+          const lost = _P.hand.length ? _P.hand.splice(Math.floor(Math.random()*_P.hand.length),1)[0] : null;
+          if(lost){ _P.discard.push(lost); pushLog(`\u2604 Siphon: ${c.name} has nothing charged \u2014 a card is drained from hand instead.`); }
+          else pushLog(`\u2604 Siphon finds nothing left on ${c.name}.`);
+        }
+      } else if(mode==='hand'){
+        const lost = _P.hand.length ? _P.hand.splice(Math.floor(Math.random()*_P.hand.length),1)[0] : null;
+        if(lost){ _P.discard.push(lost); pushLog(`\u2604 Siphon: ${c.name} discards a card.`); }
+        else pushLog(`\u2604 Siphon: ${c.name}'s hand is empty.`);
+        if(own && own.c && own.c.hp>0){ if(!own.P.deck.length&&own.P.discard.length) own.P.deck=shuffle(own.P.discard.splice(0));
+          if(own.P.deck.length){ own.P.hand.push(own.P.deck.shift()); pushLog(`\u2604 ${own.c.name} draws from the drain.`); } }
+      } else if(mode==='tempo'){
+        _P.attachesLeft=Math.max(0,(_P.attachesLeft||0)-1);
+        pushLog(`\u2604 Siphon: ${c.name} loses an attach this turn.`);
+      } else {
+        const dealt=Math.min(sp.amt||10, c.hp); c.hp=Math.max(0,c.hp-dealt);
+        pushLog(`\u2604 Siphon: ${c.name} loses ${dealt} HP.`);
+        if(own && own.c && own.c.hp>0){
+          const room=Math.max(0,20-(own.P._leechTurn||0));
+          const back=Math.min(sp.leech!=null?sp.leech:Math.floor((sp.amt||10)/2), dealt, room);
+          if(back>0){ healChar(own.c,back); own.P._leechTurn=(own.P._leechTurn||0)+back;
+            pushLog(`\u2604 ${own.c.name} draws back ${back} HP.`); }
+        } else pushLog('\u2604 The siphon has no owner left \u2014 nothing is returned.');
+      }
+      sp.turns=(sp.turns||1)-1;
+      if(sp.turns<=0){ delete c.status.siphon; pushLog(`Siphon fades from ${c.name}.`); }
+    });
+    _P._siphonStole=false; checkKO(_P,_sk);
+  }
   p.team.forEach(c=>{ ['hardcover','laminate','glue','costUp'].forEach(s=>{ if(c.status[s]) delete c.status[s]; }); });
   p.team.forEach(c=>{ if(c.hp>0) c.turnsInPlay++; });
   feOnField(p).forEach(c=>{ if(c.passive&&c.passive.profileToggle && !c.status.highlight && !c.status.laminate){ grant(c,'highlight'); pushLog(`${c.name} shifts profile — Highlighted this turn.`); } });
@@ -3273,7 +3312,7 @@ function inflict(t,k,ignoreLam){
   t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'neg'); return true;
 }
 function grant(t,k){ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ pushLog(`${t.name} is too isolated to gain ${statusName(k)}.`); return false; } if(t&&t.hp>0){ t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'pos'); return true; } return false; }
-function cleanseNeg(t){ if(!t) return; ['tear','rip','glue','burn','_smudgeHalf','costUp'].forEach(k=>{ delete t.status[k]; }); if(!t.status._spillLock){ delete t.status.spill; delete t.status.spillAmt; } if(!t.status._smudgeLock){ delete t.status.smudge; } }
+function cleanseNeg(t){ if(!t) return; ['tear','rip','glue','burn','_smudgeHalf','costUp','siphon'].forEach(k=>{ delete t.status[k]; }); if(!t.status._spillLock){ delete t.status.spill; delete t.status.spillAmt; } if(!t.status._smudgeLock){ delete t.status.smudge; } }
 function clearAllStatus(t){ if(t) t.status={}; }
 function statusLabel(c){
   const order=[['burn','🔥'],['spill','💧'],['tear','✂'],['rip','⊘'],['glue','🩹'],['smudge','▒'],['laminate','◈'],['highlight','✶'],['hardcover','▣'],['marginNotes','✎'],['rip','⊘']];
@@ -3584,7 +3623,34 @@ function performAttack(side,abilKey){           // == beginAttack
   if(hasCrit(side,'psycho') && def.blkCharge.length===0){ pierce=true; }
   if(symbolsOff()) pierce=false;
   if(S.scrim && S.scrim.ruleShift==='pintendo' && side==='opp'){ const bb=def.blk; const full=bb && bb.cost!=null && def.blkCharge.length>=bb.cost; if(!full){ pierce=true; } }
+  if(ab.siphon && !symbolsOff()) applySiphon(def,att,side,ab.siphon);
   atkCtx={side,A,att,ab,D,dKey,def,dmg,pierce,condInflict,condFoeDiscard};
+  // ---- Riposte: armed whenever the defender's block is charged, block or no block ----
+  { const rb=def.blk&&def.blk.riposte;
+    const armed = rb && def.blk.cost!=null && def.blkCharge.length>=def.blk.cost;
+    if(armed && !symbolsOff() && att._ripostedTurn!==S._turnNo){
+      att._ripostedTurn=S._turnNo;
+      const mode=rb.mode||'hp';
+      if(mode==='charge'){
+        if(att.atkCharge.length){ A.discard.push(att.atkCharge.pop()); pushLog(`\u26a1 Riposte \u2014 ${att.name} loses a charged Attack ABC.`); }
+        else if(att.blkCharge.length){ A.discard.push(att.blkCharge.pop()); pushLog(`\u26a1 Riposte \u2014 no Attack ABC charged, so a Block ABC is stripped instead.`); }
+        else if(A.hand.length){ A.discard.push(A.hand.splice(Math.floor(Math.random()*A.hand.length),1)[0]); pushLog(`\u26a1 Riposte \u2014 nothing charged, so a random card is discarded from hand.`); }
+        else pushLog(`\u26a1 Riposte \u2014 ${att.name} has nothing left to lose.`);
+      } else if(mode==='hand'){
+        let bi=A.hand.findIndex(c=>c&&c.cat==='bm');
+        if(bi<0) bi=A.hand.length?Math.floor(Math.random()*A.hand.length):-1;
+        if(bi>=0){ const lost=A.hand.splice(bi,1)[0]; A.discard.push(lost);
+          pushLog(`\u26a1 Riposte \u2014 ${lost.cat==='bm'?'a Bookmark is burned out of':'a random card is discarded from'} ${who(A)}'s hand.`); }
+        else pushLog(`\u26a1 Riposte \u2014 ${who(A)}'s hand is empty.`);
+      } else if(mode==='tempo'){
+        A.flags.bmCap=Math.max(0,(A.flags.bmCap!=null?A.flags.bmCap:2)-1);
+        pushLog(`\u26a1 Riposte \u2014 ${who(A)} may play one fewer Bookmark next turn.`);
+      } else {
+        const d=rb.dmg||10; att.hp=Math.max(0,att.hp-d);
+        pushLog(`\u26a1 Riposte \u2014 ${def.name}'s guard bites back for ${d}.`);
+        if(att.hp<=0){ checkKO(A,side); pushLog(`${att.name} falls on the counter \u2014 the attack never lands.`); return finishAttack(0,true); }
+      }
+    } }
   if(def.status.ecoNegate){ def.status.ecoNegate=false; pushLog(`${def.name} negates the attack (Ecocriticism)!`); return finishAttack(dmg,true); }
   if(def.status.ironcurtain && !pierce && !ab.ignoreDefBuffs){ def.status.ironcurtain=false; pushLog(`${def.name}'s Iron Curtain absorbs the blow!`); return finishAttack(dmg,true); }
   const bb=def.blk, canBlock=(!pierce||deconOn()) && !def.status.glue && bb && bb.cost!=null && def.blkCharge.length>=bb.cost;
@@ -3622,6 +3688,7 @@ function doBlock(){
   if(!symbolsOff()){
     if(b.grant){ grant(def,b.grant); pushLog(`${def.name} gains ${b.grant}.`); }
     if(b.inflictAtt && att.hp>0){ if(inflict(att,b.inflictAtt)) pushLog(`${att.name} is afflicted with ${b.inflictAtt.charAt(0).toUpperCase()+b.inflictAtt.slice(1)}.`); }
+    if(b.siphon){ applySiphon(att,def,dKey,b.siphon); }
     if(b.selfStatus){ def.status[b.selfStatus]=true; pushLog(`${def.name} suffers ${b.selfStatus}.`); }
     if(b.selfDamage){ def.hp=Math.max(0,def.hp-b.selfDamage); pushLog(`${def.name} loses ${b.selfDamage} HP.`); }
     if(b.onBlockDraw){ for(let i=0;i<b.onBlockDraw;i++){ if(!D.deck.length&&D.discard.length)D.deck=shuffle(D.discard.splice(0)); if(D.deck.length)D.hand.push(D.deck.shift()); } pushLog(`${def.name} draws ${b.onBlockDraw} after blocking.`); }
@@ -4207,6 +4274,8 @@ function charTile(p,side){
 
 /* ---- Status glossary (mechanics taken from the engine, not invented) ---- */
 window.STATUS_HELP={
+  siphon:{n:'Siphon',ic:'\u2604',t:'Siphoned \u2014 drains at the <b>start of this character\u2019s turn</b>, and the character who applied it takes back part of what is lost.',
+        fix:'Cleanse it, or knock out the siphon\u2019s owner \u2014 the drain continues but nothing is returned to them.'},
   tear:{n:'Tear',ic:'T',t:'Torn — this character takes <b>+10 extra damage</b> from every incoming attack.',
         fix:'Use a bookmark like <b>Masking Tape</b>, or an ability that clears statuses.'},
   rip:{n:'Rip',ic:'R',t:'Ripped — this character\u2019s <b>attack is disabled</b> and cannot be used.',
@@ -4220,8 +4289,24 @@ window.STATUS_HELP={
   smudge:{n:'Smudge',ic:'M',t:'Smudged — the next card you attach here is <b>spent clearing the Smudge</b> instead of charging the attack.',
           fix:'Attach one card to burn it off, or clear it with a bookmark/ability.'}
 };
+function siphonOwner(sp){ if(!sp||!sp.own) return null;
+  const P=S&&S[sp.own.side]; if(!P) return null;
+  const c=P.team&&P.team[sp.own.idx];
+  return (c&&c.hp>0&&P.team[P.activeIdx]===c)?{P,c}:(c&&c.hp>0?{P,c}:null); }
+function applySiphon(target,owner,ownerSide,cfg){
+  if(!target||target.hp<=0) return false;
+  if(target.status.laminate){ pushLog(`${target.name} is Laminated \u2014 the siphon finds no purchase.`); return false; }
+  const P=S[ownerSide], idx=P.team.indexOf(owner);
+  const prev=target.status.siphon;
+  const amt=(cfg&&cfg.amt)||10;
+  target.status.siphon={amt, leech:(cfg&&cfg.leech!=null)?cfg.leech:Math.floor(amt/2),
+    turns:(cfg&&cfg.turns)||2, mode:(cfg&&cfg.mode)||'hp', own:{side:ownerSide,idx}};
+  pushLog(prev?`Siphon on ${target.name} is renewed \u2014 duration refreshed, drain unchanged.`
+              :`\u2604 ${target.name} is Siphoned \u2014 ${amt} per turn.`);
+  if(typeof fxStatus==='function'){ try{ fxStatus(sideOfChar?sideOfChar(target):null,'siphon'); }catch(e){} }
+  return true; }
 function statusKeys(c){ var out=[]; if(!c||!c.status) return out;
-  ['tear','rip','glue','burn','spill','smudge'].forEach(function(k){ if(c.status[k]) out.push(k); }); return out; }
+  ['tear','rip','glue','burn','spill','smudge','siphon'].forEach(function(k){ if(c.status[k]) out.push(k); }); return out; }
 function statusBubbles(c){
   var ks=statusKeys(c); if(!ks.length) return '';
   return '<span class="sbub">'+ks.map(function(k){
@@ -4554,7 +4639,7 @@ function spawnKO(side,name){
   o.innerHTML=`<div class="ko-card"></div><div class="ko-stone"><b>R.I.P.</b><span>${name}</span></div>`;
   document.body.appendChild(o); setTimeout(()=>o.remove(),1700);
 }
-const STATUS_NAME={tear:'Tear',rip:'Rip',glue:'Glue',spill:'Spill',burn:'Burn',smudge:'Smudge',highlight:'Highlight',hardcover:'Hardcover',laminate:'Laminate',marginNotes:'Margin Notes',weaken:'Weaken',exposed:'Exposed',ironcurtain:'Iron Curtain',costUp:'Cost Up'};
+const STATUS_NAME={tear:'Tear',rip:'Rip',glue:'Glue',spill:'Spill',burn:'Burn',smudge:'Smudge',highlight:'Highlight',hardcover:'Hardcover',laminate:'Laminate',marginNotes:'Margin Notes',weaken:'Weaken',exposed:'Exposed',ironcurtain:'Iron Curtain',costUp:'Cost Up',siphon:'Siphon'};
 function statusName(k){ return STATUS_NAME[k]||k; }
 function sideOfChar(c){ if(!S||!c) return null; if(S.you.team.some(x=>x.uid===c.uid)) return 'you'; if(S.opp.team.some(x=>x.uid===c.uid)) return 'opp'; return null; }
 function fxAt(side, html, dur){
@@ -6712,6 +6797,7 @@ window.ABC_EXPORT = {
   expBmData:function(k,i){ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; const x=b&&b.bookmarks&&b.bookmarks[i]; if(!x)return null; return {kind:'bm',name:x.name,bkind:x.kind,text:x.text,rarity:this._rar(x.rarity),effect:x.effect||''}; }
 };
 window.ABC_DEBUG = {
+  applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack,
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
   get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
