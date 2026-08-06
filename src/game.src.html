@@ -1787,16 +1787,16 @@ const DATA = {
       { id:"othello", name:"Othello", hp:120, accent:"#A62B2B", img:"", tags:["Soldier","Leader"],
         atk:{n:"The Sword of Spain", t:"A blade of the ice-brook's temper. +15 ⚔ for every Attack ABC charged.", cost:2, dmg:40, dmgType:"perABC", base:40, step:15, label:"40+/2"},
         blk:{n:"Chaos Is Come Again", t:"His rage wounds whoever swung. Inflict 🪢 Tear on the attacker. Othello is left disabled.", cost:2, block:30, inflict:"tear", selfStatus:"disabled", label:"30/2"} },
-      { id:"iago", name:"Iago", hp:90, accent:"#2E6B40", img:"", tags:["Rogue","Cyber-Spy"],
+      { id:"iago", name:"Iago", hp:90, accent:"#2E6B40", img:"", tags:["Rogue","Spy"],
         atk:{n:"Trifles Light as Air", t:"Small things, made proof as holy writ. Inflict 🩸 Siphon — each turn it steals a charged ABC and attaches it to Iago free.", cost:2, dmg:30, label:"30/2", siphon:{amt:10,turns:2,leech:5,mode:"charge"}},
         blk:{n:"The Net That Shall Enmesh", t:"Her own goodness, turned to pitch. +15 ⛊ for every Block ABC charged.", cost:2, block:40, blockType:"perABC", base:20, step:15, label:"40+/2"} },
       { id:"desdemona", name:"Desdemona", hp:80, accent:"#E1F5FE", img:"", tags:["Diplomat","Innocent"],
         atk:{n:"A Plea for Cassio", t:"She will not stop asking. +20 ⚔ for every Attack ABC charged.", cost:1, dmg:20, dmgType:"perABC", base:20, step:20, label:"20+/1"},
         blk:{n:"The Handkerchief", t:"Spotted with strawberries, worth more than it weighs. Grant 📕 Hardcover.", cost:2, block:40, grant:"hardcover", label:"40/2"} },
-      { id:"cassio", name:"Cassio", hp:100, accent:"#2A4B7C", img:"", tags:["Pilot","Soldier"],
+      { id:"cassio", name:"Cassio", hp:100, accent:"#2A4B7C", img:"", tags:["Officer","Soldier"],
         atk:{n:"The Arithmetician", t:"A great one, by Iago's account — and a better soldier. If Cassio is at full HP, grant him ✨ Highlight.", cost:3, dmg:50, cond:[{test:"hpMax",then:{grant:"highlight"}}], label:"50/3"},
         blk:{n:"Reputation, Reputation", t:"The immortal part of himself, and all that is left. +15 ⛊ for every Block ABC charged.", cost:2, block:30, blockType:"perABC", base:30, step:15, label:"30+/2"} },
-      { id:"emilia", name:"Emilia", hp:90, accent:"#D4A373", img:"", tags:["Tech","Cynic"],
+      { id:"emilia", name:"Emilia", hp:90, accent:"#D4A373", img:"", tags:["Servant","Cynic"],
         atk:{n:"Let Husbands Know", t:"She has been silent long enough. +10 ⚔ for every Attack ABC charged.", cost:2, dmg:30, dmgType:"perABC", base:30, step:10, label:"30+/2"},
         blk:{n:"Liberal as the North", t:"She will speak, though every wind blows against it. Inflict ✂️ Rip on the attacker.", cost:2, block:30, inflict:"rip", label:"30/2"} },
       { id:"roderigo", name:"Roderigo", hp:70, accent:"#9B5DE5", img:"", tags:["Elite","Pawn"],
@@ -1810,7 +1810,7 @@ const DATA = {
         blk:{n:"I Am No Strumpet", t:"She is as honest as those who slander her. Grant 🛡️ Laminate.", cost:2, block:20, grant:"laminate", label:"20/2"} },
       { id:"montano", name:"Montano", hp:100, accent:"#4A5568", img:"", tags:["Leader","Soldier"],
         atk:{n:"The Governor's Watch", t:"Cyprus keeps its own order. Inflict 🪢 Tear if the target is a Soldier.", cost:2, dmg:40, cond:[{test:"defenderHasTag",tags:["Soldier"],then:{inflict:"tear"}}], label:"40/2"},
-        blk:{n:"Hold, For Your Lives", t:"He steps between the drawn swords. If the block is broken, the attacker is disoriented.", cost:2, block:30, cond:[{test:"blockBroken",then:{inflict:"disoriented"}}], label:"30/2"} },
+        blk:{n:"Hold, For Your Lives", t:"He steps between the drawn swords and holds them apart. Inflict 🩹 Glue on the attacker.", cost:2, block:30, inflictAtt:"glue", label:"30/2"} },
       { id:"duke", name:"The Duke of Venice", hp:80, accent:"#D4AF37", img:"", tags:["Ruler","Diplomat"],
         atk:{n:"The Signiory Assembles", t:"Venice speaks with one voice at midnight. +20 ⚔ for every Attack ABC charged across your team.", cost:2, dmg:40, dmgType:"perTeamABC", base:20, step:20, label:"40+/2"},
         blk:{n:"The Council's Warrant", t:"Authority that reaches past the front line. Grant your next Backstage character ✨ Highlight.", cost:2, block:50, grantBench:"highlight", label:"50/2"} },
@@ -1859,7 +1859,7 @@ const DATA = {
         blk:{n:"Kansas Cyclone", t:"Inflict 🫟 Spill.", cost:2, block:40, inflict:"spill", label:"40/2"} },
       { id:"scarecrow", name:"The Scarecrow", hp:100, accent:"#D2691E", img:"", tags:["ally","construct"],
         atk:{n:"Stuffed With Straw", t:"Inflict ✂️ Rip.", cost:2, dmg:40, inflict:"rip", label:"40/2"},
-        blk:{n:"Crow-Pecking Counter", t:"A murder of crows defends him. If the opponent uses a fire-based move, his defense completely breaks down.", cost:2, block:50, cond:[{test:"theme",match:"fire",then:{blockSet:0}}], label:"50/2"} },
+        blk:{n:"Crow-Pecking Counter", t:"A murder of crows defends him — but he is stuffed with straw. This block fails completely against an attacker who is 🔥 Burning.", cost:2, block:50, cond:[{test:"defenderHasStatus",status:"burn",then:{blockSet:0}}], label:"50/2"} },
       { id:"tinwoodman", name:"The Tin Woodman", hp:120, accent:"#808080", img:"", tags:["ally","construct"],
         atk:{n:"Axe Cleave", t:"Inflict 🫆 Smudge.", cost:2, dmg:30, inflict:"smudge", label:"30/2"},
         blk:{n:"Rusted Joints", t:"Rust locks him rigid, and takes hold of whatever strikes him. 🪃 Riposte — while charged, attackers lose a charged ABC.", cost:2, block:30, grant:"hardcover", inflictSelf:"glue", label:"30/2", riposte:{mode:"charge"}} },
@@ -1871,7 +1871,7 @@ const DATA = {
         blk:{n:"Yapping Distraction", t:"The target's next attack deals 20 less.", cost:1, block:30, inflict:{atkDebuff:20}, label:"30/1"} },
       { id:"witchwest", name:"The Wicked Witch of the West", hp:90, accent:"#4B0082", img:"", tags:["witch","villain"],
         atk:{n:"Golden Cap Command", t:"Inflict 🪢 Tear.", cost:2, dmg:30, inflict:"tear", label:"30/2"},
-        blk:{n:"Water Terror", t:"The Witch relies on her umbrella to shield her, terrified of the liquid that could end her life.", cost:2, block:40, cond:[{test:"theme",match:"water",then:{blockSet:0,selfKO:true}}], label:"40/2"} },
+        blk:{n:"Water Terror", t:"She hides beneath her umbrella, terrified of what one splash would do. If the Witch is 🫟 Spilled, this block fails and she is undone.", cost:2, block:40, cond:[{test:"selfHasStatus",status:"spill",then:{blockSet:0,selfKO:true}}], label:"40/2"} },
       { id:"glinda", name:"Glinda the Good Witch", hp:110, accent:"#FF69B4", img:"", tags:["witch","leader"],
         atk:{n:"Quadling Book of Records", t:"Grant 📝 Margin Notes.", cost:1, dmg:30, grant:"marginnotes", label:"30/1"},
         blk:{n:"Ruby Protection", t:"Grant 🛡️ Laminate.", cost:2, block:40, grant:"laminate", label:"40/2"} },
@@ -3339,6 +3339,16 @@ function condMatch(rule, own, other, otherChar){
   if(rule.test==='selfHpBelow'){ const a=active(own); return !!(a && a.hp < (rule.n||0)); }
   if(rule.test==='incomingCostGTE'){ return !!(atkCtx && atkCtx.ab && (atkCtx.ab.cost||0) >= (rule.n||0)); }
   if(rule.test==='attackerDeckIn'){ return !!(other && (rule.decks||[]).includes(other.setKey)); }
+  if(rule.test==='hpMax'){ const a=active(own); return !!(a && a.maxHp && a.hp>=a.maxHp); }
+  if(rule.test==='defenderHasTag'){ const tg=(otherChar&&otherChar.tags)||[]; return (rule.tags||[]).some(t=>tg.some(x=>String(x).toLowerCase()===String(t).toLowerCase())); }
+  if(rule.test==='benchContains'){ const id=rule.id||ids[0]; const a=active(own);
+    return !!(own && own.team.some(c=>c.id===id && c.hp>0 && c!==a)); }
+  if(rule.test==='fieldContains'){ const id=rule.id||ids[0];
+    return rule.scope==='foe' ? aliveOn(other,id)
+         : rule.scope==='either' ? (aliveOn(own,id)||aliveOn(other,id))
+         : aliveOn(own,id); }
+  if(rule.test==='atkCostGTE'){ return !!(atkCtx && atkCtx.ab && (atkCtx.ab.cost||0) >= (rule.n||0)); }
+  if(rule.test==='allyKOPreviousTurn'){ return !!(own && own._lastKOTurn!=null && (S._turnNo||0)-own._lastKOTurn<=2); }
   return false;
 }
 
@@ -3587,7 +3597,7 @@ function performAttack(side,abilKey){           // == beginAttack
   if(hasCrit(side,'russian')){ dmg=att.hp; pushLog(`Russian Formalism: ${att.name}'s damage equals its HP (${dmg}).`); }
   let condPierce=false, condInflict=null, condFoeDiscard=0;
   if(ab.koScale){ const n=(S[side].grave||[]).length; if(n){ dmg+=ab.koScale*n; pushLog(`${att.name}: +${ab.koScale*n} damage from ${n} fallen.`); } }
-  if(ab.cond){ ab.cond.forEach(r=>{ if(condMatch(r,A,D,def)){ const t=r.then||{}; if(t.dmgSet!=null)dmg=t.dmgSet; if(t.dmgAdd)dmg+=t.dmgAdd; if(t.dmgMult)dmg=Math.round(dmg*t.dmgMult); if(t.pierce)condPierce=true; if(t.inflict)condInflict=t.inflict; if(t.foeDiscard)condFoeDiscard+=t.foeDiscard; if(r.log)pushLog(r.log); } }); }
+  if(ab.cond){ ab.cond.forEach(r=>{ if(condMatch(r,A,D,def)){ const t=r.then||{}; if(t.dmgSet!=null)dmg=t.dmgSet; if(t.dmgAdd)dmg+=t.dmgAdd; if(t.dmgMult)dmg=Math.round(dmg*t.dmgMult); if(t.pierce||(t.flags&&String(t.flags).toLowerCase().includes('pierce')))condPierce=true; if(t.inflict)condInflict=t.inflict; if(t.grant){ grant(att,t.grant); pushLog(`${att.name} gains ${statusName(t.grant)}.`); } if(t.foeDiscard)condFoeDiscard+=t.foeDiscard; if(r.log)pushLog(r.log); } }); }
   // 1E passive & ability damage
   if(att.fe&&att.passive&&att.passive.soloBonus&&isSoloAlive(A)){ dmg+=att.passive.soloBonus; pushLog(`${att.name} stands alone — +${att.passive.soloBonus} damage.`); }
   if(att.fe&&att.passive&&att.passive.statusDmgBonus&&STATUS_NEG.some(x=>def.status[x])){ dmg+=att.passive.statusDmgBonus; pushLog(`${att.name}: +${att.passive.statusDmgBonus} against an afflicted target.`); }
@@ -3681,6 +3691,9 @@ function doBlock(){
       if(t.blockMult) amt=Math.round(amt*t.blockMult);
       if(t.blockHalf) amt=Math.ceil(dmg/2);
       if(t.blockFailDouble) failDouble=true;
+      if(t.grant){ grant(def,t.grant); pushLog(`${def.name} gains ${statusName(t.grant)}.`); }
+      if(t.inflict){ inflict(att,t.inflict); }
+      if(t.selfKO){ def.hp=0; pushLog(`${def.name} is undone by it.`); }
       if(r.log) pushLog(r.log);
   } }); }
   if(S.settings.powerAdds && !neg) amt+=spentBlk.reduce((s,c)=>s+(c.power||0),0);
@@ -3769,6 +3782,7 @@ function finishAttack(blocked,negated,forceNet){
 function checkKO(p,side){
   const a=active(p);
   if(a && a.hp<=0){
+    p._lastKOTurn=(S._turnNo||0);
     if(S.scrim && S.scrim.ruleShift==='e_waitlist' && side==='opp' && !S.scrim._waitlistUsed){ S.scrim._waitlistUsed=true; a.hp=Math.max(1,Math.round(a.maxHp*0.3)); pushLog('The Waitlist \u2014 the examiner claws back to 30% HP!'); if(typeof toast==='function') toast('The Waitlist revives!'); render(); return; }
     if(S.scrim && SCRIM.kit==='gothic' && side==='you' && !S._galvanicUsed){ S._galvanicUsed=true; a.hp=Math.max(1,Math.round(a.maxHp*0.25)); pushLog('Galvanic Spark \u2014 '+a.name+' is reanimated at 25% HP!'); if(typeof toast==='function') toast('Galvanic Spark!'); render(); return; }
     if(S.scrim && SCRIM.kit==='macbeth' && side==='opp'){ SCRIM._ambition=Math.min(10,(SCRIM._ambition||0)+1); pushLog('Vaulting Ambition \u2014 your team grows stronger (+'+(SCRIM._ambition*5)+'% damage).'); }
