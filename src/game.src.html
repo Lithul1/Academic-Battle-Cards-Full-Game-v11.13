@@ -399,8 +399,9 @@ body.calm-fx .thinking{opacity:1!important}
 .over-ip small{display:block;font-size:11px;color:#9d8f6a}
 /* ================= STATUS BUBBLES + GLOSSARY (all sizes) ================= */
 .sbub{position:absolute;top:-9px;left:-11px;display:flex;flex-direction:column;gap:3px;z-index:16}
-.sb{width:21px;height:21px;border-radius:50%;background:#e07b28;border:2px solid var(--ink);color:#fff;
-  font-family:var(--disp);font-size:9px;display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.sb{min-width:27px;height:21px;border-radius:11px;padding:0 5px;background:#e07b28;border:2px solid var(--ink);color:#fff;
+  font-family:var(--disp);font-size:9px;letter-spacing:.3px;display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.sb.neg{background:#e07b28} .sb.pos{background:#2f7d5c} .sb.key{background:#6B4E8A}
 .sb:hover{transform:scale(1.15)}
 .stx{max-width:280px}
 .stx h4{margin:0 0 6px;font-family:var(--disp);font-size:15px;color:var(--red);display:flex;align-items:center;gap:8px}
@@ -1612,7 +1613,7 @@ const DATA = {
         atk:{n:'Lessons at Sea', t:'Grants one ally Highlight before attacking.', cost:3, dmg:50, grantAlly:'highlight', label:'50/3'},
         blk:{n:'Veteran Sailor', t:'Gains Laminate until your next turn.', cost:2, block:30, grant:'laminate', label:'30/2'} },
       { id:'catherine', name:'Catherine', hp:70, accent:'#C27BA0', img:'',
-        atk:{n:'Rumor Mill', t:'The rumour spreads, and keeps spreading. Inflict ☄ Siphon — each turn the target discards a card and Catherine draws one.', cost:2, dmg:30, label:'30/2', siphon:{amt:10,turns:2,leech:5,mode:"hand"}},
+        atk:{n:'Rumor Mill', t:'The rumour spreads, and keeps spreading. Inflict 🩸 Siphon — each turn the target discards a card and Catherine draws one.', cost:2, dmg:30, label:'30/2', siphon:{amt:10,turns:2,leech:5,mode:"hand"}},
         blk:{n:'Changing Stories', t:'Removes Spill from herself or an ally.', cost:2, block:40, blockType:'cleanse', blkCleanse:'spill', cleanseAlly:'spill', label:'40/2'} },
       { id:'henry_gatz', name:'Henry Gatz', hp:90, accent:'#6AA84F', img:'',
         atk:{n:'Father\'s Pride', t:'Heals 20 HP after dealing damage.', cost:2, dmg:40, heal:20, label:'40/2'},
@@ -1624,10 +1625,10 @@ const DATA = {
     crucible: [
       { id:'abigail', name:'Abigail Williams', hp:200, accent:'#9C3B57',
         atk:{n:'Rapier of Revenge', t:'A vengeful thrust that builds on chaos.', cost:2, dmg:50, label:'50/2'},
-        blk:{n:'Alliance of Death', t:'A grim pact wards off the blow and marks whoever threw it. ⚡ Riposte — while charged, attackers take 20.', cost:3, block:50, label:'50/3', riposte:{dmg:20,mode:"hp"}} },
+        blk:{n:'Alliance of Death', t:'A grim pact wards off the blow and marks whoever threw it. 🪃 Riposte — while charged, attackers take 20.', cost:3, block:50, label:'50/3', riposte:{dmg:20,mode:"hp"}} },
       { id:'jproctor', name:'John Proctor', hp:100, accent:'#6E7B53',
         atk:{n:'Late Jab of Truth', t:'Hits now and again at the start of the next turn.', cost:3, dmg:70, label:'70/3'},
-        blk:{n:'Leave Me My Name', t:'He defends his name, and the accusation costs the accuser. ⚡ Riposte — while charged, attackers play one fewer Bookmark next turn.', cost:2, block:30, label:'30/2', riposte:{mode:"tempo"}} },
+        blk:{n:'Leave Me My Name', t:'He defends his name, and the accusation costs the accuser. 🪃 Riposte — while charged, attackers play one fewer Bookmark next turn.', cost:2, block:30, label:'30/2', riposte:{mode:"tempo"}} },
       { id:'eproctor', name:'Elizabeth Proctor', hp:150, accent:'#4F6D8A',
         atk:{n:'Curtain Call', t:'A surprise strike that lands first.', cost:3, dmg:70, flags:['first'], label:'70/3'},
         blk:{n:'Mirror Shield', t:'Hesitates, then turns the next attack aside.', cost:1, block:30, label:'30/1'} },
@@ -1636,28 +1637,28 @@ const DATA = {
         blk:{n:'Greed\'s Shield', t:'Throws everything into one selfish block.', cost:1, blockType:'negate', label:'X/1'} },
       { id:'putnam', name:'Thomas & Ann Putnam', hp:130, accent:'#6B4E8A',
         atk:{n:'The Do Over', t:'Strikes twice when the stars align.', cost:3, dmg:70, label:'70/3'},
-        blk:{n:"Queen's Comfort", t:'A regal guard that soaks the blow and returns the insult. ⚡ Riposte — while charged, attackers take 10.', cost:2, block:30, label:'30/2', riposte:{dmg:10,mode:"hp"}} },
+        blk:{n:"Queen's Comfort", t:'A regal guard that soaks the blow and returns the insult. 🪃 Riposte — while charged, attackers take 10.', cost:2, block:30, label:'30/2', riposte:{dmg:10,mode:"hp"}} },
       { id:'mary', name:'Mary Warren', hp:70, accent:'#7A8A6A',
         atk:{n:'Wise Wail', t:'Sharp words that cut both ways.', cost:3, dmg:70, label:'70/3'},
         blk:{n:'Curtain Concealer', t:'A clumsy hiding place caps any hit.', cost:2, blockType:'capto', cap:10, label:'10/2'} },
       { id:'giles', name:'Giles Corey', hp:80, accent:'#8A5A4A',
         atk:{n:'Ghost Protocol', t:'Passes through any shield.', cost:2, dmg:30, flags:['pierce'], label:'30/2'},
-        blk:{n:'Alliance of Death', t:'More weight. The pact turns the blow aside and presses back. ⚡ Riposte — while charged, attackers take 20.', cost:3, block:50, label:'50/3', riposte:{dmg:20,mode:"hp"}} },
+        blk:{n:'Alliance of Death', t:'More weight. The pact turns the blow aside and presses back. 🪃 Riposte — while charged, attackers take 20.', cost:3, block:50, label:'50/3', riposte:{dmg:20,mode:"hp"}} },
       { id:'danforth', name:'Judge Danforth', hp:70, accent:'#5A6E8A',
         atk:{n:'Final Judgement', t:'A ruling that lands no matter what.', cost:2, dmg:50, label:'50/2'},
-        blk:{n:'Blind Justice', t:'The letter of the law deflects harm. ⚡ Riposte — while charged, attackers lose a Bookmark from hand.', cost:1, block:20, label:'20/1', riposte:{mode:"hand"}} },
+        blk:{n:'Blind Justice', t:'The letter of the law deflects harm. 🪃 Riposte — while charged, attackers lose a Bookmark from hand.', cost:1, block:20, label:'20/1', riposte:{mode:"hand"}} },
       { id:'tituba', name:'Tituba', hp:60, accent:'#7A5C8A', img:'',
-        atk:{n:'Barbados Songs', t:'Old songs that draw the words out of you. Inflict ☄ Siphon — each turn the target discards a card and Tituba draws one.', cost:2, dmg:30, label:'30/2', siphon:{amt:10,turns:2,leech:5,mode:"hand"}},
+        atk:{n:'Barbados Songs', t:'Old songs that draw the words out of you. Inflict 🩸 Siphon — each turn the target discards a card and Tituba draws one.', cost:2, dmg:30, label:'30/2', siphon:{amt:10,turns:2,leech:5,mode:"hand"}},
         blk:{n:'Chains of Society', t:'Binds the blow with whispered names.', cost:1, block:30, label:'30/1'} },
       { id:'hale', name:'Reverend Hale', hp:50, accent:'#4F6D8A', img:'',
         atk:{n:'Persistent Strike', t:'Deals 10 damage for every ABC charged to him.', cost:2, dmgType:'perABC', step:10, label:'X+/2'},
-        blk:{n:"The Night's Watch", t:'Watchful eyes strip away whatever fuelled the attack. ⚡ Riposte — while charged, attackers lose a charged ABC.', cost:2, block:30, label:'30/2', riposte:{mode:"charge"}} },
+        blk:{n:"The Night's Watch", t:'Watchful eyes strip away whatever fuelled the attack. 🪃 Riposte — while charged, attackers lose a charged ABC.', cost:2, block:30, label:'30/2', riposte:{mode:"charge"}} },
       { id:'rebecca', name:'Rebecca Nurse', hp:60, accent:'#6E7B6A',
         atk:{n:'Quiet Conscience', t:'Her serene refusal to confess sows doubt in her accusers — inflicts Smudge.', cost:2, dmg:30, inflict:'smudge', label:'30/2'},
         blk:{n:'Unbending Grace', t:'Decades of gentle strength turn the blow aside and steady her — grants Laminate.', cost:2, block:30, grant:'laminate', label:'30/2'} },
       { id:'salem', name:'Town of Salem', hp:55, accent:'#7A6A4A',
-        atk:{n:'Mass Hysteria', t:'Accusation feeds on whoever it touches. Inflict ☄ Siphon — 10 HP a turn for 2 turns, half returned to the town.', cost:2, dmg:20, label:'20/2', siphon:{amt:10,turns:2,leech:5,mode:"hp"}},
-        blk:{n:'Weight of the Mob', t:'The crowd closes ranks and turns on the striker. ⚡ Riposte — while charged, attackers take 20.', cost:3, block:50, label:'50/3', riposte:{dmg:20,mode:"hp"}} },
+        atk:{n:'Mass Hysteria', t:'Accusation feeds on whoever it touches. Inflict 🩸 Siphon — 10 HP a turn for 2 turns, half returned to the town.', cost:2, dmg:20, label:'20/2', siphon:{amt:10,turns:2,leech:5,mode:"hp"}},
+        blk:{n:'Weight of the Mob', t:'The crowd closes ranks and turns on the striker. 🪃 Riposte — while charged, attackers take 20.', cost:3, block:50, label:'50/3', riposte:{dmg:20,mode:"hp"}} },
     ],
     hamlet: [
       { id:'claudius', name:'Claudius', hp:140, accent:'#7A2E3B', img:'',
@@ -1668,7 +1669,7 @@ const DATA = {
         blk:{n:"Queen's Comfort", t:'A regal guard that soaks a heavy blow.', cost:2, block:40, cond:[{test:'inPlay',scope:'self',ids:['claudius'],then:{negate:true},log:"Queen's Comfort negates — Claudius shields her."},{test:'inPlay',scope:'self',ids:['ghost_king'],then:{blockFailDouble:true},log:"Queen's Comfort fails — the Ghost exposes her guilt."}], label:'40/2'} },
       { id:'elsinore', name:'Elsinore', hp:120, accent:'#5A6E6E', img:'',
         atk:{n:'Triple Attack', t:'Deals 10 damage for every ABC charged to the castle.', cost:2, dmgType:'perABC', step:10, label:'X/2'},
-        blk:{n:"The Night's Watch", t:'The castle itself wears besiegers down. ⚡ Riposte — while charged, attackers lose a charged ABC.', cost:2, block:30, label:'30/2', riposte:{mode:"charge"}} },
+        blk:{n:"The Night's Watch", t:'The castle itself wears besiegers down. 🪃 Riposte — while charged, attackers lose a charged ABC.', cost:2, block:30, label:'30/2', riposte:{mode:"charge"}} },
       { id:'laertes', name:'Laertes', hp:100, accent:'#5A7A5A', img:'',
         atk:{n:'Rapier of Revenge', t:'A vengeful thrust — deadlier once Polonius lies slain.', cost:2, dmg:40, cond:[{test:'ko',ids:['polonius'],then:{dmgMult:2,pierce:true},log:'Rapier of Revenge doubles and pierces — Polonius is slain.'}], label:'40/2'},
         blk:{n:'Alliance of Death', t:'A grim pact with the king wards off the blow.', cost:3, block:60, cond:[{test:'inPlay',scope:'self',ids:['claudius'],then:{negate:true},log:'Alliance of Death negates — the pact with Claudius holds.'}], label:'60/3'} },
@@ -1729,7 +1730,7 @@ const DATA = {
         atk:{n:'Affectionate Plea', t:"A heartfelt appeal that blunts the target's aggression.", cost:1, dmg:30, weaken:20, label:'30/1'},
         blk:{n:'Fatal Vulnerability', t:'Safe while Victor lives; helpless before the Creature.', cost:2, block:50, cond:[{test:'inPlay',scope:'either',ids:['creature'],then:{blockSet:0},log:'Fatal Vulnerability fails — the Creature is in play.'}], label:'50/2'} },
       { id:'caroline', name:'Caroline Beaufort', hp:80, accent:'#8A6A3C', img:'',
-        atk:{n:'Maternal Sacrifice', t:'A final act of care passes a lingering fever. Inflict ☄ Siphon — 10 HP a turn for 2 turns, half of it returned to her.', cost:1, dmg:20, label:'20/1', siphon:{amt:10,turns:2,leech:5,mode:"hp"}},
+        atk:{n:'Maternal Sacrifice', t:'A final act of care passes a lingering fever. Inflict 🩸 Siphon — 10 HP a turn for 2 turns, half of it returned to her.', cost:1, dmg:20, label:'20/1', siphon:{amt:10,turns:2,leech:5,mode:"hp"}},
         blk:{n:'Deathbed Blessing', t:'Supreme protection for her children.', cost:3, block:60, cond:[{test:'inPlay',scope:'self',ids:['victor','elizabeth'],then:{blockMult:2},log:'Deathbed Blessing doubles — guarding her children.'}], label:'60/3'} },
       { id:'safie', name:'Safie', hp:80, accent:'#8A7A4A', img:'',
         atk:{n:'Language Acquisition', t:'Grows stronger as the fallen accumulate.', cost:2, dmg:50, koScale:10, label:'50+/2'},
@@ -1770,13 +1771,13 @@ const DATA = {
         atk:{n:"The Woman's Outwitting", t:'Turns the tables with a hidden photograph, fouling their next move.', cost:2, dmg:30, inflict:'smudge', label:'30/2'},
         blk:{n:'Flawless Disguise', t:'Blends into the London crowd, untouchable.', cost:2, block:40, grant:'laminate', label:'40/2'} },
       { id:'lestrade', name:'Inspector Lestrade', hp:90, accent:'#3A5A6E', img:'',
-        atk:{n:'Scotland Yard Raid', t:'Paperwork the target cannot get out from under. Inflict ☄ Siphon — the target loses one attach a turn for 2 turns.', cost:2, dmg:40, label:'40/2', siphon:{amt:10,turns:2,leech:0,mode:"tempo"}},
+        atk:{n:'Scotland Yard Raid', t:'Paperwork the target cannot get out from under. Inflict 🩸 Siphon — the target loses one attach a turn for 2 turns.', cost:2, dmg:40, label:'40/2', siphon:{amt:10,turns:2,leech:0,mode:"tempo"}},
         blk:{n:'Official Bureaucracy', t:'Hides behind red tape to absorb a blow.', cost:2, block:40, selfDiscardHand:1, label:'40/2'} },
       { id:'roylott', name:'Dr. Grimesby Roylott', hp:90, accent:'#4A6E3A', img:'',
         atk:{n:'The Speckled Band', t:'Looses a deadly swamp adder, envenoming the target.', cost:2, dmg:30, inflict:'tear', label:'30/2'},
         blk:{n:'Iron Poker Bend', t:'Bends steel to intimidate and harden his posture.', cost:2, block:30, grant:'hardcover', label:'30/2'} },
       { id:'milverton', name:'Charles Augustus Milverton', hp:80, accent:'#5A4A5A', img:'',
-        atk:{n:'Blackmail Ledger', t:'Secrets drawn out a little at a time. Inflict ✂️ and ☄ Siphon — each turn it steals a charged ABC for Milverton.', cost:1, dmg:20, inflict:'rip', label:'20/1', siphon:{amt:10,turns:2,leech:5,mode:"charge"}},
+        atk:{n:'Blackmail Ledger', t:'Secrets drawn out a little at a time. Inflict ✂️ and 🩸 Siphon — each turn it steals a charged ABC for Milverton.', cost:1, dmg:20, inflict:'rip', label:'20/1', siphon:{amt:10,turns:2,leech:5,mode:"charge"}},
         blk:{n:'Extortion Shield', t:'Forces his victims to take the heat — stronger as the bodies pile up.', cost:2, block:40, cond:[{test:'pileCount',scope:'self',n:3,then:{blockSet:60},log:'Extortion Shield surges — three or more cards lie discarded.'}], label:'40+/2'} },
       { id:'wiggins', name:'Wiggins', hp:60, accent:'#6E5A4A', img:'',
         atk:{n:'Streetwise Reconnaissance', t:'Throws dirt and scrambles off, leaving the target hobbled.', cost:1, dmg:20, inflict:'glue', label:'20/1'},
@@ -1787,7 +1788,7 @@ const DATA = {
         atk:{n:"Void-Steel Cleaver", t:"A devastating plasma-arc strike fueled by raw battlefield dominance. Deals +15 damage for every Attack ABC card attached to Othello.", cost:2, dmg:40, dmgType:"perABC", base:40, step:15, label:"40+/2"},
         blk:{n:"Blinded Fury", t:"Channels overwhelming manipulated rage into a reckless defensive barrier. Inflicts Tear on the attacker.", cost:2, block:30, inflict:"tear", selfStatus:"disabled", label:"30/2"} },
       { id:"iago", name:"Iago", hp:90, accent:"#2E6B40", img:"", tags:["Rogue","Cyber-Spy"],
-        atk:{n:"Whisper Net Injection", t:"Falsified telemetry bleeds the target's systems. Inflict ☄ Siphon — each turn it steals a charged ABC and attaches it to Iago free.", cost:2, dmg:30, label:"30/2", siphon:{amt:10,turns:2,leech:5,mode:"charge"}},
+        atk:{n:"Whisper Net Injection", t:"Falsified telemetry bleeds the target's systems. Inflict 🩸 Siphon — each turn it steals a charged ABC and attaches it to Iago free.", cost:2, dmg:30, label:"30/2", siphon:{amt:10,turns:2,leech:5,mode:"charge"}},
         blk:{n:"Web of Deceit", t:"Projects an intricate field of shifting holographic clones. Blocks an additional +15 damage for each Block ABC attached to Iago.", cost:2, block:40, blockType:"perABC", base:20, step:15, label:"40+/2"} },
       { id:"desdemona", name:"Desdemona", hp:80, accent:"#E1F5FE", img:"", tags:["Diplomat","Innocent"],
         atk:{n:"Starlight Plea", t:"Broadcasts an urgent, emotionally raw distress beacon. Deals an additional +20 damage for each Attack ABC attached to her.", cost:1, dmg:20, dmgType:"perABC", base:20, step:20, label:"20+/1"},
@@ -1823,7 +1824,7 @@ const DATA = {
     macbeth: [
       {"id": "macbeth", "name": "Macbeth", "hp": 150, "accent": "#7A1F1F", "img": "", "tags": ["King"], "atk": {"n": "Vaulting Ambition", "t": "If this attack KOs a character, Macbeth gains Burn.", "cost": 3, "dmg": 50, "onKO": {"selfStatus": "burn"}, "label": "50/3"}, "blk": {"n": "False Courage", "t": "Negate Tearbefore reducing damage.", "cost": 2, "block": 40, "blkCleanse": "tear", "blockType": "cleanse", "label": "40/2"}},
       {"id": "lady_macbeth", "name": "Lady Macbeth", "hp": 130, "accent": "#5C2E6B", "img": "", "tags": ["Noble"], "atk": {"n": "Unsex Me Here", "t": "Inflict Smudgeon opponent.", "cost": 2, "dmg": 30, "inflict": "smudge", "label": "30/2"}, "blk": {"n": "Out, Damned Spot!", "t": "Remove Burn or Spill from yourself.", "cost": 2, "block": 40, "blkCleanse": ["burn", "spill"], "blockType": "cleanse", "label": "40/2"}},
-      {"id": "banquo", "name": "Banquo (Ghost)", "hp": 70, "accent": "#8A8A8A", "img": "", "tags": ["Ghost"], "atk": {"n": "Haunting Vision", "t": "The ghost sits at the table and will not stop taking. Inflict ☄ Siphon — 10 HP a turn for 3 turns, half returned.", "cost": 3, "dmg": 60, "label": "60/3", siphon:{amt:10,turns:3,leech:5,mode:"hp"}}, "blk": {"n": "Silent Accusation", "t": "Remove opponent's Highlightbefore blocking.", "cost": 2, "block": 40, "blockType": "negateStatus", "label": "40/2"}},
+      {"id": "banquo", "name": "Banquo (Ghost)", "hp": 70, "accent": "#8A8A8A", "img": "", "tags": ["Ghost"], "atk": {"n": "Haunting Vision", "t": "The ghost sits at the table and will not stop taking. Inflict 🩸 Siphon — 10 HP a turn for 3 turns, half returned.", "cost": 3, "dmg": 60, "label": "60/3", siphon:{amt:10,turns:3,leech:5,mode:"hp"}}, "blk": {"n": "Silent Accusation", "t": "Remove opponent's Highlightbefore blocking.", "cost": 2, "block": 40, "blockType": "negateStatus", "label": "40/2"}},
       {"id": "duncan", "name": "King Duncan (Sleeping)", "hp": 120, "accent": "#D4AF37", "img": "", "tags": ["King"], "atk": {"n": "Royal Blessing", "t": "Gain Highlight.", "cost": 2, "dmg": 40, "selfStatus": "highlight", "label": "40/2"}, "blk": {"n": "Peaceful Reign", "t": "Gain Laminateuntil next turn.", "cost": 2, "block": 30, "blockType": "laminate", "label": "30/2"}},
       {"id": "witches", "name": "The Weird Sisters", "hp": 90, "accent": "#4B2354", "img": "", "tags": ["Witch"], "atk": {"n": "Double, Double", "t": "Choose to inflict Glue or Spill.", "cost": 2, "dmg": 30, "inflictChoice": ["glue", "spill"], "label": "30/2"}, "blk": {"n": "Prophetic Mist", "t": "Negate one incoming status effect.", "cost": 2, "block": 30, "blockType": "negateStatus", "label": "30/2"}},
       {"id": "malcolm", "name": "Malcolm", "hp": 80, "accent": "#3F6C3A", "img": "", "tags": ["Heir"], "atk": {"n": "Rally the Nobles", "t": "Remove Smudgefrom an ally before attacking.", "cost": 3, "dmg": 60, "cleanseAlly": "smudge", "label": "60/3"}, "blk": {"n": "Lawful Rule", "t": "Remove Tear from yourself or an ally.", "cost": 2, "block": 40, "blkCleanse": "tear", "blockType": "cleanse", "label": "40/2"}},
@@ -1861,7 +1862,7 @@ const DATA = {
         blk:{n:"Crow-Pecking Counter", t:"A murder of crows defends him. If the opponent uses a fire-based move, his defense completely breaks down.", cost:2, block:50, cond:[{test:"theme",match:"fire",then:{blockSet:0}}], label:"50/2"} },
       { id:"tinwoodman", name:"The Tin Woodman", hp:120, accent:"#808080", img:"", tags:["ally","construct"],
         atk:{n:"Axe Cleave", t:"A heavy, direct metal strike that cuts through standard academic resource attachments.", cost:2, dmg:30, inflict:"smudge", label:"30/2"},
-        blk:{n:"Rusted Joints", t:"Rust locks him rigid, and takes hold of whatever strikes him. ⚡ Riposte — while charged, attackers lose a charged ABC.", cost:2, block:30, grant:"hardcover", inflictSelf:"glue", label:"30/2", riposte:{mode:"charge"}} },
+        blk:{n:"Rusted Joints", t:"Rust locks him rigid, and takes hold of whatever strikes him. 🪃 Riposte — while charged, attackers lose a charged ABC.", cost:2, block:30, grant:"hardcover", inflictSelf:"glue", label:"30/2", riposte:{mode:"charge"}} },
       { id:"cowardlylion", name:"The Cowardly Lion", hp:130, accent:"#B8860B", img:"", tags:["ally","beast"],
         atk:{n:"Terrifying Roar", t:"A thunderous roar that shakes the battlefield, causing a severe, permanent degradation to the target's resolve.", cost:3, dmg:60, inflict:"burn", label:"60/3"},
         blk:{n:"Shameful Retreat", t:"The Lion hides behind his massive tail, absorbing a portion of the incoming blow through thick fur.", cost:2, block:40, cond:[{test:"benchContains",id:"dorothy",then:{blockSet:60}}], label:"40/2"} },
@@ -1891,7 +1892,7 @@ const DATA = {
         blk:{n:"Blue Attire Blend", t:"The Munchkin hides among the completely blue houses and landscapes of the Eastern country to avoid detection.", cost:1, block:40, costSelfDiscardHand:1, blockSet:40, label:"40/1"} },
       { id:"guard", name:"An Emerald City Guard", hp:100, accent:"#008000", img:"", tags:["guard","soldier"],
         atk:{n:"Green Spectacles", t:"The guard forces the target to lock green glasses onto their eyes, restricting their operational movement on the field.", cost:1, dmg:20, inflict:"glue", label:"20/1"},
-        blk:{n:"Palace Gates", t:"The emerald gates slam shut. ⚡ Riposte — while this block is charged, anyone who attacks takes 10.", cost:2, block:30, grant:"hardcover", label:"30/2", riposte:{dmg:10,mode:"hp"}} },
+        blk:{n:"Palace Gates", t:"The emerald gates slam shut. 🪃 Riposte — while this block is charged, anyone who attacks takes 10.", cost:2, block:30, grant:"hardcover", label:"30/2", riposte:{dmg:10,mode:"hp"}} },
       { id:"quadling", name:"A Quadling", hp:70, accent:"#FF0000", img:"", tags:["citizen"],
         atk:{n:"Red Country Unity", t:"A community strike backed by the vibrant, entirely red culture of the Southern country.", cost:1, dmg:30, dmgType:"pileCount", scope:"oz", step:10, label:"30/1"},
         blk:{n:"Glinda’s Border Security", t:"The Quadling relies on the magical safety nets established by their Good Witch.", cost:2, block:40, cond:[{test:"fieldContains",id:"glinda",then:{blockSet:60}}], label:"40/2"} },
@@ -1922,7 +1923,7 @@ const DATA = {
         atk:{n:"Everlasting Love", t:"Heal 20 HP and gain Highlight after attacking.", cost:3, dmg:60, heal:20, grant:"highlight", label:"60/3"},
         blk:{n:"Selfless Protection", t:"Negate Burn before reducing damage.", cost:2, block:50, blkCleanse:"burn", label:"50/2"} },
       { id:"nunkie", name:"Nunkie", hp:70, accent:"#E69138", img:"", tags:["Rival"],
-        atk:{n:"Jealous Temptation", t:"Temptation takes a little more each time. Inflict 🫎 and ☄ Siphon — 10 HP a turn for 2 turns, half returned.", cost:2, dmg:20, inflict:"smudge", label:"20/2", siphon:{amt:10,turns:2,leech:5,mode:"hp"}},
+        atk:{n:"Jealous Temptation", t:"Temptation takes a little more each time. Inflict 🫎 and 🩸 Siphon — 10 HP a turn for 2 turns, half returned.", cost:2, dmg:20, inflict:"smudge", label:"20/2", siphon:{amt:10,turns:2,leech:5,mode:"hp"}},
         blk:{n:"Playful Escape", t:"Remove Glue from yourself.", cost:2, block:40, blkCleanse:"glue", label:"40/2"} },
       { id:"johnny_taylor", name:"Johnny Taylor", hp:60, accent:"#3D85C6", img:"", tags:["Musician"],
         atk:{n:"Sweet Serenade", t:"Draw one card after damage.", cost:2, dmg:40, drawAfter:1, label:"40/2"},
@@ -1937,7 +1938,7 @@ const DATA = {
         atk:{n:"Cross Examination", t:"Inflict Smudge and remove the defender's Highlight.", cost:3, dmg:60, inflict:"smudge", stripPos:"highlight", label:"60/3"},
         blk:{n:"Due Process", t:"Negate one status effect targeting this character.", cost:2, block:40, blockType:"negateStatus", label:"40/2"} },
       { id:"rabid_dog", name:"The Rabid Dog", hp:80, accent:"#5B5B5B", img:"", tags:["Beast"],
-        atk:{n:"Rabid Bite", t:"The bite carries something that spreads. Inflict ☄ Siphon — 10 HP a turn for 3 turns, half returned to the dog.", cost:3, dmg:50, label:"50/3", siphon:{amt:10,turns:3,leech:5,mode:"hp"}},
+        atk:{n:"Rabid Bite", t:"The bite carries something that spreads. Inflict 🩸 Siphon — 10 HP a turn for 3 turns, half returned to the dog.", cost:3, dmg:50, label:"50/3", siphon:{amt:10,turns:3,leech:5,mode:"hp"}},
         blk:{n:"Cornered Beast", t:"Inflict Tear on the attacker after blocking.", cost:2, block:30, inflictAtt:"tear", label:"30/2"} }
     ]
   },
@@ -4274,19 +4275,27 @@ function charTile(p,side){
 
 /* ---- Status glossary (mechanics taken from the engine, not invented) ---- */
 window.STATUS_HELP={
-  siphon:{n:'Siphon',ic:'\u2604',t:'Siphoned \u2014 drains at the <b>start of this character\u2019s turn</b>, and the character who applied it takes back part of what is lost.',
+  siphon:{n:'Siphon',ic:'SI',tone:'key',t:'Siphoned \u2014 drains at the <b>start of this character\u2019s turn</b>, and the character who applied it takes back part of what is lost.',
         fix:'Cleanse it, or knock out the siphon\u2019s owner \u2014 the drain continues but nothing is returned to them.'},
-  tear:{n:'Tear',ic:'T',t:'Torn — this character takes <b>+10 extra damage</b> from every incoming attack.',
+  tear:{n:'Tear',ic:'TR',tone:'neg',t:'Torn — this character takes <b>+10 extra damage</b> from every incoming attack.',
         fix:'Use a bookmark like <b>Masking Tape</b>, or an ability that clears statuses.'},
-  rip:{n:'Rip',ic:'R',t:'Ripped — this character\u2019s <b>attack is disabled</b> and cannot be used.',
+  rip:{n:'Rip',ic:'RP',tone:'neg',t:'Ripped — this character\u2019s <b>attack is disabled</b> and cannot be used.',
        fix:'Use <b>Masking Tape</b>, or <b>swap the character out</b> \u2014 Rip clears when they leave the Active slot.'},
-  glue:{n:'Glue',ic:'G',t:'Glued — this character <b>cannot block</b>, even with enough charge on its block.',
+  glue:{n:'Glue',ic:'GL',tone:'neg',t:'Glued — this character <b>cannot block</b>, even with enough charge on its block.',
         fix:'Use a bookmark or ability that removes Glue.'},
-  burn:{n:'Burn',ic:'B',t:'Burning — loses <b>10 HP at the start of every turn</b>.',
+  burn:{n:'Burn',ic:'BN',tone:'neg',t:'Burning — loses <b>10 HP at the start of every turn</b>.',
         fix:'Cleanse with a bookmark or ability, or swap the character out.'},
-  spill:{n:'Spill',ic:'S',t:'Spilled — takes <b>ongoing damage each turn</b> (usually 10 HP).',
+  spill:{n:'Spill',ic:'SP',tone:'neg',t:'Spilled — takes <b>ongoing damage each turn</b> (usually 10 HP).',
          fix:'Cleanse with a bookmark or ability that clears statuses.'},
-  smudge:{n:'Smudge',ic:'M',t:'Smudged — the next card you attach here is <b>spent clearing the Smudge</b> instead of charging the attack.',
+  weaken:{n:'Weaken',ic:'WK',tone:'neg',t:'Weakened \u2014 the next attack deals reduced damage.',fix:'It clears itself once the attack resolves.'},
+  exposed:{n:'Exposed',ic:'EX',tone:'neg',t:'Exposed \u2014 the next incoming attack deals <b>double damage</b>.',fix:'It clears itself once the attack resolves.'},
+  costUp:{n:'Cost Up',ic:'CU',tone:'neg',t:'The next attack from this character <b>costs 1 extra ABC</b>.',fix:'Expires at the start of your next turn.'},
+  highlight:{n:'Highlight',ic:'HL',tone:'pos',t:'Highlighted \u2014 the next attack deals <b>+20 damage</b>.',fix:'Spent automatically on the next attack.'},
+  hardcover:{n:'Hardcover',ic:'HC',tone:'pos',t:'Hardcovered \u2014 <b>reduces all incoming damage by 10</b> until your next turn.',fix:'Expires at the start of your next turn.'},
+  laminate:{n:'Laminate',ic:'LM',tone:'pos',t:'Laminated \u2014 <b>immune to Tear, Rip, Glue and Spill</b> while it lasts.',fix:'Expires at the start of your next turn.'},
+  marginNotes:{n:'Margin Notes',ic:'MN',tone:'pos',t:'The next ABC attached here <b>draws a card</b>.',fix:'Spent on the next attach.'},
+  ironcurtain:{n:'Iron Curtain',ic:'IC',tone:'pos',t:'The next attack against this character is <b>fully absorbed</b>.',fix:'Spent on the next incoming attack.'},
+  smudge:{n:'Smudge',ic:'SM',tone:'neg',t:'Smudged — the next card you attach here is <b>spent clearing the Smudge</b> instead of charging the attack.',
           fix:'Attach one card to burn it off, or clear it with a bookmark/ability.'}
 };
 function siphonOwner(sp){ if(!sp||!sp.own) return null;
@@ -4311,7 +4320,7 @@ function statusBubbles(c){
   var ks=statusKeys(c); if(!ks.length) return '';
   return '<span class="sbub">'+ks.map(function(k){
     var h=window.STATUS_HELP[k];
-    return '<span class="sb" data-statushelp="'+k+'" title="'+h.n+'">'+h.ic+'</span>';
+    return '<span class="sb '+(h.tone||'neg')+'" data-statushelp="'+k+'" title="'+h.n+'">'+h.ic+'</span>';
   }).join('')+'</span>';
 }
 function statusHelpModal(k){
