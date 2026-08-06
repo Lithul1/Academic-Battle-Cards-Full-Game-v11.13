@@ -3407,7 +3407,13 @@ function playBookmark(side,idx){
     }
     case 'mac2_gekokujo':{
       var bench=P.team.filter(function(c,i){return i!==P.activeIdx && c.hp>0;});
-      var go=function(t){ if(!t){ remove(); return; } var idx=P.team.indexOf(t); doSwitch(P, idx); healChar(t,30); grant(t,'highlight'); var fo4=foeOf(side); var foe4=fo4.team[fo4.activeIdx]; if(foe4){ foe4.atkCharge=0; foe4.blkCharge=0; if(foe4.atkCards)foe4.atkCards=[]; if(foe4.blkCards)foe4.blkCards=[]; } pushLog(who(P)+" enacts Gekokuj\u014d \u2014 "+t.name+" rises, healed and blazing."); commit(); remove(); render&&render(); };
+      var go=function(t){ if(!t){ remove(); return; } var idx=P.team.indexOf(t); doSwitch(P, idx); healChar(t,30); grant(t,'highlight'); var fo4=foeOf(side); var foe4=fo4.team[fo4.activeIdx];
+        if(foe4){ var _n=0;
+          if(Array.isArray(foe4.atkCharge)&&foe4.atkCharge.length){ _n+=foe4.atkCharge.length; fo4.discard.push.apply(fo4.discard, foe4.atkCharge.splice(0)); }
+          if(Array.isArray(foe4.blkCharge)&&foe4.blkCharge.length){ _n+=foe4.blkCharge.length; fo4.discard.push.apply(fo4.discard, foe4.blkCharge.splice(0)); }
+          foe4.atkCharge=foe4.atkCharge||[]; foe4.blkCharge=foe4.blkCharge||[];
+          if(_n) pushLog(foe4.name+" loses "+_n+" charged ABC.");
+        } pushLog(who(P)+" enacts Gekokuj\u014d \u2014 "+t.name+" rises, healed and blazing."); commit(); remove(); render&&render(); };
       if(!bench.length){ if(isYou) toast('No backstage character to raise.'); return; }
       if(isYou && bench.length>1) askPick('Raise which character?', bench.map(function(c){return {label:c.name+"  "+c.hp+"/"+c.maxHp,val:c.uid};}), function(uid){ go(bench.find(function(c){return c.uid===uid;})); });
       else go(bench[0]);
