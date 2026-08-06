@@ -3292,6 +3292,11 @@ function attach(side,handIdx,correct,targetUid){
     if(!p.critTurn._voiceUsed){ const _janie=feOnField(p).find(c=>c.passive&&c.passive.onAttachCleanseAlly); if(_janie){ const _ally=p.team.find(c=>c.hp>0 && STATUS_NEG.some(s=>c.status[s])); if(_ally){ const _s=STATUS_NEG.find(x=>_ally.status[x]); delete _ally.status[_s]; if(_s==='smudge')delete _ally.status._smudgeHalf; p.critTurn._voiceUsed=true; pushLog(`Finding Her Voice — ${_janie.name} lifts ${statusName(_s)} from ${_ally.name}.`); } } }
   } else {
     p.critTurn.wrong=(p.critTurn.wrong||0)+1;
+    // ---- Lens theses that watch the OPPONENT miss ----
+    { const _foe=foeOf(side); if(_foe){ _foe.critEver=_foe.critEver||{};
+        if(String(card.type||'').toUpperCase()==='BLOCK') _foe.critEver.oppWrongBlk=true;   // Psychoanalytic
+        if((p.critTurn.wrong||0)>=2) _foe.critEver.oppWrong2=true;                          // Affective Fallacy
+    } }
     const protect=hasCrit(side,'postcolonial') && p.flags.oppBmLast;
     if(protect){ p.attachesLeft--; pushLog(`${who(p)} missed — Postcolonial Lens keeps the ${card.type} card in hand.`); }
     else { p.hand.splice(handIdx,1); p.discard.push(card); p.attachesLeft--; pushLog(`${who(p)} missed the question — ${card.type} card discarded.`); }
@@ -3361,7 +3366,11 @@ function playBookmark(side,idx){
   const card=P.hand[idx], isYou=side==='you', act=active(P);
   const remove=()=>{ const i=P.hand.indexOf(card); if(i>=0) P.hand.splice(i,1); P.discard.push(card); };
   const hold=(tag,uid)=>{ const i=P.hand.indexOf(card); if(i>=0) P.hand.splice(i,1); card._tag=tag; card._uid=uid||null; (P.activeBm||(P.activeBm=[])).push(card); };
-  const commit=()=>{ P.flags.bmCount=(P.flags.bmCount||0)+1; P.flags.bmThisTurn=true; if(!P.critTurn)P.critTurn={}; P.critTurn.bm=true; const _eat=feOnField(P).find(c=>c.passive&&c.passive.onBookmarkHealTeam); if(_eat){ const amt=_eat.passive.onBookmarkHealTeam; let any=false; P.team.forEach(c=>{ if(c.hp>0&&c.hp<c.maxHp){ const b0=c.hp; c.hp=Math.min(c.maxHp,c.hp+amt); if(c.hp>b0){ fxHeal(sideOfChar(c),c.hp-b0); any=true; } } }); if(any) pushLog('Strength in Community — every ally heals '+amt+'.'); } };
+  const commit=()=>{ P.flags.bmCount=(P.flags.bmCount||0)+1; P.flags.bmThisTurn=true; if(!P.critTurn)P.critTurn={}; P.critTurn.bm=true;
+    // ---- Deconstruction: a Bookmark that tries to skip a turn or stop damage ----
+    { const _eff=String((card&&card.effect)||'').toLowerCase();
+      if(['truce','ironcurtain','supercharge','deadline','finaldraft'].includes(_eff)){
+        const _foe=foeOf(side); if(_foe){ _foe.critEver=_foe.critEver||{}; _foe.critEver.oppBmBlocked=true; } } } const _eat=feOnField(P).find(c=>c.passive&&c.passive.onBookmarkHealTeam); if(_eat){ const amt=_eat.passive.onBookmarkHealTeam; let any=false; P.team.forEach(c=>{ if(c.hp>0&&c.hp<c.maxHp){ const b0=c.hp; c.hp=Math.min(c.maxHp,c.hp+amt); if(c.hp>b0){ fxHeal(sideOfChar(c),c.hp-b0); any=true; } } }); if(any) pushLog('Strength in Community — every ally heals '+amt+'.'); } };
   switch(card.effect){
     case 'heal':{
       const living=P.team.filter(c=>c.hp>0);
@@ -6820,7 +6829,7 @@ window.ABC_EXPORT = {
   expBmData:function(k,i){ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; const x=b&&b.bookmarks&&b.bookmarks[i]; if(!x)return null; return {kind:'bm',name:x.name,bkind:x.kind,text:x.text,rarity:this._rar(x.rarity),effect:x.effect||''}; }
 };
 window.ABC_DEBUG = {
-  applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack,
+  applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
   get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
