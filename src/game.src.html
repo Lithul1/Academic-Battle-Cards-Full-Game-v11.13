@@ -139,6 +139,9 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .pc-mn{flex:1;min-width:0;font-family:var(--cond);font-weight:700;letter-spacing:.4px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pc-mc{font-family:var(--cond);font-size:10px;letter-spacing:.3px;opacity:.85;white-space:nowrap}
 .pc-chip{flex:0 0 auto;font-family:var(--disp);font-size:13px;line-height:1;color:#fff;padding:4px 7px;border-radius:6px;border:2px solid rgba(0,0,0,.35);min-width:34px;text-align:center}
+.armed-flag{position:absolute;top:-9px;right:-8px;background:var(--gold-dk);color:var(--ink);border:2px solid var(--ink);border-radius:11px;padding:1px 7px;font-family:var(--cond);font-size:9.5px;letter-spacing:.8px;box-shadow:0 2px 3px rgba(0,0,0,.4);pointer-events:none;z-index:14}
+.pc-move{position:relative}
+
 .pc-chip.red{background:var(--red)} .pc-chip.blue{background:#3f7fd6}
 .pc-chip.sm{font-size:11px;padding:2px 6px;min-width:0}
 .pc-move.atk{background:#f3c7bf;color:var(--red-dk)}
@@ -1873,7 +1876,7 @@ const DATA = {
         atk:{n:"Golden Cap Command", t:"Inflict 🪢 Tear.", cost:2, dmg:30, inflict:"tear", label:"30/2"},
         blk:{n:"Water Terror", t:"She hides beneath her umbrella, terrified of what one splash would do. If the Witch is 🫟 Spilled, this block fails and she is undone. This block fails completely, and this character is undone while this character has 🫟 Spill.", cost:2, block:40, cond:[{test:"selfHasStatus",status:"spill",then:{blockSet:0,selfKO:true}}], label:"40/2"} },
       { id:"glinda", name:"Glinda the Good Witch", hp:120, 'archetype':'Mentor', accent:"#FF69B4", img:"", tags:["witch","leader"],
-        atk:{n:"Quadling Book of Records", t:"Grant 📝 Margin Notes.", cost:1, dmg:30, grant:"marginnotes", label:"30/1"},
+        atk:{n:"Quadling Book of Records", t:"Grant 📝 Margin Notes.", cost:1, dmg:30, grant:"marginNotes", label:"30/1"},
         blk:{n:"Ruby Protection", t:"Grant 🛡️ Laminate.", cost:2, block:40, grant:"laminate", label:"40/2"} },
       { id:"oz", name:"The Great and Powerful Oz", hp:90, 'archetype':'Scourge', accent:"#00A86B", img:"", tags:["leader","human"],
         atk:{n:"Behind the Curtain", t:"Inflict 🫆 Smudge.", cost:2, dmg:30, inflict:"smudge", label:"30/2"},
@@ -2407,7 +2410,7 @@ const DATA = {
     { id:'proofread', name:'Proofread', kind:'BOOST', rarity:'C', text:'Remove one negative status from your Active Character.', effect:'proofread' },
     { id:'revisededition', name:'Revised Edition', kind:'BOOST', rarity:'R', text:'Remove all negative statuses from your Active and heal 20 HP.', effect:'revised' },
     { id:'highlightpassage', name:'Highlight Passage', kind:'BOOST', rarity:'C', text:'Grant Highlight — your next attack deals +20 damage.', effect:'highlight' },
-    { id:'marginnotes', name:'Margin Notes', kind:'BOOST', rarity:'C', text:'Grant Margin Notes — the next time you attach an ABC, draw a card.', effect:'marginnotes' },
+    { id:'marginNotes', name:'Margin Notes', kind:'BOOST', rarity:'C', text:'Grant Margin Notes — the next time you attach an ABC, draw a card.', effect:'marginNotes' },
     { id:'hardcover', name:'Hardcover Edition', kind:'BOOST', rarity:'C', text:'Grant Hardcover — reduce all incoming damage by 10 until your next turn.', effect:'hardcover' },
     { id:'dogeared', name:'Dog-Eared Strategy', kind:'UTILITY', rarity:'U', text:"Your Active's next attack does not discard its Attack ABC cards.", effect:'dogear' },
     { id:'redpen', name:"Editor's Red Pen", kind:'UTILITY', rarity:'R', text:'Discard one ABC from the enemy Active, then attach one ABC from your hand free of trivia.', effect:'redpen' },
@@ -3014,6 +3017,11 @@ function escCost(ch,ab,slot){
   const used=ch['_esc'+slot]||0;
   return Math.min(e.cap||4, base + used*(e.step||1));
 }
+// A riposte is armed whenever the block is charged, block or no block.
+function riposteArmed(ch){
+  const b=ch&&ch.blk; if(!b||!b.riposte||ch.hp<=0) return false;
+  return b.cost!=null && ch.blkCharge.length>=blockCostFor(ch,b);
+}
 function blockCostFor(ch,ab){ return ab ? escCost(ch,ab,'Blk') : 0; }
 function attackCostFor(side,ab){
   let cost=ab.cost||0;
@@ -3517,7 +3525,7 @@ function playBookmark(side,idx){
     case 'proofread':{ const m=active(P); let r=null; for(const k of STATUS_NEG){ if(m.status[k]){ delete m.status[k]; if(k==='smudge') delete m.status._smudgeHalf; r=k; break; } } pushLog(r?`Proofread: ${m.name} sheds ${r}.`:`Proofread: ${m.name} had no negative status.`); remove(); break; }
     case 'revised':{ const m=active(P); cleanseNeg(m); const b0=m.hp; healChar(m,20); fxHeal(sideOfChar(m),m.hp-b0); pushLog(`Revised Edition: ${m.name} is cleansed and heals 20 (${m.hp}/${m.maxHp}).`); remove(); break; }
     case 'highlight':{ grant(act,'highlight'); pushLog(`${who(P)} highlights ${act.name} — next attack +20.`); hold('highlight',act.uid); break; }
-    case 'marginnotes':{ grant(act,'marginNotes'); pushLog(`${who(P)} pencils Margin Notes on ${act.name} — draw on the next attach.`); hold('marginNotes',act.uid); break; }
+    case 'marginNotes':{ grant(act,'marginNotes'); pushLog(`${who(P)} pencils Margin Notes on ${act.name} — draw on the next attach.`); hold('marginNotes',act.uid); break; }
     case 'hardcover':{ grant(act,'hardcover'); pushLog(`${who(P)} gives ${act.name} a Hardcover — incoming damage -10 until your next turn.`); hold('hardcover',act.uid); break; }
     case 'dogear':{ P.flags.dogear=true; pushLog(`${who(P)} dog-ears a page — the next attack keeps its Attack ABC.`); hold('dogear'); break; }
     case 'redpen':{ const F=foeOf(side),oa=active(F); const piles=[]; oa.atkCharge.forEach((c,i)=>piles.push(['a',i])); oa.blkCharge.forEach((c,i)=>piles.push(['b',i])); if(piles.length){ const [pk,pi]=piles[rnd(piles.length)]; const arr=pk==='a'?oa.atkCharge:oa.blkCharge; F.discard.push(arr.splice(pi,1)[0]); pushLog(`Editor's Red Pen strips an ABC from ${oa.name}.`); } const m=active(P), ci=P.hand.findIndex(c=>c.cat==='abc'); if(ci>=0){ const c=P.hand.splice(ci,1)[0]; (c.type==='ATTACK'?m.atkCharge:m.blkCharge).push(c); pushLog(`Editor's Red Pen attaches a ${c.type} ABC to ${m.name} free of trivia.`); } remove(); break; }
@@ -4315,7 +4323,7 @@ function charTile(p,side){
       ${ch.atk2?`<button class="pc-move atk ${canAct&&ch.atkCharge.length>=ch.atk2.cost?'ready':''}" data-act="attack2" ${canAct&&ch.atkCharge.length>=ch.atk2.cost?'':'disabled'}>
         <span class="pc-mn">${ch.atk2.n}</span><span class="pc-mc">${ch.atkCharge.length}/${ch.atk2.cost}&#9876;</span><span class="pc-chip red">${ch.atk2.label||''}</span></button>`:''}
       <div class="pc-move blk">
-        <span class="pc-mn">${ch.blk.n}</span><span class="pc-mc">${ch.blkCharge.length}/${ch.blk?blockCostFor(ch,ch.blk):'–'}&#9932;</span><span class="pc-chip blue">${ch.blk.label||''}</span></div>
+        <span class="pc-mn">${ch.blk.n}</span><span class="pc-mc">${ch.blkCharge.length}/${ch.blk?blockCostFor(ch,ch.blk):'\u2013'}&#9932;</span><span class="pc-chip blue">${ch.blk.label||''}</span>${riposteArmed(ch)?'<span class="armed-flag" title="Riposte is armed \u2014 attacking into this block will cost the attacker">\uD83E\uDE83 ARMED</span>':''}</div>
     </div></div>`;
 }
 
@@ -4361,7 +4369,9 @@ function applySiphon(target,owner,ownerSide,cfg){
   if(typeof fxStatus==='function'){ try{ fxStatus(sideOfChar?sideOfChar(target):null,'siphon'); }catch(e){} }
   return true; }
 function statusKeys(c){ var out=[]; if(!c||!c.status) return out;
-  ['tear','rip','glue','burn','spill','smudge','siphon'].forEach(function(k){ if(c.status[k]) out.push(k); }); return out; }
+  ['tear','rip','glue','burn','spill','smudge','siphon',
+   'highlight','hardcover','laminate','marginNotes','ironcurtain','weaken','exposed','costUp']
+   .forEach(function(k){ if(c.status[k]) out.push(k); }); return out; }
 function statusBubbles(c){
   var ks=statusKeys(c); if(!ks.length) return '';
   return '<span class="sbub">'+ks.map(function(k){
@@ -6853,7 +6863,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, blockCostFor, escClear, healChar, escBump, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, blockCostFor, escClear, healChar, escBump, riposteArmed, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
