@@ -1581,7 +1581,7 @@ const DATA = {
         blk:{n:'Shifting Loyalties', t:'Leans on her allies to soak a hit.', cost:2, block:50, label:'50/2'} },
       { id:'gatsby', name:'Jay Gatsby', hp:105, 'archetype':'Monument', accent:'#3E8E7E',
         atk:{n:'Green Light Ambition', t:'+5 each turn it stays in play.', cost:3, dmgType:'perTurn', base:50, step:5, label:'50/3+'},
-        blk:{n:'Fading Illusions', t:'Negate the attack entirely.', cost:3, blockType:'negate', label:'X/3'} },
+        blk:{n:'Fading Illusions', t:'The illusion holds. Negate the attack entirely, but every use costs 1 more ABC than the last, up to 4.', cost:3, blockType:'negate', label:'X/3+', 'escalate':{step:1,cap:4}} },
       { id:'myrtle', name:'Myrtle Wilson', hp:70, 'archetype':'Steadfast', accent:'#B0556B',
         atk:{n:'Ambitious Strike', t:'A sharp, social-climbing jab.', cost:1, dmg:30, label:'30/1'},
         blk:{n:'Fragile Aspirations', t:'Absorbs one big attack at a cost.', cost:2, block:50, label:'50/2'} },
@@ -1634,7 +1634,7 @@ const DATA = {
         blk:{n:'Mirror Shield', t:'Hesitates, then turns the next attack aside.', cost:1, block:30, label:'30/1'} },
       { id:'parris', name:'Reverend Parris', hp:75, 'archetype':'Steadfast', accent:'#8A6A3C',
         atk:{n:'Narcissistic Paranoia', t:'A reckless, doubling lunge.', cost:1, dmg:20, label:'20/1'},
-        blk:{n:'Greed\'s Shield', t:'Negate the attack entirely.', cost:1, blockType:'negate', label:'X/1'} },
+        blk:{n:'Greed\'s Shield', t:'Greed compounds. Negate the attack entirely, but every use costs 1 more ABC than the last, up to 4.', cost:1, blockType:'negate', label:'X/1+', 'escalate':{step:1,cap:4}} },
       { id:'putnam', name:'Thomas & Ann Putnam', hp:115, "archetype":"Paragon", accent:'#6B4E8A',
         atk:{n:'The Do Over', t:'Strikes twice when the stars align.', cost:3, dmg:70, label:'70/3'},
         blk:{n:"Queen's Comfort", t:'A regal guard that soaks the blow and returns the insult. 🪃 Riposte — while charged, attackers take 10.', cost:2, block:30, label:'30/2', riposte:{dmg:10,mode:"hp"}} },
@@ -1663,7 +1663,7 @@ const DATA = {
     hamlet: [
       { id:'claudius', name:'Claudius', hp:140, 'archetype':'Paragon', accent:'#7A2E3B', img:'',
         atk:{n:'Castle Crasher', t:'The usurped crown brought down in full force.', cost:3, dmg:60, label:'60/3'},
-        blk:{n:"Sinner's Sanctuary", t:'Negate the attack entirely.', cost:3, blockType:'negate', label:'X/3'} },
+        blk:{n:"Sinner's Sanctuary", t:'Untouchable at false prayer. Negate the attack entirely, but every use costs 1 more ABC than the last, up to 4.', cost:3, blockType:'negate', label:'X/3+', 'escalate':{step:1,cap:4}} },
       { id:'gertrude', name:'Gertrude', hp:100, 'archetype':'Trickster', accent:'#8A6A8A', img:'',
         atk:{n:'The Do Over', t:'Strikes twice when the stars align. Deals 2× damage while you have Claudius and The Ghost King in play.', cost:3, dmg:60, cond:[{test:'inPlay',scope:'self',ids:['claudius','ghost_king'],all:true,then:{dmgMult:2},log:'The Do Over strikes twice — Claudius and the Ghost both stand.'}], label:'60/3'},
         blk:{n:"Queen's Comfort", t:'A regal guard that soaks a heavy blow. Negates the attack entirely while you have Claudius in play. This block fails and the damage doubles while you have The Ghost King in play.', cost:2, block:40, cond:[{test:'inPlay',scope:'self',ids:['claudius'],then:{negate:true},log:"Queen's Comfort negates — Claudius shields her."},{test:'inPlay',scope:'self',ids:['ghost_king'],then:{blockFailDouble:true},log:"Queen's Comfort fails — the Ghost exposes her guilt."}], label:'40/2'} },
@@ -1678,13 +1678,13 @@ const DATA = {
         blk:{n:'Mirror Shield', t:'Hesitates, then turns the next attack aside.', cost:1, block:20, label:'20/1'} },
       { id:'horatio', name:'Horatio', hp:120, 'archetype':'Paragon', accent:'#4F6D8A', img:'',
         atk:{n:'The Sober Witness', t:'Strikes only to protect — and remembers all.', cost:2, dmg:50, label:'50/2'},
-        blk:{n:'Flights of Angels', t:'Negate the attack entirely.', cost:3, blockType:'negate', label:'X/3'} },
+        blk:{n:'Flights of Angels', t:'He shields his friend. Negate the attack entirely, but every use costs 1 more ABC than the last, up to 4.', cost:3, blockType:'negate', label:'X/3+', 'escalate':{step:1,cap:4}} },
       { id:'fortinbras', name:'Fortinbras', hp:115, 'archetype':'Sentinel', accent:'#4A5A8A', img:'',
         atk:{n:'The Takeover', t:'Claims the throne over the bodies. Deals 2× damage once Hamlet has fallen.', cost:3, dmg:60, cond:[{test:'ko',ids:['hamlet'],then:{dmgMult:2},log:'The Takeover doubles — Hamlet has fallen.'}], label:'60/3'},
         blk:{n:'Norway, No How', t:'The foreign army stands apart from the blow.', cost:3, block:70, label:'70/3'} },
       { id:'ophelia', name:'Ophelia', hp:110, 'archetype':'Gatekeeper', accent:'#8A6A9A', img:'',
         atk:{n:'Crazy in Love', t:'A reckless lunge. Deals 2× damage against Hamlet.', cost:1, dmg:20, cond:[{test:'defenderIs',ids:['hamlet'],then:{dmgMult:2},log:'Crazy in Love doubles against Hamlet.'}], label:'20/1'},
-        blk:{n:'Sacrificial Love', t:'Negate the attack entirely.', cost:1, blockType:'negate', label:'X/1'} },
+        blk:{n:'Sacrificial Love', t:'Everything she has, given away. Negate the attack entirely. Ophelia loses 10 HP each time she does.', cost:1, blockType:'negate', label:'X/1', 'selfDamage':10} },
       { id:'polonius', name:'Polonius', hp:85, 'archetype':'Paragon', accent:'#8A6A3C', img:'',
         atk:{n:'Wise Wail', t:'Tedious counsel that still cuts.', cost:3, dmg:70, label:'70/3'},
         blk:{n:'Curtain Concealer', t:'Caps incoming damage at 10.', cost:2, blockType:'capto', cap:10, label:'10/2'} },
@@ -1710,7 +1710,7 @@ const DATA = {
     frankenstein: [
       { id:'creature', name:'The Creature', hp:115, 'archetype':'Force of Nature', accent:'#5A6E55', img:'', tags:['villain'],
         atk:{n:'Vengeful Wrath', t:'Inflict ✂️ Rip.', cost:4, dmg:80, inflict:'rip', label:'80/4'},
-        blk:{n:'Sublime Wilderness', t:'Negate the attack entirely.', cost:3, blockType:'negate', label:'X/3'} },
+        blk:{n:'Sublime Wilderness', t:'He vanishes into glacier and Arctic. Negate the attack entirely, but every use costs 1 more ABC than the last, up to 4.', cost:3, blockType:'negate', label:'X/3+', 'escalate':{step:1,cap:4}} },
       { id:'walton', name:'Captain Robert Walton', hp:105, 'archetype':'Hero', accent:'#4F6D8A', img:'',
         atk:{n:'Ardent Voyage', t:'Grant ✨ Highlight.', cost:2, dmg:40, grant:'highlight', label:'40/2'},
         blk:{n:'Icebound Vessel', t:'Grant 📕 Hardcover.', cost:2, block:30, grant:'hardcover', label:'30/2'} },
@@ -1757,7 +1757,7 @@ const DATA = {
         blk:{n:'Criminal Web', t:'Inflict 🩹 Glue on the attacker.', cost:1, block:30, inflictAtt:'glue', label:'30/1'} },
       { id:'holmes', name:'Sherlock Holmes', hp:100, 'archetype':'Force of Nature', accent:'#4A5A6E', img:'',
         atk:{n:'Elementary Deduction', t:'Inflict ✂️ Rip.', cost:2, dmg:40, inflict:'rip', label:'40/2'},
-        blk:{n:'7-Percent Solution', t:'Negate the attack entirely. Grant ✨ Highlight.', cost:3, blockType:'negate', grant:'highlight', label:'X/3'} },
+        blk:{n:'7-Percent Solution', t:'A mind-sharpening retreat. Negate the attack entirely and gain ✨ Highlight, but every use costs 1 more ABC than the last, up to 4.', cost:3, blockType:'negate', grant:'highlight', label:'X/3+', 'escalate':{step:1,cap:4}} },
       { id:'watson', name:'Dr. John Watson', hp:90, 'archetype':'Fallen', accent:'#6E5A3C', img:'',
         atk:{n:'Service Revolver', t:'Inflict 🪢 Tear.', cost:2, dmg:30, inflict:'tear', label:'30/2'},
         blk:{n:'Medical Field Dressing', t:'Grant 📕 Hardcover.', cost:2, block:30, grant:'hardcover', label:'30/2'} },
@@ -3005,8 +3005,19 @@ function hasCrit(side,fx){ return critFx(side)===fx; }
 function symbolsOff(){ return critFx('you')==='formalism'||critFx('opp')==='formalism'; }
 function deconOn(){ return critFx('you')==='deconstruct'||critFx('opp')==='deconstruct'; }
 function affectiveOn(){ return critFx('you')==='affective'||critFx('opp')==='affective'; }
+// Escalate: each use of a move costs one more ABC than the last, up to a cap.
+// The counter lives on the character and clears when it leaves play or is revived.
+function escBump(ch,slot){ if(!ch) return; const k='_esc'+slot; ch[k]=(ch[k]||0)+1; }
+function escClear(ch){ if(!ch) return; ch._escAtk=0; ch._escBlk=0; }
+function escCost(ch,ab,slot){
+  const base=ab.cost||0, e=ab&&ab.escalate; if(!e||!ch) return base;
+  const used=ch['_esc'+slot]||0;
+  return Math.min(e.cap||4, base + used*(e.step||1));
+}
+function blockCostFor(ch,ab){ return ab ? escCost(ch,ab,'Blk') : 0; }
 function attackCostFor(side,ab){
   let cost=ab.cost||0;
+  { const P0=S&&S[side]; if(P0) cost=escCost(active(P0),ab,'Atk'); }
   if(hasCrit(side,'biographical') && S[side].grave.length>0) cost=Math.max(1,cost-1);
   const P=S[side]; if(P){ const act=active(P);
     if(act&&act.fe&&act.passive&&act.passive.costMod) cost+=act.passive.costMod;
@@ -3080,7 +3091,7 @@ function fulfillThesis(side){
   }
   if(!S.over) finishCrit(); else render();
 }
-function healChar(c, amt){ if(!c||amt<=0) return 0; if(c.fe && c.passive && c.passive.noHeal){ if(typeof pushLog==='function') pushLog(`${c.name} is too far gone to be healed.`); return 0; } const b0=c.hp; c.hp=Math.min(c.maxHp, c.hp+amt); return c.hp-b0; }
+function healChar(c, amt){ if(c && c.hp<=0) escClear(c); if(!c||amt<=0) return 0; if(c.fe && c.passive && c.passive.noHeal){ if(typeof pushLog==='function') pushLog(`${c.name} is too far gone to be healed.`); return 0; } const b0=c.hp; c.hp=Math.min(c.maxHp, c.hp+amt); return c.hp-b0; }
 function drawN(side,n){ const P=S[side]; const foe=S[side==='you'?'opp':'you']; const spy=foe&&foe.team&&foe.team[foe.activeIdx]; const canPeek=spy&&spy.hp>0&&spy.fe&&spy.passive&&spy.passive.peekFoeDraw; for(let i=0;i<n;i++){ if(!P.deck.length && P.discard.length) P.deck=shuffle(P.discard.splice(0)); if(P.deck.length){ const c=P.deck.shift(); c._new=true; P.hand.push(c); if(canPeek){ var nm=(c.name||(c.word?('“'+c.word+'” '+(c.type||'')):(c.type||'a card'))); pushLog(`${spy.name} spies through the silk screen — ${who(P)} drew ${nm}.`); } } } }
 
 
@@ -3581,7 +3592,7 @@ function pPassiveChar(p,flag){ return feOnField(p).find(c=>c.passive&&c.passive[
 function isSoloAlive(p){ return p.team.filter(c=>c.hp>0).length<=1; }
 function doSwitch(p, newIdx, opts){
   opts=opts||{}; const oldIdx=p.activeIdx; if(newIdx==null||newIdx===oldIdx) return;
-  const leaving=p.team[oldIdx]; p.activeIdx=newIdx; const entering=p.team[newIdx];
+  const leaving=p.team[oldIdx]; escClear(leaving); p.activeIdx=newIdx; const entering=p.team[newIdx];
   if(leaving && leaving.status && leaving.status.rip){ delete leaving.status.rip; if(!opts.silent) pushLog(`${leaving.name} leaves the front line — its Rip mends.`); }
   if(leaving && leaving._tatamiTransfer && leaving.status && leaving.status.smudge && entering && entering.hp>0){ delete leaving.status.smudge; delete leaving._tatamiTransfer; inflict(entering,'smudge'); entering._tatamiTransfer=true; if(!opts.silent) pushLog(`The bloodstain spreads — ${entering.name} is Smudged as ${leaving.name} withdraws.`); }
   if(!opts.silent && leaving&&leaving.hp>0&&leaving.fe&&leaving.passive&&leaving.passive.onSwitchInflict&&entering&&entering.hp>0){
@@ -3648,12 +3659,13 @@ function performAttack(side,abilKey){           // == beginAttack
   let pierce=(ab.flags||[]).includes('pierce') || condPierce;
   if(hasCrit(side,'psycho') && def.blkCharge.length===0){ pierce=true; }
   if(symbolsOff()) pierce=false;
-  if(S.scrim && S.scrim.ruleShift==='pintendo' && side==='opp'){ const bb=def.blk; const full=bb && bb.cost!=null && def.blkCharge.length>=bb.cost; if(!full){ pierce=true; } }
+  if(S.scrim && S.scrim.ruleShift==='pintendo' && side==='opp'){ const bb=def.blk; const full=bb && bb.cost!=null && def.blkCharge.length>=blockCostFor(def,bb); if(!full){ pierce=true; } }
+  if(ab.escalate) escBump(att,'Atk');
   if(ab.siphon && !symbolsOff()) applySiphon(def,att,side,ab.siphon);
   atkCtx={side,A,att,ab,D,dKey,def,dmg,pierce,condInflict,condFoeDiscard};
   // ---- Riposte: armed whenever the defender's block is charged, block or no block ----
   { const rb=def.blk&&def.blk.riposte;
-    const armed = rb && def.blk.cost!=null && def.blkCharge.length>=def.blk.cost;
+    const armed = rb && def.blk.cost!=null && def.blkCharge.length>=blockCostFor(def,def.blk);
     if(armed && !symbolsOff() && att._ripostedTurn!==S._turnNo){
       att._ripostedTurn=S._turnNo;
       const mode=rb.mode||'hp';
@@ -3679,8 +3691,8 @@ function performAttack(side,abilKey){           // == beginAttack
     } }
   if(def.status.ecoNegate){ def.status.ecoNegate=false; pushLog(`${def.name} negates the attack (Ecocriticism)!`); return finishAttack(dmg,true); }
   if(def.status.ironcurtain && !pierce && !ab.ignoreDefBuffs){ def.status.ironcurtain=false; pushLog(`${def.name}'s Iron Curtain absorbs the blow!`); return finishAttack(dmg,true); }
-  const bb=def.blk, canBlock=(!pierce||deconOn()) && !def.status.glue && bb && bb.cost!=null && def.blkCharge.length>=bb.cost;
-  if(def.status.glue && bb && def.blkCharge.length>=bb.cost) pushLog(`${def.name} is Glued — cannot block.`);
+  const bb=def.blk, canBlock=(!pierce||deconOn()) && !def.status.glue && bb && bb.cost!=null && def.blkCharge.length>=blockCostFor(def,bb);
+  if(def.status.glue && bb && def.blkCharge.length>=blockCostFor(def,bb)) pushLog(`${def.name} is Glued — cannot block.`);
   if(canBlock){
     if(dKey==='you' && !S.settings.autoBlock){ S.defend=true; busy=true; render(); return; }   // player chooses
     const willBlock=(dKey==='opp')?(dmg>=8):true;
@@ -3690,8 +3702,10 @@ function performAttack(side,abilKey){           // == beginAttack
 }
 function doBlock(){
   const {A,att,def,D,dmg,dKey}=atkCtx, b=def.blk;
-  let spentBlk=spend(def.blkCharge,b.cost);
-  if(spentBlk.length<b.cost && hasCrit(dKey,'queer')){ spentBlk.push(...spend(def.atkCharge,b.cost-spentBlk.length)); }
+  const _bCost=blockCostFor(def,b);
+  let spentBlk=spend(def.blkCharge,_bCost);
+  if(spentBlk.length<_bCost && hasCrit(dKey,'queer')){ spentBlk.push(...spend(def.atkCharge,_bCost-spentBlk.length)); }
+  if(b.escalate) escBump(def,'Blk');
   const res=calcBlock(def,b,dmg); let amt=res.amt; let neg=!!res.negate; let failDouble=false;
   if(b.blkCleanse){ [].concat(b.blkCleanse).forEach(function(_st){ if(def.status[_st]){ delete def.status[_st]; pushLog(`${def.name} shrugs off ${statusName(_st)} while blocking.`); } }); }
     if(b.cleanseAlly){ const _al=D.team.find(c=>c.hp>0 && c!==def && c.status[b.cleanseAlly]); if(_al){ delete _al.status[b.cleanseAlly]; pushLog(`${def.name} clears ${statusName(b.cleanseAlly)} from ${_al.name}.`); } }
@@ -4301,7 +4315,7 @@ function charTile(p,side){
       ${ch.atk2?`<button class="pc-move atk ${canAct&&ch.atkCharge.length>=ch.atk2.cost?'ready':''}" data-act="attack2" ${canAct&&ch.atkCharge.length>=ch.atk2.cost?'':'disabled'}>
         <span class="pc-mn">${ch.atk2.n}</span><span class="pc-mc">${ch.atkCharge.length}/${ch.atk2.cost}&#9876;</span><span class="pc-chip red">${ch.atk2.label||''}</span></button>`:''}
       <div class="pc-move blk">
-        <span class="pc-mn">${ch.blk.n}</span><span class="pc-mc">${ch.blkCharge.length}/${ch.blk.cost??'–'}&#9932;</span><span class="pc-chip blue">${ch.blk.label||''}</span></div>
+        <span class="pc-mn">${ch.blk.n}</span><span class="pc-mc">${ch.blkCharge.length}/${ch.blk?blockCostFor(ch,ch.blk):'–'}&#9932;</span><span class="pc-chip blue">${ch.blk.label||''}</span></div>
     </div></div>`;
 }
 
@@ -6839,7 +6853,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, blockCostFor, escClear, healChar, escBump, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
