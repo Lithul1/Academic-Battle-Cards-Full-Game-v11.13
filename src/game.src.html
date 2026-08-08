@@ -4154,15 +4154,20 @@ function ipCost(side){ const a=active(S[side]); return (a && a.status && a.statu
 function ipOffer(side,pend,choice){
   const P=S[side];
   if(pend._retried) return false;                  // one retry per question
-  if(P.hand.length < ipCost(side)) return false;   // cannot pay
+  if(P.hand.length - 1 < ipCost(side)) return false;   // the pending card cannot be shed
   return true;
 }
 function ipAccept(picks){
   const st=S._ip; if(!st) return;
   const P=S[st.side], need=ipCost(st.side);
-  const idxs=[].concat(picks).slice(0,need);
+  const idxs=[].concat(picks).filter(i=>i!==st.pend.handIdx).slice(0,need);
   if(idxs.length<need){ toast('Choose '+need+' card'+(need===1?'':'s')+' to shed.'); return; }
-  idxs.sort((a,b)=>b-a).forEach(i=>{ const c=P.hand.splice(i,1)[0]; if(c) P.discard.push(c); });
+  // shed high-to-low, then shift the pending index for every card removed beneath it,
+  // or attach() will reach for the wrong card once the hand has closed up.
+  idxs.sort((a,b)=>b-a).forEach(i=>{
+    const c=P.hand.splice(i,1)[0]; if(c) P.discard.push(c);
+    if(i < st.pend.handIdx) st.pend.handIdx--;
+  });
   pushLog(`${who(P)} sheds ${need} card${need===1?'':'s'} to try again.`);
   const pend=st.pend; pend._retried=true; pend._wrongPick=st.choice;
   S._ip=null; S.pending=pend; busy=true; render();
@@ -5067,7 +5072,7 @@ function ipModal(){
     <h3>Iterum Probare</h3>
     <p>${sm?'Your notes are smudged. This retry costs <b>two</b> cards.'
            :'Wrong. Shed a card from your hand to answer once more \u2014 the card is spent either way.'}</p>
-    <div class="ip-pick">${P.hand.map(mini).join('')||'<span class="ip-empty">Your hand is empty.</span>'}</div>
+    <div class="ip-pick">${P.hand.map((c,i)=> i===st.pend.handIdx ? '' : mini(c,i)).join('')||'<span class="ip-empty">Nothing else to shed.</span>'}</div>
     <div class="ip-cost">${canPay?`Costs <b>${need} card${need===1?'':'s'}</b>. Your ${pend0(st)} and your attach are still on the table.`
                                  :'Nothing left to spend.'}</div>
     <div class="ip-acts">
@@ -5350,7 +5355,7 @@ document.addEventListener('click',e=>{
     if(!(e.target.closest && e.target.closest('[data-do]'))) return;
   }
   if(e.target.classList && e.target.classList.contains('modal-bg') && S && S._benchView){ S._benchView=null; render(); return; }
-  const t=e.target.closest('[data-do],[data-idx],[data-act],[data-ans],[data-def],[data-pick],[data-deck],[data-opp],[data-diff],[data-pile],[data-bld],[data-audio],[data-benchinfo],[data-scrim]');
+  const t=e.target.closest('[data-do],[data-idx],[data-act],[data-ans],[data-def],[data-pick],[data-deck],[data-opp],[data-diff],[data-pile],[data-bld],[data-audio],[data-benchinfo],[data-scrim],[data-ippick]');
   if(!t) return;
   if(t.dataset.benchinfo){ const [side,uid]=t.dataset.benchinfo.split(':'); S._benchView={side,uid}; render(); return; }
   if(t.dataset.audio){
