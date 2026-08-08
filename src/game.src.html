@@ -243,6 +243,52 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .bd-cav{width:34px;height:34px;border-radius:7px;object-fit:cover;object-position:50% 26%;border:1.5px solid var(--ink)}
 .bd-chip.crt.on{outline:2px solid var(--gold)}
 /* --- discard / retry UI (must stay outside any @media) --- */
+/* --- Index prompt + dev menu (must stay outside any @media) --- */
+.idx{background:var(--cream);border:3.5px solid var(--ink);border-radius:12px;padding:14px 16px;width:min(330px,92vw);
+  box-shadow:0 8px 0 rgba(0,0,0,.45);text-align:center;color:var(--ink)}
+.idx h3{font-family:var(--disp);font-size:19px;margin:0 0 3px}
+.idx p{font-size:12.5px;margin:0 0 10px;color:#3a322b}
+.idx-in{width:100%;font-family:ui-monospace,Menlo,monospace;font-size:13px;padding:8px 10px;
+  border:2px solid var(--ink);border-radius:8px;background:#fff;color:var(--ink)}
+.idx-msg{font-size:12px;font-style:italic;color:var(--red-dk);margin-top:8px}
+.idx-acts{display:flex;gap:9px;justify-content:center;margin-top:11px}
+.dev{background:#141a1a;border:3px solid #d8b25a;border-radius:12px;padding:13px 15px;
+  width:min(430px,94vw);max-height:88vh;overflow-y:auto;color:#EFE2C7;text-align:left}
+.dev h3{font-family:var(--disp);font-size:17px;margin:0 0 1px;color:#d8b25a}
+.dev .warn{font-family:var(--cond);font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--red);margin-bottom:9px}
+.dv-sec{font-family:var(--cond);letter-spacing:1.1px;text-transform:uppercase;font-size:11px;color:#9a8a6a;
+  margin:11px 0 5px;border-bottom:1px dashed #4a4030;padding-bottom:3px}
+.dv-row{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:5px}
+.dv-btn{font-family:var(--cond);letter-spacing:.7px;text-transform:uppercase;font-size:11px;background:#2a2420;
+  color:#EFE2C7;border:2px solid #5a4636;border-radius:7px;padding:6px 10px;cursor:pointer}
+.dv-btn:hover{border-color:#d8b25a}
+.dv-btn.danger{border-color:#8C2A20;color:#f2c2bc}
+.dv-num{width:80px;font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#0f1414;color:#EFE2C7;
+  border:2px solid #5a4636;border-radius:7px;padding:5px 7px}
+.dv-lab{font-size:12px;color:#c9b58a;min-width:74px}
+.dv-msg{font-size:12px;color:#d8b25a;font-style:italic;margin-top:10px;text-align:center}
+.dv-close{display:block;margin:13px auto 0;font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;
+  font-size:12px;background:#d8b25a;color:#241F1B;border:2px solid var(--ink);border-radius:9px;padding:8px 16px;cursor:pointer}
+.dev .pill{font-family:var(--cond);font-size:10px;letter-spacing:.6px;background:#2a2420;border:1.5px solid #5a4636;
+  border-radius:11px;padding:2px 8px;color:#c9b58a}
+
+/* --- Marginalia (must stay outside any @media) --- */
+.pl.pick{cursor:pointer;box-shadow:0 2px 0 rgba(40,25,12,.4)}
+.pl.sel{outline:3px solid var(--gold);outline-offset:2px}
+.pl.dim{opacity:.35}
+.mg-bar{background:var(--cream-hi);border:2px dashed #6B4E8A;border-radius:9px;padding:8px 11px;margin:10px 0 0;font-size:12.5px;line-height:1.5}
+.mg-bar b{font-family:var(--cond);letter-spacing:.8px;text-transform:uppercase;font-size:11px;color:#6B4E8A}
+.mg-acts{display:flex;gap:9px;justify-content:center;margin-top:11px}
+.mg-go{font-family:var(--disp);font-size:13px;letter-spacing:.8px;background:#6B4E8A;color:#FBF3DD;
+  border:3px solid var(--ink);border-radius:10px;padding:9px 15px;box-shadow:0 4px 0 #4a3560;cursor:pointer}
+.mg-go.off{opacity:.4;cursor:not-allowed}
+.mg-no{font-family:var(--disp);font-size:13px;letter-spacing:.8px;background:var(--cream-hi);color:var(--ink);
+  border:3px solid var(--ink);border-radius:10px;padding:9px 15px;box-shadow:0 4px 0 #8a7a5a;cursor:pointer}
+.mg-pips{display:flex;gap:5px;justify-content:center;margin:6px 0 4px}
+.mg-pips .pip{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:var(--cream)}
+.mg-pips .pip.done{background:#2f7d5c}
+.mg-pips .pip.now{background:var(--gold)}
+
 .hv-disc{font-family:var(--disp);font-size:14px;letter-spacing:1px;background:var(--cream-hi);color:var(--ink);
      border:3px solid var(--ink);border-radius:10px;padding:10px 16px;box-shadow:0 4px 0 #8a7a5a;cursor:pointer}
    .hv-disc.off{opacity:.42;cursor:not-allowed}
@@ -4208,15 +4254,16 @@ function render(){
   const root=$('#game'); if(!root) return;
   try{ if(APP.screen==='play'&&S){ SFX.contextTrack(S.scrim?((S.scrim.node&&S.scrim.node.boss)?'boss':'hiphop9'):null); } else { SFX.contextTrack(null); } }catch(e){}
   if(APP.screen==='play' && S){ document.body.setAttribute('data-screen','play'); sweepActiveBm(S.you); sweepActiveBm(S.opp); renderGame(root); try{fxHpTrails();}catch(e){} return; }
-  if(APP.screen==='scrim'){ document.body.setAttribute('data-screen','scrim'); document.body.setAttribute('data-scrimview',(SCRIM&&SCRIM.view)||''); root.innerHTML=scrimScreen(); scrimAfterRender&&scrimAfterRender(); return; }
+  if(APP.screen==='scrim'){ document.body.setAttribute('data-screen','scrim'); document.body.setAttribute('data-scrimview',(SCRIM&&SCRIM.view)||''); root.innerHTML=scrimScreen()+devModal(); scrimAfterRender&&scrimAfterRender(); return; }
   if(APP.screen==='builder'){ document.body.setAttribute('data-screen','builder'); root.innerHTML=builderScreen(); return; }
   document.body.setAttribute('data-screen','menu');
   document.body.setAttribute('data-menuscreen',APP.screen);
-  if(APP.screen==='difficulty'){ root.innerHTML=difficultyScreen(); return; }
-  if(APP.screen==='custom'){ root.innerHTML=customScreen(); return; }
-  if(APP.screen==='tune'){ root.innerHTML=tuneScreen(); return; }
-  if(APP.screen==='guide'){ root.innerHTML=guideScreen(); return; }
-  root.innerHTML=menuScreen();
+  const _ov=()=>indexModal()+devModal();
+  if(APP.screen==='difficulty'){ root.innerHTML=difficultyScreen()+_ov(); return; }
+  if(APP.screen==='custom'){ root.innerHTML=customScreen()+_ov(); return; }
+  if(APP.screen==='tune'){ root.innerHTML=tuneScreen()+_ov(); return; }
+  if(APP.screen==='guide'){ root.innerHTML=guideScreen()+_ov(); return; }
+  root.innerHTML=menuScreen()+_ov();
 }
 const initials = n => n.replace('&','').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 
@@ -4254,6 +4301,7 @@ function menuScreen(){
       <button class="menu-btn" data-do="go-quick"><span class="menu-ic">⚡</span><span class="menu-tx"><b>Quickplay</b><small>Pick a difficulty — random decks for both sides</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="go-custom"><span class="menu-ic">♟</span><span class="menu-tx"><b>Custom Play</b><small>Choose difficulty, your deck, the opponent &amp; house rules</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="go-drawn"><span class="menu-ic">🎴</span><span class="menu-tx"><b>Drawn Mode</b><small>Experimental — draw your team from the deck, then place them</small></span><span class="menu-go">›</span></button>
+      <button class="menu-btn" data-do="go-index"><span class="menu-ic">\uD83D\uDD16</span><span class="menu-tx"><b>Index</b><small>Look something up</small></span><span class="menu-go">\u203a</span></button>
       <button class="menu-btn" data-do="go-scrim"><span class="menu-ic">🏆</span><span class="menu-tx"><b>Literary Scrimmage</b><small>A roguelike campaign — bosses, unlockables &amp; a branching map</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="builder"><span class="menu-ic">⚒</span><span class="menu-tx"><b>Deck Builder</b><small>Build, edit &amp; share custom decks</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="go-guide"><span class="menu-ic">📖</span><span class="menu-tx"><b>Quickstart Guide</b><small>How to play &amp; a rules refresher</small></span><span class="menu-go">›</span></button>
@@ -4949,7 +4997,7 @@ function renderGame(root){
    ${S.viewPile?pileModal():''}
    ${S._bossReveal?bossRevealModal():''}
    ${S.over?(S.scrim?scrimOverModal():overModal()):''}
-   ${S._settings?settingsModal():''}
+   ${S._settings?settingsModal():''}${devModal()}
    ${S._benchView?benchInfoModal():''}
    ${S._handView!=null?handViewModal():''}
    ${S.drawn&&S._mullPop?drawnMullModal():''}`;
@@ -5085,7 +5133,10 @@ function triviaModal(){
   const c=S.pending.card;
   return `<div class="modal-bg"><div class="trivia ${c.type.toLowerCase()}">
     <div class="tri-head">${c.type==='ATTACK'?'⚔ ATTACK CARD':'⛊ BLOCK CARD'} · power ${c.power}</div>
-    <div class="tri-sub${S.pending._retried?' tri-retry':''}">${S.pending._retried?'Second attempt \u2014 same question.':'Answer correctly to charge your character.'}</div>
+    <div class="tri-sub${(S.pending._retried||S.pending._mg)?' tri-retry':''}">${
+      S.pending._mg ? `Marginalia \u2014 question ${S._mg.step+1} of ${S._mg.need}. No retry.`
+      : S.pending._retried?'Second attempt \u2014 same question.':'Answer correctly to charge your character.'}</div>
+    ${S.pending._mg?`<div class="mg-pips">${Array.from({length:S._mg.need},(_,i)=>`<span class="pip${i<S._mg.step?' done':(i===S._mg.step?' now':'')}"></span>`).join('')}</div>`:''}
     <div class="tri-q">${scrimTriviaText(c.q)}</div>
     <div class="tri-opts">${(function(){ let cliff=-1; if(S.scrim && scrimHas('cliffsnotes')){ for(let i=0;i<c.opts.length;i++){ if(i!==c.ans){ cliff=i; break; } } } const _wp=S.pending._wrongPick; return c.opts.map((o,i)=>`<button class="tri-opt${i===cliff?' tri-out':''}${i===_wp?' tri-wrong':''}" data-ans="${i}"${(i===cliff||i===_wp)?' disabled':''}><b>${'ABCD'[i]}</b> ${scrimTriviaText(o)}</button>`).join(''); })()}</div>
     ${(S.scrim && scrimHas('rosetta') && !S.scrim.rosettaUsed)?`<button class="tri-rosetta" data-scrim="rosetta" title="Swap this question (once per match)">\ud83d\udcdc Rosetta Stone — swap question</button>`:''}</div></div>`;
@@ -5108,18 +5159,169 @@ function pickerModal(){
     <div class="pick-title">${S.picker.title}</div>
     <div class="pick-opts">${S.picker.options.map(o=>`<button class="pick-opt" data-pick="${o.val}">${o.label}</button>`).join('')}</div></div></div>`;
 }
+// ---- Marginalia: spend an attach, name an ABC in your own discard, answer two
+// (three while Smudged) to charge it straight onto your Active. No retry.
+function mgEligible(){
+  return !!(S && S.turn==='you' && S.phase==='strategize' && !busy
+            && S.viewPile==='you' && (S.you.attachesLeft||0)>0 && !drawnLocked());
+}
+function mgNeed(){ const a=active(S.you); return (a&&a.status&&a.status.smudge)?3:2; }
+function mgQuestions(card,n){
+  const pool=[];
+  const push=c=>{ if(c&&c.cat==='abc'&&c.q&&c.opts&&c.ans!=null) pool.push(c); };
+  S.you.deck.forEach(push); S.you.discard.forEach(push); S.you.hand.forEach(push);
+  const out=[card];
+  const seen=new Set([card.q]);
+  const shuffled=pool.slice().sort(()=>Math.random()-0.5);
+  for(const c of shuffled){ if(out.length>=n) break; if(seen.has(c.q)) continue; seen.add(c.q); out.push(c); }
+  while(out.length<n) out.push(card);           // tiny pools: repeat rather than break
+  return out.slice(0,n);
+}
+function mgSelect(i){
+  if(!mgEligible()) return;
+  const c=S.you.discard[i];
+  if(!c || c.cat!=='abc') return;
+  S._mgPick = (S._mgPick===i) ? null : i;
+  render();
+}
+function mgStart(){
+  if(!mgEligible() || S._mgPick==null) return;
+  const idx=S._mgPick, card=S.you.discard[idx];
+  if(!card || card.cat!=='abc'){ S._mgPick=null; render(); return; }
+  const need=mgNeed();
+  S._mg={idx, card, need, step:0, qs:mgQuestions(card,need)};
+  S._mgPick=null; S.viewPile=null;
+  busy=true; S.pending={card:S._mg.qs[0], handIdx:-1, target:null, _mg:true};
+  pushLog(`${who(S.you)} reaches back into the pile \u2014 ${need} questions to reclaim it.`);
+  render();
+}
+function mgAnswer(choice){
+  const st=S._mg; if(!st) return;
+  const q=st.qs[st.step], correct=choice===q.ans;
+  S.pending=null;
+  if(!correct){
+    S._mg=null; busy=false;
+    S.you.attachesLeft=Math.max(0,(S.you.attachesLeft||0)-1);
+    toast('Wrong — the card stays buried.','bad');
+    pushLog('The page will not come back. The attach is spent.');
+    render(); return;
+  }
+  st.step++;
+  if(st.step<st.need){
+    toast(`Correct — ${st.need-st.step} to go.`,'good');
+    S.pending={card:st.qs[st.step], handIdx:-1, target:null, _mg:true};
+    busy=true; render(); return;
+  }
+  // all correct — pull it out of the pile and charge it
+  const i=S.you.discard.indexOf(st.card);
+  if(i>=0) S.you.discard.splice(i,1);
+  const act=active(S.you);
+  (String(st.card.type).toUpperCase()==='ATTACK'?act.atkCharge:act.blkCharge).push(st.card);
+  S.you.attachesLeft=Math.max(0,(S.you.attachesLeft||0)-1);
+  S._mg=null; busy=false;
+  toast('Reclaimed — the card is charged.','good');
+  pushLog(`${act.name} reclaims a ${st.card.type} card from the pile.`);
+  render();
+}
+
+/* ===== Dev menu — hidden behind a keyword. Reachable from the Vault transcript
+   box or from the title screen "Index". Everything writes to META and saves. ===== */
+const DEV_WORD='lakefront';
+function devOpen(){ APP.dev=true; render(); }
+function devClose(){ APP.dev=false; APP.devMsg=null; render(); }
+function devLog(t){ APP.devMsg=t; if(typeof S!=='undefined' && S && typeof pushLog==='function') pushLog('\u2699 '+t); }
+function devNum(id){ const el=document.getElementById(id); return Math.max(0, parseInt(el&&el.value,10)||0); }
+function devDo(what){
+  collInit&&collInit();
+  const allDecks=Object.keys((typeof DATA!=='undefined'&&DATA.characters)||{});
+  switch(what){
+    case 'ipset':   META.ip=devNum('dv-ip'); devLog('Intellect set to '+META.ip); break;
+    case 'ipadd':   META.ip=(META.ip||0)+1000; devLog('Intellect +1000 \u2192 '+META.ip); break;
+    case 'lfset':   if(typeof SCRIM!=='undefined'&&SCRIM&&SCRIM.active){ SCRIM.lf=devNum('dv-lf'); devLog('Late Fees set to '+SCRIM.lf); } else devLog('No active run.'); break;
+    case 'decks':   META.decks=allDecks.slice(); devLog('All '+allDecks.length+' decks unlocked'); break;
+    case 'cmdrs':   META.commanders=allDecks.slice(); devLog('All commanders granted'); break;
+    case 'firsteds':{ const ids=(typeof DATA!=='undefined'&&DATA.firsteds)?Object.keys(DATA.firsteds):[];
+                     META.editionCards=ids.slice(); devLog(ids.length+' first editions granted'); break; }
+    case 'packs':   META.packs=(META.packs||0)+10; devLog('Packs +10 \u2192 '+META.packs); break;
+    case 'foils':   META.foils=(META.foils||0)+10; devLog('Foils +10 \u2192 '+META.foils); break;
+    case 'bosses':  if(typeof SCRIM_BOSSES!=='undefined'&&SCRIM_BOSSES){ META.bossSeen=Object.keys(SCRIM_BOSSES); devLog('All '+META.bossSeen.length+' bosses revealed'); } else devLog('Boss table unavailable.'); break;
+    case 'killed':  if(typeof SCRIM_BOSSES!=='undefined'&&SCRIM_BOSSES){ META.bossKilled=Object.keys(SCRIM_BOSSES); META.bossSeen=Object.keys(SCRIM_BOSSES); devLog('All bosses marked defeated'); } else devLog('Boss table unavailable.'); break;
+    case 'clearrun':if(typeof scrimClearSave==='function'){ scrimClearSave(); devLog('Active run cleared \u2014 reload to see it'); } break;
+    case 'honors':  { const _top=(typeof HONORS!=='undefined'&&HONORS.length)?HONORS.length-1:0;
+                  META.honorsMax=_top; META.honorsCleared=_top;
+                  devLog('Honors maxed \u2014 '+((HONORS[_top]&&HONORS[_top].short)||_top)); break; }
+    case 'hand':    if(S&&S.you){ while(S.you.hand.length<8 && S.you.deck.length) S.you.hand.push(S.you.deck.shift()); devLog('Hand refilled to '+S.you.hand.length); } else devLog('Not in a battle.'); break;
+    case 'attach':  if(S&&S.you){ S.you.attachesLeft=(S.you.attachesLeft||0)+5; S.you.discardsLeft=(S.you.discardsLeft||0)+5; devLog('+5 attaches and discards'); } else devLog('Not in a battle.'); break;
+    case 'heal':    if(S&&S.you){ S.you.team.forEach(c=>{ if(c.hp>0) c.hp=c.maxHp; }); devLog('Your team healed'); } else devLog('Not in a battle.'); break;
+    case 'pile':    if(S&&S.you){ const mk=t=>({cat:'abc',type:t,power:1,q:'',opts:[],ans:0});
+                      for(let i=0;i<20;i++) S.you.discard.push(mk(i%2?'BLOCK':'ATTACK'));
+                      devLog('Discard filled \u2014 '+S.you.discard.length+' cards'); } else devLog('Not in a battle.'); break;
+    case 'skipai':  if(S){ S.turn='you'; if(typeof busy!=='undefined') busy=false; devLog('AI turn skipped'); } else devLog('Not in a battle.'); break;
+    case 'wipe':    { const el=document.getElementById('dv-wipe');
+                      if(!el || String(el.value).trim().toUpperCase()!=='WIPE'){ devLog('Type WIPE to confirm.'); break; }
+                      META.ip=0; META.decks=[]; META.commanders=[]; META.editionCards=[]; META.packs=0;
+                      META.foils=0; META.bossSeen=[]; META.bossKilled=[]; META.perks=[]; META.loadout=[];
+                      META.honorsMax=0; META.honorsCleared=0;
+                      devLog('All progress wiped.'); break; }
+  }
+  metaSave(); render();
+}
+function indexModal(){
+  if(!APP.indexOpen) return '';
+  return `<div class="modal-bg"><div class="idx">
+    <h3>\uD83D\uDD16 Index</h3>
+    <p>Look up a term from the collection.</p>
+    <input class="idx-in" id="idx-in" placeholder="term\u2026" autocomplete="off" spellcheck="false">
+    ${APP.indexMsg?`<div class="idx-msg">${APP.indexMsg}</div>`:''}
+    <div class="idx-acts"><button class="toolbtn go" data-do="index-go">Look up</button>
+      <button class="toolbtn" data-do="index-close">Close</button></div></div></div>`;
+}
+function devModal(){
+  if(!APP.dev) return '';
+  const inBattle = (typeof S!=='undefined' && !!S);
+  const B=(w,l,cls)=>`<button class="dv-btn${cls?' '+cls:''}" data-do="dev:${w}">${l}</button>`;
+  return `<div class="modal-bg"><div class="dev">
+    <h3>\u2699 Dev Menu</h3><div class="warn">progress-altering \u00b7 not for students</div>
+    <div class="dv-sec">Currency</div>
+    <div class="dv-row"><span class="dv-lab">Intellect</span>
+      <input class="dv-num" id="dv-ip" value="${META.ip||0}">${B('ipset','Set')}${B('ipadd','+1000')}</div>
+    <div class="dv-row"><span class="dv-lab">Late Fees</span>
+      <input class="dv-num" id="dv-lf" value="${(typeof SCRIM!=='undefined'&&SCRIM&&SCRIM.lf)||0}">${B('lfset','Set')}<span class="pill">run only</span></div>
+    <div class="dv-sec">Collection</div>
+    <div class="dv-row">${B('decks','Unlock all decks')}${B('cmdrs','All commanders')}</div>
+    <div class="dv-row">${B('firsteds','All 1st editions')}${B('packs','+10 packs')}${B('foils','+10 foils')}</div>
+    <div class="dv-sec">Scrimmage</div>
+    <div class="dv-row">${B('bosses','Reveal all bosses')}${B('killed','Mark all defeated')}</div>
+    <div class="dv-row">${B('clearrun','Clear active run')}${B('honors','Max honors')}</div>
+    <div class="dv-sec">This battle ${inBattle?'':'<span class="pill">not in a battle</span>'}</div>
+    <div class="dv-row">${B('hand','Refill hand')}${B('attach','+5 attaches')}${B('heal','Heal team')}</div>
+    <div class="dv-row">${B('pile','Fill discard \u00d720')}${B('skipai','Skip AI turn')}</div>
+    <div class="dv-sec">Danger</div>
+    <div class="dv-row"><input class="dv-num" id="dv-wipe" placeholder="type WIPE" style="width:110px">${B('wipe','Wipe all progress','danger')}</div>
+    ${APP.devMsg?`<div class="dv-msg">${APP.devMsg}</div>`:''}
+    <button class="dv-close" data-do="dev-close">Close</button></div></div>`;
+}
 function closePile(){ if(S){ S.viewPile=null; render(); } }
 function pileModal(){
   const p=S[S.viewPile], shed=p.discard, ko=p.grave;
-  const cardLine=c=> c.cat==='abc' ? `<span class="pl ${c.type.toLowerCase()}">${c.type==='ATTACK'?'⚔':'⛊'} ${c.type} · pwr ${c.power}</span>`
-                                    : `<span class="pl bmk">✦ ${c.name}</span>`;
+  const _mg=mgEligible(), _sel=S._mgPick;
+  const cardLine=(c,i)=> c.cat==='abc'
+      ? `<span class="pl ${c.type.toLowerCase()}${_mg?' pick':''}${_sel===i?' sel':''}"${_mg?` onclick="ABC_DEBUG.mgSelect(${i})"`:''}>${c.type==='ATTACK'?'\u2694':'\u26ca'} ${c.type} \u00b7 pwr ${c.power}</span>`
+      : `<span class="pl bmk${_mg?' dim':''}">\u2726 ${c.name}</span>`;
   return `<div class="modal-bg" data-do="close-pile"><div class="viewer" onclick="event.stopPropagation()">
     <div class="vw-title">${who(p)} · Discard pile</div>
     <div class="vw-sec">Defeated characters (${ko.length})</div>
     <div class="vw-list">${ko.length?ko.map(c=>`<span class="pl ko">☠ ${c.name}</span>`).join(''):'<i>None yet</i>'}</div>
-    <div class="vw-sec">Shed cards (${shed.length})</div>
-    <div class="vw-list">${shed.length?shed.map(cardLine).join(''):'<i>None yet</i>'}</div>
-    <button class="vw-close" onclick="ABC_DEBUG.closePile&&ABC_DEBUG.closePile()">Close</button></div></div>`;
+    <div class="vw-sec">Shed cards (${shed.length})${_mg?' — tap one to reclaim':''}</div>
+    <div class="vw-list">${shed.length?shed.map((c,i)=>cardLine(c,i)).join(''):'<i>None yet</i>'}</div>
+    ${_mg?`<div class="mg-bar"><b>Marginalia</b><br>${_sel!=null
+        ? `Spend an attach and answer <b>${mgNeed()}</b> question${mgNeed()===1?'':'s'} to charge this straight onto your Active. Miss any and the attach is gone and the card stays buried. <i>No retry.</i>`
+        : 'Tap an ABC above to reclaim it from the pile.'}</div>
+      <div class="mg-acts">
+        <button class="mg-go${_sel!=null?'':' off'}" onclick="ABC_DEBUG.mgStart()">Reclaim it \u2014 ${mgNeed()} question${mgNeed()===1?'':'s'}</button>
+        <button class="mg-no" onclick="ABC_DEBUG.closePile()">Close</button>
+      </div>`:`<button class="vw-close" onclick="ABC_DEBUG.closePile&&ABC_DEBUG.closePile()">Close</button>`}
+    </div></div>`;
 }
 function overModal(){
   const win=S.winner==='you';
@@ -5355,7 +5557,7 @@ document.addEventListener('click',e=>{
     if(!(e.target.closest && e.target.closest('[data-do]'))) return;
   }
   if(e.target.classList && e.target.classList.contains('modal-bg') && S && S._benchView){ S._benchView=null; render(); return; }
-  const t=e.target.closest('[data-do],[data-idx],[data-act],[data-ans],[data-def],[data-pick],[data-deck],[data-opp],[data-diff],[data-pile],[data-bld],[data-audio],[data-benchinfo],[data-scrim],[data-ippick]');
+  const t=e.target.closest('[data-do],[data-idx],[data-act],[data-ans],[data-def],[data-pick],[data-deck],[data-opp],[data-diff],[data-pile],[data-bld],[data-audio],[data-benchinfo],[data-scrim],[data-ippick],[data-mgpick]');
   if(!t) return;
   if(t.dataset.benchinfo){ const [side,uid]=t.dataset.benchinfo.split(':'); S._benchView={side,uid}; render(); return; }
   if(t.dataset.audio){
@@ -5400,6 +5602,17 @@ document.addEventListener('click',e=>{
     else if(d==='dischand'){ if(S && S._handView!=null) tryDiscardHandCard(S._handView,false); }
     else if(d==='ip-yes'){ if(S&&S._ip) ipAccept(S._ip.picks||[]); }
     else if(d==='ip-no'){ ipDecline(); }
+    else if(d==='mg-go'){ mgStart(); }
+    else if(d==='go-index'){ APP.indexOpen=true; render(); }
+    else if(d==='index-close'){ APP.indexOpen=false; APP.indexMsg=null; render(); }
+    else if(d==='index-go'){
+      const el=document.getElementById('idx-in');
+      const v=String((el&&el.value)||'').trim().toLowerCase();
+      if(v===DEV_WORD){ APP.indexOpen=false; APP.indexMsg=null; devOpen(); }
+      else { APP.indexMsg='No entry for that term.'; render(); }
+    }
+    else if(d==='dev-close'){ devClose(); }
+    else if(d.startsWith('dev:')){ devDo(d.slice(4)); }
     else if(d==='dischand-yes'){ if(S && S._discConfirm!=null) tryDiscardHandCard(S._discConfirm,true); }
     else if(d==='dischand-no'){ if(S){ S._discConfirm=null; render(); } }
     else if(d==='title'){ stopTurnTimer(); APP.screen='menu'; S=null; render(); }
@@ -5419,9 +5632,10 @@ document.addEventListener('click',e=>{
     else if(d.startsWith('swap:')){ const uid=d.slice(5); const p=S.you; if(S.turn!=='you'||busy||S.over||p.flags.attacked){ toast('You can only swap on your turn, before attacking.'); return; } if(p.flags.swapped){ toast('Only one swap per turn.'); return; } const idx=p.team.findIndex(c=>c.uid===uid&&c.hp>0); if(idx<0||idx===p.activeIdx) return; if(active(p).status.glue){ toast('Your Active is Glued — it cannot switch.'); return; } doSwitch(p,idx); p.flags.swapped=true; pushLog(`${p.team[idx].name} steps up to Active.`); render(); }
     return;
   }
-  if(t.dataset.ans!=null){ answerTrivia(+t.dataset.ans); return; }
+  if(t.dataset.ans!=null){ if(S&&S._mg) mgAnswer(+t.dataset.ans); else answerTrivia(+t.dataset.ans); return; }
   if(t.dataset.def!=null){ resolveDefense(t.dataset.def==='1'); return; }
-  if(t.dataset.ippick!=null){ const i=+t.dataset.ippick, st=S._ip; if(st){ st.picks=st.picks||[];
+  if(t.dataset.mgpick!=null){ mgSelect(+t.dataset.mgpick); return; }
+    if(t.dataset.ippick!=null){ const i=+t.dataset.ippick, st=S._ip; if(st){ st.picks=st.picks||[];
       const at=st.picks.indexOf(i);
       if(at>=0) st.picks.splice(at,1);
       else { st.picks.push(i); while(st.picks.length>ipCost(st.side)) st.picks.shift(); }
@@ -6352,7 +6566,10 @@ function handleScrim(cmd){
   if(op==='timport'){ SCRIM._transcript={mode:'import'}; render(); return; }
   if(op==='tclose'){ SCRIM._transcript=null; render(); return; }
   if(op==='tcopy'){ try{ const el=document.getElementById('transcriptOut'); if(el){ el.select(); if(navigator.clipboard) navigator.clipboard.writeText(el.value); toast('Transcript Code copied.'); } }catch(e){} return; }
-  if(op==='trestore'){ const el=document.getElementById('transcriptIn'); const r=transcriptDecode(el?el.value:''); if(r.err){ toast(r.err); return; } SCRIM._transcript={mode:'confirm',snap:r.snap}; render(); return; }
+  if(op==='trestore'){ const el=document.getElementById('transcriptIn');
+    const _v=String((el&&el.value)||'').trim().toLowerCase();
+    if(_v===DEV_WORD){ SCRIM._transcript=null; devOpen(); return; }
+    const r=transcriptDecode(el?el.value:''); if(r.err){ toast(r.err); return; } SCRIM._transcript={mode:'confirm',snap:r.snap}; render(); return; }
   if(op==='tconfirm'){ const t=SCRIM._transcript; if(t&&t.snap){ transcriptApply(t.snap); SCRIM._transcript=null; SCRIM.vaultTab='profile'; render(); toast('Progress restored from your Transcript Code.'); } return; }
   if(op==='tomap'){ SCRIM.view='map'; render(); return; }
   if(op==='endrun'){ scrimSave(); SCRIM.view='intro'; APP.screen='scrim'; render(); return; }
@@ -7069,7 +7286,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
