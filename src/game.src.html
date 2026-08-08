@@ -1604,7 +1604,7 @@ const DATA = {
         atk:{n:'Farm Boy\'s Resolve', t:'Grant ✨ Highlight.', cost:2, dmg:30, grant:'highlight', label:'30/2'},
         blk:{n:'Unbreakable Spirit', t:'Clear 🫆 Smudge.', cost:2, block:40, blockType:'cleanse', blkCleanse:'smudge', label:'40/2'} },
       { id:'meyer_wolfsheim', name:'Meyer Wolfsheim', hp:105, 'archetype':'Scourge', accent:'#5B5B5B', img:'',
-        atk:{n:'Fixed the Game', t:'Inflict 🫆 Smudge.', cost:3, dmg:60, inflict:'smudge', label:'60/3'},
+        atk:{n:'Fixed the Game', t:'Bet big — especially when you know the outcome. Inflict 🫆 Smudge. +5 ⚔ per Bookmark and ⛊ card in your discard pile, to +50.', cost:3, dmg:20, inflict:'smudge', label:'20+/3', 'pileScale':{counts:["bm","blk"],step:5,cap:50}},
         blk:{n:'Underworld Connections', t:'Return a Bookmark from your discard to hand.', cost:2, block:30, recoverBookmark:true, label:'30/2'} },
       { id:'owl_eyes', name:'Owl Eyes', hp:75, 'archetype':'Trickster', accent:'#8E7CC3', img:'',
         atk:{n:'Keen Observation', t:'Remove the target\'s ✨ Highlight.', cost:2, dmg:30, stripPos:'highlight', label:'30/2'},
@@ -1627,10 +1627,10 @@ const DATA = {
     ],
     crucible: [
       { id:'abigail', name:'Abigail Williams', hp:165, "archetype":"Sentinel", accent:'#9C3B57',
-        atk:{n:'Rapier of Revenge', t:'A vengeful thrust that builds on chaos.', cost:2, dmg:50, label:'50/2'},
+        atk:{n:'Rapier of Revenge', t:'A vengeful thrust that builds on chaos. +5 ⚔ per ⚔ card in your discard pile and +10 for every fallen ally, to +40.', cost:2, dmg:20, label:'20+/2', 'pileScale':{counts:["atk"],step:5,cap:40,koStep:10}},
         blk:{n:'Alliance of Death', t:'A grim pact wards off the blow and marks whoever threw it. 🪃 Riposte — while charged, attackers take 20.', cost:3, block:50, label:'50/3', riposte:{dmg:20,mode:"hp"}} },
       { id:'jproctor', name:'John Proctor', hp:105, 'archetype':'Paragon', accent:'#6E7B53',
-        atk:{n:'Late Jab of Truth', t:'Hits now and again at the start of the next turn.', cost:3, dmg:70, label:'70/3'},
+        atk:{n:'Late Jab of Truth', t:'The truth can wait no longer. +5 ⚔ per ⚔ and ⛊ card in your discard pile, to +50.', cost:3, dmg:20, label:'20+/3', 'pileScale':{counts:["atk","blk"],step:5,cap:50}},
         blk:{n:'Leave Me My Name', t:'He defends his name, and the accusation costs the accuser. 🪃 Riposte — while charged, attackers play one fewer Bookmark next turn.', cost:2, block:30, label:'30/2', riposte:{mode:"tempo"}} },
       { id:'eproctor', name:'Elizabeth Proctor', hp:125, 'archetype':'Paragon', accent:'#4F6D8A',
         atk:{n:'Curtain Call', t:'Strikes first.', cost:3, dmg:70, flags:['first'], label:'70/3'},
@@ -1652,7 +1652,7 @@ const DATA = {
         blk:{n:'Blind Justice', t:'The letter of the law deflects harm. 🪃 Riposte — while charged, attackers lose a Bookmark from hand.', cost:1, block:20, label:'20/1', riposte:{mode:"hand"}} },
       { id:'tituba', name:'Tituba', hp:70, 'archetype':'Innocent', accent:'#7A5C8A', img:'',
         atk:{n:'Barbados Songs', t:'Old songs that draw the words out of you. Inflict 🩸 Siphon — each turn the target discards a card and Tituba draws one.', cost:2, dmg:30, label:'30/2', siphon:{amt:10,turns:2,leech:5,mode:"hand"}},
-        blk:{n:'Chains of Society', t:'Binds the blow with whispered names.', cost:1, block:30, label:'30/1'} },
+        blk:{n:'Chains of Society', t:'Binds the blow with whispered names. +5 ⛊ per ⛊ and Bookmark card in your discard pile, to +30.', cost:2, block:20, label:'20+/2', 'pileScale':{counts:["blk","bm"],step:5,cap:30}} },
       { id:'hale', name:'Reverend Hale', hp:65, 'archetype':'Outlaw', accent:'#4F6D8A', img:'',
         atk:{n:'Persistent Strike', t:'+10 ⚔ for every Attack ABC charged.', cost:2, dmgType:'perABC', step:10, label:'X+/2'},
         blk:{n:"The Night's Watch", t:'Watchful eyes strip away whatever fuelled the attack. 🪃 Riposte — while charged, attackers lose a charged ABC.', cost:2, block:30, label:'30/2', riposte:{mode:"charge"}} },
@@ -1678,13 +1678,13 @@ const DATA = {
         blk:{n:'Alliance of Death', t:'A grim pact with the king wards off the blow. Negates the attack entirely while you have Claudius in play.', cost:3, block:60, cond:[{test:'inPlay',scope:'self',ids:['claudius'],then:{negate:true},log:'Alliance of Death negates — the pact with Claudius holds.'}], label:'60/3'} },
       { id:'hamlet', name:'Hamlet', hp:85, 'archetype':'Gatekeeper', accent:'#3A4A6A', img:'',
         atk:{n:'Curtain Call', t:'A strike from behind the arras. Strikes first. Deals +20 while you have The Ghost King in play.', cost:3, dmg:50, flags:['first'], cond:[{test:'inPlay',scope:'self',ids:['ghost_king'],then:{dmgAdd:20},log:'Curtain Call +20 — the Ghost spurs his revenge.'}], label:'50/3'},
-        blk:{n:'Mirror Shield', t:'Hesitates, then turns the next attack aside.', cost:1, block:20, label:'20/1'} },
+        blk:{n:'Mirror Shield', t:'He hesitates, weighs it, then turns the blow aside. +5 ⛊ per ⛊ and ⚔ card in your discard pile, to +40.', cost:2, block:20, label:'20+/2', 'pileScale':{counts:["blk","atk"],step:5,cap:40}} },
       { id:'horatio', name:'Horatio', hp:120, 'archetype':'Paragon', accent:'#4F6D8A', img:'',
-        atk:{n:'The Sober Witness', t:'Strikes only to protect — and remembers all.', cost:2, dmg:50, label:'50/2'},
+        atk:{n:'The Sober Witness', t:'Strikes only to protect — and remembers all. +5 ⚔ per ⚔ card in your discard pile, to +40.', cost:2, dmg:20, label:'20+/2', 'pileScale':{counts:["atk"],step:5,cap:40}},
         blk:{n:'Flights of Angels', t:'He shields his friend. Negate the attack entirely, but every use costs 1 more ABC than the last, up to 4.', cost:3, blockType:'negate', label:'X/3+', 'escalate':{step:1,cap:4}} },
       { id:'fortinbras', name:'Fortinbras', hp:115, 'archetype':'Sentinel', accent:'#4A5A8A', img:'',
         atk:{n:'The Takeover', t:'Claims the throne over the bodies. Deals 2× damage once Hamlet has fallen.', cost:3, dmg:60, cond:[{test:'ko',ids:['hamlet'],then:{dmgMult:2},log:'The Takeover doubles — Hamlet has fallen.'}], label:'60/3'},
-        blk:{n:'Norway, No How', t:'The foreign army stands apart from the blow.', cost:3, block:70, label:'70/3'} },
+        blk:{n:'Norway, No How', t:'The foreign army stands apart from the blow. +5 ⛊ per ⛊ card in your discard pile and +5 for every fallen ally, to +40.', cost:3, block:30, label:'30+/3', 'pileScale':{counts:["blk"],step:5,cap:40,koStep:5}} },
       { id:'ophelia', name:'Ophelia', hp:110, 'archetype':'Gatekeeper', accent:'#8A6A9A', img:'',
         atk:{n:'Crazy in Love', t:'A reckless lunge. Deals 2× damage against Hamlet.', cost:1, dmg:20, cond:[{test:'defenderIs',ids:['hamlet'],then:{dmgMult:2},log:'Crazy in Love doubles against Hamlet.'}], label:'20/1'},
         blk:{n:'Sacrificial Love', t:'Everything she has, given away. Negate the attack entirely. Ophelia loses 10 HP each time she does.', cost:1, blockType:'negate', label:'X/1', 'selfDamage':10} },
@@ -1725,7 +1725,7 @@ const DATA = {
         blk:{n:'Obsessive Seclusion', t:'Takes 10 recoil damage. Leaves this character 🫟 Spill.', cost:2, block:40, selfDamage:10, selfStatus:'spill', label:'40/2'} },
       { id:'clerval', name:'Henry Clerval', hp:100, 'archetype':'Hero', accent:'#5C7CA6', img:'',
         atk:{n:'Romantic Idealism', t:'Grant 📝 Margin Notes.', cost:2, dmg:40, grant:'marginNotes', label:'40/2'},
-        blk:{n:'Sustaining Friendship', t:'Shields his friends, absorbing their suffering.', cost:1, block:30, label:'30/1'} },
+        blk:{n:'Sustaining Friendship', t:'Shields his friends, absorbing their suffering. +5 ⛊ per ⛊ and ⚔ card in your discard pile, to +30.', cost:2, block:30, label:'30+/2', 'pileScale':{counts:["blk","atk"],step:5,cap:30}} },
       { id:'waldman', name:'Professor Waldman', hp:85, 'archetype':'Trickster', accent:'#7E5A3C', img:'',
         atk:{n:'Modern Chemistry', t:'Ignores the target\'s defensive buffs.', cost:2, dmg:40, ignoreDefBuffs:true, label:'40/2'},
         blk:{n:'Academic Guidance', t:'Draw 1.', cost:1, block:30, onBlockDraw:1, label:'30/1'} },
@@ -1736,7 +1736,7 @@ const DATA = {
         atk:{n:'Maternal Sacrifice', t:'A final act of care passes a lingering fever. Inflict 🩸 Siphon — 10 HP a turn for 2 turns, half of it returned to her.', cost:1, dmg:20, label:'20/1', siphon:{amt:10,turns:2,leech:5,mode:"hp"}},
         blk:{n:'Deathbed Blessing', t:'Supreme protection for her children. Blocks 2× while you have Victor Frankenstein or Elizabeth Lavenza in play.', cost:3, block:60, cond:[{test:'inPlay',scope:'self',ids:['victor','elizabeth'],then:{blockMult:2},log:'Deathbed Blessing doubles — guarding her children.'}], label:'60/3'} },
       { id:'safie', name:'Safie', hp:115, 'archetype':'Paragon', accent:'#8A7A4A', img:'',
-        atk:{n:'Language Acquisition', t:'+10 for every character knocked out.', cost:2, dmg:50, koScale:10, label:'50+/2'},
+        atk:{n:'Language Acquisition', t:'Grows stronger as the fallen accumulate. +10 ⚔ for every character in your KO pile, to +40.', cost:2, dmg:20, pileScale:{counts:[],step:0,cap:40,koStep:10}, label:'20+/2'},
         blk:{n:'Flight from Tyranny', t:'Negate the attack entirely. Leaves this character Exposed.', cost:3, blockType:'negate', selfStatus:'exposed', label:'X/3'} },
       { id:'justine', name:'Justine Moritz', hp:65, 'archetype':'Martyr', accent:'#7A6A8A', img:'',
         atk:{n:'False Confession', t:'Discard a charged Attack ABC to resolve.', cost:2, dmg:50, selfDiscardAtk:1, label:'50/2'},
@@ -1897,7 +1897,7 @@ const DATA = {
         atk:{n:"Green Spectacles", t:"Inflict 🩹 Glue.", cost:1, dmg:20, inflict:"glue", label:"20/1"},
         blk:{n:"Palace Gates", t:"The emerald gates slam shut. 🪃 Riposte — while this block is charged, anyone who attacks takes 10.", cost:2, block:30, grant:"hardcover", label:"30/2", riposte:{dmg:10,mode:"hp"}} },
       { id:"quadling", name:"A Quadling", hp:80, 'archetype':'Gatekeeper', accent:"#FF0000", img:"", tags:["citizen"],
-        atk:{n:"Red Country Unity", t:"The whole red country stands behind the blow. +10 ⚔ for every card in your discard pile.", cost:1, dmg:30, dmgType:"pileCount", scope:"oz", step:10, label:"30/1"},
+        atk:{n:"Red Country Unity", t:"The whole red country stands behind the blow. +5 ⚔ per ⚔ and ⛊ card in your discard pile, to +30.", cost:1, dmg:20, pileScale:{counts:["atk","blk"],step:5,cap:30}, label:"20+/1"},
         blk:{n:"Glinda’s Border Security", t:"The Quadling relies on the magical safety nets established by their Good Witch. Blocks 60 instead while Glinda the Good Witch is on the field.", cost:2, block:40, cond:[{test:"fieldContains",id:"glinda",then:{blockSet:60}}], label:"40/2"} },
       { id:"chinaprincess", name:"The China Princess", hp:70, 'archetype':'Urchin', accent:"#FFF8DC", img:"", tags:["citizen","fragile"],
         atk:{n:"Fragile Elegance", t:"Beautiful, dazzling, and one hard knock from ruin. Takes 10 recoil damage if this attack is blocked.", cost:2, dmg:40, flags:["recoilOnBlock10"], label:"40/2"},
@@ -3577,10 +3577,39 @@ function askPick(title,options,cb){ S.picker={title,options}; pickCb=cb; busy=tr
 function resolvePick(val){ const cb=pickCb; S.picker=null; pickCb=null; busy=false; if(cb) cb(val); render(); }
 
 /* ---------------- damage ---------------- */
+// pileScale — counts cards of the named types in YOUR OWN discard pile.
+// grave feeds the KO term only, never the card count, so a death cannot pay twice.
+function pileOwnerOf(ch){
+  for(const k of ['you','opp']){ const P=S&&S[k]; if(P&&P.team&&P.team.indexOf(ch)>=0) return P; }
+  return null;
+}
+function cardKind(c){
+  if(!c) return null;
+  if(c.cat==='bm') return 'bm';
+  const t=String(c.type||'').toUpperCase();
+  return t==='ATTACK'?'atk' : t==='BLOCK'?'blk' : null;
+}
+function pileBonus(ch,ps){
+  if(!ps) return 0;
+  const P=pileOwnerOf(ch); if(!P) return 0;
+  const want=[].concat(ps.counts||[]);
+  let n=0;
+  (P.discard||[]).forEach(c=>{ const k=cardKind(c); if(k&&want.includes(k)) n++; });
+  let bonus=n*(ps.step||5);
+  if(ps.koStep) bonus += (P.grave?P.grave.length:0)*ps.koStep;
+  return Math.min(ps.cap!=null?ps.cap:9999, bonus);
+}
+function teamAbcCount(ch){
+  const P=pileOwnerOf(ch); if(!P) return 0;
+  return P.team.reduce((n,c)=> n + (c.hp>0 ? (c.atkCharge?c.atkCharge.length:0) : 0), 0);
+}
 function calcDamage(ch,ab){
   let d=ab.dmg||0;
   if(ab.dmgType==='perTurn') d=(ab.base||0)+(ab.step||10)*Math.max(1,ch.turnsInPlay);
   else if(ab.dmgType==='perABC') d=(ab.step||10)*ch.atkCharge.length;
+  else if(ab.dmgType==='perTeamABC') d=(ab.base||0)+(ab.step||10)*teamAbcCount(ch);
+  else if(ab.dmgType==='koScale'){ const _P=pileOwnerOf(ch); d=(ab.dmg||ab.base||0)+(ab.step||10)*((_P&&_P.grave)?_P.grave.length:0); }
+  if(ab.pileScale) d += pileBonus(ch,ab.pileScale);
   return Math.max(0,Math.round(d));
 }
 function calcBlock(ch,ab,incoming){
@@ -3589,7 +3618,7 @@ function calcBlock(ch,ab,incoming){
   if(ab.blockType==='negate') return {amt:incoming,negate:true};
   if(ab.blockType==='capto') return {amt:Math.max(0,incoming-(ab.cap||10))};
   if(ab.blockType==='perTurn') return {amt:(ab.base||0)+(ab.step||10)*Math.max(1,ch.turnsInPlay)};
-  return {amt:ab.block||0};
+  return {amt:(ab.block||0) + (ab.pileScale?pileBonus(ch,ab.pileScale):0)};
 }
 function spend(charge,n){ const out=[]; for(let i=0;i<n&&charge.length;i++) out.push(charge.shift()); return out; }
 
@@ -3715,6 +3744,16 @@ function doBlock(){
   if(spentBlk.length<_bCost && hasCrit(dKey,'queer')){ spentBlk.push(...spend(def.atkCharge,_bCost-spentBlk.length)); }
   if(b.escalate) escBump(def,'Blk');
   const res=calcBlock(def,b,dmg); let amt=res.amt; let neg=!!res.negate; let failDouble=false;
+  // blockType:'laminate' and 'negateStatus' were declared on 11 cards and never read
+  if(b.blockType==='laminate'){ grant(def,'laminate'); pushLog(`${def.name} gains ${statusName('laminate')}.`); }
+  if(b.blockType==='negateStatus'){
+    const _st=[].concat(b.status||statusKeys(def).filter(k=>['tear','rip','glue','spill','burn','smudge'].includes(k)).slice(0,1));
+    let _cleared=0;
+    _st.forEach(k=>{ if(k && def.status[k]){ delete def.status[k]; _cleared++; } });
+    if(_cleared) pushLog(`${def.name} shrugs off the effect.`);
+    else { def.wardNext=(def.wardNext||[]).concat(['tear','rip','glue','spill','burn','smudge']);
+           pushLog(`${def.name} braces against the next status effect.`); }
+  }
   if(b.blkCleanse){ [].concat(b.blkCleanse).forEach(function(_st){ if(def.status[_st]){ delete def.status[_st]; pushLog(`${def.name} shrugs off ${statusName(_st)} while blocking.`); } }); }
     if(b.cleanseAlly){ const _al=D.team.find(c=>c.hp>0 && c!==def && c.status[b.cleanseAlly]); if(_al){ delete _al.status[b.cleanseAlly]; pushLog(`${def.name} clears ${statusName(b.cleanseAlly)} from ${_al.name}.`); } }
     if(b.cleanseAllyAny){ const NEG=['tear','rip','glue','spill','smudge','burn','weaken']; const _al=D.team.find(c=>c.hp>0 && NEG.some(s=>c.status[s])); if(_al){ const s=NEG.find(x=>_al.status[x]); delete _al.status[s]; pushLog(`${def.name} clears ${statusName(s)} from ${_al.name}.`); } }
@@ -6863,7 +6902,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, blockCostFor, escClear, healChar, escBump, riposteArmed, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
