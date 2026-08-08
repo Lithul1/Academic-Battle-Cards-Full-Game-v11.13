@@ -571,6 +571,40 @@ body.calm-fx .thinking{opacity:1!important}
   .hvi-row p{font-size:15px}
   body[data-screen="play"] .bench-view.char{width:min(60vw,420px)!important}
   .hv-play,.hv-close{font-size:17px;padding:13px 24px}
+   .hv-disc{font-family:var(--disp);font-size:14px;letter-spacing:1px;background:var(--cream-hi);color:var(--ink);
+     border:3px solid var(--ink);border-radius:10px;padding:10px 16px;box-shadow:0 4px 0 #8a7a5a;cursor:pointer}
+   .hv-disc.off{opacity:.42;cursor:not-allowed}
+   .ip{background:var(--cream);border:3.5px solid #6B4E8A;border-radius:12px;padding:12px 14px;max-width:340px;
+     box-shadow:0 8px 0 rgba(0,0,0,.45);text-align:center}
+   .ip.sm{border-color:var(--red-dk)}
+   .ip h3{font-family:var(--disp);font-size:18px;margin:0 0 1px;color:#6B4E8A}
+   .ip.sm h3{color:var(--red-dk)}
+   .ip .lat{font-family:var(--cond);font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#7a6a4a;margin-bottom:7px}
+   .ip p{font-size:12.5px;line-height:1.5;margin:0 0 9px;color:var(--ink)}
+   .ip-cost{background:var(--cream-hi);border:2px dashed var(--ink);border-radius:8px;padding:7px 9px;font-size:12px;margin-bottom:10px}
+   .ip-empty{font-size:12px;font-style:italic;color:#7a6a4a}
+   .ip-pick{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+   .ip-mini{width:56px;height:66px;border:2.5px solid var(--ink);border-radius:7px;background:var(--cream-hi);
+     display:flex;flex-direction:column;overflow:hidden;cursor:pointer;box-shadow:0 3px 0 rgba(40,25,12,.4)}
+   .ip-mini .t{font-family:var(--cond);font-size:8px;letter-spacing:.4px;color:#fff;padding:2px 3px;text-align:center}
+   .ip-mini.a .t{background:var(--red)}.ip-mini.b .t{background:var(--teal)}.ip-mini.m .t{background:#6B4E8A}
+   .ip-mini .v{flex:1;display:grid;place-items:center;font-family:var(--disp);font-size:15px}
+   .ip-mini.sel{outline:3px solid var(--gold);outline-offset:2px}
+   .ip-acts{display:flex;gap:9px;justify-content:center}
+   .ip-yes{font-family:var(--disp);font-size:13px;letter-spacing:.8px;background:#6B4E8A;color:#FBF3DD;
+     border:3px solid var(--ink);border-radius:10px;padding:9px 15px;box-shadow:0 4px 0 #4a3560;cursor:pointer}
+   .ip-yes.off{opacity:.4;cursor:not-allowed}
+   .ip-no{font-family:var(--disp);font-size:13px;letter-spacing:.8px;background:var(--cream-hi);color:var(--ink);
+     border:3px solid var(--ink);border-radius:10px;padding:9px 15px;box-shadow:0 4px 0 #8a7a5a;cursor:pointer}
+   .tri-opt.tri-wrong{background:#f2c2bc;border-color:#8C2A20;text-decoration:line-through;opacity:.75}
+   .tri-sub.tri-retry{color:#6B4E8A;font-weight:600;font-style:normal}
+   .hv-note{font-family:var(--cond);font-size:10.5px;letter-spacing:.7px;color:#e7d4a6;text-transform:uppercase}
+   .hv-confirm{background:var(--cream);border:3px solid var(--red);border-radius:10px;padding:10px 14px;
+     display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 4px 0 rgba(40,25,12,.45)}
+   .hv-confirm b{font-family:var(--cond);letter-spacing:1px;font-size:13px;text-transform:uppercase;color:var(--red-dk)}
+   .hv-confirm span{font-family:Georgia,serif;font-size:12px;color:var(--ink)}
+   .hv-cacts{display:flex;gap:9px}
+   .dp-left{position:absolute;top:2px;right:5px;font-family:var(--cond);font-size:9.5px;color:var(--gold)}
   /* drop targets are already generous at this size */
   body[data-screen="play"] .bench-mini.drop-zone::after{inset:-10px}
 }
@@ -2626,7 +2660,7 @@ const clone = o => JSON.parse(JSON.stringify(o));
 
 /* ---------------- tunable settings ---------------- */
 const DEFAULTS = {
-  hpScale:1.0, maxAttaches:2, handSize:5, benchSize:2, aiAccuracy:0.8,
+  hpScale:1.0, maxAttaches:2, maxDiscards:2, handSize:5, benchSize:2, aiAccuracy:0.8,
   powerAdds:true, triviaOn:true, autoBlock:false, youSet:'gatsby', oppSet:'crucible',
   koTarget:3, handMin:4, turnTimer:60,
 };
@@ -2846,9 +2880,9 @@ function newPlayer(name,def,st,drawn){
                           cid:'h'+d.id+'_'+Math.random().toString(36).slice(2,6) });
     const chCards=pool.map(d=>mk(d,false));
     (def.fe||[]).slice(0,LIMITS.fe).forEach(id=>{ const fd=firstedById(id); if(fd) chCards.push(mk(fd,true)); });
-    return { name,setKey:def.d,team:[],activeIdx:0,deck:shuffle(deck.concat(chCards)),hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,crit:null,critTurn:{},critEver:{},flags:{},activeBm:[],_hpScale:st.hpScale,_drawn:true };
+    return { name,setKey:def.d,team:[],activeIdx:0,deck:shuffle(deck.concat(chCards)),hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,discardsLeft:(st.maxDiscards!=null?st.maxDiscards:2),crit:null,critTurn:{},critEver:{},flags:{},activeBm:[],_hpScale:st.hpScale,_drawn:true };
   }
-  return { name,setKey:def.d,team,activeIdx:0,deck,hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,crit:null,critTurn:{},critEver:{},flags:{},activeBm:[] };
+  return { name,setKey:def.d,team,activeIdx:0,deck,hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,discardsLeft:(st.maxDiscards!=null?st.maxDiscards:2),crit:null,critTurn:{},critEver:{},flags:{},activeBm:[] };
 }
 function newGame(st,youDef,oppDef){
   stopTurnTimer();
@@ -3130,6 +3164,7 @@ function startTurn(){
   const _feFree = feOnField(p).reduce((n,c)=>n+((c.passive&&c.passive.freeAttach)||0),0);
   p.flags.feFree = _feFree;
   p.attachesLeft = S.settings.maxAttaches + _feFree;
+  p.discardsLeft = (S.settings.maxDiscards!=null ? S.settings.maxDiscards : 2);
   p.flags.attacked = false;
   p.flags.swapped = false;
   p.flags.bmCount = 0;
@@ -3255,6 +3290,43 @@ function endTurn(){ if(S.over) return;
   S.turn=foeKey(); startTurn(); }
 
 /* ---------------- attaching ABCs (trivia gate) ---------------- */
+// Voluntary discard — feeds your own pile, which is what pileScale reads.
+// The AI only sheds cards when it is holding something that reads the pile,
+// and only until that card's cap is reached. Otherwise it looks like it is
+// throwing cards away for no reason.
+function aiFeedPile(p){
+  if(!p || (p.discardsLeft||0)<=0) return;
+  const readers=[];
+  p.team.forEach(c=>{ if(c.hp<=0) return;
+    ['atk','blk'].forEach(sl=>{ const ab=c[sl]; if(ab&&ab.pileScale) readers.push(ab.pileScale); }); });
+  if(!readers.length) return;
+  const want=new Set(); let capReached=true;
+  readers.forEach(ps=>{
+    [].concat(ps.counts||[]).forEach(k=>want.add(k));
+    if(pileBonus(active(p),ps) < (ps.cap!=null?ps.cap:9999)) capReached=false;
+  });
+  if(capReached || !want.size) return;                 // already maxed — stop shedding
+  const keep=Math.max(2, Math.ceil(p.hand.length/2));  // never empty its own hand
+  let shed=0;
+  for(let i=p.hand.length-1; i>=0 && p.discardsLeft>0 && p.hand.length>keep && shed<2; i--){
+    const c=p.hand[i], k=cardKind(c);
+    if(!k || !want.has(k)) continue;
+    if(c.cat==='bm') continue;                          // never sheds a Bookmark
+    p.hand.splice(i,1); p.discard.push(c); p.discardsLeft--; shed++;
+  }
+  if(shed) pushLog(`${who(p)} sheds ${shed} card${shed===1?'':'s'} into the pile.`);
+}
+function tryDiscardHandCard(i,confirmed){
+  if(!S || S.turn!=='you' || S.phase!=='strategize' || busy) return;
+  const P=S.you, c=P.hand[i]; if(!c) return;
+  if((P.discardsLeft||0)<=0){ toast('No discards left this turn.'); return; }
+  if(c.cat==='bm' && !confirmed){ S._discConfirm=i; render(); return; }
+  P.hand.splice(i,1); P.discard.push(c);
+  P.discardsLeft--;
+  S._discConfirm=null; S._handView=null;
+  pushLog(`${who(P)} sheds ${c.cat==='bm'?(c.name||'a Bookmark'):(c.type||'a card')} \u2014 ${P.discard.length} in the pile.`);
+  render();
+}
 function tryPlayHandCard(idx,targetUid){
   if(busy || S.turn!=='you' || S.phase!=='strategize') return;
   const p=S.you, card=p.hand[idx]; if(!card) return;
@@ -3970,6 +4042,7 @@ function aiTurn(){
   setTimeout(()=>{
     if(!S||S.over){ busy=false; return; }
     const p=S.opp; let guard=0;
+    aiFeedPile(p);
     // deploy a Critical Lens if the AI is holding one and has none active
     if(!p.crit){ const ci=p.hand.findIndex(c=>c.cat==='crit'); if(ci>=0) playCrit('opp',ci); }
     // bring a 1st Edition anchor Active when it makes sense (once/turn)
@@ -3999,7 +4072,20 @@ function aiTurn(){
       if(pick<0) pick=p.hand.findIndex(c=>c.cat==='abc');
       if(p.attachesLeft>0 && pick>=0 && guard<9){ guard++;
         const useFree=(p.flags.feFree||0)>0 && p.hand[pick] && p.hand[pick].cat==='abc'; if(useFree) p.flags.feFree--;
-        const ok=useFree?true:(Math.random()<S.settings.aiAccuracy);
+        let ok=useFree?true:(Math.random()<S.settings.aiAccuracy);
+        // Iterum Probare for the AI. The ability is identical; the WILLINGNESS to
+        // spend a card scales with difficulty so the four tiers stay distinct.
+        if(!ok && S.settings.triviaOn){
+          const _a=active(p);
+          const _need=(_a&&_a.status&&_a.status.smudge)?2:1;
+          const _willing=Math.max(0,Math.min(1,(S.settings.aiAccuracy-0.75)*4));
+          if(p.hand.length>=_need+2 && Math.random()<_willing){
+            for(let z=0;z<_need;z++){ const c=p.hand.pop(); if(c) p.discard.push(c); }
+            pushLog('The opponent studies the question again.');
+            ok=Math.random()<S.settings.aiAccuracy;
+            pushLog(ok?'\u2026 and gets it this time.':'\u2026 and misses again.');
+          }
+        }
         attach('opp',pick,ok||!S.settings.triviaOn); setTimeout(step,400);
       } else {
         setTimeout(aiEngage,400);
@@ -4059,9 +4145,42 @@ function overlordTurn(){
 
 /* ---------------- trivia ---------------- */
 function openTrivia(card,handIdx,targetUid){ busy=true; S.pending={card,handIdx,target:targetUid}; try{SFX.card('book_flip',0.7);}catch(e){} render(); }
-function answerTrivia(choice){
+// Iterum Probare — a wrong answer can be bought back with a card from hand.
+// Fires before the ABC is discarded and before the attach is spent.
+function ipCost(side){ const a=active(S[side]); return (a && a.status && a.status.smudge) ? 2 : 1; }
+function ipOffer(side,pend,choice){
+  const P=S[side];
+  if(pend._retried) return false;                  // one retry per question
+  if(P.hand.length < ipCost(side)) return false;   // cannot pay
+  return true;
+}
+function ipAccept(picks){
+  const st=S._ip; if(!st) return;
+  const P=S[st.side], need=ipCost(st.side);
+  const idxs=[].concat(picks).slice(0,need);
+  if(idxs.length<need){ toast('Choose '+need+' card'+(need===1?'':'s')+' to shed.'); return; }
+  idxs.sort((a,b)=>b-a).forEach(i=>{ const c=P.hand.splice(i,1)[0]; if(c) P.discard.push(c); });
+  pushLog(`${who(P)} sheds ${need} card${need===1?'':'s'} to try again.`);
+  const pend=st.pend; pend._retried=true; pend._wrongPick=st.choice;
+  S._ip=null; S.pending=pend; busy=true; render();
+}
+function ipDecline(){
+  const st=S._ip; if(!st) return;
+  S._ip=null;
+  S.pending=st.pend;          // answerTrivia needs it back to resolve the miss
+  busy=true;
+  answerTrivia(st.choice,true);
+}
+function answerTrivia(choice,skipRetry){
   const pend=S.pending; if(!pend) return;
-  const correct=choice===pend.card.ans; S.pending=null; busy=false;
+  const correct=choice===pend.card.ans;
+  if(!correct && !skipRetry && ipOffer('you',pend,choice)){
+    S.pending=null; busy=false;
+    S._ip={side:'you',pend,choice,picks:[]};
+    try{SFX.card('card_shove',0.5);}catch(e){}
+    render(); return;
+  }
+  S.pending=null; busy=false;
   if(!correct && S.scrim) S.scrim._streak=0;
   try{SFX.card(correct?'card_place':'card_shove',0.7);}catch(e){}
   toast(correct?'Correct! Card attached.':'Wrong — card discarded.', correct?'good':'bad');
@@ -4470,7 +4589,7 @@ function pilesFor(p,sideKey){
     ${deckStack(p,sideKey)}
     ${activeBmZone(p)}
     <div class="discardpile" data-pile="${sideKey}" title="Discard — shed &amp; defeated cards">
-      <span class="dp-face">♺</span><span class="dp-ct">${p.discard.length+p.grave.length}</span>${p.grave.length?`<em>${p.grave.length}☠</em>`:''}
+      <span class="dp-face">♺</span><span class="dp-ct">${p.discard.length+p.grave.length}</span>${(p===S.you&&S.turn==='you')?`<span class="dp-left">${p.discardsLeft||0} left</span>`:''}${p.grave.length?`<em>${p.grave.length}☠</em>`:''}
     </div>
     ${fePeekChips(p,sideKey)}
   </div>`;
@@ -4816,7 +4935,7 @@ function renderGame(root){
      <div class="hand">${you.hand.map((c,i)=>handCard(c,i)).join('')||'<span class="empty">No cards</span>'}</div></div>
    <button class="logtoggle" data-do="log">☰ Log</button>
    <div class="log ${S._logopen?'open':''}">${S.log.map(l=>`<div>${l}</div>`).join('')}</div>
-   ${S.pending?triviaModal():''}
+   ${S.pending?triviaModal():''}${S._ip?ipModal():''}
    ${S.defend?defendModal():''}
    ${S.picker?pickerModal():''}
    ${S.viewPile?pileModal():''}
@@ -4891,8 +5010,13 @@ function handViewModal(){
     ${handViewInfo(c)}
     <div class="hv-acts">
       ${(S.drawn&&S.phase==='place')?'':`<button class="hv-play" data-do="playhand">\u25b6 Play card</button>`}
+      ${(S.drawn&&S.phase==='place')?'':`<button class="hv-disc${(S.you.discardsLeft||0)>0?'':' off'}" data-do="dischand" title="Shed this card into your discard pile">\uD83D\uDDD1 Discard</button>`}
       <button class="hv-close" data-do="closehand">Close \u2715</button>
-    </div></div></div>`;
+    </div>
+    ${(S.drawn&&S.phase==='place')?'':`<div class="hv-note">${(S.you.discardsLeft||0)>0?`${S.you.discardsLeft} discard${S.you.discardsLeft===1?'':'s'} left this turn`:'no discards left this turn'}</div>`}
+    ${S._discConfirm!=null?`<div class="hv-confirm"><b>Discard a Bookmark?</b><span>Bookmarks are scarce. This cannot be undone.</span>
+      <div class="hv-cacts"><button class="hv-play" data-do="dischand-yes">Yes, shed it</button><button class="hv-close" data-do="dischand-no">Keep it</button></div></div>`:''}
+    </div></div>`;
 }
 function benchInfoModal(){
   const v=S._benchView||{}; const p=v.side==='you'?S.you:S.opp; if(!p) return '';
@@ -4924,13 +5048,38 @@ function benchChargeList(ch){
     ${row(b,'blk','\u26ca Block',(ch.blk&&ch.blk.cost)||0)}
   </div>`;
 }
+function ipModal(){
+  const st=S._ip; if(!st) return '';
+  const P=S[st.side], need=ipCost(st.side), sm=need>1;
+  const picks=st.picks||[];
+  const mini=(c,i)=>{
+    const k=(c.cat==='bm')?'m':(String(c.type||'').toUpperCase()==='ATTACK'?'a':'b');
+    const lab=(c.cat==='bm')?'\u2726 BM':(k==='a'?'\u2694 ATK':'\u26ca BLK');
+    const val=(c.cat==='bm')?(c.rarity||'R'):(c.power!=null?c.power:'\u2013');
+    return `<div class="ip-mini ${k}${picks.includes(i)?' sel':''}" data-ippick="${i}"><div class="t">${lab}</div><div class="v">${val}</div></div>`;
+  };
+  const canPay=P.hand.length>=need, chosen=picks.length>=need;
+  return `<div class="modal-bg"><div class="ip${sm?' sm':''}">
+    <div class="lat">Try again${sm?' \u00b7 smudged':''}</div>
+    <h3>Iterum Probare</h3>
+    <p>${sm?'Your notes are smudged. This retry costs <b>two</b> cards.'
+           :'Wrong. Shed a card from your hand to answer once more \u2014 the card is spent either way.'}</p>
+    <div class="ip-pick">${P.hand.map(mini).join('')||'<span class="ip-empty">Your hand is empty.</span>'}</div>
+    <div class="ip-cost">${canPay?`Costs <b>${need} card${need===1?'':'s'}</b>. Your ${pend0(st)} and your attach are still on the table.`
+                                 :'Nothing left to spend.'}</div>
+    <div class="ip-acts">
+      <button class="ip-yes${(canPay&&chosen)?'':' off'}" data-do="ip-yes">Try again</button>
+      <button class="ip-no" data-do="ip-no">Let it go</button>
+    </div></div></div>`;
+}
+function pend0(st){ const c=st.pend&&st.pend.card; return c? (String(c.type).toUpperCase()==='ATTACK'?'Attack card':'Block card') : 'card'; }
 function triviaModal(){
   const c=S.pending.card;
   return `<div class="modal-bg"><div class="trivia ${c.type.toLowerCase()}">
     <div class="tri-head">${c.type==='ATTACK'?'⚔ ATTACK CARD':'⛊ BLOCK CARD'} · power ${c.power}</div>
-    <div class="tri-sub">Answer correctly to charge your character.</div>
+    <div class="tri-sub${S.pending._retried?' tri-retry':''}">${S.pending._retried?'Second attempt \u2014 same question.':'Answer correctly to charge your character.'}</div>
     <div class="tri-q">${scrimTriviaText(c.q)}</div>
-    <div class="tri-opts">${(function(){ let cliff=-1; if(S.scrim && scrimHas('cliffsnotes')){ for(let i=0;i<c.opts.length;i++){ if(i!==c.ans){ cliff=i; break; } } } return c.opts.map((o,i)=>`<button class="tri-opt${i===cliff?' tri-out':''}" data-ans="${i}"${i===cliff?' disabled':''}><b>${'ABCD'[i]}</b> ${scrimTriviaText(o)}</button>`).join(''); })()}</div>
+    <div class="tri-opts">${(function(){ let cliff=-1; if(S.scrim && scrimHas('cliffsnotes')){ for(let i=0;i<c.opts.length;i++){ if(i!==c.ans){ cliff=i; break; } } } const _wp=S.pending._wrongPick; return c.opts.map((o,i)=>`<button class="tri-opt${i===cliff?' tri-out':''}${i===_wp?' tri-wrong':''}" data-ans="${i}"${(i===cliff||i===_wp)?' disabled':''}><b>${'ABCD'[i]}</b> ${scrimTriviaText(o)}</button>`).join(''); })()}</div>
     ${(S.scrim && scrimHas('rosetta') && !S.scrim.rosettaUsed)?`<button class="tri-rosetta" data-scrim="rosetta" title="Swap this question (once per match)">\ud83d\udcdc Rosetta Stone — swap question</button>`:''}</div></div>`;
 }
 function defendModal(){
@@ -5240,6 +5389,11 @@ document.addEventListener('click',e=>{
     else if(d==='bossgo'){ if(S){ S._bossReveal=null; render(); } }
     else if(d==='closehand'){ if(S){ S._handView=null; render(); } }
     else if(d==='playhand'){ if(S){ const i=S._handView; S._handView=null; render(); if(i!=null) tryPlayHandCard(i); } }
+    else if(d==='dischand'){ if(S && S._handView!=null) tryDiscardHandCard(S._handView,false); }
+    else if(d==='ip-yes'){ if(S&&S._ip) ipAccept(S._ip.picks||[]); }
+    else if(d==='ip-no'){ ipDecline(); }
+    else if(d==='dischand-yes'){ if(S && S._discConfirm!=null) tryDiscardHandCard(S._discConfirm,true); }
+    else if(d==='dischand-no'){ if(S){ S._discConfirm=null; render(); } }
     else if(d==='title'){ stopTurnTimer(); APP.screen='menu'; S=null; render(); }
     else if(d==='rematch'){ startBattle(); }
     else if(d==='settings'){ S._settings=true; render(); }
@@ -5259,7 +5413,12 @@ document.addEventListener('click',e=>{
   }
   if(t.dataset.ans!=null){ answerTrivia(+t.dataset.ans); return; }
   if(t.dataset.def!=null){ resolveDefense(t.dataset.def==='1'); return; }
-  if(t.dataset.pick!=null){ const v=t.dataset.pick; resolvePick(isNaN(+v)?v:+v); return; }
+  if(t.dataset.ippick!=null){ const i=+t.dataset.ippick, st=S._ip; if(st){ st.picks=st.picks||[];
+      const at=st.picks.indexOf(i);
+      if(at>=0) st.picks.splice(at,1);
+      else { st.picks.push(i); while(st.picks.length>ipCost(st.side)) st.picks.shift(); }
+      render(); } return; }
+    if(t.dataset.pick!=null){ const v=t.dataset.pick; resolvePick(isNaN(+v)?v:+v); return; }
   if(t.dataset.act==='attack'){ performAttack('you','atk'); return; }
   if(t.dataset.act==='attack2'){ performAttack('you','atk2'); return; }
   if(t.dataset.pile){ S.viewPile=t.dataset.pile; render(); return; }
@@ -6030,7 +6189,7 @@ function scrimReachable(c,r){ const m=SCRIM.map; if(!m) return false; const cur=
 function scrimAdvanceTo(c,r){ if(!SCRIM.map || !SCRIM.map.cols[c] || !SCRIM.map.cols[c][r]) return; SCRIM.map.pos={c,r}; SCRIM.map.cols[c][r].done=true; SCRIM.cleared++; if(scrimHas('journal')){ SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.min(t.maxHp,t.curHp+5); }); } }
 
 /* ---- deck / character builders for a run battle ---- */
-function scrimPlayerShell(name,setKey,team,deck){ const ai=team.findIndex(c=>c.hp>0); return { name,setKey,team,activeIdx:ai>=0?ai:0,deck,hand:[],discard:[],grave:[],kos:0,attachesLeft:0,crit:null,critTurn:{},critEver:{},flags:{},activeBm:[],_lastDrawn:null }; }
+function scrimPlayerShell(name,setKey,team,deck){ const ai=team.findIndex(c=>c.hp>0); return { name,setKey,team,activeIdx:ai>=0?ai:0,deck,hand:[],discard:[],grave:[],kos:0,attachesLeft:0,discardsLeft:0,crit:null,critTurn:{},critEver:{},flags:{},activeBm:[],_lastDrawn:null }; }
 function buildRunDeck(rd){ const deck=[];
   (rd.ab||[]).forEach((r,n)=>{ const a=DATA.abcs[r.d]&&DATA.abcs[r.d][r.i]; if(a) deck.push({cat:'abc',...clone(a),cid:'a'+n+Math.random().toString(36).slice(2,5)}); });
   (rd.bm||[]).forEach((i,n)=>{ const b=DATA.bookmarks[i]; if(b) deck.push({cat:'bookmark',...clone(b),cid:'b'+n+Math.random().toString(36).slice(2,5)}); });
@@ -6902,7 +7061,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
