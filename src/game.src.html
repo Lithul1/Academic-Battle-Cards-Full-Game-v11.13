@@ -244,12 +244,17 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .bd-chip.crt.on{outline:2px solid var(--gold)}
 
 /* --- battle arenas: one backdrop per deck, behind each player's row --- */
-.side{position:relative;isolation:isolate}
-.side::before{content:'';position:absolute;inset:0;z-index:-2;border-radius:10px;background-size:cover;background-repeat:no-repeat;background-image:var(--arena,none);background-position:var(--arena-pos,center bottom)}
-.side[data-arena]::after{content:'';position:absolute;inset:0;z-index:-1;border-radius:10px;pointer-events:none;background:linear-gradient(180deg,rgba(10,20,20,.55),rgba(10,20,20,.25) 40%,rgba(10,20,20,.6))}
+/* the art goes on the row itself and the scrim over it, so nothing needs a
+   negative z-index — that is what broke when paint containment was added. */
+.side{position:relative}
+.side[data-arena]{background-image:var(--arena,none);background-size:cover;background-repeat:no-repeat;
+  background-position:var(--arena-pos,center bottom);border-radius:10px}
+.side[data-arena]>*{position:relative;z-index:1}
+.side[data-arena]::before{content:'';position:absolute;inset:0;z-index:0;border-radius:10px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(10,20,20,.55),rgba(10,20,20,.25) 40%,rgba(10,20,20,.6))}
 /* the row labels sit directly on the art, so give them their own contrast */
 .side[data-arena] .side-meta{text-shadow:0 1px 3px rgba(0,0,0,.95),0 0 10px rgba(0,0,0,.8);color:#F2E6C6}
-.side[data-arena] .critchip,.side[data-arena] .lens-chip{backdrop-filter:blur(2px)}
+
 .side[data-arena="gatsby"]{--arena:var(--arena-gatsby);--arena-pos:center 62%}
 .side[data-arena="hamlet"]{--arena:var(--arena-hamlet);--arena-pos:center 60%}
 .side[data-arena="frankenstein"]{--arena:var(--arena-frankenstein);--arena-pos:center 55%}
@@ -7304,7 +7309,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, render, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
