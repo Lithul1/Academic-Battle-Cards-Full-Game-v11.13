@@ -265,6 +265,25 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .side[data-arena="othello"]{--arena:var(--arena-castle);--arena-pos:center bottom}
 .side[data-arena="crucible"]{--arena:var(--arena-forest);--arena-pos:center bottom}
 .side[data-arena="tewwg"]{--arena:var(--arena-city);--arena-pos:center bottom}
+
+/* --- Quickstart guide (must stay outside any @media) --- */
+.gd-tag{text-align:center;font-size:12px;font-style:italic;color:#6b5c42;margin:-4px 0 12px}
+.rules p{font-size:13.5px;line-height:1.6;margin:0 0 9px}
+.gd-box{background:var(--cream-hi);border:2px solid var(--ink);border-radius:9px;padding:10px 12px;margin:10px 0;font-size:13px;line-height:1.55}
+.gd-box b.lbl{font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;font-size:11.5px;display:block;margin-bottom:3px}
+.gd-kw{background:var(--cream-hi);border-left:5px solid #6B4E8A;border-radius:0 8px 8px 0;padding:9px 12px;margin:8px 0;font-size:13px;line-height:1.55}
+.gd-kw b.n{font-family:var(--disp);font-size:14px;color:#6B4E8A;display:block;margin-bottom:2px}
+.gd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;margin:8px 0 4px}
+.gd-st{display:flex;gap:7px;align-items:flex-start;font-size:12.5px;line-height:1.42}
+.gd-st .sb{flex:0 0 auto}
+.gd-key{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;margin:8px 0 4px;align-items:center}
+.gd-key span{display:flex;align-items:center;gap:6px}
+.gd-dot{width:14px;height:14px;border-radius:4px;border:2px solid var(--ink);display:inline-block;flex:0 0 auto}
+.gd-dot.neg{background:#e07b28}.gd-dot.pos{background:#2f7d5c}.gd-dot.key{background:#6B4E8A}
+.gd-tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}
+.gd-tbl th,.gd-tbl td{border:1px solid var(--ink);padding:4px 8px;text-align:left}
+.gd-tbl th{background:var(--ink);color:var(--cream);font-family:var(--cond);font-weight:400;letter-spacing:.7px}
+.ic.blk{background:var(--teal)} .ic.bmk{background:#6B4E8A} .ic.lens{background:var(--gold-dk)}
 /* --- discard / retry UI (must stay outside any @media) --- */
 /* --- Index prompt + dev menu (must stay outside any @media) --- */
 .idx{background:var(--cream);border:3.5px solid var(--ink);border-radius:12px;padding:14px 16px;width:min(330px,92vw);
@@ -4384,19 +4403,46 @@ function guideScreen(){
   return `<div class="title-screen sub-screen">
     <img class="title-logo sm" src="${window.ABC_LOGO||''}" alt="Academic Battle Cards">
     <h2 class="sub-h">Quickstart Guide</h2>
+    <div class="gd-tag">Deal, draw &amp; duel with trivia</div>
     <div class="rules">
-      <h2>How to play</h2>
+      <h2>The goal</h2>
+      <p>Knock out <b>3</b> of your opponent's characters. Each side has one <b>Active</b> fighting and a <b>Backstage</b> that steps up when the Active falls.</p>
+      <h2>A turn, in three phases</h2>
       <ol>
-        <li><b>Goal.</b> Knock out enough enemy characters to win (this demo scores <b>3 KOs</b>). Each side has one <i>Active</i> and a bench that steps up when the Active is knocked out.</li>
-        <li><b>① Draw.</b> Draw back up to a full hand at the start of your turn.</li>
-        <li><b>② Strategize (Main Phase).</b> Charge your Active by <b>answering trivia</b> on <span class="ic atk">⚔ Attack</span> / <span class="ic blk">⛊ Block</span> cards (right charges, wrong discards), play up to <b>2</b> <span class="ic bmk">✦ Bookmark</span> cards, and deploy a <b>◆ Critical Lens</b> to bend the rules.</li>
-        <li><b>✦ Status effects.</b> Bookmarks can inflict or grant lingering conditions. <b>Negative:</b> Tear (+10 damage taken), Rip (disables an attack), Glue (can't block/switch), Spill &amp; Burn (lose 10 HP each turn — Burn ignores healing), Smudge (next attach needs two correct answers). <b>Positive:</b> Highlight (+20 next attack), Hardcover (−10 incoming), Laminate (immune to Tear/Rip/Glue/Spill), Margin Notes (draw when you next attach). Bookmarks carry a rarity: ⚪ Common, 🟢 Uncommon, 🔵 Rare, 🟣 Epic, 👑 Legendary.</li>
-        <li><b>③ Engage (Battle Phase).</b> Once a character has charged an ability's cost (the <b>/number</b>), tap the lit attack to strike. When attacked, you choose whether to block.</li>
-        <li><b>◆ Critical Lenses.</b> Up to <b>4</b> in a deck; only <b>one active at a time</b> (deploying a new one archives the old). Each has a continuous <b>Passive Focus</b> plus a <b>Thesis</b> — meet it and tap <b>Fulfil thesis ▸</b> for a one-time reward.</li>
-        <li><b>Cards read “30/2”</b> = damage <b>/</b> cards needed to use it.</li>
+        <li><b>\u2460 Draw.</b> You draw <b>one card</b> per turn. Your hand is small on purpose \u2014 every card you spend is a real cost.</li>
+        <li><b>\u2461 Strategize.</b> Where the game is played. You may <b>charge 2 cards</b>, <b>shed 2 cards</b>, play up to <b>2 Bookmarks</b>, and deploy one <b>Critical Lens</b>.</li>
+        <li><b>\u2462 Engage.</b> Once a move has its cost charged, tap it to strike. The defender chooses whether to block.</li>
       </ol>
+      <div class="gd-box"><b class="lbl">Reading a card</b>A move shows <span class="pc-chip red">50/2</span> \u2014 <b>50 damage</b> for <b>2 charged cards</b>. <span class="pc-chip blue">30/2</span> on the lower row is a block. <b>X</b> means it negates instead of blocking a number, and a <b>+</b> like <span class="pc-chip red">20+/2</span> means it grows.</div>
+      <h2>Charging: answer to arm</h2>
+      <p>Charge a move by answering trivia on an <span class="ic atk">\u2694 ATTACK</span> or <span class="ic blk">\u26ca BLOCK</span> card. Right, and it charges. Wrong, and the card is discarded and the attach is spent.</p>
+      <div class="gd-kw"><b class="n">Iterum Probare \u2014 try again</b>Miss a question and you are offered a second attempt. <b>Shed a card from your hand</b> and the same question returns with your wrong answer struck out. The card is spent either way. One retry per question.</div>
+      <div class="gd-kw"><b class="n">Marginalia \u2014 reach back into the pile</b>Tap your own discard during Strategize. Pick an <b>ABC</b> you shed earlier, spend an attach, and answer <b>two</b> questions to charge it straight onto your Active. Miss either and the attach is gone and the card stays buried. <b>Iterum Probare does not apply here.</b></div>
+      <h2>The discard pile is a resource</h2>
+      <p>You may <b>shed up to 2 cards a turn</b> \u2014 tap a card and choose <b>\uD83D\uDDD1 Discard</b>. Shed cards are not lost; they return to your deck when it runs out. Some characters get <b>stronger the fuller your pile is</b>, so feeding it deliberately is a strategy.</p>
+      <h2>Statuses</h2>
+      <p>Badges on a character show what is affecting them. Tap any badge to read what it does.</p>
+      <div class="gd-grid"><div class="gd-st"><span class="sb neg">TR</span><span><b>Tear</b> \u2014 takes +10 from everything</span></div><div class="gd-st"><span class="sb neg">RP</span><span><b>Rip</b> \u2014 the attack is disabled</span></div><div class="gd-st"><span class="sb neg">GL</span><span><b>Glue</b> \u2014 cannot block or switch</span></div><div class="gd-st"><span class="sb neg">SP</span><span><b>Spill</b> \u2014 loses 10 HP a turn</span></div><div class="gd-st"><span class="sb neg">BN</span><span><b>Burn</b> \u2014 10 a turn, healing will not clear it</span></div><div class="gd-st"><span class="sb neg">SM</span><span><b>Smudge</b> \u2014 attaching needs an extra answer</span></div><div class="gd-st"><span class="sb key">SI</span><span><b>Siphon</b> \u2014 drains, and feeds whoever applied it</span></div><div class="gd-st"><span class="sb neg">WK</span><span><b>Weaken</b> \u2014 the next attack hits softer</span></div><div class="gd-st"><span class="sb neg">EX</span><span><b>Exposed</b> \u2014 the next hit is doubled</span></div><div class="gd-st"><span class="sb neg">CU</span><span><b>Cost Up</b> \u2014 the next attack costs 1 more</span></div><div class="gd-st"><span class="sb pos">HL</span><span><b>Highlight</b> \u2014 +20 on the next attack</span></div><div class="gd-st"><span class="sb pos">HC</span><span><b>Hardcover</b> \u2014 \u221210 from everything</span></div><div class="gd-st"><span class="sb pos">LM</span><span><b>Laminate</b> \u2014 immune to TR, RP, GL, SP</span></div><div class="gd-st"><span class="sb pos">MN</span><span><b>Margin Notes</b> \u2014 draw on your next attach</span></div><div class="gd-st"><span class="sb pos">IC</span><span><b>Iron Curtain</b> \u2014 the next attack is absorbed</span></div></div>
+      <div class="gd-key"><span><i class="gd-dot neg"></i>orange hurts</span><span><i class="gd-dot pos"></i>green helps</span><span><i class="gd-dot key"></i>purple is a keyword</span></div>
+      <h2>Keywords on cards</h2>
+      <div class="gd-kw"><b class="n">\uD83E\uDE78 Siphon</b>Drains the target each turn and returns part of it to whoever applied it. Cleanse it, or knock out its owner \u2014 the drain continues but nothing is returned.</div>
+      <div class="gd-kw"><b class="n">\uD83E\uDE83 Riposte</b>Some blocks bite back. While the block is <b>charged</b>, anyone who attacks pays for it \u2014 whether or not the block is used. Watch for the gold <b>ARMED</b> flag on the block row.</div>
+      <div class="gd-kw"><b class="n">Escalate</b>A few moves cost <b>1 more ABC every time you use them</b>, up to 4. Their cost shows a <b>+</b>. Switching the character out resets it.</div>
+      <div class="gd-kw"><b class="n">Pile scaling</b>Ten characters get stronger the fuller your discard pile is, counting only certain card types and stopping at a cap.</div>
+      <h2>Bookmarks &amp; Critical Lenses</h2>
+      <p><span class="ic bmk">\u2726 BOOKMARK</span> cards are played outright, up to <b>2 a turn</b>. Rarity runs Common, Uncommon, Rare, Epic, Legendary.</p>
+      <p><span class="ic lens">\u25c6 CRITICAL LENS</span> cards bend the rules of the whole match. Up to <b>4 in a deck, one active at a time</b>. Each has a continuous <b>Passive</b> and a <b>Thesis</b> \u2014 meet it and tap <b>Fulfil thesis \u25b8</b> for a one-time reward.</p>
+      <h2>Archetypes</h2>
+      <p>Every character is built on one of nine shapes \u2014 Sentinel, Mentor, Hero, Force of Nature, Shadow, Outlaw, Trickster, Innocent, Martyr \u2014 plus twelve hybrids between them. Learn the shape and you can read a card you have never seen. A Sentinel absorbs; a Shadow degrades you; an Outlaw goes through walls.</p>
+      <table class="gd-tbl">
+        <tr><th>Per turn</th><th></th><th>Per match</th><th></th></tr>
+        <tr><td>Cards drawn</td><td>1</td><td>KOs to win</td><td>3</td></tr>
+        <tr><td>Cards charged</td><td>2</td><td>Lenses in a deck</td><td>4</td></tr>
+        <tr><td>Cards shed</td><td>2</td><td>Lenses active</td><td>1</td></tr>
+        <tr><td>Bookmarks played</td><td>2</td><td>Opening hand</td><td>5</td></tr>
+      </table>
     </div>
-    <div class="sub-actions"><button class="bigbtn" data-do="menu">‹ Back to menu</button></div>
+    <div class="sub-actions"><button class="bigbtn" data-do="menu">\u2039 Back to menu</button></div>
   </div>`;
 }
 
@@ -7309,7 +7355,7 @@ window.ABC_EXPORT = {
 };
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, render, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, get guideSrc(){return guideScreen();}, render, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
