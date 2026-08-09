@@ -34,7 +34,7 @@ body{
 }
 
 /* ===== UI redesign (demo_11_12): shared paper backdrop on framed screens ===== */
-:root{ --abc-bg:none; --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); --deckbg-hamlet:url("data:image/png;base64,__ABCASSET_902__"); --deckbg-frankenstein:url("data:image/png;base64,__ABCASSET_903__"); --deckbg-sherlock:url("data:image/png;base64,__ABCASSET_904__"); --deckbg-othello:url("data:image/png;base64,__ABCASSET_905__"); --deckbg-macbeth:url("data:image/png;base64,__ABCASSET_906__"); --deckbg-wonderland:url("data:image/png;base64,__ABCASSET_907__"); --deckbg-oz:url("data:image/png;base64,__ABCASSET_908__"); --deckbg-crucible:url("data:image/png;base64,__ABCASSET_901__"); --deckbg-tewwg:url("data:image/jpeg;base64,__ABCASSET_919__"); }
+:root{ --abc-bg:none; --arena-gatsby:url("data:image/jpeg;base64,__ABCASSET_1015__"); --arena-hamlet:url("data:image/jpeg;base64,__ABCASSET_1016__"); --arena-frankenstein:url("data:image/jpeg;base64,__ABCASSET_1017__"); --arena-sherlock:url("data:image/jpeg;base64,__ABCASSET_1018__"); --arena-wonderland:url("data:image/jpeg;base64,__ABCASSET_1019__"); --arena-oz:url("data:image/jpeg;base64,__ABCASSET_1020__"); --arena-city:url("data:image/jpeg;base64,__ABCASSET_1021__"); --arena-forest:url("data:image/jpeg;base64,__ABCASSET_1022__"); --arena-castle:url("data:image/jpeg;base64,__ABCASSET_1023__"); --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); --deckbg-hamlet:url("data:image/png;base64,__ABCASSET_902__"); --deckbg-frankenstein:url("data:image/png;base64,__ABCASSET_903__"); --deckbg-sherlock:url("data:image/png;base64,__ABCASSET_904__"); --deckbg-othello:url("data:image/png;base64,__ABCASSET_905__"); --deckbg-macbeth:url("data:image/png;base64,__ABCASSET_906__"); --deckbg-wonderland:url("data:image/png;base64,__ABCASSET_907__"); --deckbg-oz:url("data:image/png;base64,__ABCASSET_908__"); --deckbg-crucible:url("data:image/png;base64,__ABCASSET_901__"); --deckbg-tewwg:url("data:image/jpeg;base64,__ABCASSET_919__"); }
 body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:var(--abc-bg) center/cover no-repeat; }
 /* gameplay surfaces keep their own playfield/ink look */
@@ -242,6 +242,24 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .lc-thesis.unmet{background:#b9ad93;color:#4a4230;box-shadow:none}
 .bd-cav{width:34px;height:34px;border-radius:7px;object-fit:cover;object-position:50% 26%;border:1.5px solid var(--ink)}
 .bd-chip.crt.on{outline:2px solid var(--gold)}
+
+/* --- battle arenas: one backdrop per deck, behind each player's row --- */
+.side{position:relative;isolation:isolate}
+.side::before{content:'';position:absolute;inset:0;z-index:-2;border-radius:10px;background-size:cover;background-repeat:no-repeat;background-image:var(--arena,none);background-position:var(--arena-pos,center bottom)}
+.side[data-arena]::after{content:'';position:absolute;inset:0;z-index:-1;border-radius:10px;pointer-events:none;background:linear-gradient(180deg,rgba(10,20,20,.55),rgba(10,20,20,.25) 40%,rgba(10,20,20,.6))}
+/* the row labels sit directly on the art, so give them their own contrast */
+.side[data-arena] .side-meta{text-shadow:0 1px 3px rgba(0,0,0,.95),0 0 10px rgba(0,0,0,.8);color:#F2E6C6}
+.side[data-arena] .critchip,.side[data-arena] .lens-chip{backdrop-filter:blur(2px)}
+.side[data-arena="gatsby"]{--arena:var(--arena-gatsby);--arena-pos:center 62%}
+.side[data-arena="hamlet"]{--arena:var(--arena-hamlet);--arena-pos:center 60%}
+.side[data-arena="frankenstein"]{--arena:var(--arena-frankenstein);--arena-pos:center 55%}
+.side[data-arena="sherlock"]{--arena:var(--arena-sherlock);--arena-pos:center 58%}
+.side[data-arena="wonderland"]{--arena:var(--arena-wonderland);--arena-pos:center 66%}
+.side[data-arena="oz"]{--arena:var(--arena-oz);--arena-pos:center 66%}
+.side[data-arena="macbeth"]{--arena:var(--arena-castle);--arena-pos:center bottom}
+.side[data-arena="othello"]{--arena:var(--arena-castle);--arena-pos:center bottom}
+.side[data-arena="crucible"]{--arena:var(--arena-forest);--arena-pos:center bottom}
+.side[data-arena="tewwg"]{--arena:var(--arena-city);--arena-pos:center bottom}
 /* --- discard / retry UI (must stay outside any @media) --- */
 /* --- Index prompt + dev menu (must stay outside any @media) --- */
 .idx{background:var(--cream);border:3.5px solid var(--ink);border-radius:12px;padding:14px 16px;width:min(330px,92vw);
@@ -4975,13 +4993,13 @@ function renderGame(root){
      <div class="tb-btns"><button data-do="settings">⚙ Tune</button><button data-do="title">⌂ Menu</button></div>
    </div>
    <div class="board"><div class="board-inner">
-     <div class="side opp-side">
+     <div class="side opp-side" data-arena="${opp.setKey}">
        <div class="side-meta">Opponent · ${setName(opp.setKey)} · hand ${opp.hand.length}</div>
        <div class="row"><div class="bench">${benchTiles(opp,false)}</div>${charTile(opp,'opp')}${pilesFor(opp,'opp')}</div>
        ${critChip(opp,'opp')}
      </div>
      <div class="midline"><div class="phasehud">${phaseHud}</div>${S.turn==='you'&&!S.over?`<span id="turnclock" class="turnclock${(S._timeLeft<=5)?' low':''}">⏱ ${Math.max(0,(S._timeLeft!=null?S._timeLeft:(S.settings.turnTimer||60)))}s</span>`:''}<div class="actions">${actionBtn}</div></div>
-     <div class="side you-side">
+     <div class="side you-side" data-arena="${you.setKey}">
        ${critChip(you,'you')}
        <div class="row"><div class="bench">${benchTiles(you,true)}</div>${charTile(you,'you')}${pilesFor(you,'you')}</div>
        <div class="side-meta">You · ${setName(you.setKey)}</div>
