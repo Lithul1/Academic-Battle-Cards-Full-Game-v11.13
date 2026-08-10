@@ -296,6 +296,12 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .arch-t{display:flex;flex-direction:column;line-height:1.25;min-width:0}
 .arch-t b{font-family:var(--cond);font-size:12.5px;letter-spacing:.7px;text-transform:uppercase}
 .arch-t small{font-size:10.5px;color:#6b5c42;font-style:italic}
+
+.arch.sm{padding:4px 7px;gap:6px;margin:5px 0 2px;background:rgba(255,255,255,.06);
+  border-color:rgba(255,255,255,.22);color:#EFE2C7}
+.arch.sm .arch-ic{font-size:13px}
+.arch.sm .arch-t b{font-size:11px}
+.arch.sm .arch-t small{font-size:9.5px;color:#c9b58a}
 /* --- discard / retry UI (must stay outside any @media) --- */
 /* --- Index prompt + dev menu (must stay outside any @media) --- */
 .idx{background:var(--cream);border:3.5px solid var(--ink);border-radius:12px;padding:14px 16px;width:min(330px,92vw);
@@ -2569,85 +2575,85 @@ const DATA = {
   firsteds: [
       { id:"otdesi_1e", name:"O.T. & Desi (1E)", deck:"othello", hp:120, archetype:'Fallen', accent:"#8a2a3a", img:"data:image/jpeg;base64,__ABCASSET_1014__", fe:true, tier:"ultra", base:["othello","othello"],
         passive:{id:"dangerlove",name:"Dangerously In Love",text:"O.T. & Desi's attacks deal +10 damage, but they take +20 damage from incoming attacks. If either player has an active negative status, both values are doubled."},
-        atk:{n:"Ours to Ruin",t:"Inflict RIP. If the defender already has RIP, inflict GLUE instead. O.T. & Desi lose 60 HP after attacking.",cost:5,dmg:90,inflict:"rip",inflictIfHas:{has:"rip",then:"glue"},sacrifice:60,label:"90/5"},
+        atk:{n:"Ours to Ruin",t:"Inflict ✂️ Rip. If the defender already has ✂️ Rip, inflict 🩹 Glue instead. O.T. & Desi lose 60 HP after attacking.",cost:5,dmg:90,inflict:"rip",inflictIfHas:{has:"rip",then:"glue"},sacrifice:60,label:"90/5"},
         atk2:{n:"Torn Asunder",t:"Inflicts TEAR. If tear is already applied to the defender, inflict RIP instead.",cost:4,dmg:40,inflict:"tear",inflictIfHas:{has:"tear",then:"rip"},label:"40/4"},
         blk:{n:"Collateral Damage",t:"Damage beyond what the defender blocks spills onto one of your backstage cards.",cost:4,block:50,collateral:true,label:"50/4"} },
       { id:"holmes_1e", name:"Sherlock Holmes (1E)", deck:"sherlock", hp:100, archetype:'Trickster', accent:"#3E5A4A", img:"", fe:true, base:["sherlock","holmes"],
         passive:{id:"coldlogic",name:"Cold Logic",text:"Look at the top card of your deck at any time. But whenever you fail a trivia check to attach an ABC, discard 1 random card from your hand.",peekOwnDeck:true,failDiscardRandom:true},
-        atk:{n:"Master of Deduction",t:"If the defending character has any negative status (Tear, Rip, Glue, Spill, Smudge, Burn), this attack gains Pierce.",cost:2,dmg:40,cond:[{test:"defenderHasStatus",then:{pierce:true}}],label:"40/2"},
-        blk:{n:"Anticipate the Strike",t:"Grants Holmes Margin Notes. If the incoming attack costs 3 or more ABC, negate it entirely.",cost:1,block:30,grant:"marginNotes",cond:[{test:"incomingCostGTE",n:3,then:{negate:true}}],label:"30/1"} },
+        atk:{n:"Master of Deduction",t:"If the defending character has any negative status (🪢 Tear, ✂️ Rip, 🩹 Glue, 🫟 Spill, 🫆 Smudge, 🔥 Burn), this attack gains Pierce.",cost:2,dmg:40,cond:[{test:"defenderHasStatus",then:{pierce:true}}],label:"40/2"},
+        blk:{n:"Anticipate the Strike",t:"Grants Holmes \ud83d\udcdd Margin Notes. If the incoming attack costs 3 or more ABC, negate it entirely.",cost:1,block:30,grant:"marginNotes",cond:[{test:"incomingCostGTE",n:3,then:{negate:true}}],label:"30/1"} },
       { id:"creature_1e", name:"The Creature (1E)", deck:"frankenstein", hp:140, archetype:'Fallen', accent:"#3E6E50", img:"", fe:true, base:["frankenstein","creature"],
         passive:{id:"isolation",name:"Total Isolation",text:"The Creature's attacks deal +20 while you have no living benched characters. But it can never be healed or gain positive statuses from your own Bookmarks.",soloBonus:20,immuneSelfBuff:true},
-        atk:{n:"Outcast's Retribution",t:"Inflicts Tear on the defender. The Creature then takes 20 Sacrifice recoil damage.",cost:4,dmg:70,inflict:"tear",sacrifice:20,label:"70/4"},
-        blk:{n:"Nature's Sanction",t:"Grants The Creature Laminate structural protection.",cost:2,block:50,grant:"laminate",label:"50/2"} },
+        atk:{n:"Outcast's Retribution",t:"Inflicts \ud83e\udea2 Tear on the defender. The Creature then takes 20 Sacrifice recoil damage.",cost:4,dmg:70,inflict:"tear",sacrifice:20,label:"70/4"},
+        blk:{n:"Nature's Sanction",t:"Grants The Creature \ud83d\udee1\ufe0f Laminate structural protection.",cost:2,block:50,grant:"laminate",label:"50/2"} },
       { id:"gatsby_1e", name:"Jay Gatsby (1E)", deck:"gatsby", hp:90, archetype:'Trickster', accent:"#1F6A6A", img:"", fe:true, base:["gatsby","gatsby"],
-        passive:{id:"illusion",name:"The Colossal Illusion",text:"At the start of your Main Phase, attach 1 ABC to any character free of trivia. Caveat: Gatsby carries a permanent, uncleansable Spill (−10 HP each turn).",freeAttach:1,spillLock:true},
+        passive:{id:"illusion",name:"The Colossal Illusion",text:"At the start of your Main Phase, attach 1 ABC to any character free of trivia. Caveat: Gatsby carries a permanent, uncleansable 🫟 Spill (−10 HP each turn).",freeAttach:1,spillLock:true},
         atk:{n:"Lavish Display",t:"Deals +10 damage for every Bookmark in your discard pile (max +30).",cost:2,dmg:30,bmDiscardBonus:10,bmDiscardCap:30,label:"30+/2"},
         blk:{n:"Unfathomable Wealth",t:"Caps incoming damage at 20 for this Battle Phase. Discard 1 attached Block ABC after use.",cost:2,blockType:"capto",cap:20,postDiscardBlk:1,label:"Cap20/2"} },
       { id:"hamlet_1e", name:"Hamlet (1E)", deck:"hamlet", hp:95, archetype:'Trickster', accent:"#6E3B73", img:"", fe:true, base:["hamlet","hamlet"],
         passive:{id:"antic",name:"Anticipatory Madness",text:"See the card your opponent just drew. Caveat: if you fail a trivia check while Hamlet is on the field, you must skip your next attack declaration.",peekFoeDraw:true,failSkipAttack:true,skipFlavor:"Hamlet's hesitation"},
-        atk:{n:"The Mousetrap",t:"Guess the type on top of your opponent's deck. If correct, +20 damage and inflict Tear.",cost:2,dmg:40,guessTopFoe:{bonus:20,inflict:"tear"},label:"40/2"},
-        blk:{n:"To Be or Not To Be",t:"Grants Hamlet Margin Notes. If Hamlet's HP is below 40, negate the incoming attack instead.",cost:1,block:30,grant:"marginNotes",cond:[{test:"selfHpBelow",n:40,then:{negate:true}}],label:"30/1"} },
+        atk:{n:"The Mousetrap",t:"Guess the type on top of your opponent's deck. If correct, +20 damage and inflict \ud83e\udea2 Tear.",cost:2,dmg:40,guessTopFoe:{bonus:20,inflict:"tear"},label:"40/2"},
+        blk:{n:"To Be or Not To Be",t:"Grants Hamlet \ud83d\udcdd Margin Notes. If Hamlet's HP is below 40, negate the incoming attack instead.",cost:1,block:30,grant:"marginNotes",cond:[{test:"selfHpBelow",n:40,then:{negate:true}}],label:"30/1"} },
       { id:"othello_1e", name:"Othello (1E)", deck:"othello", hp:130, archetype:'Fallen', accent:"#A62B2B", img:"", fe:true, base:["othello","othello"],
         passive:{id:"jealousy",name:"Blinding Jealousy",text:"Othello's attacks deal +30 while he stands alone (no living bench). He cannot be healed or gain positive statuses from your Bookmarks, and if you bench him he Rips the character that replaces him.",soloBonus:30,immuneSelfBuff:true,onSwitchInflict:"rip"},
         atk:{n:"General's Wrath",t:"Gains Pierce, ignoring the defender's blocks and buffs. Othello takes 20 Sacrifice recoil.",cost:4,dmg:70,flags:["pierce"],sacrifice:20,label:"70/4"},
-        blk:{n:"Tragic Realization",t:"Grants Othello Laminate structural protection.",cost:2,block:50,grant:"laminate",label:"50/2"} },
+        blk:{n:"Tragic Realization",t:"Grants Othello \ud83d\udee1\ufe0f Laminate structural protection.",cost:2,block:50,grant:"laminate",label:"50/2"} },
       { id:"proctor_1e", name:"John Proctor (1E)", deck:"crucible", hp:100, archetype:'Trickster', accent:"#B53A2C", img:"", fe:true, base:["crucible","jproctor"],
-        passive:{id:"myname",name:"Because It Is My Name!",text:"Once per turn, attach 1 ABC to Proctor free of trivia. Caveat: Proctor carries a permanent, uncleansable Spill (−10 HP each turn).",freeAttach:1,spillLock:true},
+        passive:{id:"myname",name:"Because It Is My Name!",text:"Once per turn, attach 1 ABC to Proctor free of trivia. Caveat: Proctor carries a permanent, uncleansable 🫟 Spill (−10 HP each turn).",freeAttach:1,spillLock:true},
         atk:{n:"Righteous Denunciation",t:"Deals +10 damage for every Bookmark in your discard pile (max +30).",cost:2,dmg:40,bmDiscardBonus:10,bmDiscardCap:30,label:"40+/2"},
         blk:{n:"Unyielding Integrity",t:"Caps incoming damage at 20 for this Battle Phase. Discard 1 attached Block ABC after use.",cost:2,blockType:"capto",cap:20,postDiscardBlk:1,label:"Cap20/2"} },
       { id:"macbeth_1e", name:"Macbeth (1E)", deck:"macbeth", hp:110, archetype:'Fallen', accent:"#7A1F2B", img:"", fe:true, base:["macbeth","macbeth"],
         passive:{id:"tomorrow",name:"Tomorrow, and Tomorrow...",text:"All of Macbeth's move costs are reduced by 1 (min 1). Caveat: he is perpetually Smudged, and each enemy character he KOs makes every future attach require two correct answers.",costMod:-1,smudgeLock:true,killWorsen:true},
-        atk:{n:"Scorpion-Minded Strike",t:"Inflicts Glue. If the defender already has a negative status, deals +20 damage.",cost:2,dmg:50,inflict:"glue",cond:[{test:"defenderHasStatus",then:{dmgAdd:20}}],label:"50/2"},
+        atk:{n:"Scorpion-Minded Strike",t:"Inflicts \ud83e\ude79 Glue. If the defender already has a negative status, deals +20 damage.",cost:2,dmg:50,inflict:"glue",cond:[{test:"defenderHasStatus",then:{dmgAdd:20}}],label:"50/2"},
         blk:{n:"Vaulting Ambition",t:"Avoids the attack entirely, but Macbeth must retreat to Backstage.",cost:1,blockType:"negate",forceSwitchSelf:"bench",label:"X/1"} },
       { id:"alice_1e", name:"Alice (1E)", deck:"wonderland", hp:90, archetype:'Paragon', accent:"#2C6EA6", img:"", fe:true, base:["wonderland","alice"],
-        passive:{id:"curious",name:"Curious Alterations",text:"At the start of your turn, grant Alice Highlight or Laminate. Caveat: she is perpetually Smudged (attaches to her need two correct answers).",profileToggle:true,smudgeLock:true},
-        atk:{n:"Drink Me / Eat Me",t:"If Alice is Highlighted, this attack gains Pierce. If she is Laminated, it inflicts Glue.",cost:2,dmg:40,cond:[{test:"selfHasStatus",status:"highlight",then:{pierce:true}},{test:"selfHasStatus",status:"laminate",then:{inflict:"glue"}}],label:"40/2"},
+        passive:{id:"curious",name:"Curious Alterations",text:"At the start of your turn, grant Alice \u2728 Highlight or \ud83d\udee1\ufe0f Laminate. Caveat: she is perpetually Smudged (attaches to her need two correct answers).",profileToggle:true,smudgeLock:true},
+        atk:{n:"Drink Me / Eat Me",t:"If Alice is Highlighted, this attack gains Pierce. If she is Laminated, it inflicts \ud83e\ude79 Glue.",cost:2,dmg:40,cond:[{test:"selfHasStatus",status:"highlight",then:{pierce:true}},{test:"selfHasStatus",status:"laminate",then:{inflict:"glue"}}],label:"40/2"},
         blk:{n:"Nonsensical Rebuttal",t:"Clears one negative status from Alice. If the attacker is from a Gothic or Tragedy deck, block 60 instead.",cost:2,block:40,selfCleanse:1,cond:[{test:"attackerDeckIn",decks:["frankenstein","hamlet","othello","macbeth"],then:{blockSet:60}}],label:"40/2"} },
       { id:"queen_of_hearts_1e", name:"The Queen of Hearts (1E)", deck:"wonderland", hp:110, archetype:'Trickster', accent:"#B01E3C", img:"", fe:true, base:["wonderland","queen_hearts"],
         passive:{id:"offheads",name:"Off With Their Heads!",text:"Any character that blocks the Queen's attack is immediately Torn. Caveat: she cannot gain damage-reducing statuses, and takes +10 damage whenever she has no attached Block ABC.",blockerTear:true,noDamageReduction:true,nakedVuln:10},
-        atk:{n:"Croquet Execution",t:"If the defender already has Tear, force the opponent to discard 1 random card.",cost:3,dmg:60,cond:[{test:"defenderHasStatus",status:"tear",then:{foeDiscard:1}}],label:"60/3"},
+        atk:{n:"Croquet Execution",t:"If the defender already has \ud83e\udea2 Tear, force the opponent to discard 1 random card.",cost:3,dmg:60,cond:[{test:"defenderHasStatus",status:"tear",then:{foeDiscard:1}}],label:"60/3"},
         blk:{n:"Mock Trial",t:"The opponent's next attack is forced onto one of their benched-target choices — it strikes a random benched enemy instead of the Queen.",cost:1,block:30,forceRedirectFoe:true,label:"30/1"} },
       { id:"wizard_1e", name:"The Wonderful Wizard of Oz (1E)", deck:"oz", hp:80, archetype:'Scourge', accent:"#00A86B", img:"", fe:true, base:["oz","oz"],
         passive:{id:"curtain",name:"Pay No Attention to That Man Behind the Curtain",text:"While the Wizard is Backstage, your Active character's moves cost 1 less (min 1). Caveat: if he is ever forced Active he is Ripped (attack disabled) and your active defensive buffs are stripped.",benchCostAura:-1,forcedActiveSelfRip:true,forcedActiveStripBlocks:true},
-        atk:{n:"Projected Terror",t:"Inflicts Burn on the defender (−10 HP each turn, unhealable).",cost:3,dmg:50,inflict:"burn",label:"50/3"},
+        atk:{n:"Projected Terror",t:"Inflicts 🔥 Burn on the defender (−10 HP each turn, unhealable).",cost:3,dmg:50,inflict:"burn",label:"50/3"},
         blk:{n:"Smoke and Mirrors",t:"Avoid one incoming attack completely, then slip safely to Backstage.",cost:3,blockType:"negate",forceSwitchSelf:"bench",label:"X/3"} },
       { id:"wicked_witch_1e", name:"The Wicked Witch of the West (1E)", deck:"oz", hp:100, archetype:'Shadow', accent:"#2E7D32", img:"", fe:true, base:["oz","witchwest"],
-        passive:{id:"dissolve",name:"Liquid Dissolution",text:"The Witch's attacks deal +20 against any character with a negative status. Caveat: whenever the opponent successfully attaches a Block ABC, she suffers an uncleansable Spill (−15 HP each turn).",statusDmgBonus:20,spillOnFoeBlockAttach:15},
-        atk:{n:"Winged Monkey Ambush",t:"Inflicts Glue on the defender (cannot switch positions next phase).",cost:2,dmg:40,inflict:"glue",label:"40/2"},
-        blk:{n:"Hourglass Countdown",t:"Caps incoming damage at 20 and inflicts Tear on the attacker.",cost:2,blockType:"capto",cap:20,inflictAtt:"tear",label:"Cap20/2"} },
+        passive:{id:"dissolve",name:"Liquid Dissolution",text:"The Witch's attacks deal +20 against any character with a negative status. Caveat: whenever the opponent successfully attaches a Block ABC, she suffers an uncleansable 🫟 Spill (−15 HP each turn).",statusDmgBonus:20,spillOnFoeBlockAttach:15},
+        atk:{n:"Winged Monkey Ambush",t:"Inflicts \ud83e\ude79 Glue on the defender (cannot switch positions next phase).",cost:2,dmg:40,inflict:"glue",label:"40/2"},
+        blk:{n:"Hourglass Countdown",t:"Caps incoming damage at 20 and inflicts \ud83e\udea2 Tear on the attacker.",cost:2,blockType:"capto",cap:20,inflictAtt:"tear",label:"Cap20/2"} },
       { id:"1e_janie", name:"Janie Crawford (1E)", deck:"tewwg", hp:170, archetype:'Elder', accent:"#D7A86E", img:"", fe:true, base:["tewwg","janie"],
         passive:{id:"findingvoice",name:"Finding Her Voice",text:"Once each turn, a successful trivia attach removes one negative status from an ally. Caveat: your attacks cost +1 ABC while Janie is your Active Character.",onAttachCleanseAlly:true,costMod:1},
-        atk:{n:"Pear Tree Promise",t:"Gain Highlight before attacking.",cost:3,dmg:60,grant:"highlight",label:"60/3"},
-        blk:{n:"Horizon's Strength",t:"Remove Smudge or Glue before reducing damage.",cost:2,block:50,blkCleanse:["smudge","glue"],label:"50/2"} },
+        atk:{n:"Pear Tree Promise",t:"Gain \u2728 Highlight before attacking.",cost:3,dmg:60,grant:"highlight",label:"60/3"},
+        blk:{n:"Horizon's Strength",t:"Remove \ud83e\udec6 Smudge or \ud83e\ude79 Glue before reducing damage.",cost:2,block:50,blkCleanse:["smudge","glue"],label:"50/2"} },
       { id:"1e_eatonville", name:"Town of Eatonville (1E)", deck:"tewwg", hp:190, archetype:'Mentor', accent:"#6D9EAD", img:"", fe:true, base:["tewwg","eatonville"],
         passive:{id:"strengthcommunity",name:"Strength in Community",text:"Whenever you play a Bookmark, every ally heals 10. Caveat: you may play only one Bookmark per turn instead of two.",onBookmarkHealTeam:10,bookmarkCap:1},
         atk:{n:"Shared Hope",t:"Remove one negative status from every ally.",cost:3,dmg:60,teamCleanse:true,label:"60/3"},
         blk:{n:"United Front",t:"All allies reduce incoming damage by 10 until your next turn.",cost:3,block:60,teamShield:10,label:"60/3"} },
       { id:"daisy_1e", name:"Daisy Buchanan (1E)", deck:"gatsby", hp:100, archetype:'Corrupter', accent:"#F6D97A", img:"", fe:true, base:["gatsby","daisy"],
-        passive:{id:"careless",name:"Careless People",text:"At the start of each of your turns, Daisy gains Highlight if she has no positive status — the golden glow. Caveat: she carries a permanent, uncleansable Smudge; her ABCs need two correct answers to attach.",profileToggle:true,smudgeLock:true},
-        atk:{n:"A Voice Full of Money",t:"Inflicts Glue — the listener stands transfixed, unable to switch out.",cost:2,dmg:40,inflict:"glue",label:"40/2"},
+        passive:{id:"careless",name:"Careless People",text:"At the start of each of your turns, Daisy gains ✨ Highlight if she has no positive status — the golden glow. Caveat: she carries a permanent, uncleansable 🫆 Smudge; her ABCs need two correct answers to attach.",profileToggle:true,smudgeLock:true},
+        atk:{n:"A Voice Full of Money",t:"Inflicts 🩹 Glue — the listener stands transfixed, unable to switch out.",cost:2,dmg:40,inflict:"glue",label:"40/2"},
         blk:{n:"Retreat Behind Wealth",t:"If the incoming attack costs 3 or more ABC, block 50 instead.",cost:1,block:30,cond:[{test:"incomingCostGTE",n:3,then:{blockSet:50}}],label:"30/1"} },
       { id:"abigail_1e", name:"Abigail Williams (1E)", deck:"crucible", hp:100, archetype:'Shadow', accent:"#B53A2C", img:"", fe:true, base:["crucible","abigail"],
         passive:{id:"cryingout",name:"The Crying-Out",text:"Abigail's attacks deal +20 against any character with a negative status — she preys on the accused. Caveat: whenever she fails a trivia check, the unraveling lie costs a random card from your hand.",statusDmgBonus:20,failDiscardRandom:true},
-        atk:{n:"The Needle of Accusation",t:"Inflicts Smudge — doubt is cast, and two correct answers are needed.",cost:2,dmg:40,inflict:"smudge",label:"40/2"},
-        blk:{n:"Deflected Blame",t:"Inflicts Smudge on the attacker after blocking.",cost:2,block:30,inflictAtt:"smudge",label:"30/2"} },
+        atk:{n:"The Needle of Accusation",t:"Inflicts 🫆 Smudge — doubt is cast, and two correct answers are needed.",cost:2,dmg:40,inflict:"smudge",label:"40/2"},
+        blk:{n:"Deflected Blame",t:"Inflicts \ud83e\udec6 Smudge on the attacker after blocking.",cost:2,block:30,inflictAtt:"smudge",label:"30/2"} },
       { id:"ophelia_1e", name:"Ophelia (1E)", deck:"hamlet", hp:90, archetype:'Mentor', accent:"#8A6A9A", img:"", fe:true, base:["hamlet","ophelia"],
         passive:{id:"rosemary",name:"Rosemary for Remembrance",text:"Once each turn, a successful trivia attach lets Ophelia hand a flower to an ally — removing one negative status. Caveat: lost in her sorrows, she can never be healed or gain positive statuses from your own Bookmarks.",onAttachCleanseAlly:true,immuneSelfBuff:true},
-        atk:{n:"Snatches of Old Tunes",t:"Her mad songs unsettle — inflicts Smudge.",cost:2,dmg:30,inflict:"smudge",label:"30/2"},
+        atk:{n:"Snatches of Old Tunes",t:"Her mad songs unsettle — inflicts 🫆 Smudge.",cost:2,dmg:30,inflict:"smudge",label:"30/2"},
         blk:{n:"Garland of Willow",t:"Removes one negative status from any ally.",cost:2,block:30,cleanseAllyAny:true,label:"30/2"} },
       { id:"moriarty_1e", name:"Professor Moriarty (1E)", deck:"sherlock", hp:110, archetype:'Shadow', accent:"#3A3550", img:"", fe:true, base:["sherlock","moriarty"],
         passive:{id:"finalproblem",name:"The Final Problem",text:"When Moriarty stands alone, his attacks deal +20 — the endgame is his design. Caveat: his elaborate schemes make your attacks cost +1 ABC while he is your Active Character.",soloBonus:20,costMod:1},
-        atk:{n:"Web of Influence",t:"Inflicts Glue — caught in the web, the defender cannot switch out.",cost:2,dmg:40,inflict:"glue",label:"40/2"},
-        blk:{n:"Reichenbach Gambit",t:"Inflicts Spill on the attacker — he drags them down with him.",cost:2,block:20,inflictAtt:"spill",label:"20/2"} },
+        atk:{n:"Web of Influence",t:"Inflicts 🩹 Glue — caught in the web, the defender cannot switch out.",cost:2,dmg:40,inflict:"glue",label:"40/2"},
+        blk:{n:"Reichenbach Gambit",t:"Inflicts 🫟 Spill on the attacker — he drags them down with him.",cost:2,block:20,inflictAtt:"spill",label:"20/2"} },
       { id:"iago_1e", name:"Iago (1E)", deck:"othello", hp:100, archetype:'Corrupter', accent:"#2E6B40", img:"", fe:true, base:["othello","iago"],
         passive:{id:"honestiago",name:"Honest Iago",text:"Once per turn, attach 1 ABC to Iago free of trivia — his lies come effortlessly. Caveat: when a trivia check fails, the unraveling lie costs a random card from your hand.",freeAttach:1,failDiscardRandom:true},
-        atk:{n:"Pour Pestilence",t:"Poison in the ear — inflicts Spill (ongoing damage).",cost:2,dmg:40,inflict:"spill",label:"40/2"},
-        blk:{n:"Seeming Honesty",t:"Negates the attacker's Highlight before reducing damage.",cost:2,block:30,blockType:"negateStatus",label:"30/2"} },
+        atk:{n:"Pour Pestilence",t:"Poison in the ear — inflicts 🫟 Spill (ongoing damage).",cost:2,dmg:40,inflict:"spill",label:"40/2"},
+        blk:{n:"Seeming Honesty",t:"Negates the attacker's \u2728 Highlight before reducing damage.",cost:2,block:30,blockType:"negateStatus",label:"30/2"} },
       { id:"safie_1e", name:"Safie (1E)", deck:"frankenstein", hp:90, archetype:'Trickster', accent:"#8A7A4A", img:"", fe:true, base:["frankenstein","safie"],
         passive:{id:"eagerstudent",name:"The Eager Student",text:"Safie studies constantly — see the top card of your deck at any time. Caveat: a failed trivia check shakes her confidence; your next attack declaration is skipped.",peekOwnDeck:true,failSkipAttack:true,skipFlavor:"Safie's shaken confidence"},
         atk:{n:"Letters in a New Tongue",t:"Draw one card after damage.",cost:2,dmg:30,drawAfter:1,label:"30/2"},
-        blk:{n:"Careful Notes",t:"Gains Margin Notes — draw a card on her next attach.",cost:2,block:30,grant:"marginNotes",label:"30/2"} },
+        blk:{n:"Careful Notes",t:"Gains 📝 Margin Notes — draw a card on her next attach.",cost:2,block:30,grant:"marginNotes",label:"30/2"} },
   ]
 };
 if (typeof window !== 'undefined') window.DATA = DATA;
@@ -5271,14 +5277,16 @@ function handViewModal(){
   /* ---- archetype chip: shown on the expanded card, both sides ---- */
   const ARCH_CORE={'Sentinel':['⛊','the wall — absorbs a phase and hands it back','teal'],'Mentor':['📝','low threat, high team value','teal'],'Hero':['✨','escalates itself rather than degrading you','gold'],'Force of Nature':['🔥','cost-4 finisher, unconditional','red'],'Shadow':['🩸','pressure through status, thin body','plum'],'Outlaw':['🗡️','goes through walls','red'],'Trickster':['🪃','card advantage and disruption','gold'],'Innocent':['📕','cheap, fragile, trades up','teal'],'Martyr':['✂️','pays its own HP for above-curve output','plum']};
   const ARCH_HYB={'Paragon':['Hero','Sentinel','a Hero that can hold ground'],'Scourge':['Force of Nature','Shadow','a Force of Nature that also degrades you'],'Gatekeeper':['Sentinel','Trickster','a Sentinel that disrupts while it holds'],'Fallen':['Hero','Shadow','a Hero whose kit hurts you, not itself'],'Monument':['Force of Nature','Sentinel','a Force of Nature that scales rather than spikes'],'Steadfast':['Innocent','Sentinel','an Innocent that refuses to die'],'Urchin':['Innocent','Trickster','an Innocent that draws cards'],'Corrupter':['Outlaw','Shadow','an Outlaw that poisons'],'Inquisitor':['Sentinel','Shadow','a Sentinel that punishes'],'Elder':['Hero','Mentor','a Hero who also serves'],'Zealot':['Martyr','Shadow','a Martyr that spreads'],'Warden':['Mentor','Sentinel','a Mentor that holds the door']};
-  function archChip(ch){
+  const ARCH_SHORT={'Sentinel':'absorbs and holds','Mentor':'serves the team','Hero':'escalates itself','Force of Nature':'unconditional finisher','Shadow':'pressure, thin body','Outlaw':'goes through walls','Trickster':'cards and disruption','Innocent':'cheap, fragile, trades up','Martyr':'pays its own HP','Paragon':'a Hero that holds ground','Scourge':'a finisher that degrades','Gatekeeper':'a Sentinel that disrupts','Fallen':'a Hero whose kit hurts','Monument':'scales rather than spikes','Steadfast':'an Innocent that will not die','Urchin':'an Innocent that draws','Corrupter':'an Outlaw that poisons','Inquisitor':'a Sentinel that punishes','Elder':'a Hero who also serves','Zealot':'a Martyr that spreads','Warden':'a Mentor that holds'};
+  function archChip(ch,compact){
     const a=ch&&ch.archetype; if(!a) return '';
     let ic,sub,tone;
     if(ARCH_CORE[a]){ ic=ARCH_CORE[a][0]; sub=ARCH_CORE[a][1]; tone=ARCH_CORE[a][2]; }
     else if(ARCH_HYB[a]){ const p=ARCH_HYB[a]; const base=ARCH_CORE[p[0]]||['','','teal'];
       ic=base[0]; tone=base[2]; sub=p[2]+' \u00b7 '+p[0]+' + '+p[1]; }
     else return '';
-    return '<div class="arch '+tone+'"><span class="arch-ic">'+ic+'</span>'
+    if(compact) sub=ARCH_SHORT[a]||sub;
+    return '<div class="arch '+tone+(compact?' sm':'')+'"><span class="arch-ic">'+ic+'</span>'
          + '<span class="arch-t"><b>'+a+'</b><small>'+sub+'</small></span></div>';
   }
 function benchInfoModal(){
@@ -5693,7 +5701,7 @@ function buildCharPreview(ch,deck){ if(!ch) return '';
   return `<div class="pv-card pvchar" data-deck="${deck||''}" style="--accent:${ch.accent}">
     <div class="pv-port">${img}</div>
     <div class="pv-name">${ch.name}</div>
-    <div class="pv-hp">❤ ${ch.hp} HP${(ch.tags||[]).includes('villain')?' · <em>Villain</em>':''}</div>
+    <div class="pv-hp">❤ ${ch.hp} HP${(ch.tags||[]).includes('villain')?' · <em>Villain</em>':''}</div> ${archChip(ch,true)}
     ${mv(ch.atk,'atk')}${ch.atk2?mv(ch.atk2,'atk'):''}${mv(ch.blk,'blk')}
   </div>`;
 }
@@ -5705,7 +5713,7 @@ function buildFePreview(f){ if(!f) return '';
     return `<div class="pv-card pvchar fe fullart-pv" data-deck="${f.deck||''}" style="--accent:${f.accent}">
       <div class="fa-card"><img src="${full}" alt="${f.name}"></div>
       <div class="pv-name">${f.name} <span class="fe-badge">1ST ED</span> <span class="fa-tier">\u2605 ULTRA-RARE</span></div>
-      <div class="pv-hp">\u2764 ${f.hp} HP \u00b7 ${f.deck?setName(f.deck):'no deck yet'}</div>
+      <div class="pv-hp">\u2764 ${f.hp} HP \u00b7 ${f.deck?setName(f.deck):'no deck yet'}</div> ${archChip(f,true)}
       <div class="pv-sec"><span>Passive \u2014 ${f.passive.name}</span>${f.passive.text}</div>
       ${mvf(f.atk,'atk')}${mvf(f.atk2,'atk')}${mvf(f.blk,'blk')}
       ${lore?`<div class="fa-lore">${lore}</div>`:''}
@@ -5716,7 +5724,7 @@ function buildFePreview(f){ if(!f) return '';
   return `<div class="pv-card pvchar fe" data-deck="${f.deck||''}" style="--accent:${f.accent}">
     <div class="pv-port">${img}</div>
     <div class="pv-name">${f.name} <span class="fe-badge">1ST ED</span></div>
-    <div class="pv-hp">\u2764 ${f.hp} HP \u00b7 ${f.deck?setName(f.deck):'no deck yet'}</div>
+    <div class="pv-hp">\u2764 ${f.hp} HP \u00b7 ${f.deck?setName(f.deck):'no deck yet'}</div> ${archChip(f,true)}
     <div class="pv-sec"><span>Passive \u2014 ${f.passive.name}</span>${f.passive.text}</div>
     ${mv(f.atk,'atk')}${f.atk2?mv(f.atk2,'atk'):''}${mv(f.blk,'blk')}
   </div>`;
@@ -7496,7 +7504,7 @@ try{ edBackfillArchetypes(); }catch(e){}
 
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, archChip, benchInfoModalSrc(){return benchInfoModal();}, render, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, archChip, benchInfoModalSrc(){return benchInfoModal();}, buildCharPreviewSrc(){const c=DATA.characters.hamlet.find(x=>x.id==="hamlet"); return buildCharPreview(c,"hamlet");}, render, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
