@@ -284,6 +284,18 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .gd-tbl th,.gd-tbl td{border:1px solid var(--ink);padding:4px 8px;text-align:left}
 .gd-tbl th{background:var(--ink);color:var(--cream);font-family:var(--cond);font-weight:400;letter-spacing:.7px}
 .ic.blk{background:var(--teal)} .ic.bmk{background:#6B4E8A} .ic.lens{background:var(--gold-dk)}
+
+/* --- archetype chip (must stay outside any @media) --- */
+.arch{display:flex;align-items:center;gap:8px;border:2px solid var(--ink);border-radius:8px;
+  padding:5px 9px;background:var(--cream);color:var(--ink)}
+.arch.teal{border-left:5px solid var(--teal)}
+.arch.gold{border-left:5px solid var(--gold-dk)}
+.arch.red{border-left:5px solid var(--red)}
+.arch.plum{border-left:5px solid #6B4E8A}
+.arch-ic{font-size:16px;line-height:1;flex:0 0 auto}
+.arch-t{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.arch-t b{font-family:var(--cond);font-size:12.5px;letter-spacing:.7px;text-transform:uppercase}
+.arch-t small{font-size:10.5px;color:#6b5c42;font-style:italic}
 /* --- discard / retry UI (must stay outside any @media) --- */
 /* --- Index prompt + dev menu (must stay outside any @media) --- */
 .idx{background:var(--cream);border:3.5px solid var(--ink);border-radius:12px;padding:14px 16px;width:min(330px,92vw);
@@ -2781,8 +2793,28 @@ function firstedById(id){ var f=(DATA.firsteds||[]).find(x=>x.id===id); if(f) re
 /* ---- Expansion edition helpers (edition-driven; augment matching base deck only) ---- */
 function editionsForDeck(k){ var E=window.EXPANSIONS||{}; return Object.keys(E).filter(function(id){return E[id].base===k&&E[id].battle;}).map(function(id){return E[id];}); }
 function edHas(cid){ return sbx() || (META.editionCards||[]).indexOf(cid)>=0; }
+function edBackfillArchetypes(){
+  var E=window.EXPANSIONS||{};
+  Object.keys(E).forEach(function(k){
+    var ex=E[k], base=ex && ex.base, chars=ex && ex.battle && ex.battle.chars;
+    if(!base || !chars || !DATA.characters[base]) return;
+    chars.forEach(function(c){ edInherit(base,c); });
+  });
+}
 function edCharFor(k,charId){ var eds=editionsForDeck(k); for(var i=0;i<eds.length;i++){ var c=(eds[i].battle.chars||[]).find(function(x){return x.id===charId;}); if(c&&edHas(c.cid)) return {ed:eds[i],c:c}; } return null; }
-function edResolveChar(def,id){ if(def.ed&&def.ed[id]){ var m=edCharFor(def.d,id); if(m) return m.c; } return DATA.characters[def.d].find(function(c){return c.id===id;}); }
+// A reskin is the same character in different clothes, so it inherits anything
+// the base defines and the reskin does not — archetype, tags, and so on.
+function edBaseChar(deckKey,id){
+  var d=DATA.characters[deckKey]; if(!d) return null;
+  return d.find(function(c){ return c.id===id; })||null;
+}
+function edInherit(deckKey,c){
+  if(!c) return c;
+  var base=edBaseChar(deckKey,c.id); if(!base) return c;
+  ['archetype','tags','accent'].forEach(function(k){ if(c[k]==null) c[k]=base[k]; });
+  return c;
+}
+function edResolveChar(def,id){ if(def.ed&&def.ed[id]){ var m=edCharFor(def.d,id); if(m) return edInherit(def.d,m.c); } return DATA.characters[def.d].find(function(c){return c.id===id;}); }
 function edAbcByCid(k,cid){ var eds=editionsForDeck(k); for(var i=0;i<eds.length;i++){ var a=(eds[i].battle.abcs||[]).find(function(x){return x.cid===cid;}); if(a) return a; } return null; }
 function edBmByCid(k,cid){ var eds=editionsForDeck(k); for(var i=0;i<eds.length;i++){ var b=(eds[i].battle.bookmarks||[]).find(function(x){return x.cid===cid;}); if(b) return b; } return null; }
 function edAbcsCollected(k){ var out=[]; editionsForDeck(k).forEach(function(e){(e.battle.abcs||[]).forEach(function(a){ if(edHas(a.cid)) out.push({ed:e,a:a}); });}); return out; }
@@ -5235,6 +5267,20 @@ function handViewModal(){
       <div class="hv-cacts"><button class="hv-play" data-do="dischand-yes">Yes, shed it</button><button class="hv-close" data-do="dischand-no">Keep it</button></div></div>`:''}
     </div></div>`;
 }
+
+  /* ---- archetype chip: shown on the expanded card, both sides ---- */
+  const ARCH_CORE={'Sentinel':['⛊','the wall — absorbs a phase and hands it back','teal'],'Mentor':['📝','low threat, high team value','teal'],'Hero':['✨','escalates itself rather than degrading you','gold'],'Force of Nature':['🔥','cost-4 finisher, unconditional','red'],'Shadow':['🩸','pressure through status, thin body','plum'],'Outlaw':['🗡️','goes through walls','red'],'Trickster':['🪃','card advantage and disruption','gold'],'Innocent':['📕','cheap, fragile, trades up','teal'],'Martyr':['✂️','pays its own HP for above-curve output','plum']};
+  const ARCH_HYB={'Paragon':['Hero','Sentinel','a Hero that can hold ground'],'Scourge':['Force of Nature','Shadow','a Force of Nature that also degrades you'],'Gatekeeper':['Sentinel','Trickster','a Sentinel that disrupts while it holds'],'Fallen':['Hero','Shadow','a Hero whose kit hurts you, not itself'],'Monument':['Force of Nature','Sentinel','a Force of Nature that scales rather than spikes'],'Steadfast':['Innocent','Sentinel','an Innocent that refuses to die'],'Urchin':['Innocent','Trickster','an Innocent that draws cards'],'Corrupter':['Outlaw','Shadow','an Outlaw that poisons'],'Inquisitor':['Sentinel','Shadow','a Sentinel that punishes'],'Elder':['Hero','Mentor','a Hero who also serves'],'Zealot':['Martyr','Shadow','a Martyr that spreads'],'Warden':['Mentor','Sentinel','a Mentor that holds the door']};
+  function archChip(ch){
+    const a=ch&&ch.archetype; if(!a) return '';
+    let ic,sub,tone;
+    if(ARCH_CORE[a]){ ic=ARCH_CORE[a][0]; sub=ARCH_CORE[a][1]; tone=ARCH_CORE[a][2]; }
+    else if(ARCH_HYB[a]){ const p=ARCH_HYB[a]; const base=ARCH_CORE[p[0]]||['','','teal'];
+      ic=base[0]; tone=base[2]; sub=p[2]+' \u00b7 '+p[0]+' + '+p[1]; }
+    else return '';
+    return '<div class="arch '+tone+'"><span class="arch-ic">'+ic+'</span>'
+         + '<span class="arch-t"><b>'+a+'</b><small>'+sub+'</small></span></div>';
+  }
 function benchInfoModal(){
   const v=S._benchView||{}; const p=v.side==='you'?S.you:S.opp; if(!p) return '';
   const ch=p.team.find(c=>c.uid===v.uid); if(!ch) return '';
@@ -5243,6 +5289,7 @@ function benchInfoModal(){
   return `<div class="modal-bg"><div class="bench-view char" data-deck="${p.setKey||''}" style="--accent:${ch.accent}">
     <div class="pc-plate"><span class="pc-name">${ch.name}</span><span class="pc-hp"><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
     <div class="bv-art">${port}${ch.fe?`<span class="fe-badge" title="1st Edition">1ST ED</span>`:''}</div>
+    ${archChip(ch)}
     ${ch.fe&&ch.passive?`<div class="bv-passive"><div class="bv-ph">Passive \u2014 ${ch.passive.name}</div><p>${ch.passive.text||''}</p></div>`:''}
     <div class="bv-move atk"><div class="bv-h"><b>${ch.atk.n}</b><span class="pc-chip red sm">${ch.atk.label||''}</span></div><p>${ch.atk.t||''}</p></div>
     <div class="bv-move blk"><div class="bv-h"><b>${ch.blk.n}</b><span class="pc-chip blue sm">${ch.blk.label||''}</span></div><p>${ch.blk.t||''}</p></div>
@@ -7445,9 +7492,11 @@ window.ABC_EXPORT = {
   expBmList:(k)=>{ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; return (b&&b.bookmarks)?b.bookmarks.map((x,i)=>({i:i,name:x.name})):[]; },
   expBmData:function(k,i){ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; const x=b&&b.bookmarks&&b.bookmarks[i]; if(!x)return null; return {kind:'bm',name:x.name,bkind:x.kind,text:x.text,rarity:this._rar(x.rarity),effect:x.effect||''}; }
 };
+try{ edBackfillArchetypes(); }catch(e){}
+
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, render, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, archChip, benchInfoModalSrc(){return benchInfoModal();}, render, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
