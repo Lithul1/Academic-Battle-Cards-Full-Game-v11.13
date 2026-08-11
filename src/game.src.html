@@ -34,7 +34,7 @@ body{
 }
 
 /* ===== UI redesign (demo_11_12): shared paper backdrop on framed screens ===== */
-:root{ --abc-bg:none; --fx-strike:url("data:image/png;base64,__ABCASSET_1024__"); --fx-crit:url("data:image/png;base64,__ABCASSET_1025__"); --fx-guard:url("data:image/png;base64,__ABCASSET_1026__"); --fx-ko:url("data:image/png;base64,__ABCASSET_1027__"); --arena-gatsby:url("data:image/jpeg;base64,__ABCASSET_1015__"); --arena-hamlet:url("data:image/jpeg;base64,__ABCASSET_1016__"); --arena-frankenstein:url("data:image/jpeg;base64,__ABCASSET_1017__"); --arena-sherlock:url("data:image/jpeg;base64,__ABCASSET_1018__"); --arena-wonderland:url("data:image/jpeg;base64,__ABCASSET_1019__"); --arena-oz:url("data:image/jpeg;base64,__ABCASSET_1020__"); --arena-city:url("data:image/jpeg;base64,__ABCASSET_1021__"); --arena-forest:url("data:image/jpeg;base64,__ABCASSET_1022__"); --arena-castle:url("data:image/jpeg;base64,__ABCASSET_1023__"); --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); --deckbg-hamlet:url("data:image/png;base64,__ABCASSET_902__"); --deckbg-frankenstein:url("data:image/png;base64,__ABCASSET_903__"); --deckbg-sherlock:url("data:image/png;base64,__ABCASSET_904__"); --deckbg-othello:url("data:image/png;base64,__ABCASSET_905__"); --deckbg-macbeth:url("data:image/png;base64,__ABCASSET_906__"); --deckbg-wonderland:url("data:image/png;base64,__ABCASSET_907__"); --deckbg-oz:url("data:image/png;base64,__ABCASSET_908__"); --deckbg-crucible:url("data:image/png;base64,__ABCASSET_901__"); --deckbg-tewwg:url("data:image/jpeg;base64,__ABCASSET_919__"); }
+:root{ --abc-bg:none; --fx-glue:url("data:image/png;base64,__ABCASSET_1028__"); --fx-highlight:url("data:image/png;base64,__ABCASSET_1029__"); --fx-siphon:url("data:image/png;base64,__ABCASSET_1030__"); --fx-yes:url("data:image/png;base64,__ABCASSET_1031__"); --fx-no:url("data:image/png;base64,__ABCASSET_1032__"); --fx-revive:url("data:image/png;base64,__ABCASSET_1033__"); --fx-strike:url("data:image/png;base64,__ABCASSET_1024__"); --fx-crit:url("data:image/png;base64,__ABCASSET_1025__"); --fx-guard:url("data:image/png;base64,__ABCASSET_1026__"); --fx-ko:url("data:image/png;base64,__ABCASSET_1027__"); --arena-gatsby:url("data:image/jpeg;base64,__ABCASSET_1015__"); --arena-hamlet:url("data:image/jpeg;base64,__ABCASSET_1016__"); --arena-frankenstein:url("data:image/jpeg;base64,__ABCASSET_1017__"); --arena-sherlock:url("data:image/jpeg;base64,__ABCASSET_1018__"); --arena-wonderland:url("data:image/jpeg;base64,__ABCASSET_1019__"); --arena-oz:url("data:image/jpeg;base64,__ABCASSET_1020__"); --arena-city:url("data:image/jpeg;base64,__ABCASSET_1021__"); --arena-forest:url("data:image/jpeg;base64,__ABCASSET_1022__"); --arena-castle:url("data:image/jpeg;base64,__ABCASSET_1023__"); --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); --deckbg-hamlet:url("data:image/png;base64,__ABCASSET_902__"); --deckbg-frankenstein:url("data:image/png;base64,__ABCASSET_903__"); --deckbg-sherlock:url("data:image/png;base64,__ABCASSET_904__"); --deckbg-othello:url("data:image/png;base64,__ABCASSET_905__"); --deckbg-macbeth:url("data:image/png;base64,__ABCASSET_906__"); --deckbg-wonderland:url("data:image/png;base64,__ABCASSET_907__"); --deckbg-oz:url("data:image/png;base64,__ABCASSET_908__"); --deckbg-crucible:url("data:image/png;base64,__ABCASSET_901__"); --deckbg-tewwg:url("data:image/jpeg;base64,__ABCASSET_919__"); }
 body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:var(--abc-bg) center/cover no-repeat; }
 /* gameplay surfaces keep their own playfield/ink look */
@@ -338,6 +338,40 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 @media (prefers-reduced-motion:reduce){ .cfx-img{animation-duration:.01ms!important} }
 body[data-calm="1"] .cfx-img{animation:cfxFade .5s ease-out both!important}
 @keyframes cfxFade{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+
+/* --- status cues: small, cornered, out of the way of the card --- */
+.cfx-cue{position:absolute;right:6px;top:6px;width:74px;height:74px;background-repeat:no-repeat;
+  background-position:center;background-size:contain;pointer-events:none;opacity:0;
+  animation:cfxCue 1.2s ease-out both}
+.cfx-cue.glue{background-image:var(--fx-glue)}
+.cfx-cue.highlight{background-image:var(--fx-highlight)}
+.cfx-cue.siphon{background-image:var(--fx-siphon)}
+@keyframes cfxCue{0%{opacity:0;transform:scale(.4) rotate(-12deg)}
+ 25%{opacity:1;transform:scale(1.12) rotate(5deg)}
+ 40%{transform:scale(1) rotate(-3deg)}
+ 55%{transform:scale(1.02) rotate(2deg)}
+ 75%{opacity:1;transform:scale(1) rotate(0)}
+ 100%{opacity:0;transform:scale(1.04) translateY(-8px)}}
+.cfx-img.revive{background-image:var(--fx-revive);animation:cfxRevive 1.4s ease-out both}
+@keyframes cfxRevive{0%{opacity:0;transform:translate(-50%,-38%) scale(.5)}
+ 28%{opacity:1;transform:translate(-50%,-52%) scale(1.1)}
+ 45%{transform:translate(-50%,-50%) scale(1)}
+ 75%{opacity:1;transform:translate(-50%,-50%) scale(1.02)}
+ 100%{opacity:0;transform:translate(-50%,-58%) scale(1.05)}}
+/* --- trivia: a stamp coming down on the question, not on a character --- */
+.tri-stamp{position:absolute;left:50%;top:50%;width:118px;height:118px;z-index:9;}
+.tri-stamp.fixed{position:fixed;left:50%;top:46%;width:132px;height:132px;z-index:999;
+  background-repeat:no-repeat;background-position:center;background-size:contain;pointer-events:none;
+  opacity:0;animation:cfxStamp .95s ease-out both}
+.tri-stamp.yes{background-image:var(--fx-yes)}
+.tri-stamp.no{background-image:var(--fx-no)}
+@keyframes cfxStamp{0%{opacity:0;transform:translate(-50%,-50%) scale(1.8) rotate(-14deg)}
+ 30%{opacity:1;transform:translate(-50%,-50%) scale(.94) rotate(4deg)}
+ 45%{transform:translate(-50%,-50%) scale(1.04) rotate(-2deg)}
+ 70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}
+ 100%{opacity:0;transform:translate(-50%,-50%) scale(1.06)}}
+body[data-calm="1"] .cfx-cue,body[data-calm="1"] .tri-stamp{animation:cfxFade .5s ease-out both!important}
+@media (prefers-reduced-motion:reduce){ .cfx-cue,.tri-stamp{animation-duration:.01ms!important} }
 /* --- discard / retry UI (must stay outside any @media) --- */
 /* --- Index prompt + dev menu (must stay outside any @media) --- */
 .idx{background:var(--cream);border:3.5px solid var(--ink);border-radius:12px;padding:14px 16px;width:min(330px,92vw);
@@ -3735,7 +3769,7 @@ function playBookmark(side,idx){
         P.hand.filter(c=>c!==card).slice(0,3).forEach(c=>{ const i=P.hand.indexOf(c); if(i>=0){P.hand.splice(i,1);P.discard.push(c);} });
         const gi=P.grave.indexOf(g); if(gi>=0) P.grave.splice(gi,1);
         g.hp=Math.max(10,Math.round(g.maxHp/2)); g.atkCharge=[];g.blkCharge=[];g.status={};
-        if(!P.team.includes(g)) P.team.push(g); pushLog(`${who(P)} used Defibrillator — ${g.name} returns at ${g.hp} HP.`); commit(); render();
+        if(!P.team.includes(g)) P.team.push(g); pushLog(`${who(P)} used Defibrillator — ${g.name} returns at ${g.hp} HP.`); try{ fxRevive(P===S.you?'you':'opp'); }catch(e){} commit(); render();
       };
       if(isYou && P.grave.length>1) askPick('Revive which character?', P.grave.map(g=>({label:g.name,val:g.uid})), uid=>go(P.grave.find(g=>g.uid===uid)));
       else go(P.grave[0]);
@@ -4313,6 +4347,15 @@ function overlordTurn(){
 function openTrivia(card,handIdx,targetUid){ busy=true; S.pending={card,handIdx,target:targetUid}; try{SFX.card('book_flip',0.7);}catch(e){} render(); }
 // Iterum Probare — a wrong answer can be bought back with a card from hand.
 // Fires before the ABC is discarded and before the attach is spent.
+function triviaStamp(ok){
+  // Attaches to <body>, not to the trivia panel — answerTrivia re-renders
+  // immediately after, which would destroy anything inside the panel.
+  if(typeof document==='undefined') return;
+  const el=document.createElement('div');
+  el.className='tri-stamp fixed '+(ok?'yes':'no');
+  document.body.appendChild(el);
+  setTimeout(function(){ try{ el.remove(); }catch(e){} }, 1000);
+}
 function ipCost(side){ const a=active(S[side]); return (a && a.status && a.status.smudge) ? 2 : 1; }
 function ipOffer(side,pend,choice){
   const P=S[side];
@@ -4345,6 +4388,7 @@ function ipDecline(){
 function answerTrivia(choice,skipRetry){
   const pend=S.pending; if(!pend) return;
   const correct=choice===pend.card.ans;
+  try{ triviaStamp(correct); }catch(e){}
   if(!correct && !skipRetry && ipOffer('you',pend,choice)){
     S.pending=null; busy=false;
     S._ip={side:'you',pend,choice,picks:[]};
@@ -5168,12 +5212,18 @@ function fxAt(side, html, dur){
 }
 function cfxHurt(side,dmg){ if(typeof document==='undefined'||!side) return; const big=dmg>=40, bigShake=dmg>=55; requestAnimationFrame(function(){ const el=document.querySelector('.char.'+side); if(el&&el.classList){ el.classList.remove('cfx-hurt','cfx-crit'); void el.offsetWidth; el.classList.add(big?'cfx-crit':'cfx-hurt'); setTimeout(function(){ try{el.classList.remove('cfx-hurt','cfx-crit');}catch(e){} },420); } const board=document.querySelector('.board'); if(board&&board.classList){ board.classList.remove('cfx-shake','cfx-shake-big'); void board.offsetWidth; board.classList.add(bigShake?'cfx-shake-big':'cfx-shake'); setTimeout(function(){ try{board.classList.remove('cfx-shake','cfx-shake-big');}catch(e){} },470); } }); }
 function fxHpTrails(){ if(typeof document==='undefined') return; document.querySelectorAll('.pc-hp').forEach(bar=>{ const u=bar.querySelector('u'), i=bar.querySelector('i'); if(u&&i&&u.style.width!==i.style.width){ requestAnimationFrame(()=>{ try{u.style.width=i.style.width;}catch(e){} }); } }); }
-function fxAttack(side,dmg){ try{SFX.attack();}catch(e){} cfxHurt(side,dmg); const big=dmg>=40; fxAt(side, `<div class="cfx-ring atk"></div><div class="cfx-img ${big?'crit':'strike'}"></div><div class="cfx-float atk${big?' crit':''}">${big?('\u2212'+dmg+'!'):('\u2694 \u2212'+dmg)}</div>`, big?1100:1000); }
+function fxAttack(side,dmg){ try{SFX.attack();}catch(e){} cfxHurt(side,dmg); const big=dmg>=40;                 // keeps the crit styling on the damage number
+  const huge=dmg>=60;                // the cleaver is reserved for a genuinely big hit
+  fxAt(side, `<div class="cfx-ring atk"></div><div class="cfx-img ${huge?'crit':'strike'}"></div><div class="cfx-float atk${big?' crit':''}">${big?('\u2212'+dmg+'!'):('\u2694 \u2212'+dmg)}</div>`, huge?1100:1000); }
 function fxDmgNum(side,dmg){ cfxHurt(side,dmg); fxAt(side, `<div class="cfx-float atk">\u2694 \u2212${dmg}</div>`, 1000); }
 function fxBlock(side,amt){ try{SFX.block();}catch(e){} fxAt(side, `<div class="cfx-ring blk"></div><div class="cfx-img guard"></div><div class="cfx-float blk">⛊ ${amt>0?('−'+amt):'Negated'}</div>`, 1100); }
 function fxKO(side,name){ fxAt(side, `<div class="cfx-img ko"></div>`, 1600); }
 function fxHeal(side,amt){ if(amt>0){ try{SFX.heal();}catch(e){} fxAt(side, `<div class="cfx-ring heal"></div><div class="cfx-float heal">✚ +${amt}</div>`, 1100); } }
-function fxStatus(side,label,kind){ try{SFX.status(kind);}catch(e){} fxAt(side, `<div class="cfx-float status ${kind||''}">✦ ${label}</div>`, 1050); }
+const CUE_ART={'glue':'glue','highlight':'highlight','siphon':'siphon'};
+function fxStatus(side,label,kind){ try{SFX.status(kind);}catch(e){}
+  const art=CUE_ART[String(label||'').toLowerCase().replace(/\s+/g,'')];
+  fxAt(side, `${art?`<div class="cfx-cue ${art}"></div>`:''}<div class="cfx-float status ${kind||''}">✦ ${label}</div>`, art?1250:1050); }
+function fxRevive(side){ fxAt(side, `<div class="cfx-img revive"></div>`, 1500); }
 function bossRevealModal(){
   const id=S._bossReveal, b=SCRIM_BOSSES[id]; if(!b) return '';
   const img=((window.ABC_BOSS_IMG)||{})[id]||'';
@@ -7543,7 +7593,7 @@ try{ edBackfillArchetypes(); }catch(e){}
 
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, archChip, benchInfoModalSrc(){return benchInfoModal();}, fxAttack, fxBlock, fxKO, get checkKOSrc(){return checkKO.toString();}, buildCharPreviewSrc(){const c=DATA.characters.hamlet.find(x=>x.id==="hamlet"); return buildCharPreview(c,"hamlet");}, render, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, archChip, benchInfoModalSrc(){return benchInfoModal();}, fxAttack, fxBlock, fxKO, fxStatus, fxRevive, triviaStamp, get checkKOSrc(){return checkKO.toString();}, buildCharPreviewSrc(){const c=DATA.characters.hamlet.find(x=>x.id==="hamlet"); return buildCharPreview(c,"hamlet");}, render, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
