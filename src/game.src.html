@@ -34,7 +34,7 @@ body{
 }
 
 /* ===== UI redesign (demo_11_12): shared paper backdrop on framed screens ===== */
-:root{ --abc-bg:none; --arena-gatsby:url("data:image/jpeg;base64,__ABCASSET_1015__"); --arena-hamlet:url("data:image/jpeg;base64,__ABCASSET_1016__"); --arena-frankenstein:url("data:image/jpeg;base64,__ABCASSET_1017__"); --arena-sherlock:url("data:image/jpeg;base64,__ABCASSET_1018__"); --arena-wonderland:url("data:image/jpeg;base64,__ABCASSET_1019__"); --arena-oz:url("data:image/jpeg;base64,__ABCASSET_1020__"); --arena-city:url("data:image/jpeg;base64,__ABCASSET_1021__"); --arena-forest:url("data:image/jpeg;base64,__ABCASSET_1022__"); --arena-castle:url("data:image/jpeg;base64,__ABCASSET_1023__"); --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); --deckbg-hamlet:url("data:image/png;base64,__ABCASSET_902__"); --deckbg-frankenstein:url("data:image/png;base64,__ABCASSET_903__"); --deckbg-sherlock:url("data:image/png;base64,__ABCASSET_904__"); --deckbg-othello:url("data:image/png;base64,__ABCASSET_905__"); --deckbg-macbeth:url("data:image/png;base64,__ABCASSET_906__"); --deckbg-wonderland:url("data:image/png;base64,__ABCASSET_907__"); --deckbg-oz:url("data:image/png;base64,__ABCASSET_908__"); --deckbg-crucible:url("data:image/png;base64,__ABCASSET_901__"); --deckbg-tewwg:url("data:image/jpeg;base64,__ABCASSET_919__"); }
+:root{ --abc-bg:none; --fx-strike:url("data:image/png;base64,__ABCASSET_1024__"); --fx-crit:url("data:image/png;base64,__ABCASSET_1025__"); --fx-guard:url("data:image/png;base64,__ABCASSET_1026__"); --fx-ko:url("data:image/png;base64,__ABCASSET_1027__"); --arena-gatsby:url("data:image/jpeg;base64,__ABCASSET_1015__"); --arena-hamlet:url("data:image/jpeg;base64,__ABCASSET_1016__"); --arena-frankenstein:url("data:image/jpeg;base64,__ABCASSET_1017__"); --arena-sherlock:url("data:image/jpeg;base64,__ABCASSET_1018__"); --arena-wonderland:url("data:image/jpeg;base64,__ABCASSET_1019__"); --arena-oz:url("data:image/jpeg;base64,__ABCASSET_1020__"); --arena-city:url("data:image/jpeg;base64,__ABCASSET_1021__"); --arena-forest:url("data:image/jpeg;base64,__ABCASSET_1022__"); --arena-castle:url("data:image/jpeg;base64,__ABCASSET_1023__"); --deckbg-gatsby:url("data:image/png;base64,__ABCASSET_900__"); --deckbg-hamlet:url("data:image/png;base64,__ABCASSET_902__"); --deckbg-frankenstein:url("data:image/png;base64,__ABCASSET_903__"); --deckbg-sherlock:url("data:image/png;base64,__ABCASSET_904__"); --deckbg-othello:url("data:image/png;base64,__ABCASSET_905__"); --deckbg-macbeth:url("data:image/png;base64,__ABCASSET_906__"); --deckbg-wonderland:url("data:image/png;base64,__ABCASSET_907__"); --deckbg-oz:url("data:image/png;base64,__ABCASSET_908__"); --deckbg-crucible:url("data:image/png;base64,__ABCASSET_901__"); --deckbg-tewwg:url("data:image/jpeg;base64,__ABCASSET_919__"); }
 body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:var(--abc-bg) center/cover no-repeat; }
 /* gameplay surfaces keep their own playfield/ink look */
@@ -302,6 +302,42 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .arch.sm .arch-ic{font-size:13px}
 .arch.sm .arch-t b{font-size:11px}
 .arch.sm .arch-t small{font-size:9.5px;color:#c9b58a}
+
+/* --- hand-drawn battle effects: a sprite over the tile, four cheap movements --- */
+.cfx-img{position:absolute;left:50%;top:50%;width:118%;height:118%;transform:translate(-50%,-50%);
+  background-repeat:no-repeat;background-position:center;background-size:contain;pointer-events:none;opacity:0}
+.cfx-img.strike{background-image:var(--fx-strike);animation:cfxPunch .55s cubic-bezier(.2,1.5,.4,1) both}
+.cfx-img.crit{background-image:var(--fx-crit);animation:cfxSwipe .6s ease-out both}
+.cfx-img.guard{background-image:var(--fx-guard);animation:cfxGuard .75s ease-out both}
+.cfx-img.ko{background-image:var(--fx-ko);width:132%;height:132%;animation:cfxKo 1.5s ease-out both}
+@keyframes cfxPunch{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(-14deg)}
+ 35%{opacity:1;transform:translate(-50%,-50%) scale(1.12) rotate(4deg)}
+ 50%{transform:translate(-50%,-50%) scale(.98) rotate(-2deg)}
+ 70%{opacity:1;transform:translate(-50%,-50%) scale(1.02) rotate(0)}
+ 100%{opacity:0;transform:translate(-50%,-50%) scale(1.06)}}
+@keyframes cfxSwipe{0%{opacity:0;transform:translate(-120%,-50%) rotate(-30deg) scale(.9)}
+ 30%{opacity:1}
+ 60%{opacity:1;transform:translate(-42%,-50%) rotate(8deg) scale(1.05)}
+ 100%{opacity:0;transform:translate(-26%,-50%) rotate(14deg) scale(1)}}
+@keyframes cfxGuard{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+ 25%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+ 38%{transform:translate(-53%,-50%) scale(1)}
+ 50%{transform:translate(-47%,-50%) scale(1)}
+ 62%{transform:translate(-52%,-50%) scale(1)}
+ 74%{transform:translate(-49%,-50%) scale(1)}
+ 86%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+ 100%{opacity:0;transform:translate(-50%,-50%) scale(1.02)}}
+@keyframes cfxKo{0%{opacity:0;transform:translate(-50%,-84%) scale(.7) rotate(-8deg)}
+ 22%{opacity:1;transform:translate(-50%,-47%) scale(1.06) rotate(3deg)}
+ 34%{transform:translate(-50%,-50%) scale(1) rotate(-3deg)}
+ 46%{transform:translate(-50%,-50%) scale(1) rotate(2deg)}
+ 58%{transform:translate(-50%,-50%) scale(1) rotate(-1deg)}
+ 70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}
+ 100%{opacity:0;transform:translate(-50%,-58%) scale(1.04)}}
+/* Reduce motion: show the drawing, skip the movement */
+@media (prefers-reduced-motion:reduce){ .cfx-img{animation-duration:.01ms!important} }
+body[data-calm="1"] .cfx-img{animation:cfxFade .5s ease-out both!important}
+@keyframes cfxFade{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
 /* --- discard / retry UI (must stay outside any @media) --- */
 /* --- Index prompt + dev menu (must stay outside any @media) --- */
 .idx{background:var(--cream);border:3.5px solid var(--ink);border-radius:12px;padding:14px 16px;width:min(330px,92vw);
@@ -4064,6 +4100,7 @@ function checkKO(p,side){
     if(S.scrim && SCRIM.kit==='gothic' && side==='you' && !S._galvanicUsed){ S._galvanicUsed=true; a.hp=Math.max(1,Math.round(a.maxHp*0.25)); pushLog('Galvanic Spark \u2014 '+a.name+' is reanimated at 25% HP!'); if(typeof toast==='function') toast('Galvanic Spark!'); render(); return; }
     if(S.scrim && SCRIM.kit==='macbeth' && side==='opp'){ SCRIM._ambition=Math.min(10,(SCRIM._ambition||0)+1); pushLog('Vaulting Ambition \u2014 your team grows stronger (+'+(SCRIM._ambition*5)+'% damage).'); }
     spawnKO(side, a.name);
+    try{ fxKO(side, a.name); }catch(e){}
     if(!p.grave.includes(a)) p.grave.push(a);
     const attacker=foeOf(side); attacker.kos++;
     pushLog(`${a.name} is knocked out!`);
@@ -5121,6 +5158,7 @@ const STATUS_NAME={tear:'Tear',rip:'Rip',glue:'Glue',spill:'Spill',burn:'Burn',s
 function statusName(k){ return STATUS_NAME[k]||k; }
 function sideOfChar(c){ if(!S||!c) return null; if(S.you.team.some(x=>x.uid===c.uid)) return 'you'; if(S.opp.team.some(x=>x.uid===c.uid)) return 'opp'; return null; }
 function fxAt(side, html, dur){
+  try{ if(window.ABC_DEBUG) window.ABC_DEBUG._lastFx={side:side,html:html}; }catch(e){}
   if(typeof document==='undefined'||!side) return;
   const el=document.querySelector('.char.'+side); if(!el||!el.getBoundingClientRect) return;
   const r=el.getBoundingClientRect(); if(!r.width) return;
@@ -5130,9 +5168,10 @@ function fxAt(side, html, dur){
 }
 function cfxHurt(side,dmg){ if(typeof document==='undefined'||!side) return; const big=dmg>=40, bigShake=dmg>=55; requestAnimationFrame(function(){ const el=document.querySelector('.char.'+side); if(el&&el.classList){ el.classList.remove('cfx-hurt','cfx-crit'); void el.offsetWidth; el.classList.add(big?'cfx-crit':'cfx-hurt'); setTimeout(function(){ try{el.classList.remove('cfx-hurt','cfx-crit');}catch(e){} },420); } const board=document.querySelector('.board'); if(board&&board.classList){ board.classList.remove('cfx-shake','cfx-shake-big'); void board.offsetWidth; board.classList.add(bigShake?'cfx-shake-big':'cfx-shake'); setTimeout(function(){ try{board.classList.remove('cfx-shake','cfx-shake-big');}catch(e){} },470); } }); }
 function fxHpTrails(){ if(typeof document==='undefined') return; document.querySelectorAll('.pc-hp').forEach(bar=>{ const u=bar.querySelector('u'), i=bar.querySelector('i'); if(u&&i&&u.style.width!==i.style.width){ requestAnimationFrame(()=>{ try{u.style.width=i.style.width;}catch(e){} }); } }); }
-function fxAttack(side,dmg){ try{SFX.attack();}catch(e){} cfxHurt(side,dmg); const big=dmg>=40; fxAt(side, `<div class="cfx-ring atk"></div><div class="cfx-slash"></div><div class="cfx-float atk${big?' crit':''}">${big?('\u2212'+dmg+'!'):('\u2694 \u2212'+dmg)}</div>`, 1000); }
+function fxAttack(side,dmg){ try{SFX.attack();}catch(e){} cfxHurt(side,dmg); const big=dmg>=40; fxAt(side, `<div class="cfx-ring atk"></div><div class="cfx-img ${big?'crit':'strike'}"></div><div class="cfx-float atk${big?' crit':''}">${big?('\u2212'+dmg+'!'):('\u2694 \u2212'+dmg)}</div>`, big?1100:1000); }
 function fxDmgNum(side,dmg){ cfxHurt(side,dmg); fxAt(side, `<div class="cfx-float atk">\u2694 \u2212${dmg}</div>`, 1000); }
-function fxBlock(side,amt){ try{SFX.block();}catch(e){} fxAt(side, `<div class="cfx-ring blk"></div><div class="cfx-float blk">⛊ ${amt>0?('−'+amt):'Negated'}</div>`, 1000); }
+function fxBlock(side,amt){ try{SFX.block();}catch(e){} fxAt(side, `<div class="cfx-ring blk"></div><div class="cfx-img guard"></div><div class="cfx-float blk">⛊ ${amt>0?('−'+amt):'Negated'}</div>`, 1100); }
+function fxKO(side,name){ fxAt(side, `<div class="cfx-img ko"></div>`, 1600); }
 function fxHeal(side,amt){ if(amt>0){ try{SFX.heal();}catch(e){} fxAt(side, `<div class="cfx-ring heal"></div><div class="cfx-float heal">✚ +${amt}</div>`, 1100); } }
 function fxStatus(side,label,kind){ try{SFX.status(kind);}catch(e){} fxAt(side, `<div class="cfx-float status ${kind||''}">✦ ${label}</div>`, 1050); }
 function bossRevealModal(){
@@ -7504,7 +7543,7 @@ try{ edBackfillArchetypes(); }catch(e){}
 
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, archChip, benchInfoModalSrc(){return benchInfoModal();}, buildCharPreviewSrc(){const c=DATA.characters.hamlet.find(x=>x.id==="hamlet"); return buildCharPreview(c,"hamlet");}, render, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, archChip, benchInfoModalSrc(){return benchInfoModal();}, fxAttack, fxBlock, fxKO, get checkKOSrc(){return checkKO.toString();}, buildCharPreviewSrc(){const c=DATA.characters.hamlet.find(x=>x.id==="hamlet"); return buildCharPreview(c,"hamlet");}, render, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
