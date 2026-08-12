@@ -379,8 +379,7 @@ body[data-calm="1"] .cfx-cue,body[data-calm="1"] .tri-stamp{animation:cfxFade .5
   background:#fbf3dd;border:2px solid var(--ink);border-radius:9px;padding:3px 9px;color:var(--ink);
   box-shadow:0 2px 0 rgba(40,25,12,.35)}
 .cur-chip b{font-family:var(--disp);font-size:12px}
-.vtab-cur{margin-left:auto;padding:4px 8px;display:flex;align-items:center}
-.vtabs{align-items:center}
+.shop-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .run-deck-btn{font:inherit;color:inherit;background:#fbf3dd;border:2px solid var(--ink);border-radius:8px;
   padding:2px 9px;cursor:pointer;box-shadow:0 2px 0 rgba(40,25,12,.35)}
 .run-deck-btn:hover{background:var(--gold)}
@@ -7601,8 +7600,7 @@ function scrimRunDeckScreen(){
   const tab=SCRIM._deckTab||'deck';
   const TABS=[['deck','Run Deck'],['team','Team'],['art','Artifacts']];
   const tabBtns='<button class="vtab back" data-scrim="deckback">\u2039 Map</button>'+
-    TABS.map(function(t){ return '<button class="vtab '+(tab===t[0]?'on':'')+'" data-scrim="dtab:'+t[0]+'">'+t[1]+'</button>'; }).join('')+
-    '<span class="vtab-cur">'+scrimCurrencyStrip()+'</span>';
+    TABS.map(function(t){ return '<button class="vtab '+(tab===t[0]?'on':'')+'" data-scrim="dtab:'+t[0]+'">'+t[1]+'</button>'; }).join('');
   const chip=function(cls,lab,nm,val){
     return '<div class="dk-c"><i class="'+cls+'">'+lab+'</i><b>'+nm+'</b>'+(val?'<s>'+val+'</s>':'')+'</div>';
   };
@@ -7617,7 +7615,7 @@ function scrimRunDeckScreen(){
     });
     const bms=(d.bm||[]).map(function(i){ const b=DATA.bookmarks[i]; return b?chip('m',(b.rarity||'C').charAt(0),b.name,''):''; });
     const crs=(d.cr||[]).map(function(i){ const x=DATA.crits[i]; return x?chip('c','L',x.name,''):''; });
-    panel='<div class="vtitle"><span>\ud83d\udcda Run Deck</span></div>'
+    panel='<div class="vtitle shop-head"><span>\ud83d\udcda Run Deck</span>'+scrimCurrencyStrip()+'</div>'
       +'<div class="dk-sum"><span>'+c.total+' cards</span><span>\u2694 '+c.atk+' attack</span>'
       +'<span>\u26ca '+c.blk+' block</span><span>\u2726 '+c.bm+' bookmarks</span><span>\u25c6 '+c.cr+' lenses</span></div>'
       +(atk.length?'<div class="dk-sec">\u2694 Attack \u00b7 '+atk.length+'</div><div class="dk-grid">'+atk.join('')+'</div>':'')
@@ -7634,12 +7632,12 @@ function scrimRunDeckScreen(){
       const dead=t.curHp<=0;
       return '<div class="dk-c'+(dead?' gone':'')+'"><i class="t">'+(dead?'\u2620':t.curHp)+'</i><b>'+nm+'</b><s>'+ar+'</s></div>';
     });
-    panel='<div class="vtitle"><span>\ud83c\udfad Team</span></div><div class="dk-grid">'+(rows.join('')||'<p>No team.</p>')+'</div>';
+    panel='<div class="vtitle shop-head"><span>\ud83c\udfad Team</span>'+scrimCurrencyStrip()+'</div><div class="dk-grid">'+(rows.join('')||'<p>No team.</p>')+'</div>';
   } else {
     const rows=((SCRIM.artifacts)||[]).map(function(id){
       const A=SCRIM_ART[id]; return A?'<div class="dk-c"><i class="c">'+A.ic+'</i><b>'+A.name+'</b><s>'+A.tier+'</s></div>':'';
     });
-    panel='<div class="vtitle"><span>\u2728 Artifacts</span></div><div class="dk-grid">'+(rows.join('')||'<p class="scrim-intro-copy">None yet.</p>')+'</div>';
+    panel='<div class="vtitle shop-head"><span>\u2728 Artifacts</span>'+scrimCurrencyStrip()+'</div><div class="dk-grid">'+(rows.join('')||'<p class="scrim-intro-copy">None yet.</p>')+'</div>';
   }
   return '<div class="scrim-wrap scrim-ink"><div class="scrim-folder"><div class="vtabs">'+tabBtns+'</div><div class="vbody">'+panel+'</div></div></div>';
 }
@@ -7658,7 +7656,7 @@ function scrimVaultShell(){
     default: panel=scrimVProfile();
   }
   return `<div class="scrim-wrap scrim-ink"><div class="scrim-folder">
-    <div class="vtabs">${tabBtns}<span class="vtab-cur">${scrimCurrencyStrip()}</span></div>
+    <div class="vtabs">${tabBtns}</div>
     <div class="vbody">${panel}</div>
   </div></div>`;
 }
@@ -7683,7 +7681,7 @@ function scrimVShop(){
     const click=have&&!locked?` data-scrim="perk:${id}"`:'';
     return `<span class="vault-perkwrap"><button class="${cls}"${click}>${p.ic} ${have?p.name:'???'}${p.tenured?' <small class="ten">HONORS</small>':''}${on?' \u2713':''}</button><button class="vault-info" data-scrim="perkinfo:${id}" title="What does this do?">\u2139</button></span>`;
   }).join('');
-  return `<div class="scrim-title sm vault-tabtitle">\ud83c\udfdb Shop</div>
+  return `<div class="scrim-title sm vault-tabtitle shop-head">\ud83c\udfdb Shop ${scrimCurrencyStrip()}</div>
     <div class="vault-sec"><div class="vault-h">\ud83d\udce6 Booster Packs</div>
       <div class="vault-row"><div style="display:flex;align-items:center;gap:10px;flex:1">${PA.silver?`<img class="vault-packimg" src="${PA.silver}" alt="">`:''}<div class="vault-nm">First Edition Portfolio <small>5 cards \u00b7 IP bundles, a Standing Order, and a Commander chase (60% + pity every 3rd).</small></div></div>
         <button class="vault-buy" data-scrim="pack:silver">50 IP</button></div>
