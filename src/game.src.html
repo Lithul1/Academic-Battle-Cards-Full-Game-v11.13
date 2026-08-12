@@ -372,6 +372,41 @@ body[data-calm="1"] .cfx-img{animation:cfxFade .5s ease-out both!important}
  100%{opacity:0;transform:translate(-50%,-50%) scale(1.06)}}
 body[data-calm="1"] .cfx-cue,body[data-calm="1"] .tri-stamp{animation:cfxFade .5s ease-out both!important}
 @media (prefers-reduced-motion:reduce){ .cfx-cue,.tri-stamp{animation-duration:.01ms!important} }
+
+/* --- Scrimmage UI: currency strip, draft info, run deck (outside any @media) --- */
+.cur-strip{display:inline-flex;gap:7px;flex-wrap:wrap;align-items:center}
+.cur-chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--cond);font-size:11.5px;letter-spacing:.6px;
+  background:#fbf3dd;border:2px solid var(--ink);border-radius:9px;padding:3px 9px;color:var(--ink);
+  box-shadow:0 2px 0 rgba(40,25,12,.35)}
+.cur-chip b{font-family:var(--disp);font-size:12px}
+.vtab-cur{margin-left:auto;padding:4px 8px;display:flex;align-items:center}
+.vtabs{align-items:center}
+.run-deck-btn{font:inherit;color:inherit;background:#fbf3dd;border:2px solid var(--ink);border-radius:8px;
+  padding:2px 9px;cursor:pointer;box-shadow:0 2px 0 rgba(40,25,12,.35)}
+.run-deck-btn:hover{background:var(--gold)}
+.draft-wrap{position:relative;display:flex}
+.draft-wrap .draft-card{flex:1}
+.dc-i{position:absolute;top:7px;right:7px;width:24px;height:24px;border-radius:50%;border:2px solid var(--ink);
+  background:#fbf3dd;font-family:var(--disp);font-size:11px;display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 2px 0 rgba(40,25,12,.4);z-index:3;color:var(--ink)}
+.dc-i:hover{background:var(--gold)}
+.dc-syn{background:#eef6ee;border:2px dashed #2f7d5c;border-radius:8px;padding:8px 10px;margin-top:8px;
+  font-size:11.5px;line-height:1.5;color:#241F1B}
+.dc-syn b{font-family:var(--cond);letter-spacing:.8px;text-transform:uppercase;font-size:10.5px;color:#2f7d5c;display:block;margin-bottom:2px}
+.dk-sum{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.dk-sum span{font-family:var(--cond);font-size:11px;letter-spacing:.6px;background:#fbf3dd;border:2px solid var(--ink);
+  border-radius:9px;padding:3px 9px;color:var(--ink)}
+.dk-sec{font-family:var(--cond);letter-spacing:1.1px;text-transform:uppercase;font-size:12px;color:#8a6a1a;
+  margin:12px 0 6px;border-bottom:1px dashed #c9b58a;padding-bottom:3px}
+.dk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:6px}
+.dk-c{display:flex;gap:6px;align-items:center;background:#fbf3dd;border:2px solid var(--ink);border-radius:7px;
+  padding:4px 7px;font-size:11px;color:var(--ink)}
+.dk-c i{font-family:var(--disp);font-size:10px;font-style:normal;color:#fff;border-radius:4px;padding:2px 5px;flex:none;min-width:20px;text-align:center}
+.dk-c i.a{background:var(--red)}.dk-c i.b{background:var(--teal)}.dk-c i.m{background:#6B4E8A}
+.dk-c i.c{background:var(--gold-dk)}.dk-c i.t{background:#2a2a2a}
+.dk-c b{flex:1;font-weight:400;font-family:var(--cond);letter-spacing:.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dk-c s{text-decoration:none;font-family:var(--cond);font-size:9.5px;color:#7a6a4a;flex:none}
+.dk-c.gone{opacity:.5}
 /* --- discard / retry UI (must stay outside any @media) --- */
 /* --- Index prompt + dev menu (must stay outside any @media) --- */
 .idx{background:var(--cream);border:3.5px solid var(--ink);border-radius:12px;padding:14px 16px;width:min(330px,92vw);
@@ -6908,7 +6943,11 @@ function handleScrim(cmd){
     else if(a==='healall'){ const _h=Math.round(20*honorsMods().healMul); SCRIM.team.forEach(t=>{ if(t.curHp>0) t.curHp=Math.min(t.maxHp,t.curHp+_h); }); }
     else if(a==='revive'){ const dead=SCRIM.team.filter(t=>t.curHp<=0); if(dead.length){ dead[0].curHp=Math.round(dead[0].maxHp*0.5); } }
     SCRIM.view='map'; render(); scrimSave(); return; }
-  if(op==='draftpick'){ try{SFX.card('pack_take',0.75);}catch(e){} const k=+a; const ref=SCRIM.draft&&SCRIM.draft[k]; if(ref){ if(ref.t==='art'){ if(SCRIM.artifacts.indexOf(ref.id)<0){ SCRIM.artifacts.push(ref.id); scrimArtOnGain(ref.id); toast('Artifact acquired: '+SCRIM_ART[ref.id].name); } } else if(ref.t==='ab') SCRIM.deck.ab.push({d:ref.d,i:ref.i}); else if(ref.t==='bm') SCRIM.deck.bm.push(ref.i); else SCRIM.deck.cr.push(ref.i); } SCRIM.draft=null; SCRIM.view='map'; render(); scrimSave(); return; }
+  if(op==='draftinfo'){ const k=+a; SCRIM._draftInfo=(SCRIM._draftInfo===k)?null:k; render(); return; }
+  if(op==='rundeck'){ SCRIM._back=SCRIM.view; SCRIM.view='rundeck'; SCRIM._deckTab='deck'; render(); return; }
+  if(op==='deckback'){ SCRIM.view=SCRIM._back||'map'; render(); return; }
+  if(op==='dtab'){ SCRIM._deckTab=a; render(); return; }
+  if(op==='draftpick'){ SCRIM._draftInfo=null; try{SFX.card('pack_take',0.75);}catch(e){} const k=+a; const ref=SCRIM.draft&&SCRIM.draft[k]; if(ref){ if(ref.t==='art'){ if(SCRIM.artifacts.indexOf(ref.id)<0){ SCRIM.artifacts.push(ref.id); scrimArtOnGain(ref.id); toast('Artifact acquired: '+SCRIM_ART[ref.id].name); } } else if(ref.t==='ab') SCRIM.deck.ab.push({d:ref.d,i:ref.i}); else if(ref.t==='bm') SCRIM.deck.bm.push(ref.i); else SCRIM.deck.cr.push(ref.i); } SCRIM.draft=null; SCRIM.view='map'; render(); scrimSave(); return; }
   if(op==='draftskip'){ SCRIM.draft=null; SCRIM.view='map'; render(); scrimSave(); return; }
   if(op==='bossrewardpick'){ const k=+a; const feid=SCRIM.bossReward&&SCRIM.bossReward[k]; if(feid){ const fd=firstedById(feid); if(fd){ const mx=fd.hp||90; SCRIM.team.push({fe:true,id:feid,deck:fd.deck,curHp:mx,maxHp:mx}); if((META.commanders||[]).indexOf(feid)<0){ META.commanders.push(feid); metaSave(); toast('Commander recruited & added to your Library: '+fd.name); } else toast('Commander recruited: '+fd.name); try{SFX.card('pack_take',0.75);}catch(e){} } } scrimAdvanceAct(); return; }
   if(op==='bossrewardskip'){ scrimAdvanceAct(); return; }
@@ -7084,7 +7123,8 @@ function scrimScreen(){
     case 'event': return scrimEventScreen();
     case 'doctoralchoice': return scrimDoctoralChoiceScreen();
     case 'corruptedreward': return scrimCorruptedRewardScreen();
-    case 'shop': return scrimVaultShell();
+    case 'rundeck': return scrimRunDeckScreen();
+      case 'shop': return scrimVaultShell();
     case 'dead': return scrimDeadScreen();
     default: return scrimVaultShell();
   }
@@ -7168,7 +7208,7 @@ function scrimMapScreen(){
         <div class="guide-legend">${legend}</div>
         <div class="guide-run">
           <div>Run <b>${kit}</b></div><div>${SCRIM.doctoral?('Semester <b>'+(SCRIM.semester||1)+'</b>'):('Act <b>'+SCRIM.act+'</b>')}</div>
-          <div>Deck <b>${deckN}</b></div><div>IP <b>\ud83e\udde0 ${META.ip||0}</b></div><div>Fees <b>\ud83d\udcb3 ${SCRIM.lf||0}</b></div>${(SCRIM.honors||0)>0?`<div>\ud83c\udf93 <b>${HONORS[SCRIM.honors].short}${honorsMods().permadeath?' \u2620':''}</b></div>`:''}
+          <div><button class="run-deck-btn" data-scrim="rundeck" title="See everything you have collected this run">Deck <b>${deckN}</b> \u203a</button></div><div>IP <b>\ud83e\udde0 ${META.ip||0}</b></div><div>Fees <b>\ud83d\udcb3 ${SCRIM.lf||0}</b></div>${(SCRIM.honors||0)>0?`<div>\ud83c\udf93 <b>${HONORS[SCRIM.honors].short}${honorsMods().permadeath?' \u2620':''}</b></div>`:''}
         </div>
       </div>
       <div class="smap-spiral" aria-hidden="true"></div>
@@ -7197,6 +7237,55 @@ function scrimDrawConnectors(){
   svg.style.width=wrap.width+'px'; svg.style.height=wrap.height+'px';
   svg.innerHTML=paths;
 }
+
+/* ---------- run-deck synergy notes: count real things, never advise ---------- */
+function scrimDeckCounts(){
+  const d=(SCRIM&&SCRIM.deck)||{ab:[],bm:[],cr:[]};
+  let atk=0, blk=0;
+  (d.ab||[]).forEach(function(r){
+    const a=DATA.abcs[r.d]&&DATA.abcs[r.d][r.i];
+    if(!a) return;
+    if(String(a.type).toUpperCase()==='ATTACK') atk++; else blk++;
+  });
+  return {atk:atk, blk:blk, bm:(d.bm||[]).length, cr:(d.cr||[]).length,
+          total:(d.ab||[]).length+(d.bm||[]).length+(d.cr||[]).length};
+}
+function scrimTeamArchetypes(){
+  const out={};
+  ((SCRIM&&SCRIM.team)||[]).forEach(function(t){
+    if(t.curHp<=0) return;
+    let c=null;
+    if(t.fe){ c=(DATA.firsteds||[]).find(function(f){return f.id===t.id;}); }
+    else { const dk=DATA.characters[t.deck]||[]; c=dk.find(function(x){return x.id===t.id;}); }
+    if(c&&c.archetype) out[c.archetype]=(out[c.archetype]||0)+1;
+  });
+  return out;
+}
+function scrimSynergy(ref){
+  const c=scrimDeckCounts(), lines=[];
+  if(ref.t==='ab'){
+    const a=DATA.abcs[ref.d]&&DATA.abcs[ref.d][ref.i]; if(!a) return '';
+    const isAtk=String(a.type).toUpperCase()==='ATTACK';
+    const mine=isAtk?c.atk:c.blk, other=isAtk?c.blk:c.atk;
+    lines.push('Your run deck holds <b>'+c.atk+' \u2694</b> and <b>'+c.blk+' \u26ca</b>.');
+    if(mine+other>0 && mine < other) lines.push('This is your thinner half.');
+    else if(mine>other+4) lines.push('You are already heavy on these.');
+  } else if(ref.t==='bm'){
+    lines.push('You hold <b>'+c.bm+' Bookmark'+(c.bm===1?'':'s')+'</b> in the run deck.');
+    if(c.bm===0) lines.push('This would be your first.');
+  } else if(ref.t==='cr'){
+    lines.push('You run <b>'+c.cr+' Critical Lens'+(c.cr===1?'':'es')+'</b> of a possible 4.');
+    if(c.cr===0) lines.push('No Lens yet \u2014 this fills an empty slot rather than competing.');
+    else if(c.cr>=4) lines.push('Your Lens slots are full; this would sit unused.');
+    if(c.bm>0) lines.push('You shed cards every fight, so pile-reading effects stay live.');
+  } else if(ref.t==='art'){
+    lines.push('You carry <b>'+((SCRIM.artifacts||[]).length)+' artifact'+(((SCRIM.artifacts||[]).length)===1?'':'s')+'</b>.');
+  }
+  const arch=scrimTeamArchetypes(), names=Object.keys(arch);
+  if(names.length) lines.push('Your team: '+names.map(function(n){return n+(arch[n]>1?' \u00d7'+arch[n]:'');}).join(', ')+'.');
+  if(!lines.length) return '';
+  return '<div class="dc-syn"><b>How this fits your run</b>'+lines.join(' ')+'</div>';
+}
 function scrimDraftScreen(){
   const isArch=SCRIM.view==='archives';
   const artLine = SCRIM._gainedArt?`<div class="reward-art">\u2728 Artifact acquired: <b>${SCRIM_ART[SCRIM._gainedArt].ic} ${SCRIM_ART[SCRIM._gainedArt].name}</b> \u2014 ${SCRIM_ART[SCRIM._gainedArt].text}</div>`:''; 
@@ -7208,7 +7297,10 @@ function scrimDraftScreen(){
     else if(ref.t==='ab') inner=`<div class="dc-top ${card.type.toLowerCase()}">${card.type==='ATTACK'?'\u2694 ATTACK':'\u26ca BLOCK'} \u00b7 pw ${card.power}</div><div class="dc-q">${card.q}</div>`;
     else if(ref.t==='bm') inner=`<div class="dc-top bmk">\u2726 ${card.kind}</div><div class="dc-nm">${card.name}</div><div class="dc-tx">${card.text}</div>`;
     else inner=`<div class="dc-top crt">\u25c6 CRIT LENS</div><div class="dc-nm">${card.name}</div><div class="dc-tx">${card.passive||''}</div>`;
-    return `<button class="draft-card" data-scrim="draftpick:${k}">${inner}<div class="dc-add">Add to deck \u203a</div></button>`;
+    const open=SCRIM._draftInfo===k;
+    const syn=open?scrimSynergy(ref):'';
+    return `<div class="draft-wrap"><button class="draft-card${open?' open':''}" data-scrim="draftpick:${k}">${inner}${syn}<div class="dc-add">Add to deck \u203a</div></button>`
+         + `<button class="dc-i" data-scrim="draftinfo:${k}" title="How does this fit my run?">\u2139</button></div>`;
   }).join('');
   return `<div class="scrim-wrap scrim-ink"><div class="scrim-panel">
     <div class="scrim-title sm">${isArch?'\ud83d\udcda Study Break':'Victory \u2014 spoils of the scrimmage'}</div>
@@ -7494,6 +7586,63 @@ function scrimVStacks(){
     <p class="stk-sub">The source works behind every deck &amp; expansion \u2014 tap a book to read its story.</p>
     <div class="stk-grid">${books}</div>${reader}`;
 }
+
+function scrimCurrencyStrip(){
+  const inRun = !!(typeof SCRIM!=='undefined' && SCRIM && SCRIM.active);
+  const fmt=function(n){ return (n||0).toLocaleString(); };
+  let h='<span class="cur-chip">\ud83e\udde0 Intellect <b>'+fmt(META.ip)+'</b></span>';
+  if(inRun) h+='<span class="cur-chip">\ud83d\udcb3 Late Fees <b>'+fmt(SCRIM.lf)+'</b></span>';
+  if((META.packs||0)>0) h+='<span class="cur-chip">\ud83d\udce6 Packs <b>'+fmt(META.packs)+'</b></span>';
+  return '<span class="cur-strip">'+h+'</span>';
+}
+
+/* ---------- Run Deck: everything accumulated this run, grouped ---------- */
+function scrimRunDeckScreen(){
+  const tab=SCRIM._deckTab||'deck';
+  const TABS=[['deck','Run Deck'],['team','Team'],['art','Artifacts']];
+  const tabBtns='<button class="vtab back" data-scrim="deckback">\u2039 Map</button>'+
+    TABS.map(function(t){ return '<button class="vtab '+(tab===t[0]?'on':'')+'" data-scrim="dtab:'+t[0]+'">'+t[1]+'</button>'; }).join('')+
+    '<span class="vtab-cur">'+scrimCurrencyStrip()+'</span>';
+  const chip=function(cls,lab,nm,val){
+    return '<div class="dk-c"><i class="'+cls+'">'+lab+'</i><b>'+nm+'</b>'+(val?'<s>'+val+'</s>':'')+'</div>';
+  };
+  let panel='';
+  if(tab==='deck'){
+    const d=SCRIM.deck||{ab:[],bm:[],cr:[]}, c=scrimDeckCounts();
+    const atk=[], blk=[];
+    (d.ab||[]).forEach(function(r){
+      const a=DATA.abcs[r.d]&&DATA.abcs[r.d][r.i]; if(!a) return;
+      const row=chip(String(a.type).toUpperCase()==='ATTACK'?'a':'b', a.power, (a.q||'').slice(0,42), '');
+      (String(a.type).toUpperCase()==='ATTACK'?atk:blk).push(row);
+    });
+    const bms=(d.bm||[]).map(function(i){ const b=DATA.bookmarks[i]; return b?chip('m',(b.rarity||'C').charAt(0),b.name,''):''; });
+    const crs=(d.cr||[]).map(function(i){ const x=DATA.crits[i]; return x?chip('c','L',x.name,''):''; });
+    panel='<div class="vtitle"><span>\ud83d\udcda Run Deck</span></div>'
+      +'<div class="dk-sum"><span>'+c.total+' cards</span><span>\u2694 '+c.atk+' attack</span>'
+      +'<span>\u26ca '+c.blk+' block</span><span>\u2726 '+c.bm+' bookmarks</span><span>\u25c6 '+c.cr+' lenses</span></div>'
+      +(atk.length?'<div class="dk-sec">\u2694 Attack \u00b7 '+atk.length+'</div><div class="dk-grid">'+atk.join('')+'</div>':'')
+      +(blk.length?'<div class="dk-sec">\u26ca Block \u00b7 '+blk.length+'</div><div class="dk-grid">'+blk.join('')+'</div>':'')
+      +(bms.length?'<div class="dk-sec">\u2726 Bookmarks \u00b7 '+bms.length+'</div><div class="dk-grid">'+bms.join('')+'</div>':'')
+      +(crs.length?'<div class="dk-sec">\u25c6 Critical Lenses \u00b7 '+crs.length+'</div><div class="dk-grid">'+crs.join('')+'</div>':'')
+      +(c.total?'':'<p class="scrim-intro-copy">Nothing drafted yet.</p>');
+  } else if(tab==='team'){
+    const rows=((SCRIM.team)||[]).map(function(t){
+      let c=null;
+      if(t.fe) c=(DATA.firsteds||[]).find(function(f){return f.id===t.id;});
+      else c=(DATA.characters[t.deck]||[]).find(function(x){return x.id===t.id;});
+      const nm=c?c.name:t.id, ar=c&&c.archetype?c.archetype:'\u2014';
+      const dead=t.curHp<=0;
+      return '<div class="dk-c'+(dead?' gone':'')+'"><i class="t">'+(dead?'\u2620':t.curHp)+'</i><b>'+nm+'</b><s>'+ar+'</s></div>';
+    });
+    panel='<div class="vtitle"><span>\ud83c\udfad Team</span></div><div class="dk-grid">'+(rows.join('')||'<p>No team.</p>')+'</div>';
+  } else {
+    const rows=((SCRIM.artifacts)||[]).map(function(id){
+      const A=SCRIM_ART[id]; return A?'<div class="dk-c"><i class="c">'+A.ic+'</i><b>'+A.name+'</b><s>'+A.tier+'</s></div>':'';
+    });
+    panel='<div class="vtitle"><span>\u2728 Artifacts</span></div><div class="dk-grid">'+(rows.join('')||'<p class="scrim-intro-copy">None yet.</p>')+'</div>';
+  }
+  return '<div class="scrim-wrap scrim-ink"><div class="scrim-folder"><div class="vtabs">'+tabBtns+'</div><div class="vbody">'+panel+'</div></div></div>';
+}
 function scrimVaultShell(){
   const tab=SCRIM.vaultTab||'profile';
   const TABS=[['profile','Profile'],['shop','Shop'],['firsteds','1st Editions'],['stacks','The Stacks'],['bestiary','Bestiary'],['archive','Archive']];
@@ -7509,7 +7658,7 @@ function scrimVaultShell(){
     default: panel=scrimVProfile();
   }
   return `<div class="scrim-wrap scrim-ink"><div class="scrim-folder">
-    <div class="vtabs">${tabBtns}</div>
+    <div class="vtabs">${tabBtns}<span class="vtab-cur">${scrimCurrencyStrip()}</span></div>
     <div class="vbody">${panel}</div>
   </div></div>`;
 }
@@ -7615,7 +7764,7 @@ window.ABC_DEBUG = {
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
-  get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+  get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, scrimDeckCounts, scrimRunDeckScreen, scrimCurrencyStrip, scrimSynergy, scrimVaultShellSrc(){return scrimVaultShell();}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
