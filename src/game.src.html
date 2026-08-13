@@ -2920,7 +2920,8 @@ function makeChar(def, scale){
 }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];} return a; }
 /* ---------- deck definitions ---------- */
-const LIMITS = { ch:12, ab:24, bm:20, cr:4, fe:2, total:62 };
+const LIMITS={ ch:12, ab:36, bm:20, cr:4, fe:2, total:62 };   // builder CEILING per category
+const MINIMA={ ch:8,  ab:24, bm:10, cr:2, fe:2 };             // builder FLOOR per category
 function feFor(k){ return (DATA.firsteds||[]).filter(f=>f.deck===k).map(f=>f.id).slice(0,LIMITS.fe); }
 function firstedById(id){ var f=(DATA.firsteds||[]).find(x=>x.id===id); if(f) return f;
   var E=window.EXPANSIONS||{}; for(var k in E){ if(E[k].battle){ var m=(E[k].battle.commanders||[]).find(x=>x.id===id); if(m) return m; } if(E[k].boosterPool){ var m2=(E[k].boosterPool.commanders||[]).find(x=>x.id===id); if(m2) return m2; } } return null; }
@@ -2998,11 +2999,35 @@ function poolCh(k){ return DATA.characters[k].filter(c=>deckOwnCh(k,c.id)).map(c
 function poolAb(k){ return DATA.abcs[k].map((_,i)=>i).filter(i=>deckOwnAb(k,i)); }
 function poolCr(){ return DATA.crits.map((_,i)=>i).filter(i=>ownCrit(i)); }
 function poolBmSlots(){ const out=[]; DATA.bookmarks.forEach((_,i)=>{ const n=bmOwned(i); for(let c=0;c<n;c++) out.push(i); }); return out; }
+
+/* ---------------------------------------------------------------------------
+   Per-deck starter compositions. These are DEFAULTS a player can override in
+   the builder, the way a TCG starter deck is a suggestion rather than a rule.
+   Every one totals 62 (ch + ab + bm + cr + fe).
+   Identity is derived from what each deck already is: Othello is six Tricksters
+   with the lowest damage, so it is the control deck; Oz has the widest cast and
+   the lowest damage, so it is attrition; Macbeth and TEWWG hit hardest, so they
+   get the charges to do it with.
+   --------------------------------------------------------------------------- */
+const DECK_COMP = {
+  macbeth:      { ch:12, ab:34, bm:10, cr:4 },   // fastest threat
+  tewwg:        { ch:12, ab:33, bm:11, cr:4 },   // aggressive
+  wonderland:   { ch:12, ab:32, bm:12, cr:4 },   // aggressive, tricksy
+  gatsby:       { ch:13, ab:30, bm:13, cr:4 },   // balanced, wide cast
+  crucible:     { ch:12, ab:30, bm:14, cr:4 },   // the standard
+  hamlet:       { ch:13, ab:29, bm:14, cr:4 },   // slightly slow, wide cast
+  frankenstein: { ch:11, ab:30, bm:15, cr:4 },   // fragile, bookmark-leaning
+  sherlock:     { ch:12, ab:29, bm:15, cr:4 },   // status pressure
+  oz:           { ch:14, ab:27, bm:15, cr:4 },   // attrition, bodies over burst
+  othello:      { ch:12, ab:26, bm:18, cr:4 },   // control, slowest to threaten
+};
+function compFor(k){ return DECK_COMP[k] || { ch:12, ab:30, bm:14, cr:4 }; }
 function defaultDeck(k){
-  // Full 62-card default: every category filled to its cap (ch 12 + ab 24 + bm 20 + cr 4 + fe 2).
-  // Decks with only one published 1st Edition default to 61 until their second commander exists.
-  const def={ d:k, ch:poolCh(k).slice(0,LIMITS.ch), ab:poolAb(k).slice(0,LIMITS.ab), bm:[], cr:poolCr().slice(0,LIMITS.cr), fe:feFor(k) };
-  return fillGaps(def);
+  // 62-card starter built to this deck's own composition. LIMITS remains the
+  // BUILDER's ceiling; compFor() is what the deck ships as.
+  const c=compFor(k);
+  const def={ d:k, ch:poolCh(k).slice(0,c.ch), ab:poolAb(k).slice(0,c.ab), bm:[], cr:poolCr().slice(0,c.cr), fe:feFor(k) };
+  return fillGaps(def, c);
 }
 function pickN(arr,n){ const p=arr.slice(), o=[]; while(o.length<n && p.length) o.push(p.splice(rnd(p.length),1)[0]); return o; }
 function randomBookmarks(){
@@ -3094,16 +3119,18 @@ function clampDeck(def){
   def.edbm=def.edbm||{}; Object.keys(def.edbm).forEach(cid=>{ if(!(edHas(cid)&&edBmByCid(k,cid))) delete def.edbm[cid]; });
   return def;
 }
-function fillGaps(def){
+function fillGaps(def, comp){
   const k=def.d;
+  // comp is the deck's own composition; fall back to the builder ceiling
+  const C = comp || { ch:LIMITS.ch, ab:LIMITS.ab, bm:LIMITS.bm, cr:LIMITS.cr };
   const allCh=poolCh(k);
-  while(def.ch.length<LIMITS.ch){ const miss=allCh.filter(id=>!def.ch.includes(id)); if(!miss.length) break; def.ch.push(miss[rnd(miss.length)]); }
+  while(def.ch.length<C.ch){ const miss=allCh.filter(id=>!def.ch.includes(id)); if(!miss.length) break; def.ch.push(miss[rnd(miss.length)]); }
   const allAb=poolAb(k);
-  while(def.ab.length<LIMITS.ab){ const miss=allAb.filter(i=>!def.ab.includes(i)); if(!miss.length) break; def.ab.push(miss[rnd(miss.length)]); }
+  while(def.ab.length<C.ab){ const miss=allAb.filter(i=>!def.ab.includes(i)); if(!miss.length) break; def.ab.push(miss[rnd(miss.length)]); }
   const allCr=poolCr();
-  while(def.cr.length<LIMITS.cr){ const miss=allCr.filter(i=>!def.cr.includes(i)); if(!miss.length) break; def.cr.push(miss[rnd(miss.length)]); }
+  while(def.cr.length<C.cr){ const miss=allCr.filter(i=>!def.cr.includes(i)); if(!miss.length) break; def.cr.push(miss[rnd(miss.length)]); }
   const slots=poolBmSlots();
-  while(def.bm.length<LIMITS.bm){
+  while(def.bm.length<C.bm){
     const used={}; def.bm.forEach(i=>used[i]=(used[i]||0)+1);
     const avail=slots.filter(i=>(used[i]||0)<bmOwned(i));
     const fresh=avail.filter(i=>!(used[i]>0));
@@ -7782,7 +7809,7 @@ try{ edBackfillArchetypes(); }catch(e){}
 
 window.ABC_DEBUG = {
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
-  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, archChip, benchInfoModalSrc(){return benchInfoModal();}, fxAttack, fxBlock, fxKO, fxStatus, fxRevive, triviaStamp, defaultDeck, poolAb, deckOwnAb, scrimOppPlayer, enemyDeck, poolAbAny, get checkKOSrc(){return checkKO.toString();}, buildCharPreviewSrc(){const c=DATA.characters.hamlet.find(x=>x.id==="hamlet"); return buildCharPreview(c,"hamlet");}, render, get doBlockSrc(){return doBlock.toString();},
+  noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, archChip, benchInfoModalSrc(){return benchInfoModal();}, fxAttack, fxBlock, fxKO, fxStatus, fxRevive, triviaStamp, defaultDeck, poolAb, deckOwnAb, scrimOppPlayer, enemyDeck, poolAbAny, compFor, get LIMITS(){return LIMITS;}, get MINIMA(){return MINIMA;}, get checkKOSrc(){return checkKO.toString();}, buildCharPreviewSrc(){const c=DATA.characters.hamlet.find(x=>x.id==="hamlet"); return buildCharPreview(c,"hamlet");}, render, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
