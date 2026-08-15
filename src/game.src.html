@@ -208,6 +208,17 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 .hc-foot{font-family:var(--cond);font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:#7a6a52;padding:4px 8px;border-top:1px dashed #c9b58a}
 .hc-name{font-family:var(--disp);font-size:15px;padding:6px 8px 2px}
 .hc-text{font-size:11px;line-height:1.25;padding:0 8px 6px;flex:1;overflow:hidden}
+/* ---- Bookmark card art, treatment B: the illustration sits behind the rules text
+   under a cream scrim, so nothing truncates and every word still reads in hand.
+   Cards with no img fall back to the plain card, unchanged. ---- */
+.hc.bm .bmb-wrap{position:relative;flex:1;overflow:hidden}
+.hc.bm .bmb-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;
+  opacity:.62;filter:saturate(.35) contrast(1.12);pointer-events:none}
+.hc.bm .bmb-fg{position:relative;height:100%;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,rgba(242,230,198,.93) 0%,rgba(242,230,198,.90) 46%,
+             rgba(242,230,198,.42) 76%,rgba(242,230,198,.10) 100%)}
+.hc.bm .bmb-fg .hc-text{font-size:10.5px}
+
 
 /* ---- crit (Critical Lens) hand cards ---- */
 .hc.crit{display:flex;flex-direction:column}
@@ -1627,7 +1638,9 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .fe-reward .fe-port .dc-mono{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-family:var(--disp); font-size:46px; color:#fff; }
 .dc-top{ font-family:var(--cond); font-size:12px; letter-spacing:1px; padding:3px 6px; border-radius:5px; display:inline-block; align-self:flex-start; }
 .dc-top.attack{ background:#f4d3d0; color:#8a2b2b; } .dc-top.block{ background:#d0dcf4; color:#2b4a8a; }
-.dc-top.bmk{ background:#efe6cf; color:#5a4a2a; } .dc-top.crt{ background:#e6dcf0; color:#5a3a8a; }
+.dc-top.bmk{ background:#efe6cf; color:#5a4a2a; }
+.dc-port{ height:150px; border:2px solid #241f1b; border-radius:8px; overflow:hidden; background:#241f1b; margin:2px 0; }
+.dc-port img{ width:100%; height:100%; object-fit:cover; display:block; } .dc-top.crt{ background:#e6dcf0; color:#5a3a8a; }
 .dc-q,.dc-tx{ font-size:12px; color:#3a322b; line-height:1.4; } .dc-nm{ font-family:var(--cond); font-size:15px; }
 .dc-add{ margin-top:auto; font-family:var(--cond); color:#b5762a; letter-spacing:1px; font-size:12px; }
 .reward-art{ text-align:center; background:#f5e6bf; border:2px solid #caa53a; border-radius:8px; padding:8px; margin:8px 0; font-size:13px; }
@@ -2851,10 +2864,102 @@ window.EXPANSIONS.sengekokujo={"name":"Sengekokujō","base":"macbeth","box":"dat
 <script>
 window.CHAR_IMG_NEW={"james_gatz": "data:image/jpeg;base64,__ABCASSET_164__", "meyer_wolfsheim": "data:image/jpeg;base64,__ABCASSET_165__", "owl_eyes": "data:image/jpeg;base64,__ABCASSET_166__", "klipspringer": "data:image/jpeg;base64,__ABCASSET_167__", "dan_cody": "data:image/jpeg;base64,__ABCASSET_168__", "catherine": "data:image/jpeg;base64,__ABCASSET_169__", "henry_gatz": "data:image/jpeg;base64,__ABCASSET_170__", "pammy_buchanan": "data:image/jpeg;base64,__ABCASSET_171__", "tom": "data:image/jpeg;base64,__ABCASSET_163__", "daisy": "data:image/jpeg;base64,__ABCASSET_15__", "gatsby": "data:image/jpeg;base64,__ABCASSET_16__", "myrtle": "data:image/jpeg;base64,__ABCASSET_17__", "nick": "data:image/jpeg;base64,__ABCASSET_18__", "george": "data:image/jpeg;base64,__ABCASSET_19__", "jordan": "data:image/jpeg;base64,__ABCASSET_20__", "abigail": "data:image/jpeg;base64,__ABCASSET_21__", "jproctor": "data:image/jpeg;base64,__ABCASSET_22__", "eproctor": "data:image/jpeg;base64,__ABCASSET_23__", "parris": "data:image/jpeg;base64,__ABCASSET_24__", "putnam": "data:image/jpeg;base64,__ABCASSET_25__", "giles": "data:image/jpeg;base64,__ABCASSET_26__", "tituba": "data:image/jpeg;base64,__ABCASSET_27__", "rebecca": "data:image/jpeg;base64,__ABCASSET_986__", "salem": "data:image/jpeg;base64,__ABCASSET_987__"};
 window.CHAR_IMGPOS_NEW={"james_gatz": "50% 6%", "meyer_wolfsheim": "50% 8%", "owl_eyes": "50% 8%", "klipspringer": "50% 8%", "dan_cody": "50% 8%", "catherine": "50% 8%", "henry_gatz": "50% 8%", "pammy_buchanan": "50% 8%", "tom": "52% 0%", "daisy": "50% 16%", "gatsby": "58% 0%", "myrtle": "50% 7%", "nick": "40% 11%", "george": "52% 0%", "jordan": "50% 0%", "abigail": "50% 6%", "jproctor": "50% 8%", "eproctor": "50% 11%", "parris": "50% 4%", "putnam": "50% 23%", "giles": "50% 8%", "tituba": "50% 6%", "rebecca": "50% 6%", "salem": "50% 16%"};
-window.CRIT_IMG={"marxist": "data:image/jpeg;base64,__ABCASSET_28__", "feminist": "data:image/jpeg;base64,__ABCASSET_29__", "psycho": "data:image/jpeg;base64,__ABCASSET_30__", "queer": "data:image/jpeg;base64,__ABCASSET_31__", "postcolonial": "data:image/jpeg;base64,__ABCASSET_32__", "archetypal": "data:image/jpeg;base64,__ABCASSET_33__", "newhist": "data:image/jpeg;base64,__ABCASSET_34__", "formalism": "data:image/jpeg;base64,__ABCASSET_35__", "deconstruct": "data:image/jpeg;base64,__ABCASSET_36__", "ecocrit": "data:image/jpeg;base64,__ABCASSET_37__", "biographical": "data:image/jpeg;base64,__ABCASSET_38__", "reader": "data:image/jpeg;base64,__ABCASSET_39__", "affective": "data:image/jpeg;base64,__ABCASSET_40__", "russian": "data:image/jpeg;base64,__ABCASSET_41__"};
+window.CRIT_IMG={"adapt": "data:image/webp;base64,__ABCASSET_1096__", "mise": "data:image/webp;base64,__ABCASSET_1097__", "marxist": "data:image/jpeg;base64,__ABCASSET_28__", "feminist": "data:image/jpeg;base64,__ABCASSET_29__", "psycho": "data:image/jpeg;base64,__ABCASSET_30__", "queer": "data:image/jpeg;base64,__ABCASSET_31__", "postcolonial": "data:image/jpeg;base64,__ABCASSET_32__", "archetypal": "data:image/jpeg;base64,__ABCASSET_33__", "newhist": "data:image/jpeg;base64,__ABCASSET_34__", "formalism": "data:image/jpeg;base64,__ABCASSET_35__", "deconstruct": "data:image/jpeg;base64,__ABCASSET_36__", "ecocrit": "data:image/jpeg;base64,__ABCASSET_37__", "biographical": "data:image/jpeg;base64,__ABCASSET_38__", "reader": "data:image/jpeg;base64,__ABCASSET_39__", "affective": "data:image/jpeg;base64,__ABCASSET_40__", "russian": "data:image/jpeg;base64,__ABCASSET_41__"};
 (function(){var D=window.DATA;if(!D)return;var N=window.CHAR_IMG_NEW,NP=window.CHAR_IMGPOS_NEW||{};
 Object.keys(D.characters).forEach(function(k){D.characters[k].forEach(function(c){if(N[c.id]){c.img=N[c.id];c.imgpos=NP[c.id]||c.imgpos||"50% 18%";}});});
 var CI=window.CRIT_IMG;(D.crits||[]).forEach(function(c){if(CI[c.id])c.img=CI[c.id];});})();
+/* ---- Bookmark art (Aug 2026). Same shape as CRIT_IMG directly above: a map of
+   card id -> data URI, applied to the data objects once at load. Expansion
+   bookmarks are keyed "<expansionKey>|<bookmarkId>" because ids are only unique
+   within an expansion. ---- */
+window.BM_IMG={
+"firstaid":"data:image/webp;base64,__ABCASSET_1034__",
+"supercharge":"data:image/webp;base64,__ABCASSET_1035__",
+"ironcurtain":"data:image/webp;base64,__ABCASSET_1036__",
+"papercut":"data:image/webp;base64,__ABCASSET_1037__",
+"cliffnotes":"data:image/webp;base64,__ABCASSET_1038__",
+"truce":"data:image/webp;base64,__ABCASSET_1039__",
+"peekaboo":"data:image/webp;base64,__ABCASSET_1040__",
+"defib":"data:image/webp;base64,__ABCASSET_1041__",
+"poison":"data:image/webp;base64,__ABCASSET_1042__",
+"overexp":"data:image/webp;base64,__ABCASSET_1043__",
+"crown":"data:image/webp;base64,__ABCASSET_1044__",
+"trading":"data:image/webp;base64,__ABCASSET_1045__",
+"tornchapter":"data:image/webp;base64,__ABCASSET_1046__",
+"loosebinding":"data:image/webp;base64,__ABCASSET_1047__",
+"finaldraft":"data:image/webp;base64,__ABCASSET_1048__",
+"missingpages":"data:image/webp;base64,__ABCASSET_1049__",
+"coffeecat":"data:image/webp;base64,__ABCASSET_1050__",
+"inkexplosion":"data:image/webp;base64,__ABCASSET_1051__",
+"stickysituation":"data:image/webp;base64,__ABCASSET_1052__",
+"pagesstuck":"data:image/webp;base64,__ABCASSET_1053__",
+"smudgednotes":"data:image/webp;base64,__ABCASSET_1054__",
+"bookburn":"data:image/webp;base64,__ABCASSET_1055__",
+"freshlam":"data:image/webp;base64,__ABCASSET_1056__",
+"proofread":"data:image/webp;base64,__ABCASSET_1057__",
+"revisededition":"data:image/webp;base64,__ABCASSET_1058__",
+"highlightpassage":"data:image/webp;base64,__ABCASSET_1059__",
+"marginNotes":"data:image/webp;base64,__ABCASSET_1060__",
+"hardcover":"data:image/webp;base64,__ABCASSET_1061__",
+"dogeared":"data:image/webp;base64,__ABCASSET_1062__",
+"redpen":"data:image/webp;base64,__ABCASSET_1063__",
+"rewritehistory":"data:image/webp;base64,__ABCASSET_1064__",
+"bibliography":"data:image/webp;base64,__ABCASSET_1065__",
+"citationneeded":"data:image/webp;base64,__ABCASSET_1066__",
+"loststacks":"data:image/webp;base64,__ABCASSET_1067__",
+"editorialdeadline":"data:image/webp;base64,__ABCASSET_1068__",
+"libraryrestore":"data:image/webp;base64,__ABCASSET_1069__",
+"completerewrite":"data:image/webp;base64,__ABCASSET_1070__",
+"maskingtape":"data:image/webp;base64,__ABCASSET_1071__",
+"roundrobin":"data:image/webp;base64,__ABCASSET_1072__",
+"porchstories":"data:image/webp;base64,__ABCASSET_1073__",
+"horizonspromise":"data:image/webp;base64,__ABCASSET_1074__",
+"mucksurvival":"data:image/webp;base64,__ABCASSET_1075__",
+"trialverdict":"data:image/webp;base64,__ABCASSET_1076__",
+"packedbackpack":"data:image/webp;base64,__ABCASSET_1077__",
+"bookreturn":"data:image/webp;base64,__ABCASSET_1078__",
+"burnnotes":"data:image/webp;base64,__ABCASSET_1079__",
+"budgetcuts":"data:image/webp;base64,__ABCASSET_1080__",
+"interlibrary":"data:image/webp;base64,__ABCASSET_1081__",
+"alexandria":"data:image/webp;base64,__ABCASSET_1082__",
+"censorship":"data:image/webp;base64,__ABCASSET_1083__",
+"forgottenchapter":"data:image/webp;base64,__ABCASSET_1084__",
+"antiquarian":"data:image/webp;base64,__ABCASSET_1085__",
+"researchassist":"data:image/webp;base64,__ABCASSET_1086__",
+"cardcatalog":"data:image/webp;base64,__ABCASSET_1087__",
+"extracredit":"data:image/webp;base64,__ABCASSET_1088__",
+"plotarmor":"data:image/webp;base64,__ABCASSET_1089__",
+"cliffhanger":"data:image/webp;base64,__ABCASSET_1090__",
+"outofprint":"data:image/webp;base64,__ABCASSET_1091__",
+"plagiarism":"data:image/webp;base64,__ABCASSET_1092__",
+"serialnovel":"data:image/webp;base64,__ABCASSET_1093__",
+"threeact":"data:image/webp;base64,__ABCASSET_1094__",
+"deusex":"data:image/webp;base64,__ABCASSET_1095__"};
+window.EXPBM_IMG={
+"frankenstein_2077|hardening":"data:image/webp;base64,__ABCASSET_1098__",
+"frankenstein_2077|logicbomb":"data:image/webp;base64,__ABCASSET_1099__",
+"frankenstein_2077|memleak":"data:image/webp;base64,__ABCASSET_1100__",
+"frankenstein_2077|overclock":"data:image/webp;base64,__ABCASSET_1101__",
+"modern_hamlet|answermachine_mh":"data:image/webp;base64,__ABCASSET_1102__",
+"modern_hamlet|bug_mh":"data:image/webp;base64,__ABCASSET_1103__",
+"modern_hamlet|polaroid_mh":"data:image/webp;base64,__ABCASSET_1104__",
+"modern_hamlet|restructure_mh":"data:image/webp;base64,__ABCASSET_1105__",
+"sengekokujo|cauldron":"data:image/webp;base64,__ABCASSET_1106__",
+"sengekokujo|gekokujo":"data:image/webp;base64,__ABCASSET_1107__",
+"sengekokujo|mirror":"data:image/webp;base64,__ABCASSET_1108__",
+"sengekokujo|muramasa":"data:image/webp;base64,__ABCASSET_1109__",
+"sengekokujo|onryo":"data:image/webp;base64,__ABCASSET_1110__",
+"sengekokujo|sakaki":"data:image/webp;base64,__ABCASSET_1111__",
+"sengekokujo|tatami":"data:image/webp;base64,__ABCASSET_1112__"};
+(function(){var M=window.BM_IMG,X=window.EXPBM_IMG,D=window.DATA||DATA;
+  (D.bookmarks||[]).forEach(function(b){ if(M[b.id]) b.img=M[b.id]; });
+  var E=window.EXPANSIONS||{};
+  Object.keys(E).forEach(function(k){ var e=E[k];
+    [].concat((e.battle&&e.battle.bookmarks)||[],(e.boosterPool&&e.boosterPool.bookmarks)||[])
+      .forEach(function(b){ var v=X[k+"|"+b.id]; if(v) b.img=v; });
+  });
+})();
+
 </script>
 <script>
 window.HAMLET_IMG={"claudius": "data:image/jpeg;base64,__ABCASSET_42__", "gertrude": "data:image/jpeg;base64,__ABCASSET_43__", "laertes": "data:image/jpeg;base64,__ABCASSET_44__", "hamlet": "data:image/jpeg;base64,__ABCASSET_45__", "horatio": "data:image/jpeg;base64,__ABCASSET_46__", "fortinbras": "data:image/jpeg;base64,__ABCASSET_47__", "ophelia": "data:image/jpeg;base64,__ABCASSET_48__", "polonius": "data:image/jpeg;base64,__ABCASSET_49__", "ghost_king": "data:image/jpeg;base64,__ABCASSET_50__", "rosencrantz_guildenstern": "data:image/jpeg;base64,__ABCASSET_51__", "voltemand_cornelius": "data:image/jpeg;base64,__ABCASSET_52__", "elsinore": "data:image/jpeg;base64,__ABCASSET_130__", "osric": "data:image/jpeg;base64,__ABCASSET_912__", "yorick": "data:image/jpeg;base64,__ABCASSET_913__", "reynaldo": "data:image/jpeg;base64,__ABCASSET_914__"};
@@ -5337,7 +5442,7 @@ function handCard(c,idx){
   }
   const playable=straty && (you.flags.bmCount||0)<2 && !drawnLocked();
   return `<div class="hc bm ${c.kind.toLowerCase()} ${playable?'playable':'spent'}${deal}${_lk}" data-idx="${idx}">
-    <div class="hc-top bmk">✦ ${c.kind}${c.rarity?` · ${({C:'⚪ C',U:'🟢 U',R:'🔵 R',E:'🟣 E',L:'👑 L'})[c.rarity]||c.rarity}`:''}</div><div class="hc-name">${c.name}</div><div class="hc-text">${c.text}</div></div>`;
+    <div class="hc-top bmk">✦ ${c.kind}${c.rarity?` · ${({C:'⚪ C',U:'🟢 U',R:'🔵 R',E:'🟣 E',L:'👑 L'})[c.rarity]||c.rarity}`:''}</div>${c.img?`<div class="bmb-wrap"><img class="bmb-bg" src="${c.img}" alt=""><div class="bmb-fg"><div class="hc-name">${c.name}</div><div class="hc-text">${c.text}</div></div></div>`:`<div class="hc-name">${c.name}</div><div class="hc-text">${c.text}</div>`}</div>`;
 }
 /* ---- transient animation overlays (cosmetic, self-cleaning) ---- */
 function flickDeck(sideKey){
@@ -7681,7 +7786,7 @@ function scrimDraftScreen(){
     let inner;
     if(ref.t==='art'){ const A=SCRIM_ART[ref.id]; inner=`<div class="dc-top art">\u2728 ${A.tier.toUpperCase()} ARTIFACT</div><div class="dc-nm">${A.ic} ${A.name}</div><div class="dc-tx">${A.text}</div>`; }
     else if(ref.t==='ab') inner=`<div class="dc-top ${card.type.toLowerCase()}">${card.type==='ATTACK'?'\u2694 ATTACK':'\u26ca BLOCK'} \u00b7 pw ${card.power}</div><div class="dc-q">${card.q}</div>`;
-    else if(ref.t==='bm') inner=`<div class="dc-top bmk">\u2726 ${card.kind}</div><div class="dc-nm">${card.name}</div><div class="dc-tx">${card.text}</div>`;
+    else if(ref.t==='bm') inner=`<div class="dc-top bmk">\u2726 ${card.kind}</div>${card.img?`<div class="dc-port"><img src="${card.img}" alt=""></div>`:''}<div class="dc-nm">${card.name}</div><div class="dc-tx">${card.text}</div>`;
     else inner=`<div class="dc-top crt">\u25c6 CRIT LENS</div><div class="dc-nm">${card.name}</div><div class="dc-tx">${card.passive||''}</div>`;
     const open=SCRIM._draftInfo===k;
     const syn=open?scrimSynergy(ref):'';
@@ -8126,7 +8231,7 @@ window.ABC_EXPORT = {
   charData:(deck,id)=>{ const c=(DATA.characters[deck]||[]).find(x=>x.id===id); if(!c)return null; const mv=m=>m?{n:m.n,t:m.t,label:m.label}:null; return {kind:'char',name:c.name,deck:deck,hp:c.hp,img:c.img||'',imgpos:c.imgpos||'50% 18%',accent:c.accent,passive:c.passive?{name:c.passive.name,text:c.passive.text}:null,atk:mv(c.atk),atk2:mv(c.atk2),blk:mv(c.blk)}; },
   feData:(id)=>{ const f=firstedById(id); if(!f)return null; const im=(feImg(f)||{}); const mv=m=>m?{n:m.n,t:m.t,label:m.label}:null; return {kind:'fe',name:f.name,deck:f.deck,hp:f.hp,img:im.img||'',imgpos:im.pos||'50% 16%',fullart:(window.ABC_FULLART&&window.ABC_FULLART[f.id])||'',accent:f.accent,tier:f.tier||'',passive:f.passive?{name:f.passive.name,text:f.passive.text}:null,atk:mv(f.atk),atk2:mv(f.atk2),blk:mv(f.blk)}; },
   abcData:(deck,i)=>{ const a=(DATA.abcs[deck]||[])[i]; if(!a)return null; return {kind:'abc',type:a.type,power:a.power,q:a.q,opts:a.opts,ans:a.ans}; },
-  bmData:(i)=>{ const b=(DATA.bookmarks||[])[i]; if(!b)return null; return {kind:'bm',name:b.name,bkind:b.kind,text:b.text,rarity:b.rarity||'',effect:b.effect||''}; },
+  bmData:(i)=>{ const b=(DATA.bookmarks||[])[i]; if(!b)return null; return {kind:'bm',name:b.name,bkind:b.kind,text:b.text,rarity:b.rarity||'',effect:b.effect||'',img:b.img||''}; },
   critList:()=>(DATA.crits||[]).map((c,i)=>({i:i,name:c.name})),
   critData:(i)=>{ const c=(DATA.crits||[])[i]; if(!c)return null; return {kind:'crit',name:c.name,img:c.img||'',accent:c.accent,passive:c.passive,thesis:c.thesis,reward:c.reward,rarity:c.rarity||''}; },
   expList:()=>Object.keys(window.EXPANSIONS||{}),
@@ -8139,7 +8244,7 @@ window.ABC_EXPORT = {
   expCmdrList:(k)=>{ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; return (b&&b.commanders)?b.commanders.map((c,i)=>({i:i,name:c.name})):[]; },
   expCmdrData:function(k,i){ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; const c=b&&b.commanders&&b.commanders[i]; if(!c)return null; const bc=c.baseChar; return {kind:'fe',name:c.name,deck:e.name||k,hp:c.hp,img:(e.img&&e.img[bc])||'',imgpos:(e.imgpos&&e.imgpos[bc])||'50% 14%',fullart:'',accent:c.accent,tier:'',passive:c.passive?{name:c.passive.name,text:c.passive.text}:null,atk:this._expMv(c.atk),atk2:this._expMv(c.atk2),blk:this._expMv(c.blk)}; },
   expBmList:(k)=>{ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; return (b&&b.bookmarks)?b.bookmarks.map((x,i)=>({i:i,name:x.name})):[]; },
-  expBmData:function(k,i){ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; const x=b&&b.bookmarks&&b.bookmarks[i]; if(!x)return null; return {kind:'bm',name:x.name,bkind:x.kind,text:x.text,rarity:this._rar(x.rarity),effect:x.effect||''}; }
+  expBmData:function(k,i){ const e=(window.EXPANSIONS||{})[k], b=e&&e.battle; const x=b&&b.bookmarks&&b.bookmarks[i]; if(!x)return null; return {kind:'bm',name:x.name,bkind:x.kind,text:x.text,rarity:this._rar(x.rarity),effect:x.effect||'',img:x.img||''}; }
 };
 try{ edBackfillArchetypes(); }catch(e){}
 
