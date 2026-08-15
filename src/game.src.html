@@ -2651,6 +2651,13 @@ const DATA = {
     { id:'affective', name:'Affective Fallacy', accent:'#241F1B', img:'', fx:'affective',
       passive:'Critical anxiety \u2014 any wrong trivia answer deals 10 damage to that player\u2019s Active.',
       thesis:'The opponent answers two trivia questions wrong in one turn.', reward:'Opponent shuffles their hand away and redraws 3.' },
+    /* ===== NEW CARDS PATCH (Aug 2026) — Draft 3 LOCKED wave ===== */
+    { id:'mise', name:'Mise En Scène', accent:'#4A6C8C', img:'', fx:'mise',
+      passive:'Nothing leaves the frame — the first Bookmark you play each turn returns to your hand instead of discarding.',
+      thesis:'Play a Bookmark on 4 consecutive turns.', reward:'Your Active’s attack and block are instantly fully charged; unspent bonus charges vanish at end of turn.' },
+    { id:'adapt', name:'Adaptation', accent:'#8C6A4A', img:'', fx:'adapt',
+      passive:'The text survives — when your Active is knocked out, the character that steps up inherits one of its charged ABC cards (your choice), and if the fallen ally’s attack damage was higher, uses that damage instead until it leaves play.',
+      thesis:'Pay for an attack or block using an inherited charge.', reward:'Return one knocked-out character to your bench at half HP.' },
   ],
 
   // -------- BOOKMARK CARDS (support / item) --------
@@ -2698,6 +2705,27 @@ const DATA = {
     { id:'horizonspromise', name:"Horizon's Promise", kind:'BOOST', rarity:'U', text:'Give one of your characters Highlight — its next attack deals +20.', effect:'horizonspromise' },
     { id:'mucksurvival', name:'Muck Survival', kind:'UTILITY', rarity:'E', text:'Remove Burn, Spill, and Tear from one character and heal 30 HP.', effect:'mucksurvival' },
     { id:'trialverdict', name:'Trial Verdict', kind:'UTILITY', rarity:'L', text:"Strip all positive status from the opponent's Active, then inflict Smudge.", effect:'trialverdict' },
+    /* ===== NEW CARDS PATCH (Aug 2026) — Draft 3 LOCKED wave ===== */
+    { id:'packedbackpack', name:'Packed Backpack', kind:'ITEM', rarity:'C', text:'Draw 2 cards, then discard 2 cards.', effect:'packedbackpack' },
+    { id:'bookreturn', name:'Book Return', kind:'UTILITY', rarity:'U', text:'Return any 1 card from your discard pile to your hand. You cannot attack this turn.', effect:'bookreturn' },
+    { id:'burnnotes', name:'Burn the Notes', kind:'ITEM', rarity:'E', text:"Discard your hand. Your Active's attack is instantly fully charged and its next attack deals +40 damage.", effect:'burnnotes' },
+    { id:'budgetcuts', name:'Budget Cuts', kind:'ITEM', rarity:'C', text:'Discard one Attack, one Block, and one Bookmark from your hand. Draw 3 cards.', effect:'budgetcuts' },
+    { id:'interlibrary', name:'Interlibrary Loan', kind:'UTILITY', rarity:'U', text:'Swap one random card from your hand with one random card from your discard pile.', effect:'interlibrary' },
+    { id:'alexandria', name:'Library of Alexandria', kind:'UTILITY', rarity:'L', text:'Shuffle your discard pile into your deck, then draw 3 cards.', effect:'alexandria' },
+    { id:'censorship', name:'Censorship', kind:'SUPPORT', rarity:'R', text:'Neither player may play Bookmarks for the next two turns.', effect:'censorship' },
+    { id:'forgottenchapter', name:'Forgotten Chapter', kind:'UTILITY', rarity:'U', text:"Return one card from each discard pile to its owner's hand. You choose yours; theirs is random.", effect:'forgottenchapter' },
+    { id:'antiquarian', name:"Antiquarian's Eye", kind:'BOOST', rarity:'E', text:'If 3+ Bookmarks are in your discard pile, your Active gains +30 attack and +10 block until your next turn.', effect:'antiquarian' },
+    { id:'researchassist', name:'Research Assistant', kind:'UTILITY', rarity:'L', text:'Search your deck for up to 3 Bookmarks, reveal them, and add them to your hand. Shuffle your deck.', effect:'researchassist' },
+    { id:'cardcatalog', name:'Card Catalog', kind:'UTILITY', rarity:'U', text:'Search your deck for 1 Bookmark, add it to your hand, then shuffle your deck.', effect:'cardcatalog' },
+    { id:'extracredit', name:'Extra Credit', kind:'SUPPORT', rarity:'U', text:'If you knock out an enemy character this turn, draw 2 cards.', effect:'extracredit' },
+    { id:'plotarmor', name:'Plot Armor', kind:'SUPPORT', rarity:'R', text:'Discard 2 cards. Your Active takes no damage from any source until the start of your next turn. Pierce included.', effect:'plotarmor' },
+    { id:'cliffhanger', name:'Cliffhanger', kind:'SUPPORT', rarity:'E', text:'Until the start of your next turn, neither Active character can drop below 1 HP.', effect:'cliffhanger' },
+    { id:'outofprint', name:'Out of Print', kind:'STATUS', rarity:'R', text:'Discard 1 card. Enemy Active cannot attack for 2 turns. Cannot be cleansed, ignores \U0001F6E1️ Laminate, and switching does not cure it.', effect:'outofprint' },
+    { id:'plagiarism', name:'Plagiarism', kind:'UTILITY', rarity:'R', text:"Repeat the opponent's last attack back at their Active — same damage and status effects, unblockable.", effect:'plagiarism' },
+    /* --- Saga Bookmarks: multi-act, live in the Active ✦ zone until the final act --- */
+    { id:'serialnovel', name:'Serialized Novel', kind:'SUPPORT', rarity:'R', saga:true, stages:['draw1','draw1','draw1'], text:'Act I–III: draw 1 card at the start of each of your turns.', effect:'saga' },
+    { id:'threeact', name:'Three-Act Structure', kind:'UTILITY', rarity:'E', saga:true, stages:['draw1','tearfoe','atkboost30'], text:"Act I: draw 1. Act II: inflict \U0001FAA2 Tear on the enemy Active. Act III: your Active's next attack deals +30.", effect:'saga' },
+    { id:'deusex', name:'Deus Ex Machina', kind:'RESET', rarity:'L', saga:true, stages:['hardcover','heal30','revive'], text:'Act I: your Active gains \U0001F4D5 Hardcover. Act II: heal your Active 30. Act III: return one knocked-out character to your bench at half HP.', effect:'saga' },
   ],
   // -------- 1ST EDITION (Commander) CARDS --------
   firsteds: [
@@ -2818,7 +2846,7 @@ window.EXPANSIONS.frankenstein_2077={name:"Frankenstein 2077",base:"frankenstein
 <script>
 /* ===== Sengekokujō (edition #3): feudal-Japan Macbeth reskin ===== */
 window.EXPANSIONS=window.EXPANSIONS||{};
-window.EXPANSIONS.sengekokujo={"name":"Sengekokujō","base":"macbeth","box":"data:image/jpeg;base64,__ABCASSET_998__","icon":"⚔️","packKey":"senge","theme":{"paper":"#161009","frame":"#0a0806","plate":"#3a2c18"},"counts":{"characters":15,"commanders":2,"bookmarks":3,"vocabABCs":20,"total":40},"imgpos":{"macbeth":"50% 6%","lady_macbeth":"50% 4%","banquo":"50% 6%","duncan":"50% 30%","witches":"50% 6%","malcolm":"50% 8%","macduff":"50% 6%","ross":"50% 10%","hecate":"50% 10%","fleance":"50% 5%","donalbain":"50% 8%","murderers":"50% 10%","apparitions":"50% 4%","siward":"50% 12%","porter":"50% 6%"},"img":{"macbeth":"__ABCASSET_970__","lady_macbeth":"__ABCASSET_971__","banquo":"__ABCASSET_972__","duncan":"__ABCASSET_973__","witches":"__ABCASSET_974__","malcolm":"__ABCASSET_975__","macduff":"__ABCASSET_976__","ross":"__ABCASSET_977__","hecate":"__ABCASSET_978__","fleance":"__ABCASSET_979__","donalbain":"__ABCASSET_980__","murderers":"__ABCASSET_981__","apparitions":"__ABCASSET_982__","siward":"__ABCASSET_983__","porter":"__ABCASSET_984__"},"battle":{"chars":[{"id":"macbeth","name":"Kajiwara Takamori","hp":150,"accent":"#8a1a1a","tags":["King"],"atk":{"n":"Scorpion-Minded Strike","t":"Ambition made blade — cuts deeper into the already-wounded.","cost":3,"dmg":50,"onKO":{"selfStatus":"burn"},"label":"50/3"},"blk":{"n":"Vaulting Ambition","t":"Slips the blow, but the throne demands he yield the field.","cost":2,"block":40,"blkCleanse":"tear","blockType":"cleanse","label":"40/2"},"cid":"mac2:char:macbeth","kind":"char","_skin":"takamori"},{"id":"lady_macbeth","name":"Lady Fuyuka","hp":130,"accent":"#7a2d5a","tags":["Noble"],"atk":{"n":"Blood-Washing Delusion","t":"A spotless hand that will never come clean — inflicts Glitch of guilt.","cost":2,"dmg":30,"inflict":"smudge","label":"30/2"},"blk":{"n":"A Flower's Steely Mask","t":"Winter composure turns the strike aside.","cost":2,"block":40,"blkCleanse":["burn","spill"],"blockType":"cleanse","label":"40/2"},"cid":"mac2:char:lady_macbeth","kind":"char","_skin":"fuyuka"},{"id":"banquo","name":"Sakai Muneshige","hp":70,"accent":"#3a5a6a","tags":["Ghost"],"atk":{"n":"Banquet of the Damned","t":"The Onryō returns to the feast — a bleeding, vengeful haunt.","cost":3,"dmg":60,"inflict":"spill","label":"60/3"},"blk":{"n":"Phantom Iron Armor","t":"Spectral plate turns steel to mist.","cost":2,"block":40,"blockType":"negateStatus","label":"40/2"},"cid":"mac2:char:banquo","kind":"char","_skin":"muneshige"},{"id":"duncan","name":"Lord Takahito","hp":120,"accent":"#b5942e","tags":["King"],"atk":{"n":"Benevolent Command","t":"The old lord's authority, soft but sovereign.","cost":2,"dmg":40,"selfStatus":"highlight","label":"40/2"},"blk":{"n":"Sleeping Guard","t":"Even at rest, the daimyō's guard holds firm.","cost":2,"block":30,"blockType":"laminate","label":"30/2"},"cid":"mac2:char:duncan","kind":"char","_skin":"takahito"},{"id":"witches","name":"The Three Yama-uba","hp":90,"accent":"#5a3a6a","tags":["Witch"],"atk":{"n":"Loom of Fate","t":"Three crones spin the thread of a stolen crown.","cost":2,"dmg":30,"inflictChoice":["glue","spill"],"label":"30/2"},"blk":{"n":"Bamboo Mist","t":"Vanish into the whispering forest.","cost":2,"block":30,"blockType":"negateStatus","label":"30/2"},"cid":"mac2:char:witches","kind":"char","_skin":"yamauba"},{"id":"malcolm","name":"Lord Yoshiteru","hp":80,"accent":"#2e6a4a","tags":["Heir"],"atk":{"n":"Rightful Heir's Rally","t":"The true heir gathers a borrowed army.","cost":3,"dmg":60,"cleanseAlly":"smudge","label":"60/3"},"blk":{"n":"Exile's Caution","t":"Guards against the assassin's reach.","cost":2,"block":40,"blkCleanse":"tear","blockType":"cleanse","label":"40/2"},"cid":"mac2:char:malcolm","kind":"char","_skin":"yoshiteru"},{"id":"macduff","name":"Ogami Genba","hp":160,"accent":"#6a3a1a","tags":["Thane"],"atk":{"n":"Lone Wolf's Vengeance","t":"Not born of woman — the beast-born wolf cannot be stopped.","cost":4,"dmg":70,"pierceLaminate":true,"label":"70/4"},"blk":{"n":"Unyielding Defiance","t":"Caps the tyrant's fury.","cost":2,"block":40,"blkCleanse":"burn","blockType":"cleanse","label":"40/2"},"cid":"mac2:char:macduff","kind":"char","_skin":"genba"},{"id":"ross","name":"Oribe","hp":120,"accent":"#4a5a2e","tags":["Messenger"],"atk":{"n":"Courtier's Blade","t":"A messenger who navigates shifting tides.","cost":2,"dmg":40,"drawAfter":1,"label":"40/2"},"blk":{"n":"Diplomatic Guard","t":"Deflects without losing his head.","cost":1,"block":30,"blkCleanse":"glue","blockType":"cleanse","label":"30/1"},"cid":"mac2:char:ross","kind":"char","_skin":"oribe"},{"id":"hecate","name":"The Pale Matriarch","hp":100,"accent":"#7a2d7a","tags":["Witch"],"atk":{"n":"Yōkai's Scorn","t":"The ancient forest spirit mocks mortal arrogance — System-Locks the fool.","cost":3,"dmg":50,"inflict":"rip","label":"50/3"},"blk":{"n":"Kami's Veil","t":"Wrapped in old-god protection.","cost":2,"block":30,"blockType":"laminate","label":"30/2"},"cid":"mac2:char:hecate","kind":"char","_skin":"matriarch"},{"id":"fleance","name":"Sakai Munesuke","hp":70,"accent":"#3a6a7a","tags":["Noble"],"atk":{"n":"Fleeing Bloodline","t":"The boy who escapes to carry on the line.","cost":2,"dmg":40,"selfStatus":"highlight","label":"40/2"},"blk":{"n":"Night Escape","t":"Slips the ambush into darkness.","cost":2,"block":40,"blkCleanse":"rip","blockType":"cleanse","label":"40/2"},"cid":"mac2:char:fleance","kind":"char","_skin":"munesuke"},{"id":"donalbain","name":"Lord Kunimasa","hp":110,"accent":"#5a4a2e","tags":["Prince"],"atk":{"n":"Split the Risk","t":"The younger son flees to divide the danger.","cost":2,"dmg":40,"cleanseAlly":"glue","label":"40/2"},"blk":{"n":"Hidden Retreat","t":"Vanishes to a distant province.","cost":2,"block":50,"cond":[{"test":"defenderHasStatus","status":"burn","then":{"blockAdd":20}}],"label":"50/2"},"cid":"mac2:char:donalbain","kind":"char","_skin":"kunimasa"},{"id":"murderers","name":"The Nameless Suppa","hp":60,"accent":"#2a2a2a","tags":["Assassin"],"atk":{"n":"Dishonorable Ambush","t":"Low-born shinobi hired for a shameful kill — leaves them Torn.","cost":3,"dmg":60,"inflict":"tear","label":"60/3"},"blk":{"n":"Shadow Step","t":"Immune to reprisal, this turn.","cost":1,"block":30,"blockType":"immunity","label":"30/1"},"cid":"mac2:char:murderers","kind":"char","_skin":"suppa"},{"id":"apparitions","name":"The Three Apparitions","hp":120,"accent":"#4a6a6a","tags":["Spirit"],"atk":{"n":"Omens of Kitsunebi","t":"Fox-fire visions scramble the mind — inflicts Glitch.","cost":3,"dmg":60,"inflict":"smudge","stripPos":"highlight","label":"60/3"},"blk":{"n":"Spectral Ward","t":"Ghost-light turns aside the strike.","cost":2,"block":40,"blockType":"negateStatus","label":"40/2"},"cid":"mac2:char:apparitions","kind":"char","_skin":"apparitions"},{"id":"siward","name":"General Shimazu","hp":80,"accent":"#6a5a1a","tags":["General"],"atk":{"n":"Foreign Vanguard","t":"A battle-hardened warlord leads the charge.","cost":3,"dmg":70,"cond":[{"test":"selfHasStatus","status":"highlight","then":{"dmgAdd":20}}],"label":"70/3"},"blk":{"n":"War-Tested Guard","t":"Decades of battle harden his defense.","cost":2,"block":50,"blkCleanse":"tear","blockType":"cleanse","label":"50/2"},"cid":"mac2:char:siward","kind":"char","_skin":"shimazu"},{"id":"porter","name":"Rokurō the Gatekeeper","hp":70,"accent":"#7a5a2a","tags":["Comic"],"atk":{"n":"Gates of Yomi","t":"The drunken porter opens the gate to the underworld — Glues them in place.","cost":1,"dmg":30,"inflict":"glue","label":"30/1"},"blk":{"n":"Gatekeeper's Bar","t":"Bars the way with a comedic grumble.","cost":1,"block":30,"blkCleanse":["burn","smudge"],"blockType":"cleanse","label":"30/1"},"cid":"mac2:char:porter","kind":"char","_skin":"rokuro"}],"abcs":[{"cid":"mac2:abc:00","type":"ATTACK","power":2,"q":"In Macbeth, “chastise” most nearly means —","opts":["To punish or severely criticize","To make less until little remains","Loyalty to a cause","Fearless; unable to be intimidated"],"ans":0,"triviaType":"vocab","word":"chastise"},{"cid":"mac2:abc:01","type":"BLOCK","power":2,"q":"In Macbeth, “prophetic” most nearly means —","opts":["Predicting as if by divine power","Extravagant; lavish","A harsh, cruel leader","To damage or spoil"],"ans":0,"triviaType":"vocab","word":"prophetic"},{"cid":"mac2:abc:02","type":"ATTACK","power":2,"q":"In Macbeth, “palpable” most nearly means —","opts":["Capable of being touched or felt","Put out; extinguished","Deadly or destructive","Various; miscellaneous"],"ans":0,"triviaType":"vocab","word":"palpable"},{"cid":"mac2:abc:03","type":"BLOCK","power":3,"q":"In Macbeth, “dauntless” most nearly means —","opts":["Fearless; unshakeable","Unproductive; unsuccessful","A desire to harm others","Greatest in importance"],"ans":0,"triviaType":"vocab","word":"dauntless"},{"cid":"mac2:abc:04","type":"ATTACK","power":2,"q":"In Macbeth, “laudable” most nearly means —","opts":["Praiseworthy; commendable","Deserted; without inhabitants","A childish gesture","Greedy for wealth"],"ans":0,"triviaType":"vocab","word":"laudable"},{"cid":"mac2:abc:05","type":"BLOCK","power":1,"q":"In Macbeth, “dwindle” most nearly means —","opts":["To give in abundance","To shrink until little remains","To infer with little evidence","To predict divinely"],"ans":1,"triviaType":"vocab","word":"dwindle"},{"cid":"mac2:abc:06","type":"ATTACK","power":2,"q":"In Macbeth, “surmise” most nearly means —","opts":["To punish harshly","To guess with little evidence","To extinguish","To reprimand"],"ans":1,"triviaType":"vocab","word":"surmise"},{"cid":"mac2:abc:07","type":"BLOCK","power":2,"q":"In Macbeth, “dire” most nearly means —","opts":["Loud and boisterous","Indicating disaster; urgent","Loyal to a nation","Tangible"],"ans":1,"triviaType":"vocab","word":"dire"},{"cid":"mac2:abc:08","type":"ATTACK","power":3,"q":"In Macbeth, “malice” most nearly means —","opts":["Fearlessness","A desire to harm or see others suffer","Miscellaneous things","Supreme authority"],"ans":1,"triviaType":"vocab","word":"malice"},{"cid":"mac2:abc:09","type":"BLOCK","power":3,"q":"In Macbeth, “pernicious” most nearly means —","opts":["Praiseworthy","Deadly or destructive","Deserted","Greedy"],"ans":1,"triviaType":"vocab","word":"pernicious"},{"cid":"mac2:abc:10","type":"ATTACK","power":2,"q":"In Macbeth, “lavish” most nearly means —","opts":["To punish","To shrink","Extravagant; abundant","To guess"],"ans":2,"triviaType":"vocab","word":"lavish"},{"cid":"mac2:abc:11","type":"BLOCK","power":2,"q":"In Macbeth, “allegiance” most nearly means —","opts":["Boisterous behavior","Urgent trouble","Loyalty to a cause or nation","Tangible feeling"],"ans":2,"triviaType":"vocab","word":"allegiance"},{"cid":"mac2:abc:12","type":"ATTACK","power":3,"q":"In Macbeth, “tyrant” most nearly means —","opts":["A fearless warrior","An unproductive effort","A harsh or cruel leader","A miscellaneous item"],"ans":2,"triviaType":"vocab","word":"tyrant"},{"cid":"mac2:abc:13","type":"BLOCK","power":2,"q":"In Macbeth, “desolate” most nearly means —","opts":["Praiseworthy","Deadly","Deserted; without inhabitants","Greedy for gold"],"ans":2,"triviaType":"vocab","word":"desolate"},{"cid":"mac2:abc:14","type":"ATTACK","power":2,"q":"In Macbeth, “pristine” most nearly means —","opts":["Uncontrollable rage","Of high social position","Pure and uncorrupted","To criticize sharply"],"ans":2,"triviaType":"vocab","word":"pristine"},{"cid":"mac2:abc:15","type":"BLOCK","power":1,"q":"In Macbeth, “trifle” most nearly means —","opts":["To punish","To lavish","To guess","Something of little value"],"ans":3,"triviaType":"vocab","word":"trifle"},{"cid":"mac2:abc:16","type":"ATTACK","power":3,"q":"In Macbeth, “sacrilegious” most nearly means —","opts":["Boisterous","Urgent","Loyal","Grossly disrespectful of the sacred"],"ans":3,"triviaType":"vocab","word":"sacrilegious"},{"cid":"mac2:abc:17","type":"BLOCK","power":2,"q":"In Macbeth, “predominant” most nearly means —","opts":["Fruitless","Malicious","Sundry","Having the greatest authority"],"ans":3,"triviaType":"vocab","word":"predominant"},{"cid":"mac2:abc:18","type":"ATTACK","power":3,"q":"In Macbeth, “avaricious” most nearly means —","opts":["Praiseworthy","Deadly","Deserted","Having extreme greed for wealth"],"ans":3,"triviaType":"vocab","word":"avaricious"},{"cid":"mac2:abc:19","type":"BLOCK","power":2,"q":"In Macbeth, “upbraid” most nearly means —","opts":["To arbitrate","To spoil","To disturb","To criticize sharply; reprimand"],"ans":3,"triviaType":"vocab","word":"upbraid"}],"bookmarks":[{"id":"tatami","name":"Bloodstained Tatami","kind":"STATUS","rarity":"Rare","cid":"mac2:bm:tatami","pool":"core","effect":"mac2_tatami","text":"Inflict Smudge on the enemy Active. If they swap it out to clear the Smudge, it transfers to their new Active instead."},{"id":"cauldron","name":"Cauldron of the Yama-uba","kind":"UTILITY","rarity":"Epic","cid":"mac2:bm:cauldron","pool":"core","effect":"mac2_cauldron","text":"Look at the top 3 cards of your Trivia deck and reorder them. Then randomly afflict the enemy Active with Burn or Spill."},{"id":"gekokujo","name":"Gekokujō: The Great Usurpation","kind":"RESET","rarity":"Legendary","cid":"mac2:bm:gekokujo","pool":"core","effect":"mac2_gekokujo","text":"Swap a backstage character into the Active slot, heal it 30, grant Highlight (+20 next strike), and discard all charges on the enemy Active."}],"commanders":[{"id":"takamori_1e","name":"Kajiwara Takamori (1E)","hp":110,"accent":"#8a1a1a","baseChar":"macbeth","deck":"macbeth","fe":true,"cid":"mac2:cmd:takamori_1e","pool":"core","passive":{"name":"The Iron Prophecy","text":"The crones' promises cut costs: all of Takamori's moves cost 1 fewer ABC (min 1). Caveat: phantom blood permanently Smudges him; each enemy KO worsens his paranoia (future attach checks require two correct answers).","costMod":-1,"smudgeLock":true,"killWorsen":true},"atk":{"n":"Scorpion-Minded Strike","t":"Inflicts Glue; +20 vs a target already suffering a negative status.","cost":2,"dmg":50,"inflict":"glue","label":"50/2"},"blk":{"n":"Vaulting Ambition","t":"Avoids the attack, but Takamori must switch to backstage.","cost":1,"blockType":"negate","label":"30/1"}},{"id":"fuyuka_1e","name":"Lady Fuyuka (1E)","hp":95,"accent":"#7a2d5a","baseChar":"lady_macbeth","deck":"macbeth","fe":true,"cid":"mac2:cmd:fuyuka_1e","pool":"core","passive":{"name":"Whispers of the Silk Screen","text":"At the start of your Draw Phase, peek at the card your opponent just drew. Caveat: if you fail an attach check while Fuyuka is active, her composure shatters — skip your next Attack declaration.","peekFoeDraw":true,"failDiscardRandom":true},"atk":{"n":"Blood-Washing Delusion","t":"Guess the top card type of the enemy deck correctly: +20 damage and inflict Tear.","cost":2,"dmg":40,"inflict":"tear","label":"40/2"},"blk":{"n":"A Flower's Steely Mask","t":"Grants Margin Notes; if Fuyuka is below 40 HP, negate the attack entirely.","cost":1,"blockType":"negate","label":"30/1"}}]},"boosterPool":{"commanders":[{"id":"muneshige_1e","name":"Sakai Muneshige (1E)","hp":130,"accent":"#3a5a6a","baseChar":"banquo","deck":"macbeth","fe":true,"cid":"mac2:cmd:muneshige_1e","pool":"booster","passive":{"name":"Unbroken Shadow Vow","text":"+30 damage while Muneshige is your only living character on the field. Caveat: as an undead Onryō he cannot be healed or gain positive status; benching him inflicts Rip on the incoming character.","soloBonus":30,"noHeal":true,"onSwitchInflict":"rip"},"atk":{"n":"Banquet of the Damned","t":"Pierce (ignores defensive buffs/status). Muneshige takes 20 recoil.","cost":4,"dmg":70,"label":"70/4"},"blk":{"n":"Phantom Iron Armor","t":"Grants Laminate until end of round.","cost":2,"blockType":"laminate","label":"50/2"}},{"id":"genba_1e","name":"Ogami Genba (1E)","hp":100,"accent":"#6a3a1a","baseChar":"macduff","deck":"macbeth","fe":true,"cid":"mac2:cmd:genba_1e","pool":"booster","passive":{"name":"Untimely Ripped","text":"Once per turn, attach 1 ABC to Genba free of trivia. Caveat: his unnatural birth leaves a permanent, uncleansable Spill — he loses 10 HP at the end of every turn.","freeAttach":true,"spillLock":true},"atk":{"n":"Lone Wolf's Vengeance","t":"+10 damage per Bookmark in your discard (max +30).","cost":2,"dmg":40,"label":"40/2"},"blk":{"n":"Unyielding Defiance","t":"Damage cap of 20 for the rest of the phase; discard 1 attached Block ABC after.","cost":2,"blockType":"flat","label":"40/2"}}],"bookmarks":[{"id":"onryo","name":"Wrath of the Onryō","kind":"STATUS","rarity":"Rare","cid":"mac2:bm:onryo","pool":"booster","effect":"mac2_onryo","text":"Inflict Rip on the enemy Active. For two turns it is also Glued in place and cannot switch out."},{"id":"sakaki","name":"Sakaki Camouflage","kind":"BOOST","rarity":"Rare","cid":"mac2:bm:sakaki","pool":"booster","effect":"mac2_sakaki","text":"Grant your Active Laminate and Hardcover — immune to Tear/Rip/Glue/Spill and reduce incoming damage for two turns."},{"id":"muramasa","name":"Muramasa's Ghostly Edge","kind":"ITEM","rarity":"Epic","cid":"mac2:bm:muramasa","pool":"booster","effect":"mac2_muramasa","text":"Fully charge your Active's attack with no trivia. The cursed blade deals 20 self-damage and inflicts Burn on your Active."},{"id":"mirror","name":"Sengekokujō Mirror","kind":"BOOST","rarity":"Legendary","cid":"mac2:bm:mirror","pool":"booster","effect":"mac2_mirror","text":"Grant your Active 'Sengekokujō': while below 40 HP and the enemy Active is above 80, its attacks deal +20 and gain Pierce. Draw 2 on the KO."}]}};
+window.EXPANSIONS.sengekokujo={"name":"Sengekokujō","base":"macbeth","box":"data:image/jpeg;base64,__ABCASSET_998__","icon":"⚔️","packKey":"senge","theme":{"paper":"#161009","frame":"#0a0806","plate":"#3a2c18"},"counts":{"characters":15,"commanders":2,"bookmarks":3,"vocabABCs":20,"total":40},"imgpos":{"macbeth":"50% 6%","lady_macbeth":"50% 4%","banquo":"50% 6%","duncan":"50% 30%","witches":"50% 6%","malcolm":"50% 8%","macduff":"50% 6%","ross":"50% 10%","hecate":"50% 10%","fleance":"50% 5%","donalbain":"50% 8%","murderers":"50% 10%","apparitions":"50% 4%","siward":"50% 12%","porter":"50% 6%"},"img":{"macbeth":"__ABCASSET_970__","lady_macbeth":"__ABCASSET_971__","banquo":"__ABCASSET_972__","duncan":"__ABCASSET_973__","witches":"__ABCASSET_974__","malcolm":"__ABCASSET_975__","macduff":"__ABCASSET_976__","ross":"__ABCASSET_977__","hecate":"__ABCASSET_978__","fleance":"__ABCASSET_979__","donalbain":"__ABCASSET_980__","murderers":"__ABCASSET_981__","apparitions":"__ABCASSET_982__","siward":"__ABCASSET_983__","porter":"__ABCASSET_984__"},"battle":{"chars":[{"id":"macbeth","name":"Kajiwara Takamori","hp":150,"accent":"#8a1a1a","tags":["King"],"atk":{"n":"Scorpion-Minded Strike","t":"Ambition made blade — cuts deeper into the already-wounded.","cost":3,"dmg":50,"onKO":{"selfStatus":"burn"},"label":"50/3"},"blk":{"n":"Vaulting Ambition","t":"Slips the blow, but the throne demands he yield the field.","cost":2,"block":40,"blkCleanse":"tear","blockType":"cleanse","label":"40/2"},"cid":"mac2:char:macbeth","kind":"char","_skin":"takamori"},{"id":"lady_macbeth","name":"Lady Fuyuka","hp":130,"accent":"#7a2d5a","tags":["Noble"],"atk":{"n":"Blood-Washing Delusion","t":"A spotless hand that will never come clean — inflicts Glitch of guilt.","cost":2,"dmg":30,"inflict":"smudge","label":"30/2"},"blk":{"n":"A Flower's Steely Mask","t":"Winter composure turns the strike aside.","cost":2,"block":40,"blkCleanse":["burn","spill"],"blockType":"cleanse","label":"40/2"},"cid":"mac2:char:lady_macbeth","kind":"char","_skin":"fuyuka"},{"id":"banquo","name":"Sakai Muneshige","hp":70,"accent":"#3a5a6a","tags":["Ghost"],"atk":{"n":"Banquet of the Damned","t":"The Onryō returns to the feast — a bleeding, vengeful haunt.","cost":3,"dmg":60,"inflict":"spill","label":"60/3"},"blk":{"n":"Phantom Iron Armor","t":"Spectral plate turns steel to mist.","cost":2,"block":40,"blockType":"negateStatus","label":"40/2"},"cid":"mac2:char:banquo","kind":"char","_skin":"muneshige"},{"id":"duncan","name":"Lord Takahito","hp":120,"accent":"#b5942e","tags":["King"],"atk":{"n":"Benevolent Command","t":"The old lord's authority, soft but sovereign.","cost":2,"dmg":40,"selfStatus":"highlight","label":"40/2"},"blk":{"n":"Sleeping Guard","t":"Even at rest, the daimyō's guard holds firm.","cost":2,"block":30,"blockType":"laminate","label":"30/2"},"cid":"mac2:char:duncan","kind":"char","_skin":"takahito"},{"id":"witches","name":"The Three Yama-uba","hp":90,"accent":"#5a3a6a","tags":["Witch"],"atk":{"n":"Loom of Fate","t":"Three crones spin the thread of a stolen crown.","cost":2,"dmg":30,"inflictChoice":["glue","spill"],"label":"30/2"},"blk":{"n":"Bamboo Mist","t":"Vanish into the whispering forest.","cost":2,"block":30,"blockType":"negateStatus","label":"30/2"},"cid":"mac2:char:witches","kind":"char","_skin":"yamauba"},{"id":"malcolm","name":"Lord Yoshiteru","hp":80,"accent":"#2e6a4a","tags":["Heir"],"atk":{"n":"Rightful Heir's Rally","t":"The true heir gathers a borrowed army.","cost":3,"dmg":60,"cleanseAlly":"smudge","label":"60/3"},"blk":{"n":"Exile's Caution","t":"Guards against the assassin's reach.","cost":2,"block":40,"blkCleanse":"tear","blockType":"cleanse","label":"40/2"},"cid":"mac2:char:malcolm","kind":"char","_skin":"yoshiteru"},{"id":"macduff","name":"Ogami Genba","hp":160,"accent":"#6a3a1a","tags":["Thane"],"atk":{"n":"Lone Wolf's Vengeance","t":"Not born of woman — the beast-born wolf cannot be stopped.","cost":4,"dmg":70,"pierceLaminate":true,"label":"70/4"},"blk":{"n":"Unyielding Defiance","t":"Caps the tyrant's fury.","cost":2,"block":40,"blkCleanse":"burn","blockType":"cleanse","label":"40/2"},"cid":"mac2:char:macduff","kind":"char","_skin":"genba"},{"id":"ross","name":"Oribe","hp":120,"accent":"#4a5a2e","tags":["Messenger"],"atk":{"n":"Courtier's Blade","t":"A messenger who navigates shifting tides.","cost":2,"dmg":40,"drawAfter":1,"label":"40/2"},"blk":{"n":"Diplomatic Guard","t":"Deflects without losing his head.","cost":1,"block":30,"blkCleanse":"glue","blockType":"cleanse","label":"30/1"},"cid":"mac2:char:ross","kind":"char","_skin":"oribe"},{"id":"hecate","name":"The Pale Matriarch","hp":100,"accent":"#7a2d7a","tags":["Witch"],"atk":{"n":"Yōkai's Scorn","t":"The ancient forest spirit mocks mortal arrogance — System-Locks the fool.","cost":3,"dmg":50,"inflict":"rip","label":"50/3"},"blk":{"n":"Kami's Veil","t":"Wrapped in old-god protection.","cost":2,"block":30,"blockType":"laminate","label":"30/2"},"cid":"mac2:char:hecate","kind":"char","_skin":"matriarch"},{"id":"fleance","name":"Sakai Munesuke","hp":70,"accent":"#3a6a7a","tags":["Noble"],"atk":{"n":"Fleeing Bloodline","t":"The boy who escapes to carry on the line.","cost":2,"dmg":40,"selfStatus":"highlight","label":"40/2"},"blk":{"n":"Night Escape","t":"Slips the ambush into darkness.","cost":2,"block":40,"blkCleanse":"rip","blockType":"cleanse","label":"40/2"},"cid":"mac2:char:fleance","kind":"char","_skin":"munesuke"},{"id":"donalbain","name":"Lord Kunimasa","hp":110,"accent":"#5a4a2e","tags":["Prince"],"atk":{"n":"Split the Risk","t":"The younger son flees to divide the danger.","cost":2,"dmg":40,"cleanseAlly":"glue","label":"40/2"},"blk":{"n":"Hidden Retreat","t":"Vanishes to a distant province.","cost":2,"block":50,"cond":[{"test":"defenderHasStatus","status":"burn","then":{"blockAdd":20}}],"label":"50/2"},"cid":"mac2:char:donalbain","kind":"char","_skin":"kunimasa"},{"id":"murderers","name":"The Nameless Suppa","hp":60,"accent":"#2a2a2a","tags":["Assassin"],"atk":{"n":"Dishonorable Ambush","t":"Low-born shinobi hired for a shameful kill — leaves them Torn.","cost":3,"dmg":60,"inflict":"tear","label":"60/3"},"blk":{"n":"Shadow Step","t":"Immune to reprisal, this turn.","cost":1,"block":30,"blockType":"immunity","label":"30/1"},"cid":"mac2:char:murderers","kind":"char","_skin":"suppa"},{"id":"apparitions","name":"The Three Apparitions","hp":120,"accent":"#4a6a6a","tags":["Spirit"],"atk":{"n":"Omens of Kitsunebi","t":"Fox-fire visions scramble the mind — inflicts Glitch.","cost":3,"dmg":60,"inflict":"smudge","stripPos":"highlight","label":"60/3"},"blk":{"n":"Spectral Ward","t":"Ghost-light turns aside the strike.","cost":2,"block":40,"blockType":"negateStatus","label":"40/2"},"cid":"mac2:char:apparitions","kind":"char","_skin":"apparitions"},{"id":"siward","name":"General Shimazu","hp":80,"accent":"#6a5a1a","tags":["General"],"atk":{"n":"Foreign Vanguard","t":"A battle-hardened warlord leads the charge.","cost":3,"dmg":70,"cond":[{"test":"selfHasStatus","status":"highlight","then":{"dmgAdd":20}}],"label":"70/3"},"blk":{"n":"War-Tested Guard","t":"Decades of battle harden his defense.","cost":2,"block":50,"blkCleanse":"tear","blockType":"cleanse","label":"50/2"},"cid":"mac2:char:siward","kind":"char","_skin":"shimazu"},{"id":"porter","name":"Rokurō the Gatekeeper","hp":70,"accent":"#7a5a2a","tags":["Comic"],"atk":{"n":"Gates of Yomi","t":"The drunken porter opens the gate to the underworld — Glues them in place.","cost":1,"dmg":30,"inflict":"glue","label":"30/1"},"blk":{"n":"Gatekeeper's Bar","t":"Bars the way with a comedic grumble.","cost":1,"block":30,"blkCleanse":["burn","smudge"],"blockType":"cleanse","label":"30/1"},"cid":"mac2:char:porter","kind":"char","_skin":"rokuro"}],"abcs":[{"cid":"mac2:abc:00","type":"ATTACK","power":2,"q":"In Macbeth, “chastise” most nearly means —","opts":["To punish or severely criticize","To make less until little remains","Loyalty to a cause","Fearless; unable to be intimidated"],"ans":0,"triviaType":"vocab","word":"chastise"},{"cid":"mac2:abc:01","type":"BLOCK","power":2,"q":"In Macbeth, “prophetic” most nearly means —","opts":["Predicting as if by divine power","Extravagant; lavish","A harsh, cruel leader","To damage or spoil"],"ans":0,"triviaType":"vocab","word":"prophetic"},{"cid":"mac2:abc:02","type":"ATTACK","power":2,"q":"In Macbeth, “palpable” most nearly means —","opts":["Capable of being touched or felt","Put out; extinguished","Deadly or destructive","Various; miscellaneous"],"ans":0,"triviaType":"vocab","word":"palpable"},{"cid":"mac2:abc:03","type":"BLOCK","power":3,"q":"In Macbeth, “dauntless” most nearly means —","opts":["Fearless; unshakeable","Unproductive; unsuccessful","A desire to harm others","Greatest in importance"],"ans":0,"triviaType":"vocab","word":"dauntless"},{"cid":"mac2:abc:04","type":"ATTACK","power":2,"q":"In Macbeth, “laudable” most nearly means —","opts":["Praiseworthy; commendable","Deserted; without inhabitants","A childish gesture","Greedy for wealth"],"ans":0,"triviaType":"vocab","word":"laudable"},{"cid":"mac2:abc:05","type":"BLOCK","power":1,"q":"In Macbeth, “dwindle” most nearly means —","opts":["To give in abundance","To shrink until little remains","To infer with little evidence","To predict divinely"],"ans":1,"triviaType":"vocab","word":"dwindle"},{"cid":"mac2:abc:06","type":"ATTACK","power":2,"q":"In Macbeth, “surmise” most nearly means —","opts":["To punish harshly","To guess with little evidence","To extinguish","To reprimand"],"ans":1,"triviaType":"vocab","word":"surmise"},{"cid":"mac2:abc:07","type":"BLOCK","power":2,"q":"In Macbeth, “dire” most nearly means —","opts":["Loud and boisterous","Indicating disaster; urgent","Loyal to a nation","Tangible"],"ans":1,"triviaType":"vocab","word":"dire"},{"cid":"mac2:abc:08","type":"ATTACK","power":3,"q":"In Macbeth, “malice” most nearly means —","opts":["Fearlessness","A desire to harm or see others suffer","Miscellaneous things","Supreme authority"],"ans":1,"triviaType":"vocab","word":"malice"},{"cid":"mac2:abc:09","type":"BLOCK","power":3,"q":"In Macbeth, “pernicious” most nearly means —","opts":["Praiseworthy","Deadly or destructive","Deserted","Greedy"],"ans":1,"triviaType":"vocab","word":"pernicious"},{"cid":"mac2:abc:10","type":"ATTACK","power":2,"q":"In Macbeth, “lavish” most nearly means —","opts":["To punish","To shrink","Extravagant; abundant","To guess"],"ans":2,"triviaType":"vocab","word":"lavish"},{"cid":"mac2:abc:11","type":"BLOCK","power":2,"q":"In Macbeth, “allegiance” most nearly means —","opts":["Boisterous behavior","Urgent trouble","Loyalty to a cause or nation","Tangible feeling"],"ans":2,"triviaType":"vocab","word":"allegiance"},{"cid":"mac2:abc:12","type":"ATTACK","power":3,"q":"In Macbeth, “tyrant” most nearly means —","opts":["A fearless warrior","An unproductive effort","A harsh or cruel leader","A miscellaneous item"],"ans":2,"triviaType":"vocab","word":"tyrant"},{"cid":"mac2:abc:13","type":"BLOCK","power":2,"q":"In Macbeth, “desolate” most nearly means —","opts":["Praiseworthy","Deadly","Deserted; without inhabitants","Greedy for gold"],"ans":2,"triviaType":"vocab","word":"desolate"},{"cid":"mac2:abc:14","type":"ATTACK","power":2,"q":"In Macbeth, “pristine” most nearly means —","opts":["Uncontrollable rage","Of high social position","Pure and uncorrupted","To criticize sharply"],"ans":2,"triviaType":"vocab","word":"pristine"},{"cid":"mac2:abc:15","type":"BLOCK","power":1,"q":"In Macbeth, “trifle” most nearly means —","opts":["To punish","To lavish","To guess","Something of little value"],"ans":3,"triviaType":"vocab","word":"trifle"},{"cid":"mac2:abc:16","type":"ATTACK","power":3,"q":"In Macbeth, “sacrilegious” most nearly means —","opts":["Boisterous","Urgent","Loyal","Grossly disrespectful of the sacred"],"ans":3,"triviaType":"vocab","word":"sacrilegious"},{"cid":"mac2:abc:17","type":"BLOCK","power":2,"q":"In Macbeth, “predominant” most nearly means —","opts":["Fruitless","Malicious","Sundry","Having the greatest authority"],"ans":3,"triviaType":"vocab","word":"predominant"},{"cid":"mac2:abc:18","type":"ATTACK","power":3,"q":"In Macbeth, “avaricious” most nearly means —","opts":["Praiseworthy","Deadly","Deserted","Having extreme greed for wealth"],"ans":3,"triviaType":"vocab","word":"avaricious"},{"cid":"mac2:abc:19","type":"BLOCK","power":2,"q":"In Macbeth, “upbraid” most nearly means —","opts":["To arbitrate","To spoil","To disturb","To criticize sharply; reprimand"],"ans":3,"triviaType":"vocab","word":"upbraid"}],"bookmarks":[{"id":"tatami","name":"Bloodstained Tatami","kind":"STATUS","rarity":"R","cid":"mac2:bm:tatami","pool":"core","effect":"mac2_tatami","text":"Inflict Smudge on the enemy Active. If they swap it out to clear the Smudge, it transfers to their new Active instead."},{"id":"cauldron","name":"Cauldron of the Yama-uba","kind":"UTILITY","rarity":"E","cid":"mac2:bm:cauldron","pool":"core","effect":"mac2_cauldron","text":"Look at the top 3 cards of your Trivia deck and reorder them. Then randomly afflict the enemy Active with Burn or Spill."},{"id":"gekokujo","name":"Gekokujō: The Great Usurpation","kind":"RESET","rarity":"L","cid":"mac2:bm:gekokujo","pool":"core","effect":"mac2_gekokujo","text":"Swap a backstage character into the Active slot, heal it 30, grant Highlight (+20 next strike), and discard all charges on the enemy Active."}],"commanders":[{"id":"takamori_1e","name":"Kajiwara Takamori (1E)","hp":110,"accent":"#8a1a1a","baseChar":"macbeth","deck":"macbeth","fe":true,"cid":"mac2:cmd:takamori_1e","pool":"core","passive":{"name":"The Iron Prophecy","text":"The crones' promises cut costs: all of Takamori's moves cost 1 fewer ABC (min 1). Caveat: phantom blood permanently Smudges him; each enemy KO worsens his paranoia (future attach checks require two correct answers).","costMod":-1,"smudgeLock":true,"killWorsen":true},"atk":{"n":"Scorpion-Minded Strike","t":"Inflicts Glue; +20 vs a target already suffering a negative status.","cost":2,"dmg":50,"inflict":"glue","label":"50/2"},"blk":{"n":"Vaulting Ambition","t":"Avoids the attack, but Takamori must switch to backstage.","cost":1,"blockType":"negate","label":"30/1"}},{"id":"fuyuka_1e","name":"Lady Fuyuka (1E)","hp":95,"accent":"#7a2d5a","baseChar":"lady_macbeth","deck":"macbeth","fe":true,"cid":"mac2:cmd:fuyuka_1e","pool":"core","passive":{"name":"Whispers of the Silk Screen","text":"At the start of your Draw Phase, peek at the card your opponent just drew. Caveat: if you fail an attach check while Fuyuka is active, her composure shatters — skip your next Attack declaration.","peekFoeDraw":true,"failDiscardRandom":true},"atk":{"n":"Blood-Washing Delusion","t":"Guess the top card type of the enemy deck correctly: +20 damage and inflict Tear.","cost":2,"dmg":40,"inflict":"tear","label":"40/2"},"blk":{"n":"A Flower's Steely Mask","t":"Grants Margin Notes; if Fuyuka is below 40 HP, negate the attack entirely.","cost":1,"blockType":"negate","label":"30/1"}}]},"boosterPool":{"commanders":[{"id":"muneshige_1e","name":"Sakai Muneshige (1E)","hp":130,"accent":"#3a5a6a","baseChar":"banquo","deck":"macbeth","fe":true,"cid":"mac2:cmd:muneshige_1e","pool":"booster","passive":{"name":"Unbroken Shadow Vow","text":"+30 damage while Muneshige is your only living character on the field. Caveat: as an undead Onryō he cannot be healed or gain positive status; benching him inflicts Rip on the incoming character.","soloBonus":30,"noHeal":true,"onSwitchInflict":"rip"},"atk":{"n":"Banquet of the Damned","t":"Pierce (ignores defensive buffs/status). Muneshige takes 20 recoil.","cost":4,"dmg":70,"label":"70/4"},"blk":{"n":"Phantom Iron Armor","t":"Grants Laminate until end of round.","cost":2,"blockType":"laminate","label":"50/2"}},{"id":"genba_1e","name":"Ogami Genba (1E)","hp":100,"accent":"#6a3a1a","baseChar":"macduff","deck":"macbeth","fe":true,"cid":"mac2:cmd:genba_1e","pool":"booster","passive":{"name":"Untimely Ripped","text":"Once per turn, attach 1 ABC to Genba free of trivia. Caveat: his unnatural birth leaves a permanent, uncleansable Spill — he loses 10 HP at the end of every turn.","freeAttach":true,"spillLock":true},"atk":{"n":"Lone Wolf's Vengeance","t":"+10 damage per Bookmark in your discard (max +30).","cost":2,"dmg":40,"label":"40/2"},"blk":{"n":"Unyielding Defiance","t":"Damage cap of 20 for the rest of the phase; discard 1 attached Block ABC after.","cost":2,"blockType":"flat","label":"40/2"}}],"bookmarks":[{"id":"onryo","name":"Wrath of the Onryō","kind":"STATUS","rarity":"R","cid":"mac2:bm:onryo","pool":"booster","effect":"mac2_onryo","text":"Inflict Rip on the enemy Active. For two turns it is also Glued in place and cannot switch out."},{"id":"sakaki","name":"Sakaki Camouflage","kind":"BOOST","rarity":"R","cid":"mac2:bm:sakaki","pool":"booster","effect":"mac2_sakaki","text":"Grant your Active Laminate and Hardcover — immune to Tear/Rip/Glue/Spill and reduce incoming damage for two turns."},{"id":"muramasa","name":"Muramasa's Ghostly Edge","kind":"ITEM","rarity":"E","cid":"mac2:bm:muramasa","pool":"booster","effect":"mac2_muramasa","text":"Fully charge your Active's attack with no trivia. The cursed blade deals 20 self-damage and inflicts Burn on your Active."},{"id":"mirror","name":"Sengekokujō Mirror","kind":"BOOST","rarity":"L","cid":"mac2:bm:mirror","pool":"booster","effect":"mac2_mirror","text":"Grant your Active 'Sengekokujō': while below 40 HP and the enemy Active is above 80, its attacks deal +20 and gain Pierce. Draw 2 on the KO."}]}};
 </script>
 <script>
 window.CHAR_IMG_NEW={"james_gatz": "data:image/jpeg;base64,__ABCASSET_164__", "meyer_wolfsheim": "data:image/jpeg;base64,__ABCASSET_165__", "owl_eyes": "data:image/jpeg;base64,__ABCASSET_166__", "klipspringer": "data:image/jpeg;base64,__ABCASSET_167__", "dan_cody": "data:image/jpeg;base64,__ABCASSET_168__", "catherine": "data:image/jpeg;base64,__ABCASSET_169__", "henry_gatz": "data:image/jpeg;base64,__ABCASSET_170__", "pammy_buchanan": "data:image/jpeg;base64,__ABCASSET_171__", "tom": "data:image/jpeg;base64,__ABCASSET_163__", "daisy": "data:image/jpeg;base64,__ABCASSET_15__", "gatsby": "data:image/jpeg;base64,__ABCASSET_16__", "myrtle": "data:image/jpeg;base64,__ABCASSET_17__", "nick": "data:image/jpeg;base64,__ABCASSET_18__", "george": "data:image/jpeg;base64,__ABCASSET_19__", "jordan": "data:image/jpeg;base64,__ABCASSET_20__", "abigail": "data:image/jpeg;base64,__ABCASSET_21__", "jproctor": "data:image/jpeg;base64,__ABCASSET_22__", "eproctor": "data:image/jpeg;base64,__ABCASSET_23__", "parris": "data:image/jpeg;base64,__ABCASSET_24__", "putnam": "data:image/jpeg;base64,__ABCASSET_25__", "giles": "data:image/jpeg;base64,__ABCASSET_26__", "tituba": "data:image/jpeg;base64,__ABCASSET_27__", "rebecca": "data:image/jpeg;base64,__ABCASSET_986__", "salem": "data:image/jpeg;base64,__ABCASSET_987__"};
@@ -3390,6 +3418,8 @@ function thesisMet(side){
     case 'archetypal': ok=!!ce.atkEqBlk; break;                                          // attack and block resolved equal
     case 'psycho': ok=!!ce.oppWrongBlk; break;                                           // opponent missed a Block trivia
     case 'affective': ok=(ct.oppWrong||0)>=2||!!ce.oppWrong2; break;                     // opponent 2 wrong in one turn
+    case 'mise': ok=((ce.bmStreak||0)+(ct.bm?1:0))>=4; break;                            // Bookmark on 4 straight turns
+    case 'adapt': ok=!!ce.adaptSpent; break;                                             // spent an inherited charge
     case 'deconstruct': ok=!!ce.oppBmBlocked; break;                                     // opp Bookmark tried to skip/stop you
     default: ok=false;
   }
@@ -3405,7 +3435,7 @@ function fulfillThesis(side){
     case 'biographical': drawN(side,3); break;
     case 'archetypal': { const lim=S.settings.handSize; while(P.hand.length<lim && (P.deck.length||P.discard.length)){ if(!P.deck.length){P.deck=shuffle(P.discard.splice(0));} P.hand.push(P.deck.shift()); } break; }
     case 'feminist': case 'psycho': { if(opp.hand.length){ opp.discard.push(opp.hand.splice(rnd(opp.hand.length),1)[0]); pushLog(`${who(opp)} discards a card.`);} break; }
-    case 'postcolonial': case 'deconstruct': { if(oa){ oa.hp=Math.max(0,oa.hp-20); pushLog(`${oa.name} takes 20 damage. (${oa.hp}/${oa.maxHp})`); flash(oppKey); fxAttack(oppKey,20); checkKO(opp,oppKey);} break; }
+    case 'postcolonial': case 'deconstruct': { if(oa){ applyDmg(oa,20); pushLog(`${oa.name} takes 20 damage. (${oa.hp}/${oa.maxHp})`); flash(oppKey); fxAttack(oppKey,20); checkKO(opp,oppKey);} break; }
     case 'newhist': { const bi=P.deck.findIndex(c=>c.cat==='bookmark'); if(bi>=0){ P.hand.push(P.deck.splice(bi,1)[0]); pushLog(`${who(P)} tutors a Bookmark to hand.`);} else pushLog('No Bookmark left in deck.'); break; }
     case 'queer': if(act){ const b0=act.hp; act.hp=act.maxHp; fxHeal(sideOfChar(act),act.hp-b0); pushLog(`${act.name} fully healed.`);} break;
     case 'structuralism': opp.flags.noBookmarks=true; pushLog(`${who(opp)} cannot use Bookmarks next turn.`); break;
@@ -3413,9 +3443,79 @@ function fulfillThesis(side){
     case 'russian': { const bench=P.team.map((c,i)=>({c,i})).filter(o=>o.i!==P.activeIdx&&o.c.hp>0); if(bench.length){ doSwitch(P,bench[0].i); pushLog(`${P.team[P.activeIdx].name} steps up (free swap).`);} break; }
     case 'ecocrit': if(act){ act.status.ecoNegate=true; pushLog(`${act.name} will negate the next incoming attack.`);} break;
     case 'affective': { opp.deck.push(...opp.hand); opp.hand=[]; opp.deck=shuffle(opp.deck); for(let i=0;i<3;i++) if(opp.deck.length) opp.hand.push(opp.deck.shift()); pushLog(`${who(opp)} reshuffles and redraws 3.`); break; }
+    case 'mise': { if(act){ act.atkCharge=act.atkCharge||[]; act.blkCharge=act.blkCharge||[];
+        const na=(act.atk&&act.atk.cost)||3, nb=(act.blk&&act.blk.cost)||2;
+        while(act.atkCharge.length<na) act.atkCharge.push({cat:'abc',type:'ATTACK',power:0,_wild:true,_mise:true});
+        while(act.blkCharge.length<nb) act.blkCharge.push({cat:'abc',type:'BLOCK',power:0,_wild:true,_mise:true});
+        pushLog(`${act.name} is fully staged \u2014 attack and block charged. Unspent bonus charges vanish at end of turn.`); } break; }
+    case 'adapt': { const dead=(P.grave||[]).slice();
+        if(!dead.length){ pushLog('Adaptation: no fallen ally to return.'); break; }
+        const go=t=>{ if(!t) return; const gi=P.grave.indexOf(t); if(gi>=0) P.grave.splice(gi,1);
+          t.hp=Math.max(10,Math.round(t.maxHp/2)); t.atkCharge=[]; t.blkCharge=[]; t.status={};
+          if(!P.team.includes(t)) P.team.push(t);
+          pushLog(`Adaptation: ${t.name} returns to the bench at ${t.hp} HP.`); try{ fxRevive(side); }catch(e){} render(); };
+        if(side==='you' && dead.length>1) askPick('Return which character?', dead.map(g=>({label:`${g.name}  (${Math.max(10,Math.round(g.maxHp/2))} HP)`,val:g.uid})), uid=>go(P.grave.find(g=>g.uid===uid)));
+        else go(dead[0]);
+        break; }
     default: break;
   }
   if(!S.over) finishCrit(); else render();
+}
+
+/* ===== NEW CARDS PATCH (Aug 2026) — central damage chokepoint =====
+   Plot Armor  : total damage immunity on a flagged character until its owner's next turn (Pierce included).
+   Cliffhanger : while S._cliffhanger is live, neither Active may be reduced below 1 HP.
+   Every HP-loss site routes through applyDmg() so new global damage modifiers have ONE home. */
+function isActiveAny(c){ if(!c||!S) return false; return (S.you&&S.you.team&&S.you.team[S.you.activeIdx]===c)||(S.opp&&S.opp.team&&S.opp.team[S.opp.activeIdx]===c); }
+function applyDmg(c, amt, opts){
+  opts=opts||{};
+  if(!c || !(amt>0) || c.hp<=0) return 0;
+  if(c.status && c.status.plotarmor){ if(!opts.quiet && typeof pushLog==='function') pushLog(`\u{1F6E1} Plot Armor: ${c.name} takes no damage.`); return 0; }
+  let d=Math.min(amt, c.hp);
+  if((S._cliffhanger||0)>0 && isActiveAny(c) && d>=c.hp){ d=Math.max(0,c.hp-1); if(!opts.quiet && typeof pushLog==='function') pushLog(`\u{1F4D6} Cliffhanger: ${c.name} holds on at 1 HP.`); }
+  c.hp=Math.max(0,c.hp-d);
+  return d;
+}
+
+/* ---- Saga framework + Adaptation inheritance (Aug 2026 patch) ---- */
+function roman(n){ return ['','I','II','III','IV','V','VI'][n]||String(n); }
+function sagaAct(p, card, key){
+  const side=(p===S.you)?'you':'opp', foe=foeOf(side), a=active(p), oa=active(foe);
+  switch(key){
+    case 'draw1': drawN(side,1); pushLog(`${card.name}: draw 1.`); break;
+    case 'tearfoe': if(oa&&oa.hp>0&&inflict(oa,'tear')) pushLog(`${card.name}: ${oa.name} is Torn.`); break;
+    case 'atkboost30': if(a){ a._sagaBonus=(a._sagaBonus||0)+30; pushLog(`${card.name}: ${a.name}'s next attack deals +30.`); } break;
+    case 'hardcover': if(a){ grant(a,'hardcover'); pushLog(`${card.name}: ${a.name} gains Hardcover.`); } break;
+    case 'heal30': if(a){ const h=healChar(a,30); if(h>0){ try{fxHeal(side,h);}catch(e){} pushLog(`${card.name}: ${a.name} heals ${h}. (${a.hp}/${a.maxHp} HP)`); } } break;
+    case 'revive': {
+      const dead=(p.grave||[]).slice();
+      if(!dead.length){ pushLog(`${card.name}: no fallen ally to return.`); break; }
+      const go=t=>{ if(!t) return; const gi=p.grave.indexOf(t); if(gi>=0) p.grave.splice(gi,1);
+        t.hp=Math.max(10,Math.round(t.maxHp/2)); t.atkCharge=[]; t.blkCharge=[]; t.status={};
+        if(!p.team.includes(t)) p.team.push(t);
+        pushLog(`${card.name}: ${t.name} returns to the bench at ${t.hp} HP.`); try{ fxRevive(side); }catch(e){} render&&render(); };
+      if(side==='you' && dead.length>1) askPick(`${card.name} — return which character?`, dead.map(g=>({label:`${g.name}  (${Math.max(10,Math.round(g.maxHp/2))} HP)`,val:g.uid})), uid=>go(p.grave.find(g=>g.uid===uid)));
+      else go(dead[0]);
+      break; }
+    default: break;
+  }
+}
+function adaptInherit(p, side, fallen, succ){
+  if(!fallen||!succ) return;
+  const fdmg=(fallen.atk&&fallen.atk.dmg)||0, sdmg=(succ.atk&&succ.atk.dmg)||0;
+  if(fdmg>sdmg){ succ._adaptDmg=fdmg; pushLog(`Adaptation — the text survives: ${succ.name} strikes for ${fdmg} while it holds the role.`); }
+  const pool=[].concat(fallen.atkCharge||[], fallen.blkCharge||[]).filter(c=>c&&!c._wild);
+  if(!pool.length){ pushLog('Adaptation: nothing was charged to inherit.'); return; }
+  const take=(c)=>{ if(!c) return;
+    let i=(fallen.atkCharge||[]).indexOf(c); const isAtk=i>=0;
+    if(i>=0) fallen.atkCharge.splice(i,1);
+    else { i=(fallen.blkCharge||[]).indexOf(c); if(i>=0) fallen.blkCharge.splice(i,1); else return; }
+    c._inherited=true;
+    if(isAtk)(succ.atkCharge||(succ.atkCharge=[])).push(c); else (succ.blkCharge||(succ.blkCharge=[])).push(c);
+    pushLog(`Adaptation: ${succ.name} inherits a charged ${isAtk?'Attack':'Block'} ABC from ${fallen.name}.`); render&&render(); };
+  const nameOf=(c)=>(c.word?('“'+c.word+'”'):(c.name||'ABC'))+' · '+(c.type||'');
+  if(side==='you' && pool.length>1) askPick('Adaptation — inherit which charge?', pool.map((c,i)=>({label:nameOf(c),val:i})), i=>take(pool[i]));
+  else take(pool[0]);
 }
 function healChar(c, amt){ if(c && c.hp<=0) escClear(c); if(!c||amt<=0) return 0; if(c.fe && c.passive && c.passive.noHeal){ if(typeof pushLog==='function') pushLog(`${c.name} is too far gone to be healed.`); return 0; } const b0=c.hp; c.hp=Math.min(c.maxHp, c.hp+amt); return c.hp-b0; }
 function drawN(side,n){ const P=S[side]; const foe=S[side==='you'?'opp':'you']; const spy=foe&&foe.team&&foe.team[foe.activeIdx]; const canPeek=spy&&spy.hp>0&&spy.fe&&spy.passive&&spy.passive.peekFoeDraw; for(let i=0;i<n;i++){ if(!P.deck.length && P.discard.length) P.deck=shuffle(P.discard.splice(0)); if(P.deck.length){ const c=P.deck.shift(); c._new=true; P.hand.push(c); if(canPeek){ var nm=(c.name||(c.word?('“'+c.word+'” '+(c.type||'')):(c.type||'a card'))); pushLog(`${spy.name} spies through the silk screen — ${who(P)} drew ${nm}.`); } } } }
@@ -3445,6 +3545,9 @@ function paintTimer(){
 function startTurn(){
   if(!S) return;
   const p = me();
+  /* NEW CARDS PATCH — global turn counters tick before anything reads them */
+  if(S._censor>0) { S._censor--; if(S._censor===0) pushLog('Censorship lifts \u2014 Bookmarks may be played again.'); }
+  if(S._cliffhanger>0){ S._cliffhanger--; if(S._cliffhanger===0) pushLog('The Cliffhanger resolves \u2014 HP floors are gone.'); }
   const _feFree = feOnField(p).reduce((n,c)=>n+((c.passive&&c.passive.freeAttach)||0),0);
   p.flags.feFree = _feFree;
   p.attachesLeft = S.settings.maxAttaches + _feFree;
@@ -3470,13 +3573,13 @@ function startTurn(){
   pushLog(`— ${p===S.you?'Your':"Opponent's"} turn —`);
   // poison ticks at the start of each turn
   if(S.poison>0){
-    ['you','opp'].forEach(k=>{ const a=active(S[k]); if(a&&a.hp>0){ a.hp=Math.max(0,a.hp-20); pushLog(`Poison: ${a.name} loses 20 HP.`);} });
+    ['you','opp'].forEach(k=>{ const a=active(S[k]); if(a&&a.hp>0){ const _pz=applyDmg(a,20); if(_pz>0) pushLog(`Poison: ${a.name} loses ${_pz} HP.`);} });
     S.poison--; ['you','opp'].forEach(k=>checkKO(S[k],k));
   }
   // Burn / Spill tick (lose 10 HP, once per round); expire this player's timed statuses (Hardcover, Laminate, Glue, Tear cost-up)
   // ticks once per round: only the player whose turn is starting
   { const _tk=S.turn; S[_tk].team.forEach(c=>{
-    if(c.hp>0 && (c.status.burn||c.status.spill)){ let loss=0; if(c.status.burn)loss=10; if(c.status.spill)loss=Math.max(loss,c.status.spillAmt||10); c.hp=Math.max(0,c.hp-loss); pushLog(`${c.status.burn?'Burn':'Spill'}: ${c.name} loses ${loss} HP.`); }
+    if(c.hp>0 && (c.status.burn||c.status.spill)){ let loss=0; if(c.status.burn)loss=10; if(c.status.spill)loss=Math.max(loss,c.status.spillAmt||10); const _bs=applyDmg(c,loss); if(_bs>0) pushLog(`${c.status.burn?'Burn':'Spill'}: ${c.name} loses ${_bs} HP.`); }
   }); checkKO(S[_tk],_tk); }
   // ---- Siphon: drains the victim at the start of its own turn, feeds the owner ----
   { const _sk=S.turn, _P=S[_sk]; _P._leechTurn=0;
@@ -3502,7 +3605,7 @@ function startTurn(){
         _P.attachesLeft=Math.max(0,(_P.attachesLeft||0)-1);
         pushLog(`\u2604 Siphon: ${c.name} loses an attach this turn.`);
       } else {
-        const dealt=Math.min(sp.amt||10, c.hp); c.hp=Math.max(0,c.hp-dealt);
+        const dealt=applyDmg(c, sp.amt||10);
         pushLog(`\u2604 Siphon: ${c.name} loses ${dealt} HP.`);
         if(own && own.c && own.c.hp>0){
           const room=Math.max(0,20-(own.P._leechTurn||0));
@@ -3516,15 +3619,25 @@ function startTurn(){
     });
     _P._siphonStole=false; checkKO(_P,_sk);
   }
-  p.team.forEach(c=>{ ['hardcover','laminate','glue','costUp'].forEach(s=>{ if(c.status[s]) delete c.status[s]; }); });
+  p.team.forEach(c=>{ ['hardcover','laminate','glue','costUp','plotarmor','antiq'].forEach(s=>{ if(c.status[s]) delete c.status[s]; }); });
   p.team.forEach(c=>{ if(c.hp>0) c.turnsInPlay++; });
   feOnField(p).forEach(c=>{ if(c.passive&&c.passive.profileToggle && !c.status.highlight && !c.status.laminate){ grant(c,'highlight'); pushLog(`${c.name} shifts profile — Highlighted this turn.`); } });
   // crit per-turn tracking
   const foeP = (S.turn==='you')?S.opp:S.you;
   p.flags.oppBmLast = !!foeP.flags.bmThisTurn;
+  p.critEver=p.critEver||{};
+  p.critEver.bmStreak = p.flags.bmThisTurn ? ((p.critEver.bmStreak||0)+1) : 0;   /* Mise En Sc\u00e8ne thesis */
   p.flags.bmThisTurn = false;
   foeP.flags.noBookmarks = Math.max(0,(foeP.flags.noBookmarks||0)-1);
   p.critTurn = {correct:0,wrong:0,atk:false,blk:false,bm:false,readerStreak:0,queerMismatch:false};
+  /* ---- Saga Bookmarks: advance one act. A running Saga still advances under Censorship. ---- */
+  (p.activeBm||[]).slice().forEach(c=>{
+    if(c._tag!=='saga' || !c.stages) return;
+    if((c._stage||0)>=c.stages.length) return;
+    const key=c.stages[c._stage||0]; c._stage=(c._stage||0)+1;
+    pushLog(`\u2726 ${c.name} \u2014 Act ${roman(c._stage)}.`);
+    try{ sagaAct(p,c,key); }catch(e){}
+  });
   if(p._teamShield) p._teamShield=0;
   // ---- scrimmage boss rule-shift per-turn hooks ----
   if(S.scrim && S.scrim.ruleShift && S.turn==='opp'){
@@ -3571,6 +3684,15 @@ function endTurn(){ if(S.over) return;
   if(S.over) return;
   if(S.scrim && S.scrim.ruleShift==='sandroid' && S.turn==='you' && S.you.hand.length){ const n=S.you.hand.length; S.you.discard.push(...S.you.hand.splice(0)); pushLog(`The Infinite Scroll — ${n} unused card${n>1?'s':''} crumble to sand.`); }
   if(S.scrim && S.scrim.ruleShift==='sandroid2' && S.turn==='you' && S.you.hand.length){ const ri=rnd(S.you.hand.length); const lost=S.you.hand.splice(ri,1)[0]; if(lost){ S.you.discard.push(lost); pushLog('Sandstorm \u2014 a card in your hand is buried.'); } }
+  /* ---- NEW CARDS PATCH: end-of-turn upkeep ---- */
+  { const _E=S[S.turn];
+    _E.flags.extracredit=false;                                        /* Extra Credit is a this-turn promise */
+    _E.team.forEach(c=>{ if(c.status&&c.status.oop){ c._oopTurns=(c._oopTurns||1)-1;
+      if(c._oopTurns<=0){ delete c.status.oop; delete c._oopTurns; pushLog(`${c.name} is back in print \u2014 its attack returns.`); } } });
+  }
+  ['you','opp'].forEach(k=>{ (S[k].team||[]).forEach(c=>{                /* Mise En Sc\u00e8ne reward fillers vanish */
+    if(c.atkCharge&&c.atkCharge.some(x=>x&&x._mise)) c.atkCharge=c.atkCharge.filter(x=>!(x&&x._mise));
+    if(c.blkCharge&&c.blkCharge.some(x=>x&&x._mise)) c.blkCharge=c.blkCharge.filter(x=>!(x&&x._mise)); }); });
   S.turn=foeKey(); startTurn(); }
 
 /* ---------------- attaching ABCs (trivia gate) ---------------- */
@@ -3677,7 +3799,7 @@ function attach(side,handIdx,correct,targetUid){
     else { p.hand.splice(handIdx,1); p.discard.push(card); p.attachesLeft--; pushLog(`${who(p)} missed the question — ${card.type} card discarded.`); }
     if(pHasPassive(p,'failDiscardRandom') && p.hand.length){ const d=p.hand.splice(rnd(p.hand.length),1)[0]; p.discard.push(d); pushLog('Cold Logic: the slip costs a random card from hand.'); }
     if(pHasPassive(p,'failSkipAttack')){ p.flags.skipAttack=true; var _sc=pPassiveChar(p,'failSkipAttack'), _pn=(_sc&&_sc.passive&&_sc.passive.name)||'Anticipatory Madness'; p.flags.skipAttackName=_pn; p.flags.skipAttackFlavor=(_sc&&_sc.passive&&_sc.passive.skipFlavor)||_pn; pushLog(_pn+': your next attack declaration will be skipped.'); }
-    if(affectiveOn() && act && act.hp>0){ act.hp=Math.max(0,act.hp-10); pushLog(`Critical anxiety: ${act.name} takes 10 damage.`); checkKO(p,side); }
+    if(affectiveOn() && act && act.hp>0){ const _af=applyDmg(act,10); if(_af>0) pushLog(`Critical anxiety: ${act.name} takes ${_af} damage.`); checkKO(p,side); }
   }
   render();
 }
@@ -3694,7 +3816,7 @@ function inflict(t,k,ignoreLam){
 }
 function grant(t,k){ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ pushLog(`${t.name} is too isolated to gain ${statusName(k)}.`); return false; } if(t&&t.hp>0){ t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'pos'); return true; } return false; }
 function cleanseNeg(t){ if(!t) return; ['tear','rip','glue','burn','_smudgeHalf','costUp','siphon'].forEach(k=>{ delete t.status[k]; }); if(!t.status._spillLock){ delete t.status.spill; delete t.status.spillAmt; } if(!t.status._smudgeLock){ delete t.status.smudge; } }
-function clearAllStatus(t){ if(t) t.status={}; }
+function clearAllStatus(t){ if(!t) return; const _keep=t.status&&t.status.oop; t.status={}; if(_keep) t.status.oop=true; }
 function statusLabel(c){
   const order=[['burn','🔥'],['spill','💧'],['tear','✂'],['rip','⊘'],['glue','🩹'],['smudge','▒'],['laminate','◈'],['highlight','✶'],['hardcover','▣'],['marginNotes','✎'],['rip','⊘']];
   let out=''; const seen={};
@@ -3735,11 +3857,16 @@ function condMatch(rule, own, other, otherChar){
 /* ---------------- bookmarks ---------------- */
 function playBookmark(side,idx){
   const P=S[side];
+  if((S._censor||0)>0){ if(side==='you') toast('Censorship \u2014 no Bookmarks may be played.'); return; }
   if((P.flags.noBookmarks||0)>0){ if(side==='you') toast('Structuralism locked your Bookmarks this turn.'); return; }
   const _bmCap = feOnField(P).some(c=>c.passive&&c.passive.bookmarkCap) ? 1 : 2;
   if((P.flags.bmCount||0)>=_bmCap){ if(side==='you') toast('Up to '+_bmCap+' bookmark'+(_bmCap>1?'s':'')+' per turn.'); return; }
   const card=P.hand[idx], isYou=side==='you', act=active(P);
-  const remove=()=>{ const i=P.hand.indexOf(card); if(i>=0) P.hand.splice(i,1); P.discard.push(card); };
+  const lbl=(c)=>c?(c.name||(c.word?('\u201c'+c.word+'\u201d '+(c.type||'')):(c.type||'Card'))):'Card';
+  const remove=()=>{ const i=P.hand.indexOf(card); if(i>=0) P.hand.splice(i,1);
+    /* Mise En Sc\u00e8ne \u2014 the first instant-effect Bookmark each turn returns to hand instead of discarding. */
+    if(hasCrit(side,'mise') && !(P.critTurn&&P.critTurn._miseUsed) && !card.stages){ if(!P.critTurn)P.critTurn={}; P.critTurn._miseUsed=true; card._new=true; P.hand.push(card); pushLog(`Mise En Sc\u00e8ne \u2014 ${card.name} stays in frame and returns to your hand.`); return; }
+    P.discard.push(card); };
   const hold=(tag,uid)=>{ const i=P.hand.indexOf(card); if(i>=0) P.hand.splice(i,1); card._tag=tag; card._uid=uid||null; (P.activeBm||(P.activeBm=[])).push(card); };
   const commit=()=>{ P.flags.bmCount=(P.flags.bmCount||0)+1; P.flags.bmThisTurn=true; if(!P.critTurn)P.critTurn={}; P.critTurn.bm=true;
     // ---- Deconstruction: a Bookmark that tries to skip a turn or stop damage ----
@@ -3825,6 +3952,178 @@ function playBookmark(side,idx){
       if(isYou && bench.length>1) askPick('Corrupt which enemy reserve?', bench.map(c=>({label:`${c.name}  ${c.hp}/${c.maxHp}`,val:c.uid})), uid=>go(bench.find(c=>c.uid===uid)));
       else go(bench[0]);
       return;
+    }
+    /* ===================== NEW CARDS PATCH (Aug 2026) ===================== */
+    case 'packedbackpack':{
+      remove(); drawN(side,2);
+      let picked=0;
+      const shed=()=>{
+        if(picked>=2 || !P.hand.length){ pushLog(`${who(P)} repacks the backpack — drew 2, discarded ${picked}.`); commit(); render&&render(); return; }
+        if(isYou && P.hand.length>1){
+          askPick(`Packed Backpack — discard ${2-picked} more`, P.hand.map((c,i)=>({label:lbl(c),val:i})), i=>{ const c=P.hand.splice(i,1)[0]; if(c)P.discard.push(c); picked++; shed(); });
+        } else { const c=P.hand.splice(0,1)[0]; if(c)P.discard.push(c); picked++; shed(); }
+      };
+      shed(); return;
+    }
+    case 'bookreturn':{
+      if(!P.discard.length){ if(isYou) toast('Your discard pile is empty.'); return; }
+      const go=i=>{ const c=P.discard.splice(i,1)[0]; if(c){ c._new=true; P.hand.push(c); pushLog(`${who(P)} pulls ${lbl(c)} off the return cart.`); }
+        P.flags.skipAttack=true; P.flags.skipAttackName='Book Return'; P.flags.skipAttackFlavor='A trip to the return desk';
+        pushLog(`${who(P)} cannot attack this turn.`);
+        remove(); commit(); render&&render(); };
+      if(isYou && P.discard.length>1) askPick('Return which card to your hand?', P.discard.map((c,i)=>({label:lbl(c),val:i})), go);
+      else go(P.discard.length-1);
+      return;
+    }
+    case 'burnnotes':{
+      remove();
+      const n=P.hand.length; if(n) P.discard.push(...P.hand.splice(0));
+      if(act){ act.atkCharge=act.atkCharge||[]; const need=(act.atk&&act.atk.cost)||3;
+        while(act.atkCharge.length<need) act.atkCharge.push({cat:'abc',type:'ATTACK',power:0,_wild:true,_burnfill:true});
+        act._burnBonus=(act._burnBonus||0)+40; }
+      pushLog(`${who(P)} burns the notes — ${n} card${n===1?'':'s'} up in smoke; ${act?act.name:'the Active'} is fully charged and its next attack deals +40.`);
+      break;
+    }
+    case 'budgetcuts':{
+      const pool=P.hand.map((c,i)=>({c,i})).filter(o=>o.c!==card);
+      const fA=pool.find(o=>o.c.cat==='abc'&&o.c.type==='ATTACK');
+      const fB=pool.find(o=>o.c.cat==='abc'&&o.c.type==='BLOCK');
+      const fM=pool.find(o=>o.c.cat==='bookmark');
+      if(!fA||!fB||!fM){ if(isYou) toast('Budget Cuts needs one Attack, one Block and one Bookmark in hand.'); return; }
+      remove();
+      [fA.c,fB.c,fM.c].forEach(c=>{ const j=P.hand.indexOf(c); if(j>=0){ P.hand.splice(j,1); P.discard.push(c); } });
+      drawN(side,3);
+      pushLog(`${who(P)} makes Budget Cuts — one Attack, one Block and one Bookmark cut; draw 3.`);
+      break;
+    }
+    case 'interlibrary':{
+      remove();
+      if(!P.hand.length || !P.discard.length){ pushLog('Interlibrary Loan: nothing to swap.'); break; }
+      const hi=rnd(P.hand.length), di=rnd(P.discard.length);
+      const h=P.hand[hi], d=P.discard[di];
+      P.hand[hi]=d; d._new=true; P.discard[di]=h;
+      pushLog(`Interlibrary Loan: ${lbl(h)} is sent out, ${lbl(d)} comes back.`);
+      break;
+    }
+    case 'alexandria':{
+      remove();
+      const n=P.discard.length;
+      if(n){ P.deck.push(...P.discard.splice(0)); P.deck=shuffle(P.deck); }
+      drawN(side,3);
+      pushLog(`${who(P)} reopens the Library of Alexandria — ${n} card${n===1?'':'s'} shuffled back in; draw 3.`);
+      break;
+    }
+    case 'censorship':{
+      S._censor=5;                                   /* two of each player's own turns */
+      const F=foeOf(side); F.critEver=F.critEver||{}; F.critEver.oppBmBlocked=true;   /* Deconstruction thesis */
+      pushLog(`${who(P)} calls for Censorship — neither player may play Bookmarks for the next two turns.`);
+      hold('censorship'); commit(); render&&render(); return;
+    }
+    case 'forgottenchapter':{
+      const F=foeOf(side);
+      const finish=(mine)=>{
+        if(mine!=null && mine>=0){ const c=P.discard.splice(mine,1)[0]; if(c){ c._new=true; P.hand.push(c); pushLog(`${who(P)} recovers ${lbl(c)}.`); } }
+        if(F.discard.length){ const j=rnd(F.discard.length); const c2=F.discard.splice(j,1)[0]; if(c2){ c2._new=true; F.hand.push(c2); pushLog(`${who(F)} recovers ${lbl(c2)} at random.`); } }
+        remove(); commit(); render&&render();
+      };
+      if(!P.discard.length && !F.discard.length){ if(isYou) toast('Both discard piles are empty.'); return; }
+      if(isYou && P.discard.length>1) askPick('Recover which of your cards?', P.discard.map((c,i)=>({label:lbl(c),val:i})), finish);
+      else finish(P.discard.length?P.discard.length-1:-1);
+      return;
+    }
+    case 'antiquarian':{
+      const n=(P.discard||[]).filter(c=>c.cat==='bookmark').length;
+      if(n<3){ if(isYou) toast(`Antiquarian's Eye needs 3+ Bookmarks in your discard (you have ${n}).`); return; }
+      if(!act){ if(isYou) toast('No Active character.'); return; }
+      act.status.antiq=true;
+      pushLog(`${who(P)} reads ${n} discarded Bookmarks — ${act.name} gains +30 attack and +10 block until your next turn.`);
+      hold('antiq',act.uid); commit(); render&&render(); return;
+    }
+    case 'researchassist':{
+      remove();
+      const take=[];
+      const finish=()=>{ P.deck=shuffle(P.deck);
+        pushLog(take.length?`${who(P)} sends the Research Assistant — ${take.map(c=>lbl(c)).join(', ')} added to hand; deck shuffled.`:`Research Assistant found no Bookmarks; deck shuffled.`);
+        commit(); render&&render(); };
+      const step=()=>{
+        const hits=P.deck.map((c,i)=>({c,i})).filter(o=>o.c.cat==='bookmark');
+        if(take.length>=3 || !hits.length){ finish(); return; }
+        const grab=i=>{ const c=P.deck.splice(i,1)[0]; if(c){ c._new=true; P.hand.push(c); take.push(c); } step(); };
+        if(isYou && hits.length>1) askPick(`Research Assistant — add a Bookmark (${take.length+1}/3)`, hits.map(o=>({label:lbl(o.c),val:o.i})).concat([{label:'— stop searching —',val:-1}]), v=>{ if(v<0){ finish(); return; } grab(v); });
+        else grab(hits[0].i);
+      };
+      step(); return;
+    }
+    case 'cardcatalog':{
+      remove();
+      const finish=(i)=>{ if(i!=null && i>=0){ const c=P.deck.splice(i,1)[0]; if(c){ c._new=true; P.hand.push(c); pushLog(`${who(P)} looks it up in the Card Catalog — ${lbl(c)} to hand.`); } }
+        else pushLog('Card Catalog: no Bookmark left in the deck.');
+        P.deck=shuffle(P.deck); commit(); render&&render(); };
+      const hits=P.deck.map((c,i)=>({c,i})).filter(o=>o.c.cat==='bookmark');
+      if(!hits.length){ finish(-1); return; }
+      if(isYou && hits.length>1) askPick('Card Catalog — which Bookmark?', hits.map(o=>({label:lbl(o.c),val:o.i})), finish);
+      else finish(hits[0].i);
+      return;
+    }
+    case 'extracredit':{
+      P.flags.extracredit=true;
+      pushLog(`${who(P)} banks Extra Credit — knock out an enemy this turn to draw 2.`);
+      hold('extracredit'); commit(); render&&render(); return;
+    }
+    case 'plotarmor':{
+      if(!act){ if(isYou) toast('No Active character.'); return; }
+      if(P.hand.filter(c=>c!==card).length<2){ if(isYou) toast('Plot Armor needs 2 other cards in hand to discard.'); return; }
+      let paid=0;
+      const arm=()=>{ act.status.plotarmor=true;
+        const F=foeOf(side); F.critEver=F.critEver||{}; F.critEver.oppBmBlocked=true;   /* Deconstruction thesis */
+        pushLog(`${who(P)} pulls Plot Armor over ${act.name} — no damage from any source (Pierce included) until your next turn.`);
+        hold('plotarmor',act.uid); commit(); render&&render(); };
+      const pay=()=>{
+        if(paid>=2){ arm(); return; }
+        const pool=P.hand.map((c,i)=>({c,i})).filter(o=>o.c!==card);
+        if(!pool.length){ arm(); return; }
+        if(isYou && pool.length>1) askPick(`Plot Armor — discard ${2-paid} more`, pool.map(o=>({label:lbl(o.c),val:o.i})), i=>{ const c2=P.hand.splice(i,1)[0]; if(c2)P.discard.push(c2); paid++; pay(); });
+        else { const c2=P.hand.splice(pool[0].i,1)[0]; if(c2)P.discard.push(c2); paid++; pay(); }
+      };
+      pay(); return;
+    }
+    case 'cliffhanger':{
+      S._cliffhanger=2;                              /* live through the foe's turn, gone at your next start */
+      pushLog(`${who(P)} leaves it on a Cliffhanger — neither Active can drop below 1 HP until your next turn.`);
+      hold('cliffhanger'); commit(); render&&render(); return;
+    }
+    case 'outofprint':{
+      const F=foeOf(side), oa=active(F);
+      if(!oa||oa.hp<=0){ if(isYou) toast('No enemy Active.'); return; }
+      const pool=P.hand.map((c,i)=>({c,i})).filter(o=>o.c!==card);
+      if(!pool.length){ if(isYou) toast('Out of Print needs another card to discard.'); return; }
+      const go=i=>{ const c2=P.hand.splice(i,1)[0]; if(c2)P.discard.push(c2);
+        oa.status.oop=true; oa._oopTurns=2;          /* set directly: ignores Laminate, survives cleanse and switching */
+        pushLog(`${who(P)} pulls ${oa.name} Out of Print — its attack is unavailable for 2 turns and cannot be cleansed.`);
+        remove(); commit(); render&&render(); };
+      if(isYou && pool.length>1) askPick('Out of Print — discard which card?', pool.map(o=>({label:lbl(o.c),val:o.i})), go);
+      else go(pool[0].i);
+      return;
+    }
+    case 'plagiarism':{
+      const la=S.lastAtk, F=foeOf(side), fk=(side==='you')?'opp':'you', oa=active(F);
+      if(!la || la.side===side){ if(isYou) toast('No enemy attack to plagiarise yet.'); return; }
+      if(!oa||oa.hp<=0){ if(isYou) toast('No enemy Active.'); return; }
+      remove();
+      const d=applyDmg(oa, la.dmg||0);
+      pushLog(`${who(P)} plagiarises ${la.name} — ${d} unblockable damage to ${oa.name}. (${oa.hp}/${oa.maxHp} HP)`);
+      try{ flash(fk); fxAttack(fk,d); }catch(e){}
+      (la.inflict||[]).forEach(k=>{ if(oa.hp>0 && inflict(oa,k)) pushLog(`${oa.name} is afflicted with ${statusName(k)}.`); });
+      checkKO(F,fk);
+      break;
+    }
+    case 'saga':{
+      const live=(P.activeBm||[]).find(c=>c._tag==='saga');
+      if(live){ if(isYou) toast(`${live.name} is already running — one Saga at a time.`); return; }
+      if(!card.stages||!card.stages.length){ if(isYou) toast('This Saga has no acts.'); return; }
+      card._stage=0;
+      pushLog(`${who(P)} opens ${card.name} — Act I begins at the start of your next turn.`);
+      hold('saga'); commit(); render&&render(); return;
     }
     case 'supercharge': P.flags.supercharge=true; pushLog(`${who(P)} used Supercharger — next attack doubled.`); hold('supercharge'); break;
     case 'ironcurtain': act.status.ironcurtain=true; pushLog(`${who(P)} raised an Iron Curtain on ${act.name}.`); hold('ironcurtain',act.uid); break;
@@ -3966,6 +4265,8 @@ function calcDamage(ch,ab){
   else if(ab.dmgType==='perTeamABC') d=(ab.base||0)+(ab.step||10)*teamAbcCount(ch);
   else if(ab.dmgType==='koScale'){ const _P=pileOwnerOf(ch); d=(ab.dmg||ab.base||0)+(ab.step||10)*((_P&&_P.grave)?_P.grave.length:0); }
   if(ab.pileScale) d += pileBonus(ch,ab.pileScale);
+  if(ch && ch._adaptDmg && ch._adaptDmg>d) d=ch._adaptDmg;             /* Adaptation: higher-of, compared at resolution */
+  if(ch && ch.status && ch.status.antiq) d+=30;                        /* Antiquarian's Eye */
   return Math.max(0,Math.round(d));
 }
 function calcBlock(ch,ab,incoming){
@@ -3986,6 +4287,7 @@ function isSoloAlive(p){ return p.team.filter(c=>c.hp>0).length<=1; }
 function doSwitch(p, newIdx, opts){
   opts=opts||{}; const oldIdx=p.activeIdx; if(newIdx==null||newIdx===oldIdx) return;
   const leaving=p.team[oldIdx]; escClear(leaving); p.activeIdx=newIdx; const entering=p.team[newIdx];
+  if(leaving && leaving._adaptDmg){ delete leaving._adaptDmg; pushLog(`${leaving.name} leaves the role \u2014 the adapted damage reverts.`); }
   if(leaving && leaving.status && leaving.status.rip){ delete leaving.status.rip; if(!opts.silent) pushLog(`${leaving.name} leaves the front line — its Rip mends.`); }
   if(leaving && leaving._tatamiTransfer && leaving.status && leaving.status.smudge && entering && entering.hp>0){ delete leaving.status.smudge; delete leaving._tatamiTransfer; inflict(entering,'smudge'); entering._tatamiTransfer=true; if(!opts.silent) pushLog(`The bloodstain spreads — ${entering.name} is Smudged as ${leaving.name} withdraws.`); }
   if(!opts.silent && leaving&&leaving.hp>0&&leaving.fe&&leaving.passive&&leaving.passive.onSwitchInflict&&entering&&entering.hp>0){
@@ -4002,6 +4304,7 @@ function performAttack(side,abilKey){           // == beginAttack
   if(!A.critTurn) A.critTurn={};
   if((abilKey==='atk'||abilKey==='atk2') && A.flags.skipAttack){ A.flags.skipAttack=false; var _fl=A.flags.skipAttackFlavor||"Hamlet's hesitation", _nm=A.flags.skipAttackName||"Anticipatory Madness"; if(side==='you') toast(_fl+" — attack skipped."); pushLog(`${who(A)} must skip the attack declaration (${_nm}).`); A.flags.skipAttackFlavor=null; A.flags.skipAttackName=null; return false; }
   if((abilKey==='atk'||abilKey==='atk2') && att.status.rip){ if(side==='you') toast(`${att.name}'s attack is Ripped — unusable until it leaves play.`); return false; }
+  if((abilKey==='atk'||abilKey==='atk2') && att.status.oop){ if(side==='you') toast(`${att.name} is Out of Print — it cannot attack.`); return false; }
   let cost=attackCostFor(side,ab);
   if(att.status.costUp) cost+=1;
   const pool=()=> hasCrit(side,'queer') ? (att.atkCharge.length+att.blkCharge.length) : att.atkCharge.length;
@@ -4024,8 +4327,11 @@ function performAttack(side,abilKey){           // == beginAttack
   if(ab.guessTopFoe){ const top=D.deck[0]; const types=['ATTACK','BLOCK','BOOKMARK']; const guess=types[rnd(3)]; const actual=top?(top.cat==='abc'?top.type:'BOOKMARK'):null; if(actual&&guess===actual){ dmg+=ab.guessTopFoe.bonus||0; if(ab.guessTopFoe.inflict)condInflict=ab.guessTopFoe.inflict; pushLog(`The Mousetrap calls ${guess} — correct! +${ab.guessTopFoe.bonus} and Tear.`); } else pushLog(`The Mousetrap calls ${guess} — wrong.`); }
   if(ab.condPierceVillain && (def.tags||[]).includes('villain')){ condPierce=true; pushLog(`${ab.n} sees through the monstrous nature — Pierce.`); }
   if(ab.dmgPerFoeBookmark){ const n=(D.hand||[]).filter(c=>c.cat==='bookmark').length; if(n){ dmg+=ab.dmgPerFoeBookmark*n; pushLog(`${ab.n}: +${ab.dmgPerFoeBookmark*n} from ${n} Bookmark(s) in hand.`); } }
+  if(att._burnBonus){ dmg+=att._burnBonus; pushLog(`Burn the Notes: +${att._burnBonus} damage.`); delete att._burnBonus; }
+  if(att._sagaBonus){ dmg+=att._sagaBonus; pushLog(`The Saga pays off: +${att._sagaBonus} damage.`); delete att._sagaBonus; }
   let spentAtk=spend(att.atkCharge,cost);
   if(spentAtk.length<cost && hasCrit(side,'queer')){ const more=spend(att.blkCharge,cost-spentAtk.length); if(more.length) A.critTurn.queerMismatch=true; spentAtk.push(...more); }
+  if(spentAtk.some(c=>c&&c._inherited)){ A.critEver=A.critEver||{}; A.critEver.adaptSpent=true; }   /* Adaptation thesis */
   if(ab.selfDiscardBlk){ for(let i=0;i<ab.selfDiscardBlk;i++){ if(att.blkCharge.length) A.discard.push(att.blkCharge.shift()); } pushLog(`${att.name} discards ${ab.selfDiscardBlk} Block ABC.`); }
   if(ab.selfDiscardAtk){ for(let i=0;i<ab.selfDiscardAtk;i++){ if(att.atkCharge.length) A.discard.push(att.atkCharge.shift()); } pushLog(`${att.name} discards ${ab.selfDiscardAtk} Attack ABC.`); }
   if(S.settings.powerAdds) dmg+=spentAtk.reduce((s,c)=>s+(c.power||0),0);
@@ -4077,7 +4383,7 @@ function performAttack(side,abilKey){           // == beginAttack
         A.flags.bmCap=Math.max(0,(A.flags.bmCap!=null?A.flags.bmCap:2)-1);
         pushLog(`\u26a1 Riposte \u2014 ${who(A)} may play one fewer Bookmark next turn.`);
       } else {
-        const d=rb.dmg||10; att.hp=Math.max(0,att.hp-d);
+        const d=applyDmg(att,rb.dmg||10);
         pushLog(`\u26a1 Riposte \u2014 ${def.name}'s guard bites back for ${d}.`);
         if(att.hp<=0){ checkKO(A,side); pushLog(`${att.name} falls on the counter \u2014 the attack never lands.`); return finishAttack(0,true); }
       }
@@ -4098,6 +4404,7 @@ function doBlock(){
   const _bCost=blockCostFor(def,b);
   let spentBlk=spend(def.blkCharge,_bCost);
   if(spentBlk.length<_bCost && hasCrit(dKey,'queer')){ spentBlk.push(...spend(def.atkCharge,_bCost-spentBlk.length)); }
+  if(spentBlk.some(c=>c&&c._inherited)){ D.critEver=D.critEver||{}; D.critEver.adaptSpent=true; }   /* Adaptation thesis */
   if(b.escalate) escBump(def,'Blk');
   const res=calcBlock(def,b,dmg); let amt=res.amt; let neg=!!res.negate; let failDouble=false;
   // blockType:'laminate' and 'negateStatus' were declared on 11 cards and never read
@@ -4130,13 +4437,14 @@ function doBlock(){
   } }); }
   if(S.settings.powerAdds && !neg) amt+=spentBlk.reduce((s,c)=>s+(c.power||0),0);
   if(hasCrit(dKey,'newhist') && !neg){ amt+=10; pushLog('New Historicism: block reduces an extra 10.'); }
+  if(def.status.antiq && !neg){ amt+=10; pushLog("Antiquarian's Eye: block reduces an extra 10."); }
   D.discard.push(...spentBlk.filter(c=>!c._wild));
   if(!symbolsOff()){
     if(b.grant){ grant(def,b.grant); pushLog(`${def.name} gains ${b.grant}.`); }
     if(b.inflictAtt && att.hp>0){ if(inflict(att,b.inflictAtt)) pushLog(`${att.name} is afflicted with ${b.inflictAtt.charAt(0).toUpperCase()+b.inflictAtt.slice(1)}.`); }
     if(b.siphon){ applySiphon(att,def,dKey,b.siphon); }
     if(b.selfStatus){ def.status[b.selfStatus]=true; pushLog(`${def.name} suffers ${b.selfStatus}.`); }
-    if(b.selfDamage){ def.hp=Math.max(0,def.hp-b.selfDamage); pushLog(`${def.name} loses ${b.selfDamage} HP.`); }
+    if(b.selfDamage){ const _bd=applyDmg(def,b.selfDamage); if(_bd>0) pushLog(`${def.name} loses ${_bd} HP.`); }
     if(b.onBlockDraw){ for(let i=0;i<b.onBlockDraw;i++){ if(!D.deck.length&&D.discard.length)D.deck=shuffle(D.discard.splice(0)); if(D.deck.length)D.hand.push(D.deck.shift()); } pushLog(`${def.name} draws ${b.onBlockDraw} after blocking.`); }
     if(b.selfDiscardHand){ for(let i=0;i<b.selfDiscardHand;i++){ if(D.hand.length) D.discard.push(D.hand.splice(rnd(D.hand.length),1)[0]); } pushLog(`${def.name} discards ${b.selfDiscardHand} card from hand.`); }
     if(att.fe&&att.passive&&att.passive.blockerTear&&def.hp>0){ if(inflict(def,'tear')) pushLog(`Off With Their Heads! — ${def.name} is Torn for daring to block.`); }
@@ -4162,11 +4470,12 @@ function finishAttack(blocked,negated,forceNet){
   if(ab.sacrifice && hasCrit(dKey,'feminist') && !symbolsOff() && net>30){ net=30; pushLog('Feminist Lens caps the Sacrifice attack at 30.'); }
   if(D._teamShield && net>0){ const _r=Math.min(net,D._teamShield); net-=_r; pushLog(`${who(D)}'s allies stand together — ${_r} damage reduced.`); }
   if(S.scrim && scrimHas('gradecurve') && S.opp && S.opp.team.indexOf(def)>=0 && net>def.hp && att.hp>0){ const over=net-def.hp, heal=Math.round(over/2); if(heal>0){ att.hp=Math.min(att.maxHp,att.hp+heal); pushLog('Grade Curve \u2014 overkill heals '+att.name+' +'+heal+'.'); } }
-  if(net>0 && blocked>0 && def.blk && def.blk.collateral){ const bench=D.team.filter((c,i)=>i!==D.activeIdx && c.hp>0); if(bench.length){ const bc=bench[rnd(bench.length)]; bc.hp=Math.max(0,bc.hp-net); pushLog(`Collateral Damage \u2014 ${net} overflow spills onto ${bc.name} backstage.`); net=0; if(bc.hp<=0) checkKO(D,dKey); } }
-  def.hp=Math.max(0,def.hp-net);
+  if(net>0 && blocked>0 && def.blk && def.blk.collateral){ const bench=D.team.filter((c,i)=>i!==D.activeIdx && c.hp>0); if(bench.length){ const bc=bench[rnd(bench.length)]; applyDmg(bc,net); pushLog(`Collateral Damage \u2014 ${net} overflow spills onto ${bc.name} backstage.`); net=0; if(bc.hp<=0) checkKO(D,dKey); } }
+  S.lastAtk={ side:side, name:ab.n, dmg:dmg, inflict:[].concat(ab.inflict||[]).filter(Boolean) };   /* Plagiarism source */
+  net=applyDmg(def,net);
   pushLog(`${att.name} uses ${ab.n}: ${net} damage to ${def.name}. (${def.hp}/${def.maxHp} HP)`);
   if(pierce) pushLog(`${ab.n} pierced the defense!`);
-  if(ab.sacrifice && !symbolsOff()){ att.hp=Math.max(0,att.hp-ab.sacrifice); pushLog(`${att.name} sacrifices ${ab.sacrifice} HP.`); }
+  if(ab.sacrifice && !symbolsOff()){ const _sac=applyDmg(att,ab.sacrifice); if(_sac>0) pushLog(`${att.name} sacrifices ${_sac} HP.`); }
   if(ab.stripBlocks && def.blkCharge.length){ const n=def.blkCharge.length; D.discard.push(...def.blkCharge.splice(0)); pushLog(`Quick-Sand Crash buries ${def.name}'s defense — ${n} Block ABC lost.`); }
   if(!symbolsOff()){
     if(ab.inflictIfHas && def.hp>0){ const _p=[].concat(ab.inflict)[0], _h=ab.inflictIfHas.has, _t=ab.inflictIfHas.then; if(def.status[_h]){ if(inflict(def,_t)) pushLog(`${def.name} already had ${statusName(_h)} \u2014 afflicted with ${statusName(_t)}!`); } else if(_p){ if(inflict(def,_p)) pushLog(`${def.name} is afflicted with ${statusName(_p)}.`); } }
@@ -4178,12 +4487,12 @@ function finishAttack(blocked,negated,forceNet){
     if(ab.grant){ grant(att,ab.grant); pushLog(`${att.name} gains ${ab.grant}.`); }
     if(ab.weaken!=null && def.hp>0){ def.status.weaken=ab.weaken; pushLog(`${def.name} is weakened — its next attack deals ${ab.weaken} less.`); }
     if(ab.selfStatus){ att.status[ab.selfStatus]=true; pushLog(`${att.name} suffers ${ab.selfStatus}.`); }
-    if(ab.selfDamage){ att.hp=Math.max(0,att.hp-ab.selfDamage); pushLog(`${att.name} loses ${ab.selfDamage} HP.`); }
+    if(ab.selfDamage){ const _sd=applyDmg(att,ab.selfDamage); if(_sd>0) pushLog(`${att.name} loses ${_sd} HP.`); }
     if(ab.drawAfter){ drawN(side,ab.drawAfter); pushLog(`${who(A)} draws ${ab.drawAfter}.`); }
     if(ab.heal){ const _b0=att.hp; healChar(att,ab.heal); if(att.hp>_b0){ try{fxHeal(sideOfChar(att));}catch(e){} pushLog(`${att.name} heals ${att.hp-_b0} HP.`); } }
     if(ab.grantAlly){ const _al=A.team.find(c=>c.hp>0 && c!==att); if(_al){ grant(_al,ab.grantAlly); pushLog(`${att.name} grants ${statusName(ab.grantAlly)} to ${_al.name}.`); } }
     if(ab.teamCleanse){ const NEG=['tear','rip','glue','spill','smudge','burn','weaken']; A.team.forEach(c=>{ if(c.hp>0){ const s=NEG.find(x=>c.status[x]); if(s) delete c.status[s]; } }); pushLog(`${ab.n} lifts a burden from every ally.`); }
-    if(ab.splashBench){ D.team.forEach(c=>{ if(c!==def && c.hp>0) c.hp=Math.max(0,c.hp-ab.splashBench); }); pushLog(`${ab.n} splashes ${ab.splashBench} to the bench.`); checkKO(D,dKey); }
+    if(ab.splashBench){ D.team.forEach(c=>{ if(c!==def && c.hp>0) applyDmg(c,ab.splashBench,{quiet:true}); }); pushLog(`${ab.n} splashes ${ab.splashBench} to the bench.`); checkKO(D,dKey); }
     if(ab.forceFoeSwap){ const bench=D.team.map((c,i)=>({c,i})).filter(o=>o.i!==D.activeIdx && o.c.hp>0); if(bench.length){ const pk=bench[rnd(bench.length)]; doSwitch(D,pk.i); pushLog(`${ab.n} force-swaps ${who(D)}'s Active!`); } }
     if(ab.blankFoeRatings){ if(dKey==='you') S.you._ratingsBlank=true; pushLog(`${who(D)}'s Power Ratings are blanked by the flash!`); }
   }
@@ -4222,10 +4531,12 @@ function checkKO(p,side){
     try{ fxKO(side, a.name); }catch(e){}
     if(!p.grave.includes(a)) p.grave.push(a);
     const attacker=foeOf(side); attacker.kos++;
+    if(attacker.flags && attacker.flags.extracredit){ attacker.flags.extracredit=false; drawN((side==='you')?'opp':'you',2); pushLog(`${who(attacker)} cashes in Extra Credit \u2014 draw 2.`); }
     pushLog(`${a.name} is knocked out!`);
     if(attacker.kos>=S.settings.koTarget){ S.over=true; S.winner=(attacker===S.you)?'you':'opp'; pushLog(`${who(attacker)} reached ${S.settings.koTarget} knockouts — match over!`); }
     const next=p.team.findIndex(c=>c.hp>0);
-    if(next>=0){ doSwitch(p,next); pushLog(`${p.team[next].name} steps up.`); }
+    if(next>=0){ const _fallen=a; doSwitch(p,next); const _succ=p.team[next]; pushLog(`${_succ.name} steps up.`);
+      if(hasCrit(side,'adapt') && _succ && _succ.hp>0){ try{ adaptInherit(p,side,_fallen,_succ); }catch(e){} } }
   }
   if(!p.team.some(c=>c.hp>0)){
     /* DRAWN MODE: an empty board is only a loss if no character remains to field. */
@@ -4267,9 +4578,30 @@ function bmRole(c){
   return 'utility';
 }
 /* pick ONE bookmark to play, by priority, given the board */
+/* Gate-aware AI filter: several of the Aug 2026 cards toast-and-refuse rather than
+   consume themselves. Without this the AI burns its Bookmark pick on a card that
+   cannot resolve. Also covers the pre-existing Defibrillator cost gate. */
+function bmPlayable(p,c){
+  if(!p||!c) return false;
+  const a=p.team[p.activeIdx], foe=(p===S.you?S.opp:S.you), fa=foe&&foe.team[foe.activeIdx];
+  const others=p.hand.filter(x=>x!==c);
+  switch(c.effect){
+    case 'budgetcuts': return others.some(x=>x.cat==='abc'&&x.type==='ATTACK') && others.some(x=>x.cat==='abc'&&x.type==='BLOCK') && others.some(x=>x.cat==='bookmark');
+    case 'antiquarian': return !!(a&&a.hp>0) && (p.discard||[]).filter(x=>x.cat==='bookmark').length>=3;
+    case 'plotarmor':   return !!(a&&a.hp>0) && others.length>=2;
+    case 'outofprint':  return !!(fa&&fa.hp>0) && others.length>=1;
+    case 'bookreturn':  return (p.discard||[]).length>0;
+    case 'forgottenchapter': return (p.discard||[]).length>0 || (foe&&(foe.discard||[]).length>0);
+    case 'plagiarism':  return !!(S.lastAtk && S.lastAtk.side!==(p===S.you?'you':'opp') && fa && fa.hp>0);
+    case 'cardcatalog': case 'researchassist': return (p.deck||[]).some(x=>x.cat==='bookmark');
+    case 'saga':        return !(p.activeBm||[]).some(x=>x._tag==='saga') && !!(c.stages&&c.stages.length);
+    case 'defib':       return (p.grave||[]).length>0 && others.length>=3;
+    default: return true;
+  }
+}
 function aiPickBookmark(p, prof){
   var act=active(p), foe=S.you, fa=active(foe);
-  var hand=p.hand.map(function(c,i){return {c:c,i:i,role:bmRole(c)};}).filter(function(o){return o.role;});
+  var hand=p.hand.map(function(c,i){return {c:c,i:i,role:bmRole(c)};}).filter(function(o){return o.role && bmPlayable(p,o.c);});
   if(!hand.length) return -1;
   var allow=function(role){ return prof.bm.indexOf(role)>=0 || role==='cleanse'&&prof.cleanse; };
   var find=function(role,test){
@@ -4923,16 +5255,16 @@ function pilesFor(p,sideKey){
     ${fePeekChips(p,sideKey)}
   </div>`;
 }
-const ABM_TAGTXT={supercharge:'next attack ×2',dogear:'keeps Attack ABC',cliffnotes:'next ABC: no trivia',truce:"foe's next attack skipped",highlight:'+20 next attack',marginNotes:'draw on next attach',ironcurtain:'blocks next attack',hardcover:'−10 incoming',laminate:'immune to T/R/G/S'};
+const ABM_TAGTXT={plotarmor:'immune to all damage',cliffhanger:'nobody drops below 1 HP',censorship:'no Bookmarks',extracredit:'KO this turn → draw 2',antiq:'+30 atk / +10 blk',supercharge:'next attack ×2',dogear:'keeps Attack ABC',cliffnotes:'next ABC: no trivia',truce:"foe's next attack skipped",highlight:'+20 next attack',marginNotes:'draw on next attach',ironcurtain:'blocks next attack',hardcover:'−10 incoming',laminate:'immune to T/R/G/S'};
 function activeBmZone(p){
   if(!p.activeBm||!p.activeBm.length) return '';
-  const chips=p.activeBm.map(c=>`<div class="abm-card" title="${(c.name+' — '+(c.text||'')).replace(/"/g,'&quot;')}"><span class="abm-nm">✦ ${c.name}</span><span class="abm-tag">${ABM_TAGTXT[c._tag]||'in play'}</span></div>`).join('');
+  const chips=p.activeBm.map(c=>`<div class="abm-card" title="${(c.name+' — '+(c.text||'')).replace(/"/g,'&quot;')}"><span class="abm-nm">✦ ${c.name}</span><span class="abm-tag">${c._tag==='saga'?('Act '+roman(c._stage||0)+' / '+((c.stages||[]).length)):(ABM_TAGTXT[c._tag]||'in play')}</span></div>`).join('');
   return `<div class="abm-zone" title="Active bookmarks — effects in play, awaiting their trigger"><div class="abm-label">Active ✦ ${p.activeBm.length}</div>${chips}</div>`;
 }
 function sweepActiveBm(p){
   if(!p||!p.activeBm||!p.activeBm.length) return;
   const foe=(p===S.you?S.opp:S.you);
-  const statusTags=['highlight','marginNotes','ironcurtain','hardcover','laminate'];
+  const statusTags=['highlight','marginNotes','ironcurtain','hardcover','laminate','plotarmor','antiq'];
   const keep=[];
   p.activeBm.forEach(card=>{
     const t=card._tag; let on;
@@ -4941,8 +5273,12 @@ function sweepActiveBm(p){
     else if(t==='dogear') on=!!p.flags.dogear;
     else if(t==='cliffnotes') on=!!p.flags.skipTrivia;
     else if(t==='truce') on=!!(foe&&foe.flags.truce);
+    else if(t==='censorship') on=(S._censor||0)>0;
+    else if(t==='cliffhanger') on=(S._cliffhanger||0)>0;
+    else if(t==='extracredit') on=!!p.flags.extracredit;
+    else if(t==='saga') on=!!(card.stages && (card._stage||0)<card.stages.length);
     else on=false;
-    if(on) keep.push(card); else { delete card._tag; delete card._uid; p.discard.push(card); }
+    if(on) keep.push(card); else { delete card._tag; delete card._uid; delete card._stage; p.discard.push(card); }
   });
   p.activeBm=keep;
 }
@@ -7813,7 +8149,7 @@ window.ABC_DEBUG = {
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
   forceCorrupted:false, get drawnMode(){return APP.drawnMode;}, set drawnMode(v){APP.drawnMode=!!v;},
   seedOpeningHand, drawnMulligan, drawnKeepHand, drawnPlace, drawnBench, drawnPlayChar, drawnFlip, chargeBadges, benchChargeList, metaLoad, defaultDeck, bmOwned, ownCrit, starterBm, starterCr, drawnFlipAll, drawnHasActive, drawnLocked, checkKO, makeChar,
-  get S(){return S;}, healChar, drawN, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, get DRAWN_BENCH_MAX(){return DRAWN_BENCH_MAX;}, scrimDeckCounts, scrimRunDeckScreen, scrimCurrencyStrip, scrimSynergy, scrimVaultShellSrc(){return scrimVaultShell();}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
+  get S(){return S;}, healChar, drawN, applyDmg, bmPlayable, sagaAct, adaptInherit, roman, sweepActiveBm, thesisMet, scrimRollExpPack, expTotal, get APP(){return APP;}, startBattle, beginBattle, newGame, doDraw, toEngage, attach, performAttack, tryPlayHandCard, endTurn, calcDamage, calcBlock, playBookmark, resolveDefense, resolvePick, expAllGalleries, scrimOpenExpPack, expAllCids, expOwnedCount, expGallery, handleScrim, encodeDeck, decodeDeck, defaultDeck, randomDeck, randomBookmarks, clampDeck, deckCounts, handleBuilder, LIMITS, DEFAULTS, playCrit, fulfillThesis, thesisMet, critFx, hasCrit, active, checkKO, answerTrivia, grant, inflict, cleanseNeg, attackCostFor, doSwitch, feOnField, isSoloAlive, pHasPassive, firstedById, startTurn, condMatch, makeChar, render, showPreview, buildFePreview, feImg, toEngage, resolveDefense, doSwitch, scrimOpen, handleScrim, get SCRIM(){return SCRIM;}, get META(){return META;}, get DRAWN_BENCH_MAX(){return DRAWN_BENCH_MAX;}, scrimDeckCounts, scrimRunDeckScreen, scrimCurrencyStrip, scrimSynergy, scrimVaultShellSrc(){return scrimVaultShell();}, scrimGenMap, scrimStartKit, scrimResolveNode, scrimHas, scrimStartBattle, scrimAfterBattle, scrimTriviaText, scrimLoadSave, scrimSave, scrimRollBosses, scrimAdvanceAct, scrimActMul, scrimAccFloor, scrimRollFirstEds, scrimOpenPack, scrimRollPack, scrimApplyPack, packOverlayShow, scrimBestiary, bestiaryCard, mhGallery, mhCardFull, mhThumb, scrimRollMhPack, scrimApplyMhPack, scrimOpenMhPack, openTierPack, rollTierPack, applyTierPack, setPool, setProgress, packShop, collInit, ownCrit, bmOwned, metaLoad, clampDeck, licenseDeck, deckUnlocked, deckOwnCh, deckOwnAb, applyCalmFx, metaSave, defaultDeck, randomDeck, fillGaps, sbx, deckMeter, edHas, ownCrit, statusHelpModal, statusBubbles, aiTurn, aiEngage, aiPickBookmark, aiProfile, bmRole, aiLethal, doSwitch, deckForPlay, closePile, editionsForDeck, edResolveChar, edCharFor, edAbcByCid, edBmByCid, makeDeck, newPlayer, builderScreen, edAbcsCollected, edCmdsCollected, perkOn, tenureRank, perkSlots, validateLoadout, honorsMods, tenuredUnlocked, scrimActMul, scrimAccFloor, scrimEndRun, get HONORS(){return HONORS;}, get SCRIM_PERKS(){return SCRIM_PERKS;}, get SCRIM_BOSSES(){return SCRIM_BOSSES;}, get SCRIM_BOSS_RANK(){return SCRIM_BOSS_RANK;}, get SCRIM_NODE(){return SCRIM_NODE;} };
 })();
 </script>
 <script>window.addEventListener('DOMContentLoaded', function(){ if(window.ABC_BOOT) window.ABC_BOOT(); });</script>
