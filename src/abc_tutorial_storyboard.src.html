@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Academic Battle Cards — Tutorial Storyboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Anton&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F2E6C6; --cream-hi:#FBF3DD; --paper-ed:#E7D4A6;
+  --ink:#241F1B; --ink-2:#3a322b;
+  --red:#B53A2C; --red-dk:#8C2A20;
+  --teal:#1F6A6A; --teal-dk:#13474A;
+  --gold:#E3A92B; --gold-dk:#C2861A;
+  --felt:#143b3d;
+  --disp:'Alfa Slab One',Georgia,serif;
+  --cond:'Anton',Impact,sans-serif;
+  --body:'Spectral',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:var(--body); color:var(--ink);
+  background:
+    repeating-linear-gradient(0deg, rgba(74,56,34,.05) 0 1px, transparent 1px 26px),
+    radial-gradient(150% 120% at 50% 0%, #f1e7ca 0%, #e2d0a4 55%, #bfa877 100%);
+  background-attachment:fixed;
+  padding:0 0 90px;
+}
+
+/* ============ production board header ============ */
+.board{
+  background:var(--felt);
+  color:var(--cream);
+  border-bottom:8px solid var(--ink);
+  padding:26px 30px 22px;
+  position:relative;
+  box-shadow:0 6px 0 rgba(0,0,0,.25);
+}
+.board:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,.045) 0 2px, transparent 2px 7px);
+}
+.board .kicker{
+  font-family:var(--cond);letter-spacing:.28em;font-size:12px;color:var(--gold);
+  text-transform:uppercase;margin:0 0 6px;
+}
+.board h1{
+  font-family:var(--disp);font-size:clamp(26px,4.2vw,46px);line-height:.98;margin:0;
+  color:var(--cream-hi);text-shadow:4px 4px 0 var(--red-dk);
+}
+.board .sub{font-size:15px;margin:12px 0 0;max-width:70ch;color:#d8ccab;line-height:1.55}
+.board .sub b{color:var(--gold)}
+.slate{
+  display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;
+}
+.slate span{
+  font-family:var(--cond);letter-spacing:.12em;font-size:12px;text-transform:uppercase;
+  background:#0d2b2d;border:2px solid var(--gold-dk);color:var(--gold);
+  padding:6px 12px;border-radius:3px;
+}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;align-items:center}
+button.act{
+  font-family:var(--cond);letter-spacing:.09em;text-transform:uppercase;font-size:14px;
+  background:var(--gold);color:var(--ink);border:3px solid var(--ink);
+  padding:11px 18px;border-radius:6px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);
+}
+button.act:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--ink)}
+button.act:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+button.act.ghost{background:var(--cream);color:var(--ink)}
+button.act:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+#status{font-size:14px;color:#d8ccab;font-style:italic}
+
+/* ============ frame sheets ============ */
+.reel{max-width:1180px;margin:34px auto 0;padding:0 22px;display:flex;flex-direction:column;gap:34px}
+.sheet{
+  background:var(--cream-hi);
+  border:4px solid var(--ink);
+  border-radius:4px;
+  box-shadow:8px 8px 0 rgba(36,31,27,.30);
+  position:relative;
+  padding-left:44px;                 /* peg-bar gutter */
+  overflow:hidden;
+}
+/* animation-paper peg bar — the signature device */
+.sheet:before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:44px;
+  background:var(--paper-ed);
+  border-right:3px solid var(--ink);
+}
+.pegs{position:absolute;left:0;top:0;bottom:0;width:44px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:56px;pointer-events:none}
+.peg{width:16px;height:16px;border-radius:50%;background:var(--ink);opacity:.82}
+.peg.bar{width:22px;height:9px;border-radius:3px}
+
+.slatebar{
+  display:flex;align-items:stretch;border-bottom:3px solid var(--ink);
+  background:var(--ink);color:var(--cream);
+}
+.slatebar .no{
+  font-family:var(--disp);font-size:26px;padding:9px 16px;background:var(--red);
+  color:var(--cream-hi);border-right:3px solid var(--ink);min-width:74px;text-align:center;
+}
+.slatebar .nm{
+  font-family:var(--cond);letter-spacing:.14em;text-transform:uppercase;font-size:15px;
+  padding:13px 16px;flex:1;align-self:center;
+}
+.slatebar .dur{
+  font-family:var(--cond);letter-spacing:.1em;font-size:14px;padding:13px 16px;
+  background:var(--gold);color:var(--ink);border-left:3px solid var(--ink);align-self:stretch;
+  display:flex;align-items:center;
+}
+
+.frame{background:#000;border-bottom:3px solid var(--ink);line-height:0}
+.frame svg{width:100%;height:auto;display:block}
+
+.notes{display:grid;grid-template-columns:1.35fr 1fr;gap:0}
+.notes>div{padding:18px 20px}
+.notes .vo{border-right:3px solid var(--ink)}
+.lbl{
+  font-family:var(--cond);letter-spacing:.2em;text-transform:uppercase;font-size:11px;
+  color:var(--red-dk);margin:0 0 8px;display:block;
+}
+.vo p{margin:0;font-size:16.5px;line-height:1.62}
+.notes ul{margin:0;padding-left:18px;font-size:14.5px;line-height:1.6}
+.notes li{margin-bottom:5px}
+.notes li b{font-family:var(--cond);letter-spacing:.04em;font-weight:400}
+.rowtools{display:flex;gap:8px;padding:0 20px 18px}
+button.mini{
+  font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;font-size:12px;
+  background:var(--cream);border:2px solid var(--ink);border-radius:4px;padding:7px 12px;
+  cursor:pointer;box-shadow:2px 2px 0 var(--ink);
+}
+button.mini:hover{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+button.mini:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+
+@media (max-width:760px){
+  .notes{grid-template-columns:1fr}
+  .notes .vo{border-right:0;border-bottom:3px solid var(--ink)}
+  .sheet{padding-left:30px}
+  .sheet:before,.pegs{width:30px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ============ print = one 16:9 frame per page ============ */
+@media print{
+  @page{size:1920px 1080px;margin:0}
+  body{background:#fff;padding:0}
+  .board,.rowtools,.pegs,.sheet:before{display:none!important}
+  .reel{max-width:none;margin:0;padding:0;gap:0}
+  .sheet{border:0;box-shadow:none;border-radius:0;padding-left:0;page-break-after:always;background:#000}
+  .slatebar,.notes{display:none!important}
+  .frame{border:0}
+}
+</style>
+</head>
+<body>
+
+<header class="board">
+  <p class="kicker">Lakefront U LLC — production board</p>
+  <h1>Academic Battle Cards<br>How to Play — Storyboard</h1>
+  <p class="sub">Twelve frames, cut at <b>1920&times;1080</b>. Art is pulled from the live game bundle. Voiceover script and motion notes sit under each frame — record audio and lay music separately, then drop the PNGs on the timeline in order.</p>
+  <div class="slate">
+    <span id="s-frames">12 frames</span>
+    <span id="s-run">run 2:27</span>
+    <span>16:9 &middot; 1920&times;1080</span>
+    <span>Deck shown: Gatsby vs. Crucible</span>
+  </div>
+  <div class="tools">
+    <button class="act" id="dl-all">Download all frames (PNG)</button>
+    <button class="act ghost" id="dl-script">Download VO script (.txt)</button>
+    <button class="act ghost" id="pr">Print to PDF</button>
+    <span id="status"></span>
+  </div>
+</header>
+
+<main class="reel" id="reel"></main>
+
+<script>
+/* ===================================================================
+   ASSET MAP — real ids from src/game.src.html.
+   Placeholders are resolved by the normal pipeline:
+     python3 build.py --src abc_tutorial_storyboard.src.html \
+                      --out dist/abc_tutorial_storyboard.html
+   =================================================================== */
+const IMG = {
+  logo:    "data:image/jpeg;base64,__ABCASSET_107__",
+  emblem:  "data:image/jpeg;base64,__ABCASSET_108__",
+  paper:   "data:image/jpeg;base64,__ABCASSET_109__",
+  crest:   "data:image/jpeg;base64,__ABCASSET_110__",
+  back:    "data:image/jpeg;base64,__ABCASSET_956__",
+  deckbg:  "data:image/png;base64,__ABCASSET_900__",
+  arena:   "data:image/jpeg;base64,__ABCASSET_1015__",
+  /* Gatsby side (CHAR_IMG_NEW — the layer applied last) */
+  gatsby:  "data:image/jpeg;base64,__ABCASSET_16__",
+  daisy:   "data:image/jpeg;base64,__ABCASSET_15__",
+  nick:    "data:image/jpeg;base64,__ABCASSET_18__",
+  jordan:  "data:image/jpeg;base64,__ABCASSET_20__",
+  tom:     "data:image/jpeg;base64,__ABCASSET_163__",
+  /* Crucible side */
+  abigail: "data:image/jpeg;base64,__ABCASSET_21__",
+  proctor: "data:image/jpeg;base64,__ABCASSET_22__",
+  parris:  "data:image/jpeg;base64,__ABCASSET_24__",
+  /* Critical Lens art */
+  marxist: "data:image/jpeg;base64,__ABCASSET_28__",
+  feminist:"data:image/jpeg;base64,__ABCASSET_29__",
+  /* battle FX plates */
+  fxStrike:"data:image/png;base64,__ABCASSET_1024__",
+  fxCrit:  "data:image/png;base64,__ABCASSET_1025__",
+  fxGuard: "data:image/png;base64,__ABCASSET_1026__",
+  fxKO:    "data:image/png;base64,__ABCASSET_1027__",
+  fxGlue:  "data:image/png;base64,__ABCASSET_1028__",
+  fxHigh:  "data:image/png;base64,__ABCASSET_1029__",
+  fxYes:   "data:image/png;base64,__ABCASSET_1031__",
+  fxNo:    "data:image/png;base64,__ABCASSET_1032__"
+};
+
+const K = {
+  ink:'#241F1B', ink2:'#3a322b', cream:'#F2E6C6', hi:'#FBF3DD', ed:'#E7D4A6',
+  red:'#B53A2C', redDk:'#8C2A20', teal:'#1F6A6A', tealDk:'#13474A',
+  gold:'#E3A92B', goldDk:'#C2861A', felt:'#143b3d'
+};
+const W = 1920, H = 1080;
+
+/* ---------- shared SVG defs (inlined per frame so each exports alone) ---------- */
+const DEFS = `
+<defs>
+  <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="${K.hi}"/><stop offset="1" stop-color="#DCC79A"/>
+  </linearGradient>
+  <radialGradient id="vig" cx="50%" cy="46%" r="72%">
+    <stop offset="0" stop-color="#000" stop-opacity="0"/>
+    <stop offset="74%" stop-color="#000" stop-opacity=".07"/>
+    <stop offset="100%" stop-color="#000" stop-opacity=".38"/>
+  </radialGradient>
+  <radialGradient id="spot" cx="50%" cy="42%" r="62%">
+    <stop offset="0" stop-color="#fff" stop-opacity=".30"/>
+    <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="grain" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+  <filter id="wob" x="-12%" y="-12%" width="124%" height="124%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.019" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="wob2" x="-12%" y="-12%" width="124%" height="124%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="21" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse">
+    <circle cx="4" cy="4" r="2.6" fill="${K.ink}" opacity=".16"/>
+  </pattern>
+  <pattern id="rays" width="1920" height="1080" patternUnits="userSpaceOnUse">
+    <rect width="1920" height="1080" fill="none"/>
+  </pattern>
+</defs>`;
+
+/* ---------- primitives ---------- */
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function paperBG(tint){
+  return `<rect width="${W}" height="${H}" fill="url(#pg)"/>
+  <image href="${IMG.paper}" x="0" y="0" width="${W}" height="${H}"
+         preserveAspectRatio="xMidYMid slice" opacity=".34"/>
+  ${tint?`<rect width="${W}" height="${H}" fill="${tint}" opacity=".085"/>`:''}`;
+}
+function overlays(){
+  return `<rect width="${W}" height="${H}" fill="url(#spot)"/>
+  <rect width="${W}" height="${H}" fill="url(#vig)"/>
+  <rect width="${W}" height="${H}" filter="url(#grain)" opacity=".07" style="mix-blend-mode:multiply"/>
+  <rect x="8" y="8" width="${W-16}" height="${H-16}" fill="none" stroke="${K.ink}" stroke-width="7" opacity=".9"/>`;
+}
+/* starburst behind a focal point — the rubber-hose "ta-da" */
+function burst(cx, cy, r, n, color, op){
+  let p = '';
+  for(let i=0;i<n;i++){
+    const a0 = (i/n)*Math.PI*2, a1 = a0 + (Math.PI/n)*0.62;
+    p += `<path d="M${cx} ${cy} L${cx+Math.cos(a0)*r} ${cy+Math.sin(a0)*r} L${cx+Math.cos(a1)*r} ${cy+Math.sin(a1)*r} Z" fill="${color}"/>`;
+  }
+  return `<g opacity="${op}" filter="url(#wob2)">${p}</g>`;
+}
+/* ribbon banner with notched tails */
+function ribbon(cx, y, w, h, text, fill, size){
+  const x = cx - w/2, t = 26;
+  const d = `M${x} ${y} L${x+w} ${y} L${x+w} ${y+h} L${x} ${y+h} Z`;
+  return `<g>
+    <path d="M${x-t-16} ${y+10} l${t+18} ${-10} l0 ${h+20} l${-(t+18)} ${-10} l14 ${-15} Z" fill="${K.redDk}" stroke="${K.ink}" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M${x+w+t+16} ${y+10} l${-(t+18)} ${-10} l0 ${h+20} l${t+18} ${-10} l-14 ${-15} Z" fill="${K.redDk}" stroke="${K.ink}" stroke-width="6" stroke-linejoin="round"/>
+    <path d="${d}" fill="${fill||K.red}" stroke="${K.ink}" stroke-width="8" stroke-linejoin="round"/>
+    <rect x="${x+10}" y="${y+9}" width="${w-20}" height="4" fill="#fff" opacity=".28"/>
+    <text x="${cx}" y="${y+h/2+ (size||42)*0.35}" text-anchor="middle"
+      font-family="Alfa Slab One, Georgia, serif" font-size="${size||42}" fill="${K.hi}">${esc(text)}</text>
+  </g>`;
+}
+/* headline with hard ink drop-shadow */
+function head(x, y, text, size, fill, anchor, shadow){
+  const a = anchor||'middle', o = Math.max(3, size*0.085);
+  return `<g>
+    <text x="${x+o}" y="${y+o*1.15}" text-anchor="${a}" font-family="Alfa Slab One, Georgia, serif"
+          font-size="${size}" fill="${shadow||K.ink}">${esc(text)}</text>
+    <text x="${x}" y="${y}" text-anchor="${a}" font-family="Alfa Slab One, Georgia, serif"
+          font-size="${size}" fill="${fill||K.hi}">${esc(text)}</text>
+  </g>`;
+}
+function label(x, y, text, size, fill, anchor, spacing){
+  return `<text x="${x}" y="${y}" text-anchor="${anchor||'middle'}" font-family="Anton, Impact, sans-serif"
+    letter-spacing="${spacing==null?size*0.09:spacing}" font-size="${size}" fill="${fill||K.ink}">${esc(text)}</text>`;
+}
+function body(x, y, lines, size, fill, anchor, lh){
+  const a = anchor||'middle';
+  return lines.map((l,i)=>`<text x="${x}" y="${y+i*(lh||(size*1.45))}" text-anchor="${a}"
+    font-family="Spectral, Georgia, serif" font-size="${size}" fill="${fill||K.ink}">${esc(l)}</text>`).join('');
+}
+/* the cost pill exactly as the game prints it: 50/2 */
+function chip(x, y, text, kind, size){
+  const s = size||34, w = String(text).length*s*0.62 + s*0.9, h = s*1.5;
+  const bg = kind==='blue' ? K.teal : K.red;
+  return `<g><rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="${h/2}"
+      fill="${bg}" stroke="${K.ink}" stroke-width="5"/>
+    <text x="${x}" y="${y+s*0.35}" text-anchor="middle" font-family="Anton, Impact, sans-serif"
+      font-size="${s}" fill="${K.hi}" letter-spacing="1">${esc(text)}</text></g>`;
+}
+/* generic card body in the game's paper style */
+function cardShell(x, y, w, h, accent, rot){
+  const r = rot?` transform="rotate(${rot} ${x+w/2} ${y+h/2})"`:'';
+  return {open:`<g${r}>
+    <rect x="${x+9}" y="${y+11}" width="${w}" height="${h}" rx="16" fill="${K.ink}" opacity=".38"/>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="${K.cream}" stroke="${K.ink}" stroke-width="7"/>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="url(#dots)" opacity=".5"/>
+    <rect x="${x+7}" y="${y+7}" width="${w-14}" height="46" rx="10" fill="${accent||K.teal}" stroke="${K.ink}" stroke-width="4"/>`,
+    close:`</g>`};
+}
+/* character card: portrait window, HP, attack row, block row */
+function charCard(x, y, w, img, name, hp, atkName, atk, blkName, blk, side, rot){
+  const k = w/330;                                  /* every measure scales with the card */
+  const h = w*1.42, pad = 13*k, artH = h*0.575;
+  const accent = side==='foe' ? K.redDk : K.tealDk;
+  const cid = 'clip'+Math.random().toString(36).slice(2,8);
+  const r = rot?` transform="rotate(${rot} ${x+w/2} ${y+h/2})"`:'';
+  const bx = x+pad, bw = w-pad*2;
+  const boxY = y+pad+artH+9*k, boxH = (y+h-pad)-boxY;
+  const nameH = 40*k;
+  return `<g${r}>
+    <rect x="${x+10*k}" y="${y+12*k}" width="${w}" height="${h}" rx="${18*k}" fill="${K.ink}" opacity=".40"/>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${18*k}" fill="${K.cream}" stroke="${K.ink}" stroke-width="${7*k}"/>
+    <clipPath id="${cid}"><rect x="${bx}" y="${y+pad}" width="${bw}" height="${artH}" rx="${10*k}"/></clipPath>
+    <image href="${img}" x="${bx}" y="${y+pad}" width="${bw}" height="${artH}"
+           preserveAspectRatio="xMidYMin slice" clip-path="url(#${cid})"/>
+    <rect x="${bx}" y="${y+pad}" width="${bw}" height="${artH}" rx="${10*k}" fill="none" stroke="${K.ink}" stroke-width="${5*k}"/>
+    <rect x="${bx}" y="${y+pad+artH-nameH}" width="${bw}" height="${nameH}" fill="${K.ink}" opacity=".74"/>
+    ${label(x+w/2, y+pad+artH-nameH*0.30, name, 25*k, K.hi, 'middle', 2*k)}
+    <g>
+      <rect x="${x+w-pad-78*k}" y="${y+pad+8*k}" width="${74*k}" height="${33*k}" rx="${16.5*k}" fill="${K.ink}" stroke="${K.gold}" stroke-width="${4*k}"/>
+      ${label(x+w-pad-41*k, y+pad+31*k, hp+' HP', 19*k, K.gold, 'middle', 0.8*k)}
+    </g>
+    <rect x="${bx}" y="${boxY}" width="${bw}" height="${boxH}" rx="${9*k}"
+          fill="${K.hi}" stroke="${accent}" stroke-width="${4*k}"/>
+    ${label(bx+12*k, boxY+boxH*0.38, '\u2694 '+atkName, 21*k, K.red, 'start', 0.6*k)}
+    ${chip(bx+bw-46*k, boxY+boxH*0.30, atk, 'red', 23*k)}
+    <line x1="${bx+9*k}" y1="${boxY+boxH*0.50}" x2="${bx+bw-9*k}" y2="${boxY+boxH*0.50}" stroke="${K.ink}" stroke-width="${3*k}" opacity=".32"/>
+    ${label(bx+12*k, boxY+boxH*0.88, '\u26ca '+blkName, 21*k, K.teal, 'start', 0.6*k)}
+    ${chip(bx+bw-46*k, boxY+boxH*0.80, blk, 'blue', 23*k)}
+  </g>`;
+}
+/* fat rubber-hose pointer */
+function arrow(x1,y1,x2,y2,color,wd){
+  const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy), ux=dx/len, uy=dy/len;
+  const hx=x2-ux*36, hy=y2-uy*36, px=-uy, py=ux, hw=(wd||16)*1.5;
+  return `<g filter="url(#wob)">
+    <path d="M${x1} ${y1} L${hx} ${hy}" stroke="${color||K.ink}" stroke-width="${wd||16}" stroke-linecap="round" fill="none"/>
+    <path d="M${x2} ${y2} L${hx+px*hw} ${hy+py*hw} L${hx-px*hw} ${hy-py*hw} Z" fill="${color||K.ink}"/>
+  </g>`;
+}
+/* circled phase number */
+function phaseBadge(cx, cy, n, r){
+  const rr = r||62;
+  return `<g>
+    <circle cx="${cx+6}" cy="${cy+7}" r="${rr}" fill="${K.ink}" opacity=".4"/>
+    <circle cx="${cx}" cy="${cy}" r="${rr}" fill="${K.gold}" stroke="${K.ink}" stroke-width="8"/>
+    <text x="${cx}" y="${cy+rr*0.36}" text-anchor="middle" font-family="Alfa Slab One, Georgia, serif"
+      font-size="${rr*1.05}" fill="${K.ink}">${n}</text>
+  </g>`;
+}
+/* status badge, matching the in-game two-letter chips */
+function statusBadge(x, y, code, name, kind){
+  const c = kind==='pos' ? '#2E7D4F' : kind==='key' ? '#6B4E8A' : '#C0561F';
+  return `<g>
+    <rect x="${x}" y="${y}" width="66" height="66" rx="13" fill="${c}" stroke="${K.ink}" stroke-width="6"/>
+    ${label(x+33, y+45, code, 30, K.hi, 'middle', 1)}
+    ${label(x+82, y+44, name, 27, K.ink, 'start', 1)}
+  </g>`;
+}
+function tagPill(cx, cy, text, size){
+  const t = size||24, w = String(text).length*t*0.66 + t*1.6, h = t*1.85;
+  return `<g><rect x="${cx-w/2}" y="${cy-h/2}" width="${w}" height="${h}" rx="${h/2}"
+    fill="${K.gold}" stroke="${K.ink}" stroke-width="5"/>
+    ${label(cx, cy+t*0.36, text, t, K.ink, 'middle', 2)}</g>`;
+}
+function tape(x,y,w,h,rot){
+  return `<g transform="rotate(${rot} ${x+w/2} ${y+h/2})">
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${K.ed}" opacity=".82" stroke="${K.ink}" stroke-width="3" stroke-opacity=".25"/>
+  </g>`;
+}
+
+/* ===================================================================
+   THE TWELVE FRAMES
+   =================================================================== */
+const FRAMES = [
+{
+ n:1, id:'title', title:'Cold open — title card', dur:'0:06',
+ vo:'Academic Battle Cards. Two decks of literature. Two teams of characters. One question at a time. Here is how to play.',
+ notes:[
+  '<b>In:</b> iris-open from black, 12 frames.',
+  '<b>Hold:</b> burst rays rotate slowly behind the logo, ~4&deg;/sec.',
+  '<b>Type:</b> "HOW TO PLAY" snaps on 6 frames after the logo settles.',
+  '<b>Out:</b> whip-pan left into Frame 2.'
+ ],
+ art(){ return `
+  ${paperBG(K.gold)}
+  ${burst(960,470,1250,26,K.gold,'.30')}
+  ${burst(960,470,980,26,K.cream,'.35')}
+  <image href="${IMG.logo}" x="360" y="150" width="1200" height="440" preserveAspectRatio="xMidYMid meet"/>
+  <image href="${IMG.emblem}" x="150" y="700" width="230" height="230" preserveAspectRatio="xMidYMid meet" opacity=".92"/>
+  <image href="${IMG.crest}" x="1540" y="700" width="230" height="230" preserveAspectRatio="xMidYMid meet" opacity=".92"/>
+  ${ribbon(960, 660, 800, 104, 'HOW TO PLAY', K.red, 60)}
+  ${body(960, 840, ['Deal, draw & duel with trivia.'], 40, K.ink, 'middle')}
+  ${label(960, 930, 'A LAKEFRONT U PRODUCTION', 26, K.redDk, 'middle', 9)}
+  ${overlays()}`; }
+},
+{
+ n:2, id:'goal', title:'The goal — knock out three', dur:'0:12',
+ vo:'Your goal is simple. Knock out three of your opponent\u2019s characters and the match is yours. Each side puts one character forward \u2014 the Active \u2014 and keeps the rest Backstage. When your Active falls, the next one steps up.',
+ notes:[
+  '<b>Beat 1:</b> three portraits already on screen.',
+  '<b>Beat 2:</b> KO stamps slam down left-to-right, 8 frames apart, with a 3-frame screen shake on each.',
+  '<b>Beat 3:</b> counter ticks 1 &rarr; 2 &rarr; 3 in sync with the stamps.',
+  'Sound cue: three heavy stamps, then a bell.'
+ ],
+ art(){ return `
+  ${paperBG(K.red)}
+  ${burst(960,540,1300,22,K.red,'.16')}
+  ${ribbon(960, 66, 700, 96, 'KNOCK OUT 3', K.redDk, 54)}
+  ${charCard(230, 250, 330, IMG.abigail, 'ABIGAIL', 90, 'Cry Witch', '40/2', 'Denial', '20/1', 'foe', -3)}
+  ${charCard(795, 250, 330, IMG.proctor, 'PROCTOR', 110, 'Confession', '50/2', 'Good Name', '30/2', 'foe', 1)}
+  ${charCard(1360, 250, 330, IMG.parris, 'PARRIS', 85, 'Pulpit', '30/1', 'Authority', '40/2', 'foe', 4)}
+  <image href="${IMG.fxKO}" x="215" y="300" width="360" height="360" preserveAspectRatio="xMidYMid meet" opacity=".96"/>
+  <image href="${IMG.fxKO}" x="780" y="300" width="360" height="360" preserveAspectRatio="xMidYMid meet" opacity=".96"/>
+  <image href="${IMG.fxKO}" x="1345" y="300" width="360" height="360" preserveAspectRatio="xMidYMid meet" opacity=".96"/>
+  ${body(960, 930, ['One Active fights. The rest wait Backstage.','When the Active falls, the next steps up.'], 38, K.ink, 'middle', 54)}
+  ${overlays()}`; }
+},
+{
+ n:3, id:'board', title:'The table — Active, Backstage, hand', dur:'0:14',
+ vo:'Here is the table. Their Active faces yours across the arena. Below your character sit your hand, your deck and your discard pile. Every character has hit points, an attack row and a block row. That is everything you need to read.',
+ notes:[
+  '<b>Reveal order:</b> arena &rarr; foe Active &rarr; your Active &rarr; Backstage row &rarr; hand.',
+  'ACTIVE tags pop on with a 3-frame overshoot as the VO names each side.',
+  'Dim everything except the element being named \u2014 90% dip, 4-frame ramp.',
+  'Keep the arena plate soft; the cards carry the read.'
+ ],
+ art(){ return `
+  <rect width="${W}" height="${H}" fill="${K.felt}"/>
+  <image href="${IMG.arena}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" opacity=".70"/>
+  <rect width="${W}" height="${H}" fill="${K.felt}" opacity=".36"/>
+  <line x1="70" y1="560" x2="1850" y2="560" stroke="${K.gold}" stroke-width="5" opacity=".30" stroke-dasharray="26 20"/>
+  ${label(960, 70, 'THE TABLE', 42, K.gold, 'middle', 14)}
+
+  ${head(110, 235, 'THEIR SIDE', 60, K.hi, 'start', K.ink)}
+  ${body(110, 305, ['One Active up front.','The rest wait Backstage.'], 34, '#cfe0dc', 'start', 46)}
+  ${charCard(830, 190, 185, IMG.proctor, 'PROCTOR', 110, 'Confess', '50/2', 'Name', '30/2', 'foe', -3)}
+  ${charCard(1040, 190, 185, IMG.parris, 'PARRIS', 85, 'Pulpit', '30/1', 'Rank', '40/2', 'foe', 3)}
+  ${label(1030, 168, 'BACKSTAGE', 25, '#cfe0dc', 'middle', 3)}
+  ${charCard(1300, 140, 280, IMG.abigail, 'ABIGAIL', 90, 'Cry Witch', '40/2', 'Denial', '20/1', 'foe', 2)}
+  ${tagPill(1440, 122, 'ACTIVE', 25)}
+
+  ${head(110, 660, 'YOUR SIDE', 60, K.gold, 'start', K.ink)}
+  ${charCard(110, 715, 235, IMG.gatsby, 'GATSBY', 105, 'Old Sport', '50/2', 'Green Light', 'X/3', 'you', -2)}
+  ${tagPill(228, 700, 'ACTIVE', 25)}
+  ${charCard(500, 715, 190, IMG.daisy, 'DAISY', 85, 'Voice', '30/1', 'Charm', '30/2', 'you', 3)}
+  ${charCard(715, 715, 190, IMG.nick, 'NICK', 80, 'Witness', '20/1', 'Reserve', '40/2', 'you', -2)}
+  ${charCard(930, 715, 190, IMG.jordan, 'JORDAN', 75, 'Poise', '30/1', 'Nerve', '20/1', 'you', 2)}
+  ${label(715, 690, 'BACKSTAGE', 26, K.hi, 'middle', 4)}
+  <g>
+    <image href="${IMG.back}" x="1290" y="715" width="170" height="240" preserveAspectRatio="xMidYMid slice"/>
+    <rect x="1290" y="715" width="170" height="240" rx="14" fill="none" stroke="${K.ink}" stroke-width="7"/>
+    ${label(1375, 1000, 'DECK', 26, K.hi, 'middle', 4)}
+    <rect x="1520" y="715" width="170" height="240" rx="14" fill="${K.ink2}" stroke="${K.ink}" stroke-width="7" opacity=".94"/>
+    ${label(1605, 845, 'DISCARD', 23, K.gold, 'middle', 3)}
+    ${label(1605, 1000, 'PILE', 26, K.hi, 'middle', 4)}
+  </g>
+  ${overlays()}`; }
+},
+{
+ n:4, id:'read', title:'Reading a card — 50/2', dur:'0:16',
+ vo:'Read a move like a price tag. Fifty slash two means fifty damage for two charged cards. The blue row underneath is your block \u2014 thirty damage stopped, for two. An X means it negates the attack entirely instead of blocking a number. And a plus sign means the move grows the longer it stays in play.',
+ notes:[
+  'Card sits centre and scales up 105% over the whole frame \u2014 slow, no snap.',
+  '<b>50/2</b> splits apart: "50" flies left to DAMAGE, "2" flies right to CARDS CHARGED. 10-frame ease.',
+  'X and + examples pop in bottom-right, one after the other, 12 frames apart.',
+  'This is the densest frame \u2014 give the VO room, do not rush the pops.'
+ ],
+ art(){ return `
+  ${paperBG(K.teal)}
+  <image href="${IMG.deckbg}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" opacity=".18"/>
+  ${ribbon(960, 46, 780, 94, 'READING A CARD', K.tealDk, 50)}
+
+  ${charCard(120, 210, 430, IMG.gatsby, 'GATSBY', 105, 'Old Sport', '50/2', 'Green Light', '30/2', 'you', -1)}
+  ${body(1790, 200, ['Every move is priced.','Damage, slash, cost.'], 34, K.ink2, 'end', 46)}
+
+  ${arrow(590, 640, 740, 400, K.redDk, 13)}
+  ${arrow(590, 730, 740, 640, K.tealDk, 13)}
+
+  <g>
+    ${chip(860, 366, '50/2', 'red', 60)}
+    ${arrow(816, 288, 1010, 300, K.redDk, 9)}
+    ${label(1040, 312, 'DAMAGE DEALT', 34, K.redDk, 'start', 4)}
+    ${arrow(920, 448, 1010, 420, K.ink2, 9)}
+    ${label(1040, 432, 'CARDS YOU MUST CHARGE', 34, K.ink2, 'start', 4)}
+  </g>
+  <g>
+    ${chip(860, 640, '30/2', 'blue', 60)}
+    ${label(1040, 654, 'DAMAGE STOPPED, FOR 2', 34, K.tealDk, 'start', 4)}
+  </g>
+
+  <line x1="130" y1="850" x2="1790" y2="850" stroke="${K.ink}" stroke-width="5" opacity=".3" stroke-dasharray="16 14"/>
+  <g>
+    ${chip(260, 930, 'X/3', 'blue', 46)}
+    ${label(400, 944, 'NEGATES THE ATTACK ENTIRELY', 32, K.ink, 'start', 3)}
+    ${chip(260, 1020, '20+/2', 'red', 46)}
+    ${label(400, 1034, 'GROWS EVERY TURN IT STAYS IN PLAY', 32, K.ink, 'start', 3)}
+  </g>
+  ${overlays()}`; }
+},
+{
+ n:5, id:'draw', title:'Phase \u2460 — Draw', dur:'0:09',
+ vo:'A turn runs in three phases. First, Draw. You take one card. One. Your hand is small on purpose \u2014 every card you spend is a real cost.',
+ notes:[
+  'Phase strip appears once here and stays as a persistent lower-third through Frames 6 and 9.',
+  'Single card lifts off the deck, arcs right, tucks into the hand fan. 14 frames, ease-out.',
+  '"1" punches in oversized then settles to size \u2014 classic squash/stretch, 5 frames.',
+  'Hand fan gets a slow 2&deg; idle sway.'
+ ],
+ art(){ return `
+  ${paperBG(K.gold)}
+  ${burst(960,470,1180,20,K.gold,'.18')}
+  ${phaseBadge(300, 190, '1', 78)}
+  ${head(430, 225, 'DRAW', 116, K.ink, 'start', K.gold)}
+  ${body(432, 300, ['One card. Every turn.'], 42, K.ink2, 'start')}
+  <g>
+    <image href="${IMG.back}" x="250" y="470" width="220" height="310" preserveAspectRatio="xMidYMid slice"/>
+    <rect x="250" y="470" width="220" height="310" rx="14" fill="none" stroke="${K.ink}" stroke-width="7"/>
+    ${label(360, 830, 'YOUR DECK', 26, K.ink, 'middle', 4)}
+  </g>
+  ${arrow(510, 600, 800, 600, K.redDk, 18)}
+  <g>
+    <image href="${IMG.back}" x="850" y="440" width="200" height="282" preserveAspectRatio="xMidYMid slice" transform="rotate(-12 950 581)"/>
+    <rect x="850" y="440" width="200" height="282" rx="14" fill="none" stroke="${K.ink}" stroke-width="7" transform="rotate(-12 950 581)"/>
+    <image href="${IMG.back}" x="1030" y="430" width="200" height="282" preserveAspectRatio="xMidYMid slice" transform="rotate(-4 1130 571)"/>
+    <rect x="1030" y="430" width="200" height="282" rx="14" fill="none" stroke="${K.ink}" stroke-width="7" transform="rotate(-4 1130 571)"/>
+    <image href="${IMG.back}" x="1210" y="430" width="200" height="282" preserveAspectRatio="xMidYMid slice" transform="rotate(4 1310 571)"/>
+    <rect x="1210" y="430" width="200" height="282" rx="14" fill="none" stroke="${K.ink}" stroke-width="7" transform="rotate(4 1310 571)"/>
+    <image href="${IMG.back}" x="1390" y="440" width="200" height="282" preserveAspectRatio="xMidYMid slice" transform="rotate(12 1490 581)"/>
+    <rect x="1390" y="440" width="200" height="282" rx="14" fill="none" stroke="${K.ink}" stroke-width="7" transform="rotate(12 1490 581)"/>
+    ${label(1220, 830, 'YOUR HAND', 26, K.ink, 'middle', 4)}
+  </g>
+  ${ribbon(960, 900, 1080, 96, 'DRAW  \u00b7  STRATEGIZE  \u00b7  ENGAGE', K.redDk, 42)}
+  ${overlays()}`; }
+},
+{
+ n:6, id:'strategize', title:'Phase \u2461 — Strategize', dur:'0:13',
+ vo:'Second, Strategize. This is where the game is actually played. Each turn you may charge two cards, shed two cards, play up to two Bookmarks, and deploy one Critical Lens.',
+ notes:[
+  'Four allowance tiles land one at a time, 10 frames apart, each with a small dust puff.',
+  'Numbers 2 / 2 / 2 / 1 pop a beat after their tile settles.',
+  'Keep the phase strip from Frame 5 alive at the bottom, highlight moves to STRATEGIZE.',
+  'No arrows on this frame \u2014 the grid is doing the work.'
+ ],
+ art(){ return `
+  ${paperBG(K.teal)}
+  ${phaseBadge(280, 175, '2', 74)}
+  ${head(400, 208, 'STRATEGIZE', 96, K.ink, 'start', K.gold)}
+  ${body(402, 280, ['Where the game is actually played.'], 38, K.ink2, 'start')}
+  ${[['CHARGE','2','cards',K.red],['SHED','2','cards',K.tealDk],['BOOKMARKS','2','a turn',K.goldDk],['CRITICAL LENS','1','deployed','#6B4E8A']]
+     .map((t,i)=>{ const x=130+i*435, y=390;
+       return `<g>
+         <rect x="${x+9}" y="${y+11}" width="390" height="380" rx="20" fill="${K.ink}" opacity=".36"/>
+         <rect x="${x}" y="${y}" width="390" height="380" rx="20" fill="${K.hi}" stroke="${K.ink}" stroke-width="8"/>
+         <rect x="${x}" y="${y}" width="390" height="76" rx="20" fill="${t[3]}"/>
+         <rect x="${x}" y="${y+56}" width="390" height="20" fill="${t[3]}"/>
+         <line x1="${x}" y1="${y+76}" x2="${x+390}" y2="${y+76}" stroke="${K.ink}" stroke-width="8"/>
+         ${label(x+195, y+53, t[0], 32, K.hi, 'middle', 3)}
+         ${head(x+195, y+250, t[1], 150, t[3], 'middle', K.ink)}
+         ${label(x+195, y+320, t[2], 30, K.ink2, 'middle', 3)}
+       </g>`; }).join('')}
+  ${ribbon(960, 900, 1080, 96, 'DRAW  \u00b7  STRATEGIZE  \u00b7  ENGAGE', K.redDk, 42)}
+  ${overlays()}`; }
+},
+{
+ n:7, id:'charge', title:'Charging — answer to arm', dur:'0:15',
+ vo:'Charging is how you arm a move, and it is the heart of the game. Attach an Attack or Block card to your Active and you are asked a trivia question about the book. Answer right and the move charges. Answer wrong and the card is discarded and the attachment is spent.',
+ notes:[
+  'Card slides from hand onto the Active, then the question panel wipes up over it.',
+  'Correct answer: green flash, YES plate slams in, charge pip lights on the card.',
+  'Wrong answer: red flash, NO plate, card tumbles to the discard.',
+  'Show the correct path first, then hold on the NO plate under the last line of VO.'
+ ],
+ art(){ return `
+  ${paperBG(K.red)}
+  ${ribbon(960, 44, 900, 92, 'ANSWER TO ARM', K.redDk, 50)}
+  <g>
+    ${(()=>{const c=cardShell(120,200,400,540,K.red);return c.open+`
+      ${label(320, 242, '\u2694 ATTACK ABC', 30, K.hi, 'middle', 3)}
+      ${body(320, 330, ['Green light,','green light,','green light\u2026'], 34, K.ink, 'middle', 48)}
+      ${head(320, 530, 'POWER 3', 46, K.redDk, 'middle', K.ink)}
+      <g>
+        <circle cx="250" cy="620" r="26" fill="${K.red}" stroke="${K.ink}" stroke-width="6"/>
+        <circle cx="320" cy="620" r="26" fill="${K.red}" stroke="${K.ink}" stroke-width="6"/>
+        <circle cx="390" cy="620" r="26" fill="${K.cream}" stroke="${K.ink}" stroke-width="6"/>
+      </g>
+      ${label(320, 700, 'CHARGE PIPS', 24, K.ink2, 'middle', 3)}
+    `+c.close;})()}
+  </g>
+  ${arrow(560, 470, 720, 470, K.ink, 16)}
+  <g>
+    <rect x="770" y="200" width="1010" height="460" rx="22" fill="${K.hi}" stroke="${K.ink}" stroke-width="9"/>
+    <rect x="770" y="200" width="1010" height="82" rx="22" fill="${K.tealDk}"/>
+    <rect x="770" y="242" width="1010" height="40" fill="${K.tealDk}"/>
+    <line x1="770" y1="282" x2="1780" y2="282" stroke="${K.ink}" stroke-width="9"/>
+    ${label(1275, 258, 'TRIVIA \u2014 THE GREAT GATSBY', 32, K.hi, 'middle', 5)}
+    ${body(1275, 352, ['What does the green light at the end of', 'Daisy\u2019s dock represent to Gatsby?'], 36, K.ink, 'middle', 50)}
+    ${['A. His military record','B. The future he believes he can repeat','C. Tom\u2019s wealth','D. Nick\u2019s narration']
+      .map((t,i)=>{ const y=430+i*56, hit=i===1;
+        return `<g><rect x="820" y="${y}" width="910" height="46" rx="10"
+          fill="${hit?'#2E7D4F':K.cream}" stroke="${K.ink}" stroke-width="5"/>
+          ${label(842, y+33, t, 27, hit?K.hi:K.ink, 'start', 1)}</g>`; }).join('')}
+  </g>
+  <line x1="700" y1="720" x2="1800" y2="720" stroke="${K.ink}" stroke-width="5" opacity=".3" stroke-dasharray="16 14"/>
+  <image href="${IMG.fxYes}" x="810" y="750" width="270" height="270" preserveAspectRatio="xMidYMid meet"/>
+  ${label(945, 1044, 'RIGHT \u2014 IT CHARGES', 30, K.ink, 'middle', 4)}
+  <image href="${IMG.fxNo}" x="1400" y="750" width="270" height="270" preserveAspectRatio="xMidYMid meet"/>
+  ${label(1535, 1044, 'WRONG \u2014 DISCARDED', 30, K.ink, 'middle', 4)}
+  ${overlays()}`; }
+},
+{
+ n:8, id:'retry', title:'Iterum Probare — try again', dur:'0:12',
+ vo:'Miss one and you get Iterum Probare \u2014 try again. Shed a card from your hand and the same question comes back with your wrong answer struck out. One retry per question. The card is spent either way.',
+ notes:[
+  'Wrong answer strikes through with a hand-drawn line that draws left to right, 8 frames.',
+  'A card peels off the hand and drops into the discard \u2014 that is the cost, make it visible.',
+  'Latin title card holds 1 second before the panel returns.',
+  'Warn on the cost: the shed card is gone whether or not the retry lands.'
+ ],
+ art(){ return `
+  ${paperBG(K.gold)}
+  ${burst(960,520,1150,18,K.gold,'.20')}
+  ${ribbon(960, 50, 940, 100, 'ITERUM PROBARE', K.redDk, 56)}
+  ${body(960, 218, ['\u201ctry again\u201d'], 40, K.ink2, 'middle')}
+  <g>
+    <rect x="330" y="280" width="1260" height="400" rx="22" fill="${K.hi}" stroke="${K.ink}" stroke-width="9"/>
+    ${body(960, 356, ['What does the green light represent to Gatsby?'], 36, K.ink, 'middle')}
+    <g>
+      <rect x="400" y="400" width="1120" height="52" rx="10" fill="${K.cream}" stroke="${K.ink}" stroke-width="5" opacity=".55"/>
+      ${label(424, 437, 'A. His military record', 28, K.ink, 'start', 1)}
+      <line x1="410" y1="426" x2="1510" y2="426" stroke="${K.redDk}" stroke-width="8" filter="url(#wob)"/>
+    </g>
+    <g>
+      <rect x="400" y="472" width="1120" height="52" rx="10" fill="${K.cream}" stroke="${K.ink}" stroke-width="5"/>
+      ${label(424, 509, 'B. The future he believes he can repeat', 28, K.ink, 'start', 1)}
+    </g>
+    <g>
+      <rect x="400" y="544" width="1120" height="52" rx="10" fill="${K.cream}" stroke="${K.ink}" stroke-width="5"/>
+      ${label(424, 581, 'C. Tom\u2019s wealth', 28, K.ink, 'start', 1)}
+    </g>
+    ${label(960, 650, 'YOUR WRONG ANSWER IS STRUCK OUT \u2014 PICK AGAIN', 26, K.redDk, 'middle', 4)}
+  </g>
+  <g>
+    <image href="${IMG.back}" x="330" y="740" width="180" height="254" preserveAspectRatio="xMidYMid slice" transform="rotate(-14 420 867)"/>
+    <rect x="330" y="740" width="180" height="254" rx="14" fill="none" stroke="${K.ink}" stroke-width="7" transform="rotate(-14 420 867)"/>
+    ${arrow(560, 866, 830, 866, K.redDk, 16)}
+    <rect x="880" y="740" width="200" height="254" rx="14" fill="${K.ink2}" stroke="${K.ink}" stroke-width="7"/>
+    ${label(980, 880, 'DISCARD', 28, K.gold, 'middle', 3)}
+    ${label(700, 820, 'THE COST', 30, K.ink, 'middle', 4)}
+  </g>
+  ${body(1420, 830, ['One retry per','question. The card','is spent either way.'], 34, K.ink, 'middle', 48)}
+  ${overlays()}`; }
+},
+{
+ n:9, id:'engage', title:'Phase \u2462 — Engage', dur:'0:13',
+ vo:'Third, Engage. Once a move has its cost fully charged, tap it to strike. Then the defender decides whether to spend their block. Damage lands, charges are spent, and the turn passes.',
+ notes:[
+  'Charged move pulses gold twice before the strike \u2014 that is the "ready" tell.',
+  'STRIKE plate lands on the impact, 3-frame white flash, 6px screen shake.',
+  'GUARD plate answers 8 frames later on the defender side.',
+  'HP bar drains after both plates clear \u2014 do not overlap them.'
+ ],
+ art(){ return `
+  <rect width="${W}" height="${H}" fill="${K.felt}"/>
+  <image href="${IMG.arena}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" opacity=".60"/>
+  <rect width="${W}" height="${H}" fill="${K.felt}" opacity=".40"/>
+  ${burst(960,540,1300,24,K.gold,'.085')}
+  ${phaseBadge(140, 130, '3', 66)}
+  ${head(250, 158, 'ENGAGE', 84, K.hi, 'start', K.ink)}
+
+  ${charCard(150, 370, 340, IMG.gatsby, 'GATSBY', 105, 'Old Sport', '50/2', 'Green Light', 'X/3', 'you', -2)}
+  <g>
+    <rect x="130" y="300" width="420" height="50" rx="25" fill="${K.gold}" stroke="${K.ink}" stroke-width="6"/>
+    ${label(340, 335, 'FULLY CHARGED \u2014 TAP TO STRIKE', 21, K.ink, 'middle', 1.6)}
+  </g>
+  ${arrow(580, 590, 850, 590, K.gold, 20)}
+  <image href="${IMG.fxStrike}" x="700" y="380" width="420" height="420" preserveAspectRatio="xMidYMid meet"/>
+  ${charCard(1420, 370, 340, IMG.abigail, 'ABIGAIL', 90, 'Cry Witch', '40/2', 'Denial', '30/2', 'foe', 2)}
+  <image href="${IMG.fxGuard}" x="1240" y="410" width="360" height="360" preserveAspectRatio="xMidYMid meet" opacity=".95"/>
+  ${label(1590, 335, 'THE DEFENDER CHOOSES', 26, K.hi, 'middle', 4)}
+  ${ribbon(960, 940, 1180, 94, '50 DAMAGE  \u2212  30 BLOCKED  =  20 THROUGH', K.redDk, 40)}
+  ${overlays()}`; }
+},
+{
+ n:10, id:'status', title:'Statuses — read the badges', dur:'0:12',
+ vo:'Badges under a character tell you what is affecting them. Orange hurts, green helps, purple is a keyword. Tear takes extra damage. Glue cannot block. Highlight adds twenty to your next hit. Tap any badge to read it.',
+ notes:[
+  'Badges pop in colour groups \u2014 all orange, then all green, then purple.',
+  'Colour key strip wipes in last, left to right.',
+  'Hold 2 seconds at the end with no motion \u2014 viewers will pause here.',
+  'Do not list every status; three named examples is the ceiling for a beginner cut.'
+ ],
+ art(){ return `
+  ${paperBG(K.teal)}
+  ${ribbon(960, 44, 800, 92, 'READ THE BADGES', K.tealDk, 50)}
+  ${charCard(120, 230, 360, IMG.abigail, 'ABIGAIL', 90, 'Cry Witch', '40/2', 'Denial', '30/2', 'foe', -2)}
+  <image href="${IMG.fxGlue}" x="130" y="270" width="330" height="330" preserveAspectRatio="xMidYMid meet" opacity=".9"/>
+  ${[['TR','Tear \u2014 takes +10 from everything','neg'],
+     ['GL','Glue \u2014 cannot block or switch','neg'],
+     ['SP','Spill \u2014 loses 10 HP a turn','neg'],
+     ['HL','Highlight \u2014 +20 on your next attack','pos'],
+     ['HC','Hardcover \u2014 \u221210 from everything','pos'],
+     ['SI','Siphon \u2014 drains, and feeds whoever applied it','key']]
+    .map((s,i)=>statusBadge(600, 250 + i*102, s[0], s[1], s[2])).join('')}
+  <g>
+    <rect x="600" y="900" width="1180" height="86" rx="18" fill="${K.hi}" stroke="${K.ink}" stroke-width="7"/>
+    <circle cx="660" cy="943" r="20" fill="#C0561F" stroke="${K.ink}" stroke-width="5"/>
+    ${label(694, 954, 'ORANGE HURTS', 28, K.ink, 'start', 2)}
+    <circle cx="1050" cy="943" r="20" fill="#2E7D4F" stroke="${K.ink}" stroke-width="5"/>
+    ${label(1084, 954, 'GREEN HELPS', 28, K.ink, 'start', 2)}
+    <circle cx="1400" cy="943" r="20" fill="#6B4E8A" stroke="${K.ink}" stroke-width="5"/>
+    ${label(1434, 954, 'PURPLE IS A KEYWORD', 28, K.ink, 'start', 2)}
+  </g>
+  ${overlays()}`; }
+},
+{
+ n:11, id:'bmlens', title:'Bookmarks & Critical Lenses', dur:'0:15',
+ vo:'Two card types bend the rules. Bookmarks are played outright \u2014 status effects, heals, sabotage \u2014 up to two a turn. Critical Lenses change the whole match. Each has a Passive that is always on, and a Thesis. Meet the Thesis, tap it, and collect a one-time reward.',
+ notes:[
+  'Split screen: Bookmark side builds first, Lens side second. Do not run them together.',
+  'On the Lens card, PASSIVE and THESIS underline in gold as the VO names each.',
+  '"Fulfil thesis" button pulses gold twice at the end of the line.',
+  'This is the longest frame \u2014 consider splitting to 11a / 11b if the cut feels crowded.'
+ ],
+ art(){ return `
+  ${paperBG()}
+  <line x1="960" y1="150" x2="960" y2="1000" stroke="${K.ink}" stroke-width="7" stroke-dasharray="18 16" opacity=".45"/>
+  ${ribbon(480, 44, 660, 88, '\u2726 BOOKMARKS', K.goldDk, 44)}
+  ${ribbon(1440, 44, 700, 88, '\u25c6 CRITICAL LENSES', K.tealDk, 44)}
+  <g>
+    ${(()=>{const c=cardShell(230,220,500,620,K.goldDk);return c.open+`
+      ${label(480, 262, 'BOOKMARK \u00b7 COMMON', 26, K.hi, 'middle', 3)}
+      ${head(480, 350, 'HIGHLIGHT', 52, K.goldDk, 'middle', K.ink)}
+      ${head(480, 410, 'PASSAGE', 52, K.goldDk, 'middle', K.ink)}
+      <image href="${IMG.fxHigh}" x="360" y="440" width="240" height="240" preserveAspectRatio="xMidYMid meet"/>
+      ${body(480, 730, ['Your next attack','deals +20 damage.'], 32, K.ink, 'middle', 44)}
+    `+c.close;})()}
+  </g>
+  ${body(480, 900, ['Played outright \u2014 no trivia.','Up to 2 a turn.'], 34, K.ink, 'middle', 48)}
+  ${label(480, 990, 'COMMON \u00b7 UNCOMMON \u00b7 RARE \u00b7 EPIC \u00b7 LEGENDARY', 24, K.redDk, 'middle', 3)}
+  <g>
+    ${(()=>{const c=cardShell(1190,220,500,620,K.tealDk);return c.open+`
+      ${label(1440, 262, 'CRITICAL LENS', 26, K.hi, 'middle', 3)}
+      <clipPath id="lensclip"><rect x="1230" y="290" width="420" height="200" rx="12"/></clipPath>
+      <image href="${IMG.marxist}" x="1230" y="290" width="420" height="200" preserveAspectRatio="xMidYMid slice" clip-path="url(#lensclip)"/>
+      <rect x="1230" y="290" width="420" height="200" rx="12" fill="none" stroke="${K.ink}" stroke-width="5"/>
+      ${head(1440, 545, 'MARXIST LENS', 40, K.tealDk, 'middle', K.ink)}
+      ${label(1240, 605, 'PASSIVE', 26, K.goldDk, 'start', 3)}
+      ${body(1240, 645, ['Always on, all match.'], 28, K.ink, 'start')}
+      ${label(1240, 705, 'THESIS', 26, K.goldDk, 'start', 3)}
+      ${body(1240, 745, ['Meet it once for a reward.'], 28, K.ink, 'start')}
+      <rect x="1240" y="775" width="400" height="50" rx="25" fill="${K.gold}" stroke="${K.ink}" stroke-width="5"/>
+      ${label(1440, 809, 'FULFIL THESIS \u25b8', 26, K.ink, 'middle', 2)}
+    `+c.close;})()}
+  </g>
+  ${body(1440, 900, ['4 in a deck.','1 active at a time.'], 34, K.ink, 'middle', 48)}
+  ${overlays()}`; }
+},
+{
+ n:12, id:'win', title:'Win the match — outro', dur:'0:10',
+ vo:'Three knockouts and the match is yours. That is the whole game. Pick a deck, pick a fight, and start reading. Academic Battle Cards.',
+ notes:[
+  'Three KO stamps land on the beat, then the whole plate irises down to the logo.',
+  'Rays speed up slightly through the last 2 seconds, then cut to black on the final word.',
+  'Music tail: let the last chord ring over black before the URL card.',
+  'Swap the bottom line for the real URL before export.'
+ ],
+ art(){ return `
+  ${paperBG(K.gold)}
+  ${burst(960,470,1350,26,K.gold,'.34')}
+  ${burst(960,470,1050,26,K.cream,'.30')}
+  <g>
+    <image href="${IMG.fxKO}" x="300" y="150" width="300" height="300" preserveAspectRatio="xMidYMid meet" transform="rotate(-10 450 300)"/>
+    <image href="${IMG.fxKO}" x="810" y="120" width="300" height="300" preserveAspectRatio="xMidYMid meet" transform="rotate(4 960 270)"/>
+    <image href="${IMG.fxKO}" x="1320" y="150" width="300" height="300" preserveAspectRatio="xMidYMid meet" transform="rotate(11 1470 300)"/>
+  </g>
+  ${ribbon(960, 480, 900, 108, 'THREE KOs \u2014 YOU WIN', K.redDk, 58)}
+  <image href="${IMG.logo}" x="560" y="640" width="800" height="270" preserveAspectRatio="xMidYMid meet"/>
+  ${label(960, 985, 'PICK A DECK  \u00b7  PICK A FIGHT  \u00b7  START READING', 30, K.ink, 'middle', 7)}
+  ${overlays()}`; }
+}
+];
+
+/* ===================================================================
+   RENDER
+   =================================================================== */
+const NS = 'http://www.w3.org/2000/svg';
+function frameSVG(f){
+  return `<svg xmlns="${NS}" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${DEFS}${f.art()}</svg>`;
+}
+const reel = document.getElementById('reel');
+reel.innerHTML = FRAMES.map(f=>`
+  <section class="sheet" id="sheet-${f.n}">
+    <div class="pegs"><span class="peg"></span><span class="peg bar"></span><span class="peg"></span></div>
+    <div class="slatebar">
+      <div class="no">${String(f.n).padStart(2,'0')}</div>
+      <div class="nm">${esc(f.title)}</div>
+      <div class="dur">${f.dur}</div>
+    </div>
+    <div class="frame" data-frame="${f.n}">${frameSVG(f)}</div>
+    <div class="notes">
+      <div class="vo"><span class="lbl">Voiceover</span><p>${esc(f.vo)}</p></div>
+      <div><span class="lbl">Motion &amp; timing</span><ul>${f.notes.map(n=>`<li>${n}</li>`).join('')}</ul></div>
+    </div>
+    <div class="rowtools">
+      <button class="mini" data-png="${f.n}">Download frame ${String(f.n).padStart(2,'0')} PNG</button>
+    </div>
+  </section>`).join('');
+
+/* run time */
+(()=>{
+  const secs = FRAMES.reduce((a,f)=>{const [m,s]=f.dur.split(':').map(Number); return a+m*60+s;},0);
+  document.getElementById('s-run').textContent = 'run '+Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0');
+  document.getElementById('s-frames').textContent = FRAMES.length+' frames';
+})();
+
+/* ===================================================================
+   EXPORT — PNG at true 1920x1080
+   Web fonts are fetched and inlined so rasterised text matches the page.
+   Falls back to system faces if the font host is unreachable.
+   =================================================================== */
+const GF = 'https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Anton&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap';
+let FONTCSS = null;
+async function fontCSS(){
+  if(FONTCSS !== null) return FONTCSS;
+  try{
+    let css = await (await fetch(GF)).text();
+    const urls = [...new Set(css.match(/https:\/\/fonts\.gstatic\.com[^)]+/g) || [])];
+    for(const u of urls){
+      const blob = await (await fetch(u)).blob();
+      const dataURI = await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(blob); });
+      css = css.split(u).join(dataURI);
+    }
+    FONTCSS = css;
+  }catch(e){
+    FONTCSS = '';
+    say('Font host unreachable \u2014 PNGs will use fallback faces. Use Print to PDF for exact type.');
+  }
+  return FONTCSS;
+}
+function say(msg){ document.getElementById('status').textContent = msg || ''; }
+
+async function framePNG(n){
+  const f = FRAMES.find(x=>x.n===n);
+  const css = await fontCSS();
+  const svg = `<svg xmlns="${NS}" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">`
+            + (css ? `<style>${css}</style>` : '') + DEFS + f.art() + `</svg>`;
+  const url = URL.createObjectURL(new Blob([svg], {type:'image/svg+xml;charset=utf-8'}));
+  const img = await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url; });
+  const cv = document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx = cv.getContext('2d'); ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H); ctx.drawImage(img,0,0,W,H);
+  URL.revokeObjectURL(url);
+  const blob = await new Promise(r=>cv.toBlob(r,'image/png'));
+  return {blob, name:`abc_tutorial_${String(n).padStart(2,'0')}_${f.id}.png`};
+}
+function save(blob, name){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+
+reel.addEventListener('click', async e=>{
+  const btn = e.target.closest('[data-png]'); if(!btn) return;
+  btn.disabled = true; const was = btn.textContent; btn.textContent = 'Rendering\u2026';
+  try{ const {blob,name} = await framePNG(+btn.dataset.png); save(blob,name); say('Saved '+name); }
+  catch(err){ say('Frame export failed: '+err.message); }
+  btn.disabled = false; btn.textContent = was;
+});
+
+document.getElementById('dl-all').addEventListener('click', async e=>{
+  e.target.disabled = true;
+  for(const f of FRAMES){
+    say(`Rendering frame ${f.n} of ${FRAMES.length}\u2026`);
+    try{ const {blob,name} = await framePNG(f.n); save(blob,name); }
+    catch(err){ say('Stopped at frame '+f.n+': '+err.message); e.target.disabled=false; return; }
+    await new Promise(r=>setTimeout(r,420));   /* let the browser flush each save */
+  }
+  say('All '+FRAMES.length+' frames saved.');
+  e.target.disabled = false;
+});
+
+document.getElementById('dl-script').addEventListener('click', ()=>{
+  const txt = ['ACADEMIC BATTLE CARDS \u2014 HOW TO PLAY','Voiceover script + motion notes','']
+    .concat(FRAMES.flatMap(f=>[
+      `FRAME ${String(f.n).padStart(2,'0')}  [${f.dur}]  ${f.title}`,
+      '', 'VO:', f.vo, '', 'MOTION:',
+      ...f.notes.map(n=>'  - '+n.replace(/<[^>]+>/g,'')),
+      '', '\u2014'.repeat(60), ''
+    ])).join('\n');
+  save(new Blob([txt],{type:'text/plain;charset=utf-8'}), 'abc_tutorial_vo_script.txt');
+  say('Saved abc_tutorial_vo_script.txt');
+});
+
+document.getElementById('pr').addEventListener('click', ()=>window.print());
+</script>
+</body>
+</html>

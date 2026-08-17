@@ -2793,6 +2793,14 @@ const DATA = {
         passive:{id:"dissolve",name:"Liquid Dissolution",text:"The Witch's attacks deal +20 against any character with a negative status. Caveat: whenever the opponent successfully attaches a Block ABC, she suffers an uncleansable 🫟 Spill (−15 HP each turn).",statusDmgBonus:20,spillOnFoeBlockAttach:15},
         atk:{n:"Winged Monkey Ambush",t:"Inflicts \ud83e\ude79 Glue on the defender (cannot switch positions next phase).",cost:2,dmg:40,inflict:"glue",label:"40/2"},
         blk:{n:"Hourglass Countdown",t:"Caps incoming damage at 20 and inflicts \ud83e\udea2 Tear on the attacker.",cost:2,blockType:"capto",cap:20,inflictAtt:"tear",label:"Cap20/2"} },
+      { id:"hecate_1e", name:"Hecate (1E)", deck:"macbeth", hp:90, archetype:'Corrupter', accent:"#2F2142", img:"", fe:true, base:["macbeth","hecate"],
+        passive:{id:"darkmagic",name:"Dark Magic",text:"An ABC that would be wasted on a full pile charges Hecate’s other move instead — ⚔ feeds ⛊ and back. Caveat: while Hecate is your Active you cannot play Bookmarks.",crossCharge:true,bookmarkCapActive:0},
+        atk:{n:"Whisper of the Wood",t:"“Beldams as you are, saucy and overbold?” Gains 🗡️ Pierce.",cost:2,dmg:30,flags:["pierce"],label:"30/2"},
+        blk:{n:"Fate’s Foresight",t:"“Security is mortals’ chiefest enemy.” Inflict 🪢 Tear on the attacker.",cost:2,block:30,inflictAtt:"tear",label:"30/2"} },
+      { id:"toto_1e", name:"Toto (1E)", deck:"oz", hp:80, archetype:'Urchin', accent:"#7A518E", img:"", fe:true, base:["oz","toto"],
+        passive:{id:"terriervigil",name:"Terrier’s Vigil",text:"While Toto is Backstage, your Active has 🛡️ Laminate. Caveat: Toto carries a permanent, uncleansable 🫠 Spill (−10 HP each turn).",benchStatusAura:"laminate",spillLock:true},
+        atk:{n:"Watch Your Ankles",t:"Small, low, and under every guard. Gains 🗡️ Pierce.",cost:1,dmg:20,flags:["pierce"],label:"20/1"},
+        blk:{n:"Basket of Protection",t:"Toto crawls into Dorothy’s basket when things get too hairy. Draw 1.",cost:2,block:40,onBlockDraw:1,label:"40/2"} },
       { id:"1e_janie", name:"Janie Crawford (1E)", deck:"tewwg", hp:170, archetype:'Elder', accent:"#D7A86E", img:"", fe:true, base:["tewwg","janie"],
         passive:{id:"findingvoice",name:"Finding Her Voice",text:"Once each turn, a successful trivia attach removes one negative status from an ally. Caveat: your attacks cost +1 ABC while Janie is your Active Character.",onAttachCleanseAlly:true,costMod:1},
         atk:{n:"Pear Tree Promise",t:"Gain \u2728 Highlight before attacking.",cost:3,dmg:60,grant:"highlight",label:"60/3"},
@@ -3875,7 +3883,16 @@ function attach(side,handIdx,correct,targetUid){
       delete act.status.smudge; delete act.status._smudgeHalf; pushLog(`${act.name} clears the Smudge — the card attaches.`);
     }
     p.hand.splice(handIdx,1);
-    const pile=(card.type==='ATTACK'?act.atkCharge:act.blkCharge);
+    let pile=(card.type==='ATTACK'?act.atkCharge:act.blkCharge);
+    /* Dark Magic (hecate_1e): an ABC that would be wasted on a full pile is
+       redirected to the pile that still needs it. Never adds charges. */
+    if(act.fe && act.passive && act.passive.crossCharge){
+      const aNeed=(act.atk&&act.atk.cost!=null)?attackCostFor(side,act.atk):Infinity;
+      const bNeed=(act.blk&&act.blk.cost!=null)?blockCostFor(act,act.blk):Infinity;
+      const aFull=act.atkCharge.length>=aNeed, bFull=act.blkCharge.length>=bNeed;
+      if(card.type==='ATTACK' && aFull && !bFull){ pile=act.blkCharge; pushLog(`Dark Magic — ${act.name} bends the charge to her guard.`); }
+      else if(card.type==='BLOCK' && bFull && !aFull){ pile=act.atkCharge; pushLog(`Dark Magic — ${act.name} bends the charge to her attack.`); }
+    }
     pile.push(card);
     if(hasCrit(side,'reader') && p.crit && p.crit.declared===card.type){
       pile.push({type:card.type,power:0,_wild:true});
@@ -3914,11 +3931,21 @@ function attach(side,handIdx,correct,targetUid){
 /* ---------------- status effects (Tear, Rip, Glue, Spill, Smudge, Burn / Highlight, Laminate, Hardcover, Margin Notes) ---------------- */
 const STATUS_NEG=['tear','rip','glue','spill','smudge','burn'];
 const LAMINATE_BLOCKS=['tear','rip','glue','spill'];
+/* A benched 1st Edition may project a status aura onto the Active (Toto's Terrier's Vigil).
+   Mirrors the benchCostAura pattern used by wizard_1e. */
+function benchAuraSource(t,kind){
+  if(!S||!t||t.hp<=0) return null;
+  const sd=sideOfChar(t); if(!sd) return null;
+  const P=S[sd]; if(!P||!P.team) return null;
+  const act=P.team[P.activeIdx]; if(!act||act.uid!==t.uid) return null;
+  return P.team.find((c,i)=>i!==P.activeIdx&&c.fe&&c.hp>0&&c.passive&&c.passive.benchStatusAura===kind)||null;
+}
 function inflict(t,k,ignoreLam){
   if(!t||t.hp<=0) return false;
   if(t._overlord && (k==='rip'||k==='smudge'||k==='burn'||k==='spill'||k==='glue') && Math.random()<0.5){ pushLog(`${t.name} resists ${statusName(k)} — the overload shrugs it off.`); return false; }
   if(t.wardNext && t.wardNext.includes(k)){ t.wardNext=null; pushLog(`${t.name} shrugs off ${statusName(k)} — shielded.`); return false; }
   if(!ignoreLam && t.status.laminate && LAMINATE_BLOCKS.includes(k)){ pushLog(`${t.name} is Laminated — ${k.charAt(0).toUpperCase()+k.slice(1)} prevented.`); return false; }
+  if(!ignoreLam && LAMINATE_BLOCKS.includes(k)){ const _ba=benchAuraSource(t,'laminate'); if(_ba){ pushLog(`${t.name} is shielded — ${_ba.name} keeps watch from Backstage (${statusName(k)} prevented).`); return false; } }
   t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'neg'); return true;
 }
 function grant(t,k){ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ pushLog(`${t.name} is too isolated to gain ${statusName(k)}.`); return false; } if(t&&t.hp>0){ t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'pos'); return true; } return false; }
@@ -3966,7 +3993,10 @@ function playBookmark(side,idx){
   const P=S[side];
   if((S._censor||0)>0){ if(side==='you') toast('Censorship \u2014 no Bookmarks may be played.'); return; }
   if((P.flags.noBookmarks||0)>0){ if(side==='you') toast('Structuralism locked your Bookmarks this turn.'); return; }
-  const _bmCap = feOnField(P).some(c=>c.passive&&c.passive.bookmarkCap) ? 1 : 2;
+  let _bmCap = 2;
+  feOnField(P).forEach(c=>{ if(c.passive&&c.passive.bookmarkCap!=null) _bmCap=Math.min(_bmCap,c.passive.bookmarkCap); });
+  { const _a=active(P); if(_a&&_a.fe&&_a.passive&&_a.passive.bookmarkCapActive!=null) _bmCap=Math.min(_bmCap,_a.passive.bookmarkCapActive); }
+  if(_bmCap<=0){ if((P.flags.bmCount||0)>=0 && side==='you') toast('No Bookmarks while she holds the circle.'); return; }
   if((P.flags.bmCount||0)>=_bmCap){ if(side==='you') toast('Up to '+_bmCap+' bookmark'+(_bmCap>1?'s':'')+' per turn.'); return; }
   const card=P.hand[idx], isYou=side==='you', act=active(P);
   const lbl=(c)=>c?(c.name||(c.word?('\u201c'+c.word+'\u201d '+(c.type||'')):(c.type||'Card'))):'Card';
