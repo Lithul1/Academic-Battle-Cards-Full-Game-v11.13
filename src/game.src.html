@@ -3516,11 +3516,35 @@ const DECK_COMP = {
   othello:      { ch:12, ab:26, bm:18, cr:4 },   // control, slowest to threaten
 };
 function compFor(k){ return DECK_COMP[k] || { ch:12, ab:30, bm:14, cr:4 }; }
+function abStarter(k, n){
+  const pool=poolAb(k), all=DATA.abcs[k]||[];
+  const take=(t,p)=>pool.filter(i=>all[i] && all[i].type===t && all[i].power===p);
+  const want=Math.max(0,n|0), half=Math.ceil(want/2), out=[];
+  ['ATTACK','BLOCK'].forEach(function(t,ti){
+    const quota=ti===0?half:want-half;
+    // follow the pool's own power curve, band by band
+    const bands=[1,2,3,4].map(p=>take(t,p));
+    const total=bands.reduce((s,b)=>s+b.length,0)||1;
+    let got=[];
+    bands.forEach((b,bi)=>{
+      const share=Math.round(quota*b.length/total);
+      for(let j=0;j<share && j<b.length;j++) got.push(b[j]);
+    });
+    // top up or trim to the exact quota
+    const rest=bands.reduce((a,b)=>a.concat(b),[]).filter(i=>got.indexOf(i)<0);
+    while(got.length<quota && rest.length) got.push(rest.shift());
+    out.push.apply(out, got.slice(0,quota));
+  });
+  return out;
+}
 function defaultDeck(k){
   // 62-card starter built to this deck's own composition. LIMITS remains the
   // BUILDER's ceiling; compFor() is what the deck ships as.
   const c=compFor(k);
-  const def={ d:k, ch:poolCh(k).slice(0,c.ch), ab:poolAb(k).slice(0,c.ab), bm:[], cr:poolCr().slice(0,c.cr), fe:feFor(k) };
+  // ABC pools are authored in reading order (act, then power, then type), so a
+  // plain slice takes every ATTACK before it reaches a single BLOCK. Draw an
+  // even split across both types and spread it over the power bands instead.
+  const def={ d:k, ch:poolCh(k).slice(0,c.ch), ab:abStarter(k, c.ab), bm:[], cr:poolCr().slice(0,c.cr), fe:feFor(k) };
   return fillGaps(def, c);
 }
 function pickN(arr,n){ const p=arr.slice(), o=[]; while(o.length<n && p.length) o.push(p.splice(rnd(p.length),1)[0]); return o; }
@@ -8637,6 +8661,7 @@ window.ABC_EXPORT = {
 try{ edBackfillArchetypes(); }catch(e){}
 
 window.ABC_DEBUG = {
+  defaultDeck:(k)=>defaultDeck(k), compFor:(k)=>compFor(k), poolAb:(k)=>poolAb(k),
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
   noAI:false, stopTurnTimer, get busy(){return busy;}, set busy(v){busy=!!v;}, blockCostFor, escClear, healChar, escBump, riposteArmed, pileBonus, calcDamage, calcBlock, tryDiscardHandCard, aiFeedPile, cardKind, ipCost, ipOffer, ipAccept, ipDecline, answerTrivia, mgEligible, mgNeed, mgSelect, mgStart, mgAnswer, closePile, devOpen, devClose, devDo, get DEV_WORD(){return DEV_WORD;}, get META(){return META;}, get APP(){return APP;}, get menuScreenSrc(){return menuScreen();}, SFX, get guideSrc(){return guideScreen();}, archChip, benchInfoModalSrc(){return benchInfoModal();}, fxAttack, fxBlock, fxKO, fxStatus, fxRevive, triviaStamp, defaultDeck, poolAb, deckOwnAb, scrimOppPlayer, enemyDeck, poolAbAny, compFor, get LIMITS(){return LIMITS;}, get MINIMA(){return MINIMA;}, get checkKOSrc(){return checkKO.toString();}, buildCharPreviewSrc(){const c=DATA.characters.hamlet.find(x=>x.id==="hamlet"); return buildCharPreview(c,"hamlet");}, render, get doBlockSrc(){return doBlock.toString();},
   freeze(){ this.noAI=true; stopTurnTimer(); if(S){ S.settings=S.settings||{}; S.settings.turnTimer=0; } return true; },
