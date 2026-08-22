@@ -3473,7 +3473,9 @@ function makeChar(def, scale){
 }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];} return a; }
 /* ---------- deck definitions ---------- */
-const LIMITS={ ch:12, ab:36, bm:20, cr:4, fe:2, total:62 };   // builder CEILING per category
+const LIMITS={ ch:14, ab:36, bm:20, cr:4, fe:2, total:62 };   // builder CEILING per category
+/* ch is 14, not 12: gatsby and hamlet ship 13 characters and oz ships 14, so a
+   ceiling of 12 flagged three untouched starter decks as over-cap. */
 const MINIMA={ ch:8,  ab:24, bm:10, cr:2, fe:2 };             // builder FLOOR per category
 function feFor(k){ return (DATA.firsteds||[]).filter(f=>f.deck===k).map(f=>f.id).slice(0,LIMITS.fe); }
 function firstedById(id){ var f=(DATA.firsteds||[]).find(x=>x.id===id); if(f) return f;
@@ -3565,6 +3567,7 @@ function pmReturnCost(ch){
 }
 /* test surface — read by tools/pagemaster.test.js */
 try{ window.ABC_PM = { PM, pmOn, pmBooksOf, pagemasterLegal, pmReturnCost,
+  deckForPlay, pmEncodeDeck, pmDecodeDeck, isPmCode, pmCaps, pmBuildBooks,
   newPlayer, checkKO, drawnPlayChar, attackCostFor, edResolveChar,
   get S(){ return typeof S!=='undefined'?S:null; },
   get APP(){ return typeof APP!=='undefined'?APP:null; } }; }catch(e){}
@@ -3859,6 +3862,30 @@ function newGame(st,youDef,oppDef){
   dealOpening();
 }
 /* ---------- shareable deck codes ---------- */
+
+/* ---- Pagemaster deck codes: ABC-PM- so they cannot be confused with ABC- ---- */
+function pmEncodeDeck(def){
+  try{
+    const j=JSON.stringify({ d:def.d, books:def.books||[], pm:true,
+      ch:def.ch, ab:def.ab, bm:def.bm, cr:def.cr, fe:def.fe||[] });
+    return 'ABC-PM-'+window.btoa(unescape(encodeURIComponent(j))).replace(/=+$/,'');
+  }catch(e){ return ''; }
+}
+function pmDecodeDeck(code){
+  try{
+    let s=(code||'').trim();
+    if(!s.indexOf('ABC-PM-')===0 && s.indexOf('ABC-PM-')!==0) return null;
+    s=s.slice(7).replace(/\s+/g,'');
+    while(s.length%4) s+='=';
+    const o=JSON.parse(decodeURIComponent(escape(window.atob(s))));
+    if(!o||!o.pm||!o.books||!o.books.length) return null;
+    if(!o.books.every(function(k){ return DATA.characters[k]; })) return null;
+    return { d:o.d||o.books[0], books:o.books, pm:true,
+             ch:o.ch||[], ab:o.ab||[], bm:o.bm||[], cr:o.cr||[], fe:o.fe||[],
+             ed:{}, edab:[], edbm:{} };
+  }catch(e){ return null; }
+}
+function isPmCode(code){ return String(code||'').trim().indexOf('ABC-PM-')===0; }
 function encodeDeck(def){
   try{ const j=JSON.stringify({d:def.d,ch:def.ch,ab:def.ab,bm:def.bm,cr:def.cr,fe:def.fe||[]});
     return 'ABC-'+window.btoa(unescape(encodeURIComponent(j))).replace(/=+$/,''); }
@@ -6971,6 +6998,8 @@ function flash(side){ const el=$(`.char.${side}`); if(el){ el.classList.remove('
 
 /* ---------------- events ---------------- */
 function deckForPlay(){
+  /* Pagemaster plays its own saved deck, kept separate from the Custom one */
+  if(pmOn() && APP.pmDeck) return clone(APP.pmDeck);
   if(APP.customDeck) return clone(APP.customDeck);
   if(APP.youDeck==='surprise'){ const k=DECK_ORDER[rnd(DECK_ORDER.length)]; return randomDeck(k); }  // random SET (quick or custom)
   if(APP.mode==='quick') return randomDeck(APP.youDeck);            // quickplay: fresh composition of the chosen set
@@ -7047,8 +7076,20 @@ function handleBuilder(cmd){
   else if(op==='bm-'){ const i=def.bm.indexOf(+arg); if(i>=0) def.bm.splice(i,1); B.code=''; }
   else if(op==='reset'){ B.def=defaultDeck(def.d); B.code=''; }
   else if(op==='fill'){ fillGaps(def); clampDeck(def); B.code=''; toast('Filled gaps with random cards.'); }
-  else if(op==='gencode'){ clampDeck(def); B.code=encodeDeck(def); }
-  else if(op==='use'){ clampDeck(def); if(def._repaired) toast('Some cards in this deck aren\u2019t unlocked yet \u2014 swapped for cards you own.'); APP.customDeck=clone(def); APP.youDeck=def.d; APP.codeMsg={text:'Custom deck ready — choose Custom Play to take it into a match.',ok:true}; APP.screen='menu'; }
+  else if(op==='gencode'){ clampDeck(def);
+      B.code = pmOn() ? pmEncodeDeck(Object.assign({}, def, {books:pmBuildBooks()||[def.d], fe:(APP.pmCommanders||[]).slice(0,PM.fe)}))
+                      : encodeDeck(def); }
+  else if(op==='use'){ clampDeck(def);
+      if(pmOn()){
+        const a=(APP.pmCommanders||[]).slice(0,PM.fe);
+        const d2=Object.assign({}, def, { books:pmBuildBooks()||[def.d], pm:true, fe:a });
+        const errs=pagemasterLegal(a[0],a[1],d2);
+        if(errs.length){ toast('Not legal yet \u2014 '+errs[0]); return; }
+        APP.pmDeck=clone(d2); APP.youDeck=d2.books[0];
+        APP.codeMsg={text:'Pagemaster deck ready.',ok:true};
+        APP.screen='custom'; render(); return;
+      }
+      if(def._repaired) toast('Some cards in this deck aren\u2019t unlocked yet \u2014 swapped for cards you own.'); APP.customDeck=clone(def); APP.youDeck=def.d; APP.codeMsg={text:'Custom deck ready — choose Custom Play to take it into a match.',ok:true}; APP.screen='menu'; }
   else if(op==='copycode'){ const el=document.getElementById('bd-codeout'); if(el){ el.select&&el.select(); try{ navigator.clipboard&&navigator.clipboard.writeText(el.value); }catch(e){} } toast('Code copied'); return; }
   else if(op==='prevch'){
     const em=(def.ed&&def.ed[arg]==='modern')?edCharFor(def.d,arg):null;
@@ -7229,7 +7270,19 @@ document.addEventListener('click',e=>{
     else if(d.startsWith('lens:')){ const P=d.slice(5)==='opp'?S.opp:S.you; P._lensOpen=!P._lensOpen; render(); }
     else if(d==='close-pile'){ S.viewPile=null; render(); }
     else if(d==='builder'){ const _k=(APP.youDeck && APP.youDeck!=='surprise' && DATA.characters[APP.youDeck]) ? APP.youDeck : DECK_ORDER[0];  /* 'surprise' is a UI sentinel, not a deck key — defaultDeck() throws on it, which used to kill this handler and leave the button looking dead until a refresh */ APP.builder={ def:APP.customDeck?clone(APP.customDeck):defaultDeck(_k), code:'' }; APP.codeMsg=null; APP.screen='builder'; render(); }
-    else if(d==='loadcode'){ const el=document.getElementById('codein'); const def=decodeDeck(el?el.value:''); if(def){ APP.customDeck=def; APP.youDeck=def.d; APP.codeMsg={text:'Deck code loaded ✓ ('+deckCounts(def).total+' cards)',ok:true}; } else { APP.codeMsg={text:'That code didn’t work — check it and try again.',ok:false}; } render(); }
+    else if(d==='loadcode'){ const el=document.getElementById('codein'); const _raw=el?el.value:'';
+      if(isPmCode(_raw) && !pmOn()){
+        APP.codeMsg={text:'That is a Pagemaster code \u2014 open Pagemaster to use it.',ok:false}; render(); return; }
+      if(!isPmCode(_raw) && pmOn()){
+        APP.codeMsg={text:'That is an ordinary deck code \u2014 Pagemaster needs an ABC-PM- code.',ok:false}; render(); return; }
+      if(isPmCode(_raw)){
+        const pd=pmDecodeDeck(_raw);
+        if(pd){ APP.pmDeck=pd; APP.pmCommanders=(pd.fe||[]).slice(0,PM.fe);
+          APP.builder={ def:clone(pd), code:'' };
+          APP.codeMsg={text:'Pagemaster deck loaded \u2713 ('+deckCounts(pd).total+' cards)',ok:true}; }
+        else { APP.codeMsg={text:'That Pagemaster code did not work \u2014 check it and try again.',ok:false}; }
+        render(); return; }
+      const def=decodeDeck(_raw); if(def){ APP.customDeck=def; APP.youDeck=def.d; APP.codeMsg={text:'Deck code loaded ✓ ('+deckCounts(def).total+' cards)',ok:true}; } else { APP.codeMsg={text:'That code didn’t work — check it and try again.',ok:false}; } render(); }
     else if(d==='clearcustom'){ APP.customDeck=null; APP.codeMsg=null; render(); }
     else if(d.startsWith('swap:')){ const uid=d.slice(5); const p=S.you; if(S.turn!=='you'||busy||S.over||p.flags.attacked){ toast('You can only swap on your turn, before attacking.'); return; } if(p.flags.swapped){ toast('Only one swap per turn.'); return; } const idx=p.team.findIndex(c=>c.uid===uid&&c.hp>0); if(idx<0||idx===p.activeIdx) return; if(active(p).status.glue){ toast('Your Active is Glued — it cannot switch.'); return; } doSwitch(p,idx); p.flags.swapped=true; pushLog(`${p.team[idx].name} steps up to Active.`); render(); }
     return;
