@@ -3682,6 +3682,12 @@ function deckCounts(def){
            total:def.ch.length+def.ab.length+eab+def.bm.length+ebm+def.cr.length+(def.fe||[]).length };
 }
 function clampDeck(def){
+  /* a commander you do not own cannot stay in the deck */
+  if(def.fe && def.fe.length){
+    var _keep=def.fe.filter(function(id){ return feOwned(id); });
+    if(_keep.length!==def.fe.length){ def.fe=_keep; def._repaired=true; }
+  }
+
   const k=def.d;
   def.ch=(def.ch||[]).filter(id=>DATA.characters[k].some(c=>c.id===id)).slice(0,LIMITS.ch);
   def.ab=(def.ab||[]).filter(i=>i>=0&&i<DATA.abcs[k].length).slice(0,LIMITS.ab);
@@ -5712,7 +5718,7 @@ function builderScreen(){
       <span class="bd-step"><button data-bld="edbm-:${b.cid.replace(/:/g,';')}">−</button><b>${ct}</b><button data-bld="edbm+:${b.cid.replace(/:/g,';')}">+</button></span>
       <span class="bd-bmtext">${b.text}</span></div>`;
   }).join('');
-  const feRow=(DATA.firsteds||[]).map(f=>{
+  const feRow=feOwnedList().map(f=>{
     const on=(def.fe||[]).includes(f.id);
     const im=feImg(f);
     const av=im?`<img class="bd-cav" src="${im.img}" style="object-position:${im.pos||'50% 16%'}">`:`<span class="bd-cav mono-av" style="background:${f.accent}">${initials(f.name)}</span>`;
@@ -7216,6 +7222,17 @@ window.LOCKED_DECKS=['sherlock','othello','wonderland'];
 window.DECK_LICENSE=350;
 function deckLocked(k){ return (window.LOCKED_DECKS||[]).indexOf(k)>=0; }
 function deckUnlocked(k){ return sbx() || !deckLocked(k) || (META.decks||[]).indexOf(k)>=0; }
+function feOwned(id){
+  if(sbx()) return true;
+  var f=(DATA.firsteds||[]).find(function(x){ return x.id===id; });
+  if(!f) return false;
+  var k=f.deck;
+  if(!k) return true;                      /* a commander with no book is always available */
+  if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k);
+  var d=(META.deckCards||{})[k]||{};
+  return (d.fe||[]).indexOf(id)>=0 || (META.decks||[]).indexOf(k)>=0;
+}
+function feOwnedList(){ return (DATA.firsteds||[]).filter(function(f){ return feOwned(f.id); }); }
 function deckOwnCh(k,id){ if(sbx()) return true; if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ch||[]).indexOf(id)>=0; }
 function deckOwnAb(k,i){ if(sbx()) return true; if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ab||[]).indexOf(+i)>=0; }
 function licenseDeck(k){
