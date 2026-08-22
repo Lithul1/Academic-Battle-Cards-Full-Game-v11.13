@@ -1327,6 +1327,14 @@ body[data-screen="play"] .turnclock{ font-size:clamp(13px,2vh,16px); padding:2px
 .sub-screen .title-sub{ color:var(--red-dk); }
 .title-logo.sm{ max-width:200px; }
 .sub-actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
+/* ---- tutorial screen (hosted video) ---- */
+.tut-frame{ position:relative; aspect-ratio:16/9; width:100%; border:3px solid var(--ink); border-radius:12px; overflow:hidden; background:var(--felt); box-shadow:0 6px 0 #0c2426; }
+.tut-frame iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+.tut-fall{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; text-align:center; color:var(--cream-hi); background:var(--felt); }
+.tut-fall b{ font-family:var(--disp); font-size:18px; }
+.tut-fall small{ font-size:12.5px; opacity:.8; max-width:38ch; line-height:1.5; }
+.tut-note{ font-size:12.5px; color:#6b5c42; text-align:center; margin:10px 0 0; line-height:1.55; }
+.tut-note a{ color:var(--red-dk); }
 .diff-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:16px auto; max-width:720px; }
 .diff-card{ display:flex; flex-direction:column; gap:6px; text-align:left; padding:16px; border-radius:14px; border:2px solid var(--ink); border-left:7px solid var(--dac,#888); background:var(--cream); color:var(--ink); cursor:pointer; box-shadow:0 3px 0 rgba(40,25,12,.45); transition:transform .12s; }
 .diff-card:hover{ transform:translateY(-4px); }
@@ -3443,7 +3451,83 @@ function edInherit(deckKey,c){
   ['archetype','tags','accent'].forEach(function(k){ if(c[k]==null) c[k]=base[k]; });
   return c;
 }
-function edResolveChar(def,id){ if(def.ed&&def.ed[id]){ var m=edCharFor(def.d,id); if(m) return edInherit(def.d,m.c); } return DATA.characters[def.d].find(function(c){return c.id===id;}); }
+
+/* =========================================================================
+   PAGEMASTER — a two-commander format.
+
+   Deck: 2 commanders (1st Editions) + 12 characters + 30 ABC + 14 Bookmarks
+         + 4 Critical Lenses = 62, all drawn from your commanders' two books.
+   What differs from every other mode:
+     - your two commanders START on the field; the 12 characters are drawn
+     - a knocked-out commander RETURNS TO HAND and that KO does not count.
+       Returning costs attaches, and the third fall is permanent.
+     - you may strike a Backstage character for +2 ABC
+   ========================================================================= */
+const PM = {
+  total:62, ch:12, ab:30, bm:14, cr:4, fe:2,
+  minChPerBook:4,          // hybrids must field at least this many from each book
+  bmCopies:1,              // singleton: one copy of each Bookmark
+  returnCost:[1,2],        // 1st return costs 1 attach, 2nd costs 2
+  maxReturns:2,            // the 3rd KO is permanent and counts
+  benchSurcharge:2         // extra ABC to strike past the front line
+};
+function pmOn(){ try{ return APP.mode==='pagemaster'; }catch(e){ return false; } }
+function pmBooksOf(fe1,fe2){
+  const a=firstedById(fe1), b=firstedById(fe2);
+  if(!a||!b) return null;
+  return { a:a.deck, b:b.deck, mono:a.deck===b.deck,
+           books:(a.deck===b.deck?[a.deck]:[a.deck,b.deck]) };
+}
+function pagemasterLegal(fe1,fe2,def){
+  const errs=[], bk=pmBooksOf(fe1,fe2);
+  if(!bk) return ['unknown commander'];
+  if(fe1===fe2) errs.push('the two commanders must be different cards');
+  const books=bk.books;
+  if(def.ch.length!==PM.ch) errs.push('characters '+def.ch.length+', need '+PM.ch);
+  if(def.ab.length!==PM.ab) errs.push('ABCs '+def.ab.length+', need '+PM.ab);
+  if(def.bm.length!==PM.bm) errs.push('bookmarks '+def.bm.length+', need '+PM.bm);
+  if(def.cr.length!==PM.cr) errs.push('lenses '+def.cr.length+', need '+PM.cr);
+  const legalCh=new Set(books.reduce(function(a,k){
+    return a.concat((DATA.characters[k]||[]).map(function(c){return c.id;})); },[]));
+  const strayCh=def.ch.filter(function(id){ return !legalCh.has(id); });
+  if(strayCh.length) errs.push(strayCh.length+' characters outside your books');
+  const strayAb=def.ab.filter(function(r){ return books.indexOf((r&&r.d)||def.d)<0; });
+  if(strayAb.length) errs.push(strayAb.length+' ABCs outside your books');
+  if(!bk.mono) books.forEach(function(k){
+    const ids=new Set((DATA.characters[k]||[]).map(function(c){return c.id;}));
+    const n=def.ch.filter(function(id){ return ids.has(id); }).length;
+    if(n<PM.minChPerBook) errs.push('only '+n+' characters from '+setName(k)+', need '+PM.minChPerBook);
+  });
+  const dup=function(arr){ return arr.length!==new Set(arr.map(function(x){ return JSON.stringify(x); })).size; };
+  if(dup(def.ch)) errs.push('duplicate characters');
+  if(dup(def.ab)) errs.push('duplicate ABCs');
+  if(dup(def.cr)) errs.push('duplicate lenses');
+  if(dup(def.bm)) errs.push('duplicate bookmarks \u2014 Pagemaster allows one copy of each');
+  const total=def.ch.length+def.ab.length+def.bm.length+def.cr.length+PM.fe;
+  if(total!==PM.total) errs.push('deck is '+total+', need '+PM.total);
+  return errs;
+}
+/* what this commander's next return costs, or null when it can never come back */
+function pmReturnCost(ch){
+  const n=(ch&&ch._pmReturns)||0;
+  return n>=PM.maxReturns ? null : PM.returnCost[n];
+}
+/* test surface — read by tools/pagemaster.test.js */
+try{ window.ABC_PM = { PM, pmOn, pmBooksOf, pagemasterLegal, pmReturnCost,
+  newPlayer, checkKO, drawnPlayChar, attackCostFor, edResolveChar,
+  get S(){ return typeof S!=='undefined'?S:null; },
+  get APP(){ return typeof APP!=='undefined'?APP:null; } }; }catch(e){}
+
+function edResolveChar(def,id){ if(def.ed&&def.ed[id]){ var m=edCharFor(def.d,id); if(m) return edInherit(def.d,m.c); }
+  var hit=(DATA.characters[def.d]||[]).find(function(c){return c.id===id;});
+  if(hit) return hit;
+  /* a Pagemaster deck draws on two books, so a character may not live under def.d */
+  var books=(def.books||[]);
+  for(var i=0;i<books.length;i++){
+    var c=(DATA.characters[books[i]]||[]).find(function(x){return x.id===id;});
+    if(c) return edInherit(books[i], c);
+  }
+  return null; }
 function edAbcByCid(k,cid){ var eds=editionsForDeck(k); for(var i=0;i<eds.length;i++){ var a=(eds[i].battle.abcs||[]).find(function(x){return x.cid===cid;}); if(a) return a; } return null; }
 function edBmByCid(k,cid){ var eds=editionsForDeck(k); for(var i=0;i<eds.length;i++){ var b=(eds[i].battle.bookmarks||[]).find(function(x){return x.cid===cid;}); if(b) return b; } return null; }
 function edAbcsCollected(k){ var out=[]; editionsForDeck(k).forEach(function(e){(e.battle.abcs||[]).forEach(function(a){ if(edHas(a.cid)) out.push({ed:e,a:a}); });}); return out; }
@@ -3514,6 +3598,8 @@ const DECK_COMP = {
   sherlock:     { ch:12, ab:29, bm:15, cr:4 },   // status pressure
   oz:           { ch:14, ab:27, bm:15, cr:4 },   // attrition, bodies over burst
   othello:      { ch:12, ab:26, bm:18, cr:4 },   // control, slowest to threaten
+  romeojuliet:  { ch:12, ab:33, bm:11, cr:4 },   // fast and fatal, fragile bodies
+  odyssey:      { ch:14, ab:27, bm:15, cr:4 },   // attrition, the widest roster
 };
 function compFor(k){ return DECK_COMP[k] || { ch:12, ab:30, bm:14, cr:4 }; }
 function abStarter(k, n){
@@ -3660,7 +3746,14 @@ function fillGaps(def, comp){
 }
 function makeDeck(def){
   const deck=[];
-  def.ab.forEach((i,n)=>{ const a=DATA.abcs[def.d][i]; if(a) deck.push({cat:'abc',...clone(a),cid:'a'+i+'_'+n+Math.random().toString(36).slice(2,5)}); });
+  /* an entry is a plain index into def.d, or {d,i} naming its own book —
+     a Pagemaster deck draws on two. The old line indexed def.d only, so a
+     {d,i} entry silently produced nothing. */
+  def.ab.forEach((r,n)=>{
+    const dk=(r&&typeof r==='object')?r.d:def.d, ix=(r&&typeof r==='object')?r.i:r;
+    const a=(DATA.abcs[dk]||[])[ix];
+    if(a) deck.push({cat:'abc',...clone(a),cid:'a'+ix+'_'+n+Math.random().toString(36).slice(2,5)});
+  });
   def.bm.forEach((i,n)=>{ const b=DATA.bookmarks[i]; if(b) deck.push({cat:'bookmark',...clone(b),cid:'b'+i+'_'+n+Math.random().toString(36).slice(2,5)}); });
   def.cr.forEach((i,n)=>{ const c=DATA.crits[i]; if(c) deck.push({cat:'crit',...clone(c),cid:'c'+i+'_'+n+Math.random().toString(36).slice(2,5)}); });
   (def.edab||[]).forEach((cid,n)=>{ const a=edAbcByCid(def.d,cid); if(a) deck.push({cat:'abc',...clone(a),cid:'ea'+n+Math.random().toString(36).slice(2,5)}); });
@@ -3681,8 +3774,16 @@ function newPlayer(name,def,st,drawn){
                           fe:!!isFe, _cdef:d,
                           cid:'h'+d.id+'_'+Math.random().toString(36).slice(2,6) });
     const chCards=pool.map(d=>mk(d,false));
-    (def.fe||[]).slice(0,LIMITS.fe).forEach(id=>{ const fd=firstedById(id); if(fd) chCards.push(mk(fd,true)); });
-    return { name,setKey:def.d,team:[],activeIdx:0,deck:shuffle(deck.concat(chCards)),hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,discardsLeft:(st.maxDiscards!=null?st.maxDiscards:2),crit:null,critTurn:{},critEver:{},flags:{},activeBm:[],_hpScale:st.hpScale,_drawn:true };
+    /* PAGEMASTER: your two commanders are not shuffled in — they open on the
+       field, Active and Backstage. Everything else is drawn. */
+    const pmTeam=[];
+    if(def.pm){
+      (def.fe||[]).slice(0,PM.fe).forEach(id=>{ const fd=firstedById(id);
+        if(fd){ const c=makeChar(fd,st.hpScale); c._pmCmd=true; c._pmReturns=0; pmTeam.push(c); } });
+    } else {
+      (def.fe||[]).slice(0,LIMITS.fe).forEach(id=>{ const fd=firstedById(id); if(fd) chCards.push(mk(fd,true)); });
+    }
+    return { name,setKey:def.d,team:pmTeam,activeIdx:0,deck:shuffle(deck.concat(chCards)),hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,discardsLeft:(st.maxDiscards!=null?st.maxDiscards:2),crit:null,critTurn:{},critEver:{},flags:{},activeBm:[],_hpScale:st.hpScale,_drawn:true,_hasActive:pmTeam.length>0,_pm:!!def.pm };
   }
   return { name,setKey:def.d,team,activeIdx:0,deck,hand:[],discard:[],grave:[],kos:0,attachesLeft:st.maxAttaches,discardsLeft:(st.maxDiscards!=null?st.maxDiscards:2),crit:null,critTurn:{},critEver:{},flags:{},activeBm:[] };
 }
@@ -3775,6 +3876,7 @@ function drawnPlace(idx,where){
   if(where==='active'){ if(p._hasActive){ toast('Your Active slot is already filled.'); return; } }
   else if(drawnBench(p)>=DRAWN_BENCH_MAX){ toast(`Backstage is full (${DRAWN_BENCH_MAX}).`); return; }
   const ch=makeChar(card._cdef, p._hpScale||1.0);
+  if(card._pmCmd){ ch._pmCmd=true; ch._pmReturns=card._pmReturns||0; }
   p.hand.splice(idx,1); p.team.push(ch);
   if(where==='active'){ p.activeIdx=p.team.length-1; p._hasActive=true; }
   pushLog(`${ch.name} takes the ${where==='active'?'Active slot':'Backstage'}.`);
@@ -3788,9 +3890,17 @@ function drawnPlayChar(idx){
   if(!S||!S.drawn) return;
   const p=S.you, card=p.hand[idx];
   if(!card||card.cat!=='char') return;
+  /* a returned Pagemaster commander is not free to replay */
+  const pmCost=(card._pmCmd?(card._pmCost||0):0);
+  if(pmCost>0){
+    if(p.attachesLeft<pmCost){ toast(card.name+' needs '+pmCost+' attach'+(pmCost>1?'es':'')+' to return — you have '+p.attachesLeft+'.'); return; }
+    p.attachesLeft-=pmCost;
+    pushLog(card.name+' returns to the page for '+pmCost+' attach'+(pmCost>1?'es':'')+'.');
+  }
   const liveAct=drawnHasActive(p);
   if(liveAct && drawnBench(p)>=DRAWN_BENCH_MAX){ toast(`Backstage is full (${DRAWN_BENCH_MAX}).`); return; }
   const ch=makeChar(card._cdef, p._hpScale||1.0);
+  if(card._pmCmd){ ch._pmCmd=true; ch._pmReturns=card._pmReturns||0; }
   p.hand.splice(idx,1); p.team.push(ch);
   if(!liveAct){ p.activeIdx=p.team.length-1; p._hasActive=true; pushLog(`${ch.name} steps up to Active.`); }
   else pushLog(`${ch.name} joins the Backstage.`);
@@ -3859,8 +3969,11 @@ function riposteArmed(ch){
   return b.cost!=null && ch.blkCharge.length>=blockCostFor(ch,b);
 }
 function blockCostFor(ch,ab){ return ab ? escCost(ch,ab,'Blk') : 0; }
-function attackCostFor(side,ab){
+function attackCostFor(side,ab,tgt){
   let cost=ab.cost||0;
+  /* PAGEMASTER: striking a Backstage character costs +2 ABC — open to every
+     deck, but it spends a full turn of attaching. */
+  if(pmOn() && tgt && tgt.bench) cost+=PM.benchSurcharge;
   { const P0=S&&S[side]; if(P0) cost=escCost(active(P0),ab,'Atk'); }
   if(hasCrit(side,'biographical') && S[side].grave.length>0) cost=Math.max(1,cost-1);
   const P=S[side]; if(P){ const act=active(P);
@@ -5039,6 +5152,23 @@ function checkKO(p,side){
     if(S.scrim && S.scrim.ruleShift==='e_waitlist' && side==='opp' && !S.scrim._waitlistUsed){ S.scrim._waitlistUsed=true; a.hp=Math.max(1,Math.round(a.maxHp*0.3)); pushLog('The Waitlist \u2014 the examiner claws back to 30% HP!'); if(typeof toast==='function') toast('The Waitlist revives!'); render(); return; }
     if(S.scrim && SCRIM.kit==='gothic' && side==='you' && !S._galvanicUsed){ S._galvanicUsed=true; a.hp=Math.max(1,Math.round(a.maxHp*0.25)); pushLog('Galvanic Spark \u2014 '+a.name+' is reanimated at 25% HP!'); if(typeof toast==='function') toast('Galvanic Spark!'); render(); return; }
     if(S.scrim && SCRIM.kit==='macbeth' && side==='opp'){ SCRIM._ambition=Math.min(10,(SCRIM._ambition||0)+1); pushLog('Vaulting Ambition \u2014 your team grows stronger (+'+(SCRIM._ambition*5)+'% damage).'); }
+    /* PAGEMASTER: a fallen commander returns to hand rather than the grave, and
+       the KO does not count — you beat the army, not the author. The third
+       fall is permanent and does count. */
+    if(p._pm && a._pmCmd && pmReturnCost(a)!==null){
+      const cost=pmReturnCost(a);
+      a._pmReturns=(a._pmReturns||0)+1;
+      const at=p.team.indexOf(a); if(at>=0) p.team.splice(at,1);
+      if(p.activeIdx>=p.team.length) p.activeIdx=Math.max(0,p.team.length-1);
+      p.hand.push({ cat:'char', charId:a.id, name:a.name, accent:a.accent||'#444', hp:a.maxHp,
+                    fe:true, _pmCmd:true, _pmReturns:a._pmReturns, _pmCost:cost,
+                    _cdef:firstedById(a.id),
+                    cid:'pm'+a.id+'_'+Math.random().toString(36).slice(2,6) });
+      try{ fxKO(side, a.name); }catch(e){}
+      pushLog(a.name+' falls — but the author returns to your hand (costs '+cost+' attach'+(cost>1?'es':'')+' to replay).');
+      p._hasActive=p.team.some(c=>c.hp>0);
+      render(); return;
+    }
     spawnKO(side, a.name);
     try{ fxKO(side, a.name); }catch(e){}
     if(!p.grave.includes(a)) p.grave.push(a);
@@ -5353,6 +5483,7 @@ function render(){
   if(APP.screen==='custom'){ root.innerHTML=customScreen()+_ov(); return; }
   if(APP.screen==='tune'){ root.innerHTML=tuneScreen()+_ov(); return; }
   if(APP.screen==='guide'){ root.innerHTML=guideScreen()+_ov(); return; }
+  if(APP.screen==='tutorial'){ root.innerHTML=tutorialScreen()+_ov(); return; }
   root.innerHTML=menuScreen()+_ov();
 }
 const initials = n => n.replace('&','').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
@@ -5394,6 +5525,7 @@ function menuScreen(){
       <button class="menu-btn" data-do="go-index"><span class="menu-ic">\uD83D\uDD16</span><span class="menu-tx"><b>Index</b><small>Look something up</small></span><span class="menu-go">\u203a</span></button>
       <button class="menu-btn" data-do="go-scrim"><span class="menu-ic">🏆</span><span class="menu-tx"><b>Literary Scrimmage</b><small>A roguelike campaign — bosses, unlockables &amp; a branching map</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="builder"><span class="menu-ic">⚒</span><span class="menu-tx"><b>Deck Builder</b><small>Build, edit &amp; share custom decks</small></span><span class="menu-go">›</span></button>
+      <button class="menu-btn" data-do="go-tutorial"><span class="menu-ic">🎬</span><span class="menu-tx"><b>Watch the Tutorial</b><small>Two minutes — how a turn works, start to finish</small></span><span class="menu-go">›</span></button>
       <button class="menu-btn" data-do="go-guide"><span class="menu-ic">📖</span><span class="menu-tx"><b>Quickstart Guide</b><small>How to play &amp; a rules refresher</small></span><span class="menu-go">›</span></button>
     </div>
   </div>`;
@@ -5444,6 +5576,33 @@ function customScreen(){
     <div class="sub-actions">
       <button class="toolbtn" data-do="difficulty">‹ Difficulty</button>
       <button class="bigbtn" data-do="to-tune">Set house rules ›</button>
+    </div>
+  </div>`;
+}
+/* ---------- tutorial (hosted video) ---------- */
+const ABC_TUTORIAL_ID='1RsrczPZdgmrLCPOOdt4wsD75VPEvF3nG';
+function tutorialScreen(){
+  const emb='https://drive.google.com/file/d/'+ABC_TUTORIAL_ID+'/preview';
+  const url='https://drive.google.com/file/d/'+ABC_TUTORIAL_ID+'/view';
+  return `<div class="title-screen sub-screen">
+    <img class="title-logo sm" src="${window.ABC_LOGO||''}" alt="Academic Battle Cards">
+    <h2 class="sub-h">Tutorial</h2>
+    <div class="gd-tag">Two minutes, start to finish</div>
+    <div class="rules">
+      <div class="tut-frame">
+        <div class="tut-fall">
+          <b>Video needs a connection</b>
+          <small>The tutorial streams from Google Drive. If you are offline it will not load \u2014 the Quickstart Guide covers the same ground in text.</small>
+        </div>
+        <iframe src="${emb}" title="Academic Battle Cards \u2014 how to play" loading="lazy"
+          allow="autoplay; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
+      </div>
+      <p class="tut-note">Trouble playing it here? <a href="${url}" target="_blank" rel="noopener noreferrer">Open the video in a new tab</a>.</p>
+      <div class="gd-box"><b class="lbl">What it covers</b>The goal, the table, reading a card, all three phases, charging with trivia, statuses, and Bookmarks &amp; Critical Lenses.</div>
+    </div>
+    <div class="sub-actions">
+      <button class="toolbtn" data-do="menu">\u2039 Back to menu</button>
+      <button class="bigbtn" data-do="go-guide">Read the Quickstart Guide \u203a</button>
     </div>
   </div>`;
 }
@@ -6821,6 +6980,7 @@ document.addEventListener('click',e=>{
     else if(d==='go-custom'){ APP.mode='custom'; APP.drawnMode=false; APP.screen='difficulty'; render(); }
     else if(d==='go-drawn'){ APP.mode='custom'; APP.drawnMode=true; APP.screen='difficulty'; render(); }
     else if(d==='go-scrim'){ APP.drawnMode=false; scrimOpen(); }
+    else if(d==='go-tutorial'){ APP.screen='tutorial'; render(); }
     else if(d==='go-guide'){ APP.screen='guide'; render(); }
     else if(d==='difficulty'){ APP.screen='difficulty'; render(); }
     else if(d==='to-tune'){ APP.screen='tune'; render(); }
