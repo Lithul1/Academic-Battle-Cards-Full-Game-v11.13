@@ -3566,7 +3566,7 @@ function pmReturnCost(ch){
   return n>=PM.maxReturns ? null : PM.returnCost[n];
 }
 /* test surface — read by tools/pagemaster.test.js */
-try{ window.ABC_PM = { PM, pmOn, pmBooksOf, pagemasterLegal, pmReturnCost,
+try{ window.ABC_PM = { defaultDeck, bmOwned, get STARTER_BM(){return STARTER_BM;}, PM, pmOn, pmBooksOf, pagemasterLegal, pmReturnCost, clampDeck,
   deckForPlay, pmEncodeDeck, pmDecodeDeck, isPmCode, pmCaps, pmBuildBooks,
   newPlayer, checkKO, drawnPlayChar, attackCostFor, edResolveChar,
   get S(){ return typeof S!=='undefined'?S:null; },
@@ -3743,35 +3743,51 @@ function clampDeck(def){
   }
 
   const k=def.d;
-  def.ch=(def.ch||[]).filter(id=>DATA.characters[k].some(c=>c.id===id)).slice(0,LIMITS.ch);
-  def.ab=(def.ab||[]).filter(i=>i>=0&&i<DATA.abcs[k].length).slice(0,LIMITS.ab);
-  def.bm=(def.bm||[]).filter(i=>i>=0&&i<DATA.bookmarks.length).slice(0,LIMITS.bm);
-  def.cr=(def.cr||[]).filter(i=>i>=0&&i<DATA.crits.length).slice(0,LIMITS.cr);
+  /* A Pagemaster deck draws on two books, so validate against all of them.
+     Filtering to def.d alone deleted every character from the second book. */
+  const _bks=(def.books&&def.books.length)?def.books:[k];
+  const _CAP=(typeof pmCaps==='function'&&def.pm)?pmCaps():LIMITS;
+  const _chOk=new Set(_bks.reduce(function(a,b){
+    return a.concat((DATA.characters[b]||[]).map(function(c){ return c.id; })); },[]));
+  def.ch=(def.ch||[]).filter(id=>_chOk.has(id)).slice(0,_CAP.ch);
+  /* an ab entry is a plain index into def.d, or {d,i} naming its own book */
+  def.ab=(def.ab||[]).filter(function(r){
+    if(r&&typeof r==='object') return _bks.indexOf(r.d)>=0 && r.i>=0 && r.i<((DATA.abcs[r.d]||[]).length);
+    return r>=0 && r<((DATA.abcs[k]||[]).length);
+  }).slice(0,_CAP.ab);
+  def.bm=(def.bm||[]).filter(i=>i>=0&&i<DATA.bookmarks.length).slice(0,_CAP.bm);
+  def.cr=(def.cr||[]).filter(i=>i>=0&&i<DATA.crits.length).slice(0,_CAP.cr);
   def.fe=(def.fe||[]).filter(id=>firstedById(id)).filter((id,i,a)=>a.indexOf(id)===i).slice(0,LIMITS.fe);
   /* Ownership repair: strip what you don't own, then REPLACE it with cards you do own
      (never silently leave a deck short — that produced decks with 0 bookmarks). */
   const _was={ch:(def.ch||[]).length, ab:(def.ab||[]).length, cr:(def.cr||[]).length, bm:(def.bm||[]).length};
-  def.ch=(def.ch||[]).filter(id=>deckOwnCh(k,id));
-  def.ab=(def.ab||[]).filter(i=>deckOwnAb(k,i));
+  def.ch=(def.ch||[]).filter(id=>_bks.some(b=>deckOwnCh(b,id)));
+  def.ab=(def.ab||[]).filter(function(r){
+    if(r&&typeof r==='object') return deckOwnAb(r.d,r.i);
+    return deckOwnAb(k,r); });
   def.cr=(def.cr||[]).filter(i=>ownCrit(i));
   (function(){ const cnt={}; def.bm=(def.bm||[]).filter(i=>{ cnt[i]=(cnt[i]||0)+1; return cnt[i]<=bmOwned(i); }); })();
   def._repaired=(def.ch.length<_was.ch)||(def.ab.length<_was.ab)||(def.cr.length<_was.cr)||(def.bm.length<_was.bm);
   if(def._repaired){
     const capTo=(n,lim)=>Math.min(n,lim);
     // characters
-    (function(){ const pool=poolCh(k).filter(id=>!def.ch.includes(id));
-      while(def.ch.length<capTo(_was.ch,LIMITS.ch) && pool.length) def.ch.push(pool.splice(rnd(pool.length),1)[0]); })();
+    (function(){ const pool=_bks.reduce((a,b)=>a.concat(poolCh(b)),[]).filter(id=>!def.ch.includes(id));
+      while(def.ch.length<capTo(_was.ch,_CAP.ch) && pool.length) def.ch.push(pool.splice(rnd(pool.length),1)[0]); })();
     // trivia
-    (function(){ const pool=poolAb(k).filter(i=>!def.ab.includes(i));
-      while(def.ab.length<capTo(_was.ab,LIMITS.ab) && pool.length) def.ab.push(pool.splice(rnd(pool.length),1)[0]); })();
+    (function(){ const has=new Set(def.ab.map(r=>JSON.stringify(r)));
+      const pool=(def.books&&def.books.length)
+        ? _bks.reduce((a,b)=>a.concat(poolAb(b).map(i=>({d:b,i}))),[]).filter(r=>!has.has(JSON.stringify(r)))
+        : poolAb(k).filter(i=>!def.ab.includes(i));
+      while(def.ab.length<capTo(_was.ab,_CAP.ab) && pool.length) def.ab.push(pool.splice(rnd(pool.length),1)[0]); })();
     // lenses
     (function(){ const pool=poolCr().filter(i=>!def.cr.includes(i));
       while(def.cr.length<capTo(_was.cr,LIMITS.cr) && pool.length) def.cr.push(pool.splice(rnd(pool.length),1)[0]); })();
     // bookmarks (respect copies owned)
     (function(){ const slots=poolBmSlots();
-      while(def.bm.length<capTo(_was.bm,LIMITS.bm)){
+      while(def.bm.length<capTo(_was.bm,_CAP.bm)){
         const u={}; def.bm.forEach(i=>u[i]=(u[i]||0)+1);
-        const avail=slots.filter(i=>(u[i]||0)<bmOwned(i));
+        const _cp=(typeof pmCaps==='function'&&def.pm)?PM.bmCopies:null;
+        const avail=slots.filter(i=>(u[i]||0)<(_cp!==null?_cp:bmOwned(i)));
         if(!avail.length) break;
         const fresh=avail.filter(i=>!(u[i]>0));
         const pick=fresh.length?fresh:avail;
@@ -7061,8 +7077,8 @@ function handleBuilder(cmd){
     if(def.d===arg){ B.fanOpen=(B.fanOpen===false); } else { B.def=defaultDeck(arg); B.code=''; B.edFilter='all'; B.fanOpen=true; } }
   else if(op==='edcycle'){ var order=['base','modern','all']; var cur=B.edFilter||'all';
     var nx=order[(order.indexOf(cur)+1)%3]; handleBuilder('edfilter:'+nx); return; }
-  else if(op==='ch'){ const i=def.ch.indexOf(arg); if(i>=0) def.ch.splice(i,1); else if(def.ch.length<LIMITS.ch) def.ch.push(arg); B.code=''; }
-  else if(op==='ab'){ const n=+arg, i=def.ab.indexOf(n); if(i>=0) def.ab.splice(i,1); else if(def.ab.length<LIMITS.ab) def.ab.push(n); B.code=''; }
+  else if(op==='ch'){ const i=def.ch.indexOf(arg); if(i>=0) def.ch.splice(i,1); else if(def.ch.length<pmCaps().ch) def.ch.push(arg); B.code=''; }
+  else if(op==='ab'){ const n=+arg, i=def.ab.indexOf(n); if(i>=0) def.ab.splice(i,1); else if(def.ab.length<pmCaps().ab) def.ab.push(n); B.code=''; }
   else if(op==='edbase'){ if(def.ed) delete def.ed[arg]; B.code=''; }
   else if(op==='edmod'){ def.ed=def.ed||{}; def.ed[arg]='modern'; B.code=''; }
   else if(op==='edab'){ const cid=arg.replace(/;/g,':'); def.edab=def.edab||[]; const i=def.edab.indexOf(cid); if(i>=0) def.edab.splice(i,1); else if(deckCounts(def).ab<LIMITS.ab) def.edab.push(cid); B.code=''; }
@@ -7465,8 +7481,19 @@ function sbx(){ try{ return APP.mode==='quick'; }catch(e){ return false; } }   /
    Base bookmarks 0-11 (the pre-rarity core set): 3 copies each, except the four
    swingiest (First Aid Kit, Cliffnotes, Truce, Crown of Denmark) held at 2 so an
    opening deck can't stack them. 32 available for 20 slots. */
-const STARTER_BM = { 0:2, 4:2, 5:2, 10:2,            // watchlist - capped at 2
-                     1:3, 2:3, 3:3, 6:3, 7:3, 8:3, 9:3, 11:3 };
+const STARTER_BM = {
+  /* Two copies each of sixteen, rather than 2-3 copies of twelve. Same 32
+     cards, four more distinct, and the four additions are the first STATUS
+     and BOOST cards a new player owns — the old starter was ITEM and
+     SUPPORT only, so nothing in it inflicted or granted a status. Sixteen
+     distinct also makes a singleton Pagemaster deck (14) buildable. */
+  0:2,  1:2,  2:2,  3:2,  4:2,  5:2,  6:2,  7:2,
+  8:2,  9:2, 10:2, 11:2,
+  12:2,          // Torn Chapter      — inflict Tear
+  18:2,          // Sticky Situation  — inflict Glue
+  23:2,          // Proofread         — remove a negative status
+  25:2           // Highlight Passage — grant Highlight
+};
 const STARTER_CR = [6,7,10,13];   // Archetypal, Formalism, Reader-Response, Biographical
 function starterBm(i){ return STARTER_BM[+i]||0; }
 function starterCr(i){ return STARTER_CR.indexOf(+i)>=0; }
