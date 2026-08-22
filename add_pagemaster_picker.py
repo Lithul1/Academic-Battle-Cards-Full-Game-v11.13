@@ -75,6 +75,11 @@ CSS = """
 """
 
 SCREEN = r"""
+/* an empty Pagemaster deck, correctly shaped, for the builder to fill */
+function pmSeedDeck(books, cmds){
+  return { d:books[0], books:books.slice(), pm:true,
+           ch:[], ab:[], bm:[], cr:[], fe:(cmds||[]).slice(0,PM.fe), ed:{}, edab:[], edbm:{} };
+}
 /* ---------------- Pagemaster: choose two commanders ---------------- */
 function pmPickerScreen(){
   const pick=(APP.pmCommanders||[]);
@@ -205,8 +210,9 @@ EDITS = [
      "      if(a.length<PM.fe){ toast('Choose two commanders first.'); return; }\n"
      "      const bk=pmBooksOf(a[0],a[1]);\n"
      "      APP.youDeck=bk.books[0]; APP.customDeck=null;\n"
-     "      toast('Deck building for Pagemaster is the next piece \\u2014 the builder is not filtered yet.');\n"
-     "      APP.screen='builder'; render(); }\n"
+     "      /* the builder needs its working deck seeded, exactly as data-do='builder' does */\n"
+     "      APP.builder={ def:(APP.pmDeck?clone(APP.pmDeck):pmSeedDeck(bk.books,a)), code:'' };\n"
+     "      APP.codeMsg=null; APP.screen='builder'; render(); }\n"
      "    else if(d==='go-drawn'){ APP.mode='custom'; APP.drawnMode=true; APP.screen='difficulty'; render(); }"),
 ]
 
