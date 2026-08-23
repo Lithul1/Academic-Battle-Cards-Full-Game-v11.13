@@ -1852,6 +1852,13 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
   background:repeating-linear-gradient(45deg,var(--teal-dk) 0 9px,#17565a 9px 18px)}
 .dm-fd-in span{font-family:var(--disp);font-size:24px;color:var(--gold);text-shadow:2px 2px 0 rgba(0,0,0,.45);
   border:3px solid var(--gold);border-radius:50%;width:50px;height:50px;display:grid;place-items:center}
+/* the face-down tile now shows the real card back; the stripes remain as the
+   no-asset fallback underneath, and the medallion path is scaled to fit. */
+.dm-fd-in{position:relative;overflow:hidden}
+.hc.dm-fd .cb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  border:none;border-radius:9px}
+.hc.dm-fd .cb-medallion{width:44px;height:44px;border-width:2px}
+.hc.dm-fd .cb-tag{font-size:6px;bottom:4px}
 .hc.dm-fd:hover{transform:translateY(-10px);box-shadow:0 12px 0 #0c2426,0 0 0 3px var(--gold)}
 .hc-info{position:absolute;top:3px;right:3px;z-index:3;width:19px;height:19px;padding:0;line-height:1;
   border:2px solid var(--ink);border-radius:50%;background:var(--cream-hi);color:var(--ink);
@@ -3614,10 +3621,21 @@ function bdExpansionShelf(k,open){ var eds=editionsForDeck(k); if(!eds.length) r
 /* one-time: give edition commanders a base:[deck,char] so feImg can inherit a portrait */
 (function(){ var E=window.EXPANSIONS||{}; for(var k in E){ var ed=E[k]; if(!ed.battle) continue;
   var IM=ed.img||{}, IP=ed.imgpos||{};
+  /* Some expansion img maps store bare base64 (frankenstein_2077, sengekokujo)
+     while others point at a window map that already carries the data: scheme
+     (modern_hamlet). Normalise once, here, so every consumer downstream --
+     archive, hand, field, commanders -- gets a usable src. */
+  Object.keys(IM).forEach(function(id){ var v=IM[id];
+    if(typeof v==='string' && v && v.slice(0,5)!=='data:'){ IM[id]='data:image/jpeg;base64,'+v; } });
+  ed.img=IM;
   (ed.battle.chars||[]).forEach(function(c){ if(IM[c.id]){ c.img=IM[c.id]; c.imgpos=IP[c.id]||'50% 18%'; } });
-  (ed.battle.commanders||[]).forEach(function(f){ var bc=f.baseChar;
+  var wireCmd=function(f){ var bc=f.baseChar;
     if(bc && IM[bc]){ f.img=IM[bc]; f.imgpos=IP[bc]||'50% 16%'; }
-    if(!f.base && bc) f.base=[ed.base,bc]; });
+    if(!f.base && bc) f.base=[ed.base,bc]; };
+  (ed.battle.commanders||[]).forEach(wireCmd);
+  /* boosterPool commanders were skipped entirely: Muneshige and Genba got
+     neither a portrait nor a base to inherit one from. */
+  ((ed.boosterPool && ed.boosterPool.commanders) || []).forEach(wireCmd);
 } })();
 function feImg(f){ if(!f) return null; if(f.img) return {img:f.img,pos:f.imgpos}; if(f.base){ const bd=DATA.characters[f.base[0]]; const bc=bd&&bd.find(x=>x.id===f.base[1]); if(bc&&bc.img) return {img:bc.img,pos:bc.imgpos}; } if(f.baseChar){ var EX=window.EXPANSIONS||{}; for(var k in EX){ var E=EX[k]; var inReg=(E.battle&&(E.battle.commanders||[]).some(function(c){return c.id===f.id;}))||(E.boosterPool&&(E.boosterPool.commanders||[]).some(function(c){return c.id===f.id;})); if(inReg && E.img && E.img[f.baseChar]){ return {img:E.img[f.baseChar], pos:(E.imgpos&&E.imgpos[f.baseChar])}; } } } return null; }
 function cardTypeLabel(c){ if(!c) return '\u2014'; if(c.cat==='abc') return c.type==='ATTACK'?'\u2694 Attack':'\u26ca Block'; if(c.cat==='bookmark') return '\u2726 Bookmark'; if(c.cat==='crit') return '\u25c6 Lens'; return '?'; }
@@ -5496,7 +5514,8 @@ function overlordTurn(){
   if(mv==='disorient'){ const you=active(S.you); if(you){ you.status=you.status||{}; you.status.weaken=Math.max(you.status.weaken||0, phase>=2?2:1); pushLog('\ud83c\udf00 DISORIENT \u2014 your Active is overstimulated (attacks weakened).'); } }
   else { pushLog('\ud83d\udca5 SENSORY OVERLOAD!'); }
   solFace(boss,'attack');
-  boss.atk={ n:(mv==='disorient'?'Disorient':'Sensory Overload'), dmg:dmg, cost:0, label:String(dmg) };
+  boss.atk={ n:(mv==='disorient'?'Disorient':'Sensory Overload'), dmg:dmg, cost:0, label:String(dmg),
+             t:(mv==='disorient'?(SUPER_BOSS.disorientText||''):(SUPER_BOSS.atkText||'')) };
   boss.atkCharge=[];
   S.phase='engage'; render();
   setTimeout(()=>{ if(!S||S.over){ busy=false; return; } if(performAttack('opp','atk')===false){ endAiTurn(); } }, 500);
@@ -6134,6 +6153,7 @@ function benchTiles(p,mine){
       ${chargeBadges(c)}
       </div>`; }).join('');
 }
+/* issue6/2/5/3 applied -- fix_archive_portraits_overlord.py */
 function cardBackHTML(){
   if(window.CARD_BACK) return `<img class="cb-img" src="${window.CARD_BACK}" alt="ABC">`;
   return `<span class="cb-medallion"><img src="${window.ABC_EMBLEM||''}" alt="ABC"></span><span class="cb-tag">ACADEMIC BATTLE CARDS</span>`;
@@ -6193,7 +6213,7 @@ function handCard(c,idx){
   const deal=c._new?' deal-in':''; if(c._new) c._new=false;
   if(c._faceDown){
     return `<div class="hc dm-fd playable${deal}" data-do="dmflip:${idx}">
-      <div class="dm-fd-in"><span>A</span></div></div>`;
+      <div class="dm-fd-in">${cardBackHTML()}</div></div>`;
   }
   if(c.cat==='hex'){
     const canPurge=straty && you.hand.some(x=>x.cat==='bookmark');
@@ -6226,7 +6246,12 @@ function handCard(c,idx){
     const liveAct=!!(you._hasActive && you.team[you.activeIdx] && you.team[you.activeIdx].hp>0);
     const placing = S.phase==='place';
     const cp=(straty||placing) && (bench<DRAWN_BENCH_MAX || !liveAct);
-    const img=d.img?`<img class="hcc-img" src="${d.img}" alt="${c.name}">`:`<span class="hcc-mono" style="background:${c.accent||'#444'}">${initials(c.name)}</span>`;
+    /* 27 of the 28 First Editions ship img:"" and inherit their portrait from
+       base:[deck,char]; expansion commanders inherit from the expansion's img
+       map. feImg() resolves all three cases -- reading d.img raw meant every
+       1st Edition fell back to the initials monogram. */
+    const _pi=(typeof feImg==='function'?feImg(d):null)||(d.img?{img:d.img,pos:d.imgpos}:null);
+    const img=_pi&&_pi.img?`<img class="hcc-img" src="${_pi.img}" alt="${c.name}"${_pi.pos?` style="object-position:${_pi.pos}"`:''}>`:`<span class="hcc-mono" style="background:${c.accent||'#444'}">${initials(c.name)}</span>`;
     /* first hand (no Active yet): choose Active or Bench. Afterwards: Bench only. */
     const foot = placing
       ? `<div class="dm-pb"><button data-do="dmplace:${idx}:active" ${liveAct?'disabled':''}>\u2605 Active</button>`
@@ -6713,7 +6738,7 @@ function benchInfoModal(){
     <div class="pc-plate"><span class="pc-name">${ch.name}</span><span class="pc-hp"><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
     <div class="bv-art">${port}${ch.fe?`<span class="fe-badge" title="1st Edition">1ST ED</span>`:''}</div>
     ${archChip(ch)}
-    ${ch.fe&&ch.passive?`<div class="bv-passive"><div class="bv-ph">Passive \u2014 ${ch.passive.name}</div><p>${ch.passive.text||''}</p></div>`:''}
+    ${(ch.passive&&ch.passive.text)?`<div class="bv-passive"><div class="bv-ph">${ch._boss?'Behaviour':'Passive'} \u2014 ${ch.passive.name||''}</div><p>${ch.passive.text}</p></div>`:''}
     <div class="bv-move atk"><div class="bv-h"><b>${ch.atk.n}</b><span class="pc-chip red sm">${ch.atk.label||''}</span></div><p>${ch.atk.t||''}</p></div>
     <div class="bv-move blk"><div class="bv-h"><b>${ch.blk.n}</b><span class="pc-chip blue sm">${ch.blk.label||''}</span></div><p>${ch.blk.t||''}</p></div>
     ${benchChargeList(ch)}
@@ -7886,7 +7911,14 @@ const SCRIM_ELITES = {
   e_waitlist:{ name:'The Waitlist', text:'It won\u2019t take no for an answer \u2014 the examiner revives once at 30% HP the first time it falls.' },
 };
 /* ---- Campaign capstone: The Sensory Over-lord ---- */
-const SUPER_BOSS = { id:'overlord', name:'The Sensory Over-lord', accent:'#3a2f28', hp:300, sub:'Commencement' };
+const SUPER_BOSS = { id:'overlord', name:'The Sensory Over-lord', accent:'#3a2f28', hp:300, sub:'Commencement',
+  /* Descriptive only -- the live numbers come from overlordTurn(). Kept in step
+     with it: damage 40/50/65 by phase, Recalibrate every 5 turns and every 3
+     below a third, Amplify +20 and Laminate at phase 3, Disorient 15 + Weaken. */
+  passive:{ name:'Total Saturation', text:'It does not tire and it does not forget. Below two-thirds health it strikes harder and more often; below a third it strikes harder still and mends itself twice as fast. Every few turns it RECALIBRATES, purging every affliction on it and healing 5% of its maximum. Half of what you inflict slides off it entirely. And it feeds on a full hand \u2014 hold six cards or more at the start of your turn and the noise takes one from you, though the adrenaline sharpens your next strike.' },
+  atkText:'A wall of light and sound with nothing behind it. Hits for 40, for 50 below two-thirds health, and for 65 below a third \u2014 and 20 harder still if it spent the previous turn amplifying.',
+  disorientText:'A glancing burst of static, 15 damage, that leaves your Active overstimulated \u2014 its attacks are weakened until it clears.',
+  blkText:'It gathers the signal instead of striking, powering up its next assault by 20. Below a third health it shields itself as it does so.' };
 /* Boss difficulty ranks, gentlest -> harshest (drives tiered draw windows) */
 const SCRIM_BOSS_RANK = ['claystation','dyefone','sandroid','sinstaram','pintendo','hexbox','sicsoc'];
 /* Bestiary of Mal-gorithms — flavor lore, unlocked on defeat (back-port to catalog) */
@@ -8148,7 +8180,9 @@ function scrimOppPlayer(node){
   if(node.superboss){
     const b=SUPER_BOSS; const F=(typeof window!=='undefined'&&window.ABC_SOL_FACES)||{};
     const bc=makeChar({id:'overlord',name:b.name,hp:b.hp,accent:b.accent,tags:['villain'],
-      atk:{n:'Sensory Overload',dmg:40,cost:0,label:'40'},blk:{n:'Amplify',block:20,cost:2,label:'20/2'}},1.0);
+      passive:b.passive,
+      atk:{n:'Sensory Overload',dmg:40,cost:0,label:'40',t:b.atkText||''},
+      blk:{n:'Amplify',block:20,cost:2,label:'20/2',t:b.blkText||''}},1.0);
     bc._boss=true; bc._overlord=true; bc._big=true; bc.sub=b.sub; bc._faces=F; bc._face='idle'; bc.img=F.idle||''; bc.imgpos='50% 26%'; bc._turn=0;
     return scrimPlayerShell(b.name,'boss',[bc], shuffle(buildRunDeck(scrimBossDeck({deck:scrimRandomDeck()}))));
   }
@@ -8816,21 +8850,30 @@ function mhGallery(){var E=window.EXPANSIONS&&window.EXPANSIONS.modern_hamlet;if
   return '<div class="vault-sec mh-sec"><div class="vault-h">\uD83C\uDFAC Elsinore Incorporated <small>Edition #1 \u00b7 collected '+edn+'/'+(E.counts.total||43)+' \u00b7 characters '+chG+'/15</small> <button class="mh-dev" data-scrim="devunlock">\uD83D\uDD13 Unlock all (testing)</button></div><div class="mh-grid">'+tiles+'</div></div>'; }
 function expCardFull(key,id){ var E=window.EXPANSIONS[key]; if(!E) return ''; var c=null; var rs=expRoster(E);
   for(var i=0;i<rs.length;i++){ if(rs[i].id===id){ c=rs[i]; break; } } if(!c) return '';
-  var im=(E.img||{})[id]||'', ip=(E.imgpos||{})[id]||'50% 22%'; var hp=Math.min(100,Math.round(c.hp/220*100));
-  return '<div class="char mh-ed" style="width:236px">'
-    +'<div class="pc-plate"><div class="pc-name">'+c.name+'</div><div class="pc-hp"><i style="width:'+hp+'%"></i><b>'+c.hp+'</b></div></div>'
-    +'<div class="pc-art"><img class="port-img" src="'+im+'" style="object-position:'+ip+'"></div>'
-    +'<div class="mv-row atk"><b>'+c.atk.n+'</b><span>'+c.atk.label+'</span></div><div class="mv-txt">'+(c.atk.t||'')+'</div>'
-    +'<div class="mv-row blk"><b>'+c.blk.n+'</b><span>'+c.blk.label+'</span></div><div class="mv-txt">'+(c.blk.t||'')+'</div>'
-    +'</div>';
+  /* Use the same preview the deck builder uses. The old bespoke markup drew an
+     HP bar as hp/220, so a 120 HP character rendered 55% full and read as
+     damaged; buildCharPreview shows max HP as a figure, not a meter. */
+  return buildCharPreview(edPreviewChar(E,c), E.base||'').replace('pv-card pvchar','pv-card pvchar ed-pv');
 }
-function mhCardFull(id){var E=window.EXPANSIONS.modern_hamlet;var c=null;for(var i=0;i<E.roster.length;i++){if(E.roster[i].id===id){c=E.roster[i];break;}}if(!c)return'';
-  var im=(E.img||{})[id]||'',ip=(E.imgpos||{})[id]||'50% 18%';var hp=Math.min(100,Math.round(c.hp/220*100));
-  return '<div class="char mh-ed" style="width:236px">'
-    +'<div class="pc-plate"><div class="pc-name">'+c.name+'</div><div class="pc-hp"><i style="width:'+hp+'%"></i><b>'+c.hp+'</b></div></div>'
-    +'<div class="pc-art"><img class="port-img" src="'+im+'" style="object-position:'+ip+'"></div>'
-    +'<div class="pc-moves"><div class="pc-move atk"><span class="mv-n">'+c.atk.n+'</span><span class="mv-l">'+c.atk.label+'</span></div>'
-    +'<div class="pc-move blk"><span class="mv-n">'+c.blk.n+'</span><span class="mv-l">'+c.blk.label+'</span></div></div></div>'; }
+/* Portraits live on the expansion's img map keyed by character id. The
+   one-time attach pass covers battle.chars, but a roster-only entry (Elsinore)
+   never receives one, so resolve it here rather than trusting c.img. */
+function edPreviewChar(E,c){
+  var o={}; for(var k in c) o[k]=c[k];
+  if(!o.img){ var IM=E.img||{}, IP=E.imgpos||{};
+    if(IM[c.id]){ o.img=IM[c.id]; o.imgpos=IP[c.id]||'50% 18%'; } }
+  if(!o.archetype && E.base && typeof edBaseChar==='function'){
+    var b=edBaseChar(E.base,c.id); if(b&&b.archetype) o.archetype=b.archetype; }
+  return o;
+}
+function mhCardFull(id){var E=window.EXPANSIONS.modern_hamlet;if(!E)return'';
+  /* Prefer battle.chars over roster: same ids, but the battle entries carry the
+     move flavour text (.t) that the roster stubs omit. */
+  var c=null,src=(E.battle&&E.battle.chars)||[];
+  for(var i=0;i<src.length;i++){if(src[i].id===id){c=src[i];break;}}
+  if(!c){ for(var j=0;j<(E.roster||[]).length;j++){ if(E.roster[j].id===id){ c=E.roster[j]; break; } } }
+  if(!c)return'';
+  return buildCharPreview(edPreviewChar(E,c), E.base||'hamlet').replace('pv-card pvchar','pv-card pvchar ed-pv'); }
 
 function scrimBestiary(){
   const seen=META.bossSeen||[], killed=META.bossKilled||[]; const altSeen=META.bossAltSeen||[];
