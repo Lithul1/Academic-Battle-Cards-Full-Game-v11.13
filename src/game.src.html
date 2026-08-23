@@ -195,7 +195,79 @@ body[data-screen="play"] .char.boss .pc-art{height:clamp(70px,15vh,168px)}
 /* hand */
 .hand-wrap{position:fixed;left:0;right:0;bottom:0;padding:6px 10px 10px;background:linear-gradient(transparent,#0a2123 22%);z-index:30}
 .hand-label{font-family:var(--cond);letter-spacing:2px;text-transform:uppercase;font-size:11px;color:#cfe7df;text-align:center;margin-bottom:2px}
-.hand{display:flex;gap:8px;justify-content:center;align-items:flex-end;overflow-x:auto;padding:6px 4px 2px;scrollbar-width:thin}
+/* ---------- computed hand fan (fix_hand_fan.py) ----------
+   Applies at every width. --n is set on this element by render(); --i comes
+   from the nth-child ladder below. Everything else derives from those two, so
+   the fan stays correct at any hand size. */
+.hand{
+  --card-h:150px;      /* card height; overridden per breakpoint below      */
+  --card-ar:0.8;       /* width / height -- 4:5, so it reads as a card      */
+  --fan-step:4deg;     /* rotation per card away from centre                */
+  --fan-arc:1.5px;     /* how far the outer cards drop                      */
+  --fan-lift:24px;     /* hover lift                                        */
+  --fan-scale:1.14;    /* hover scale                                       */
+  --tuck-frac:0.09;    /* overlap per card past 5, as a fraction of width   */
+  --card-w:calc(var(--card-h) * var(--card-ar));
+  display:flex;justify-content:center;align-items:flex-end;
+  gap:0;overflow:visible;padding:14px 4px 4px;
+}
+.hand .hc:nth-child(1){--i:0}
+.hand .hc:nth-child(2){--i:1}
+.hand .hc:nth-child(3){--i:2}
+.hand .hc:nth-child(4){--i:3}
+.hand .hc:nth-child(5){--i:4}
+.hand .hc:nth-child(6){--i:5}
+.hand .hc:nth-child(7){--i:6}
+.hand .hc:nth-child(8){--i:7}
+.hand .hc:nth-child(9){--i:8}
+.hand .hc:nth-child(10){--i:9}
+.hand .hc:nth-child(11){--i:10}
+.hand .hc:nth-child(12){--i:11}
+.hand .hc:nth-child(13){--i:12}
+.hand .hc:nth-child(14){--i:13}
+.hand .hc:nth-child(15){--i:14}
+.hand .hc:nth-child(16){--i:15}
+.hand .hc:nth-child(17){--i:16}
+.hand .hc:nth-child(18){--i:17}
+.hand .hc:nth-child(19){--i:18}
+.hand .hc:nth-child(20){--i:19}
+.hand .hc:nth-child(21){--i:20}
+.hand .hc:nth-child(22){--i:21}
+.hand .hc:nth-child(23){--i:22}
+.hand .hc:nth-child(24){--i:23}
+body[data-screen="play"] .hand .hc{
+  --mid:calc((var(--n,1) - 1) / 2);
+  --off:calc(var(--i,0) - var(--mid));
+  flex:none;
+  width:var(--card-w);min-width:var(--card-w);height:var(--card-h);
+  transform-origin:bottom center;
+  transition:transform .16s ease, box-shadow .16s ease;
+  transform:translateY(calc(var(--off) * var(--off) * var(--fan-arc)))
+            rotate(calc(var(--off) * var(--fan-step)));
+  margin-left:calc(-1 * clamp(0px,
+      (var(--n,1) - 5) * var(--card-w) * var(--tuck-frac),
+      var(--card-w) * 0.72));
+}
+body[data-screen="play"] .hand .hc:first-child{margin-left:0}
+.hand .hc:nth-child(1){z-index:1}
+.hand .hc:nth-child(2){z-index:2}
+.hand .hc:nth-child(3){z-index:3}
+.hand .hc:nth-child(4){z-index:4}
+.hand .hc:nth-child(5){z-index:5}
+.hand .hc:nth-child(6){z-index:6}
+.hand .hc:nth-child(7){z-index:7}
+.hand .hc:nth-child(8){z-index:8}
+.hand .hc:nth-child(9){z-index:9}
+.hand .hc:nth-child(10){z-index:10}
+.hand .hc:nth-child(n+11){z-index:11}
+body[data-screen="play"] .hand .hc:hover,
+body[data-screen="play"] .hand .hc:active,
+body[data-screen="play"] .hand .hc.sel{
+  transform:translateY(calc(var(--fan-lift) * -1)) scale(var(--fan-scale)) rotate(0deg);
+  z-index:60;box-shadow:0 12px 24px rgba(0,0,0,.55);
+}
+/* a 4:5 card is narrower than the old square, so the question needs the room */
+body[data-screen="play"] .hand .hc .hc-q{-webkit-line-clamp:6}
 .hand-toggle{display:none;width:100%;justify-content:center;align-items:center;gap:8px;font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;font-size:13px;padding:9px 12px;border:none;border-top:2px solid #1c4a4a;background:#0c2426;color:#dff3ec;cursor:pointer}
 .hand .empty{color:#9fc4bd;font-family:var(--cond);letter-spacing:1px}
 .hc{flex:0 0 152px;height:150px;background:var(--cream);border:2.5px solid var(--ink);border-radius:11px;overflow:hidden;
@@ -779,20 +851,11 @@ body.calm-fx .thinking{opacity:1!important}
     display:flex!important;max-height:none;overflow:visible!important;
     justify-content:center;align-items:flex-end;gap:0;padding:6px 0 2px;background:none;border-top:none;box-shadow:none;
   }
-  body[data-screen="play"] .hand .hc{
-    width:50px!important;min-width:50px!important;height:66px!important;padding:3px!important;font-size:7px;
-    transform-origin:bottom center;transition:transform .16s ease,box-shadow .16s ease;flex:none;
-  }
-  body[data-screen="play"] .hand .hc:nth-child(1){transform:translateX(10px) rotate(-8deg)}
-  body[data-screen="play"] .hand .hc:nth-child(2){transform:translateX(5px) rotate(-4deg)}
-  body[data-screen="play"] .hand .hc:nth-child(4){transform:translateX(-5px) rotate(4deg)}
-  body[data-screen="play"] .hand .hc:nth-child(5){transform:translateX(-10px) rotate(8deg)}
-  body[data-screen="play"] .hand .hc:nth-child(6){transform:translateX(-15px) rotate(12deg)}
-  body[data-screen="play"] .hand .hc:nth-child(7){transform:translateX(-20px) rotate(16deg)}
-  body[data-screen="play"] .hand .hc:hover,
-  body[data-screen="play"] .hand .hc:active,
-  body[data-screen="play"] .hand .hc.sel{transform:translateY(-20px) scale(1.25) rotate(0deg)!important;z-index:40;
-    box-shadow:0 10px 20px rgba(0,0,0,.55)}
+  /* phone: shorter card, steeper fan, harder tuck. Shape and hover come from
+     the shared computed rules -- only the tuning changes here. */
+  /* phone typography only. Card height and fan tuning are set by the later
+     block sharing this media query, which wins the cascade. */
+  body[data-screen="play"] .hand .hc{padding:3px!important;font-size:7px}
   body[data-screen="play"] .hc-q,body[data-screen="play"] .hc-text{font-size:7px;line-height:1.1}
   body[data-screen="play"] .hc-name{font-size:8px}
   body[data-screen="play"] .hc-top,body[data-screen="play"] .hc-foot{font-size:6px}
@@ -855,18 +918,12 @@ body.calm-fx .thinking{opacity:1!important}
   /* hand — larger cards, gentler fan, easy to grab */
   body[data-screen="play"] .hand-wrap .hand,
   body[data-screen="play"] .hand-wrap.open .hand{padding:12px 0 6px}
-  body[data-screen="play"] .hand .hc{
-    width:96px!important;min-width:96px!important;height:126px!important;padding:7px!important;font-size:11px!important;
+  /* tablet: bigger card, gentler fan, easy to grab */
+  body[data-screen="play"] .hand{
+    --card-h:132px;--fan-step:5deg;--fan-arc:1.9px;
+    --fan-lift:26px;--fan-scale:1.16;--tuck-frac:0.10;
   }
-  body[data-screen="play"] .hand .hc:nth-child(1){transform:translateX(8px) rotate(-6deg)}
-  body[data-screen="play"] .hand .hc:nth-child(2){transform:translateX(4px) rotate(-3deg)}
-  body[data-screen="play"] .hand .hc:nth-child(4){transform:translateX(-4px) rotate(3deg)}
-  body[data-screen="play"] .hand .hc:nth-child(5){transform:translateX(-8px) rotate(6deg)}
-  body[data-screen="play"] .hand .hc:nth-child(6){transform:translateX(-12px) rotate(9deg)}
-  body[data-screen="play"] .hand .hc:nth-child(7){transform:translateX(-16px) rotate(12deg)}
-  body[data-screen="play"] .hand .hc:hover,
-  body[data-screen="play"] .hand .hc:active,
-  body[data-screen="play"] .hand .hc.sel{transform:translateY(-26px) scale(1.16) rotate(0deg)!important}
+  body[data-screen="play"] .hand .hc{padding:7px!important;font-size:11px!important}
   body[data-screen="play"] .hc-q,body[data-screen="play"] .hc-text{font-size:11px;line-height:1.25}
   body[data-screen="play"] .hc-name{font-size:12px}
   body[data-screen="play"] .hc-top,body[data-screen="play"] .hc-foot{font-size:9px}
@@ -908,13 +965,14 @@ body.dragging-abc{cursor:grabbing}
   /* every hand card: no scroll-hijack, no iOS text selection */
   body[data-screen="play"] .hand .hc{touch-action:none;-webkit-touch-callout:none}
   /* bigger, easier-to-hit cards + less overlap (they were 50px and heavily stacked) */
-  body[data-screen="play"] .hand .hc{width:58px!important;min-width:58px!important;height:74px!important}
-  body[data-screen="play"] .hand .hc:nth-child(1){transform:translateX(6px) rotate(-6deg)}
-  body[data-screen="play"] .hand .hc:nth-child(2){transform:translateX(3px) rotate(-3deg)}
-  body[data-screen="play"] .hand .hc:nth-child(4){transform:translateX(-3px) rotate(3deg)}
-  body[data-screen="play"] .hand .hc:nth-child(5){transform:translateX(-6px) rotate(6deg)}
-  body[data-screen="play"] .hand .hc:nth-child(6){transform:translateX(-9px) rotate(9deg)}
-  body[data-screen="play"] .hand .hc:nth-child(7){transform:translateX(-12px) rotate(12deg)}
+  /* bigger, easier-to-hit cards + less overlap. This block shares its media
+     query with the earlier phone block and wins the cascade, so the card
+     height is settled here. 74px tall at 4:5 gives a 59px card -- the same
+     fingertip target as the 58px it replaces. */
+  body[data-screen="play"] .hand{
+    --card-h:74px;--fan-step:6deg;--fan-arc:2.1px;
+    --fan-lift:20px;--fan-scale:1.35;--tuck-frac:0.11;
+  }
   /* DROP TARGETS: bench minis were 50x36 — far too small for a fingertip.
      Grow the hit area invisibly without changing the visual size. */
   body[data-screen="play"] .bench-mini.drop-zone::after{
@@ -932,12 +990,11 @@ body.dragging-abc{cursor:grabbing}
    matches every tablet and would otherwise win the cascade on equal specificity.
    Drawn Mode character cards carry a portrait, a name and two buttons. */
 @media (pointer:coarse) and (orientation:landscape) and (min-width:1000px){
-  body[data-screen="play"] .hand .hc{
-    flex:0 0 106px!important;              /* flex-basis governs a flex item, not width */
-    width:106px!important;min-width:106px!important;max-width:106px!important;
-    height:150px!important;max-height:150px!important;
+  body[data-screen="play"] .hand{
+    --card-h:150px;--fan-step:4.5deg;--fan-arc:1.7px;
+    --fan-lift:26px;--fan-scale:1.16;--tuck-frac:0.09;
   }
-  body[data-screen="play"] .hand .hc .hc-q{-webkit-line-clamp:4}
+  body[data-screen="play"] .hand .hc .hc-q{-webkit-line-clamp:5}
 }
 
 .hv-acts{display:flex;gap:10px;align-items:center}
@@ -3484,7 +3541,31 @@ const LIMITS={ ch:14, ab:36, bm:20, cr:4, fe:2, total:62 };   // builder CEILING
 /* ch is 14, not 12: gatsby and hamlet ship 13 characters and oz ships 14, so a
    ceiling of 12 flagged three untouched starter decks as over-cap. */
 const MINIMA={ ch:8,  ab:24, bm:10, cr:2, fe:2 };             // builder FLOOR per category
+/* feFor stays BASE-ONLY on purpose: it seeds starter decks, and a starter deck
+   should not open with an expansion commander. */
 function feFor(k){ return (DATA.firsteds||[]).filter(f=>f.deck===k).map(f=>f.id).slice(0,LIMITS.fe); }
+/* ---- the First Edition roster, base + expansions (fix_fe_full_merge.py) ----
+   Every expansion commander carries a BASE deck key, so everything downstream
+   -- Pagemaster books, deck pools, set names -- works unchanged. */
+function feExpansionCmds(){
+  var out=[], E=window.EXPANSIONS||{};
+  for(var k in E){ var ed=E[k]; if(!ed) continue;
+    ((ed.battle&&ed.battle.commanders)||[]).forEach(function(c){ out.push(c); });
+    ((ed.boosterPool&&ed.boosterPool.commanders)||[]).forEach(function(c){ out.push(c); });
+  }
+  return out;
+}
+function feAll(){ return (DATA.firsteds||[]).concat(feExpansionCmds()); }
+/* Ownership spans two namespaces that mean different things and are saved
+   separately: expansion cards live in META.editionCards keyed by cid, base
+   first editions in META.commanders keyed by id. This reads both; it does not
+   merge them. */
+function feHas(f){
+  if(!f) return false;
+  if(sbx()) return true;
+  if(f.cid) return edHas(f.cid);
+  return (META.commanders||[]).indexOf(f.id)>=0;
+}
 function firstedById(id){ var f=(DATA.firsteds||[]).find(x=>x.id===id); if(f) return f;
   var E=window.EXPANSIONS||{}; for(var k in E){ if(E[k].battle){ var m=(E[k].battle.commanders||[]).find(x=>x.id===id); if(m) return m; } if(E[k].boosterPool){ var m2=(E[k].boosterPool.commanders||[]).find(x=>x.id===id); if(m2) return m2; } } return null; }
 /* ---- Expansion edition helpers (edition-driven; augment matching base deck only) ---- */
@@ -5738,7 +5819,9 @@ function pmPickerScreen(){
   const pick=(APP.pmCommanders||[]);
   const owned=(typeof feOwnedList==='function')?feOwnedList():(DATA.firsteds||[]);
   const slots=[0,1].map(function(i){
-    const f=(DATA.firsteds||[]).find(function(x){ return x.id===pick[i]; });
+    /* firstedById already spans expansions; the raw array lookup did not, so a
+       chosen expansion commander rendered as an empty slot. */
+    const f=firstedById(pick[i]);
     if(!f) return '<div class="pm-slot"><div class="lbl">Commander '+(i+1)+'</div><div class="empty">choose below</div></div>';
     return '<div class="pm-slot filled" style="border-color:'+(f.accent||'#241F1B')+'">'
       + '<button class="x" data-do="pm-drop:'+i+'">\u2715</button>'
@@ -6627,7 +6710,7 @@ function renderGame(root){
      </div>
    </div></div>
    <div class="hand-wrap ${S._handOpen?'open':''}"><button class="hand-toggle" data-do="hand">&#127136; Your hand (${you.hand.length}) ${S._handOpen?'&#9662;':'&#9652;'}</button><div class="hand-label">Your hand <span class="hand-hint">— tap to charge your active, or drag ⚔/⛊ onto any of your characters (even backstage)</span></div>
-     <div class="hand">${you.hand.map((c,i)=>handCard(c,i)).join('')||'<span class="empty">No cards</span>'}</div></div>
+     <div class="hand" style="--n:${you.hand.length}">${you.hand.map((c,i)=>handCard(c,i)).join('')||'<span class="empty">No cards</span>'}</div></div>
    <button class="logtoggle" data-do="log">☰ Log</button>
    <div class="log ${S._logopen?'open':''}">${S.log.map(l=>`<div>${l}</div>`).join('')}</div>
    ${S.pending?triviaModal():''}${S._ip?ipModal():''}
@@ -6896,8 +6979,17 @@ function devDo(what){
     case 'lfset':   if(typeof SCRIM!=='undefined'&&SCRIM&&SCRIM.active){ SCRIM.lf=devNum('dv-lf'); devLog('Late Fees set to '+SCRIM.lf); } else devLog('No active run.'); break;
     case 'decks':   META.decks=allDecks.slice(); devLog('All '+allDecks.length+' decks unlocked'); break;
     case 'cmdrs':   META.commanders=allDecks.slice(); devLog('All commanders granted'); break;
-    case 'firsteds':{ const ids=(typeof DATA!=='undefined'&&DATA.firsteds)?Object.keys(DATA.firsteds):[];
-                     META.editionCards=ids.slice(); devLog(ids.length+' first editions granted'); break; }
+    case 'firsteds':{
+      /* was Object.keys() on an ARRAY -- it granted ["0","1","2"...] into the
+         edition namespace, so it never worked. Grant both namespaces properly. */
+      const _all=(typeof feAll==='function')?feAll():[];
+      const baseIds=_all.filter(function(f){return !f.cid;}).map(function(f){return f.id;});
+      const edCids=_all.filter(function(f){return !!f.cid;}).map(function(f){return f.cid;});
+      const seen={}; (META.commanders||[]).concat(baseIds).forEach(function(x){seen[x]=1;});
+      META.commanders=Object.keys(seen);
+      const seenEd={}; (META.editionCards||[]).concat(edCids).forEach(function(x){seenEd[x]=1;});
+      META.editionCards=Object.keys(seenEd);
+      devLog(_all.length+' first editions granted ('+baseIds.length+' base, '+edCids.length+' expansion)'); break; }
     case 'packs':   META.packs=(META.packs||0)+10; devLog('Packs +10 \u2192 '+META.packs); break;
     case 'foils':   META.foils=(META.foils||0)+10; devLog('Foils +10 \u2192 '+META.foils); break;
     case 'bosses':  if(typeof SCRIM_BOSSES!=='undefined'&&SCRIM_BOSSES){ META.bossSeen=Object.keys(SCRIM_BOSSES); devLog('All '+META.bossSeen.length+' bosses revealed'); } else devLog('Boss table unavailable.'); break;
@@ -7533,14 +7625,18 @@ function deckUnlocked(k){ return sbx() || !deckLocked(k) || (META.decks||[]).ind
 function feOwned(id){
   if(sbx()) return true;
   var f=(DATA.firsteds||[]).find(function(x){ return x.id===id; });
-  if(!f) return false;
+  if(!f){
+    /* an expansion commander: owned through the edition namespace instead */
+    var x=firstedById(id);
+    return !!(x && x.cid && edHas(x.cid));
+  }
   var k=f.deck;
   if(!k) return true;                      /* a commander with no book is always available */
   if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k);
   var d=(META.deckCards||{})[k]||{};
   return (d.fe||[]).indexOf(id)>=0 || (META.decks||[]).indexOf(k)>=0;
 }
-function feOwnedList(){ return (DATA.firsteds||[]).filter(function(f){ return feOwned(f.id); }); }
+function feOwnedList(){ return feAll().filter(function(f){ return feOwned(f.id); }); }
 function deckOwnCh(k,id){ if(sbx()) return true; if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ch||[]).indexOf(id)>=0; }
 function deckOwnAb(k,i){ if(sbx()) return true; if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ab||[]).indexOf(+i)>=0; }
 function licenseDeck(k){
@@ -7955,7 +8051,9 @@ function scrimRollBosses(){
 function scrimActMul(){ if(SCRIM.doctoral){ const s=SCRIM.semester||1; return (1.35 + 0.13*(s-1))*honorsMods().dmgMul; } const a=SCRIM.act||1; const base=1.0 + 0.07*(a-1); return base*honorsMods().dmgMul; }
 function scrimAccFloor(){ if(SCRIM.doctoral){ const s=SCRIM.semester||1; return Math.min(0.98, 0.82 + 0.02*(s-1) + honorsMods().acc); } const a=SCRIM.act||1; const base=0.70 + 0.03*(a-1); return Math.min(0.98, base+honorsMods().acc); }
 function scrimRollFirstEds(n){
-  const all=(DATA.firsteds||[]).filter(f=>f.tier!=='ultra').map(f=>f.id);
+  /* pool widened to include expansion commanders; ownership policy unchanged
+     (this path has always been ownership-blind, as has the Book Fair swap). */
+  const all=feAll().filter(f=>f.tier!=='ultra').map(f=>f.id);
   const have=SCRIM.team.filter(r=>r.fe).map(r=>r.id);
   const pool=shuffle(all.filter(id=>have.indexOf(id)<0));
   return pool.slice(0,n);
@@ -8419,7 +8517,7 @@ function scrimEventChoose(i){
     case 'part': { const a=grantArt(); msg=a?('The professor hands you <b>'+a.ic+' '+a.name+'</b>.'):'You already own everything on offer.'; break; }
     case 'settle': SCRIM.lf-=ch.need; msg='Settled. The librarian nods approvingly.'; break;
     case 'curse': SCRIM.team.forEach(t=>{ t.maxHp=Math.max(20,t.maxHp-6); if(t.curHp>t.maxHp)t.curHp=t.maxHp; }); msg='The distraction lingers \u2014 <b>\u22126 Max HP</b> to your roster for the rest of the run.'; break;
-    case 'swap': { const feids=(DATA.firsteds||[]).map(f=>f.id).filter(id=>!SCRIM.team.some(t=>t.fe&&t.id===id)); if(!feids.length){ msg='No substitutes are available.'; break; } const feid=feids[rnd(feids.length)]; const fd=firstedById(feid); if(!fd){ msg='No substitutes are available.'; break; } const idx=SCRIM.team.findIndex(t=>!t.fe); const slot=idx>=0?idx:0; const mx=fd.hp||90; SCRIM.team[slot]={fe:true,id:feid,deck:fd.deck,curHp:mx,maxHp:mx}; if((META.commanders||[]).indexOf(feid)<0){ META.commanders.push(feid); metaSave(); } msg='A substitute steps in: <b>'+fd.name+'</b> joins your roster.'; break; }
+    case 'swap': { const feids=feAll().map(f=>f.id).filter(id=>!SCRIM.team.some(t=>t.fe&&t.id===id)); if(!feids.length){ msg='No substitutes are available.'; break; } const feid=feids[rnd(feids.length)]; const fd=firstedById(feid); if(!fd){ msg='No substitutes are available.'; break; } const idx=SCRIM.team.findIndex(t=>!t.fe); const slot=idx>=0?idx:0; const mx=fd.hp||90; SCRIM.team[slot]={fe:true,id:feid,deck:fd.deck,curHp:mx,maxHp:mx}; if((META.commanders||[]).indexOf(feid)<0){ META.commanders.push(feid); metaSave(); } msg='A substitute steps in: <b>'+fd.name+'</b> joins your roster.'; break; }
     case 'lfcard': { const decks=Object.keys(DATA.characters); const d=decks[rnd(decks.length)]; const ci=rnd(DATA.abcs[d].length); SCRIM.deck.ab.push({d:d,i:ci}); const cd=DATA.abcs[d][ci]; msg='From the papers: a new <b>'+(cd?cd.type:'ABC')+'</b> card joins your deck.'; break; }
     case 'lfart': { const a=grantArt(); msg=a?('From the trinkets: <b>'+a.ic+' '+a.name+'</b>.'):'The trinket pile is bare.'; break; }
     case 'cram': SCRIM.team.forEach(t=>{ t.curHp=t.maxHp; }); SCRIM._noNextReward=true; msg='Rested and ready \u2014 <b>team healed to full.</b> (Your next Scrimmage gives no card.)'; break;
@@ -8648,7 +8746,7 @@ function scrimTeamArchetypes(){
   ((SCRIM&&SCRIM.team)||[]).forEach(function(t){
     if(t.curHp<=0) return;
     let c=null;
-    if(t.fe){ c=(DATA.firsteds||[]).find(function(f){return f.id===t.id;}); }
+    if(t.fe){ c=firstedById(t.id); }
     else { const dk=DATA.characters[t.deck]||[]; c=dk.find(function(x){return x.id===t.id;}); }
     if(c&&c.archetype) out[c.archetype]=(out[c.archetype]||0)+1;
   });
@@ -8763,7 +8861,8 @@ function scrimSpineAbbrev(name){
 function scrimLibraryCard(){
   const st=META.stats||{}, rank=tenureRank(), slots=perkSlots();
   const nextAt=rank>=2?null:(rank>=1?10:4);
-  const catalog=Math.round((((META.commanders||[]).length+(META.perks||[]).length)/((DATA.firsteds||[]).length+Object.keys(SCRIM_PERKS).length))*100);
+  const _feAll=feAll(), _feGot=_feAll.filter(feHas).length;
+  const catalog=Math.round(((_feGot+(META.perks||[]).length)/(_feAll.length+Object.keys(SCRIM_PERKS).length))*100);
   const fast=st.fastestMs?Math.floor(st.fastestMs/60000)+'m '+Math.floor((st.fastestMs%60000)/1000)+'s':'\u2014';
   const furthest=st.bestAct>=8?'Graduated':(st.bestAct>0?('Act '+Math.min(7,st.bestAct)):'\u2014');
   const p=META.patron||{name:'Author_1E',card:'#LUL',issued:''};
@@ -9033,7 +9132,7 @@ function scrimRunDeckScreen(){
   } else if(tab==='team'){
     const rows=((SCRIM.team)||[]).map(function(t){
       let c=null;
-      if(t.fe) c=(DATA.firsteds||[]).find(function(f){return f.id===t.id;});
+      if(t.fe) c=firstedById(t.id);
       else c=(DATA.characters[t.deck]||[]).find(function(x){return x.id===t.id;});
       const nm=c?c.name:t.id, ar=c&&c.archetype?c.archetype:'\u2014';
       const dead=t.curHp<=0;
@@ -9098,8 +9197,9 @@ function scrimVShop(){
       <div class="vault-perks">${perkChips}</div>${infoHtml}</div>`;
 }
 function scrimVFirstEds(){
-  const owned=(META.commanders||[]).length, total=(DATA.firsteds||[]).length;
-  const shelf=(DATA.firsteds||[]).map((f,i)=>{const got=(META.commanders||[]).indexOf(f.id)>=0;
+  const _all=feAll();
+  const owned=_all.filter(feHas).length, total=_all.length;
+  const shelf=_all.map((f,i)=>{const got=feHas(f);
     const h=128+((i*29)%34);
     return `<button class="lib-spine ${got?'got':''}" style="height:${h}px;--sp:${f.accent||'#5a4a3a'}" data-scrim="fecard:${f.id}" title="${f.name}">${got?'<span class="sp-star">\u2b50</span>':''}<span class="sp-name">${scrimSpineAbbrev(f.name)}</span></button>`;}).join('');
   return `<div class="scrim-title sm vault-tabtitle">\ud83d\udcd6 1st Editions</div>
@@ -9133,7 +9233,8 @@ window.ABC_EXPORT = {
   decks:()=>Object.keys(DATA.characters||{}),
   chars:(deck)=>(DATA.characters[deck]||[]).map(c=>({id:c.id,name:c.name})),
   charCard:(deck,id)=>{ const c=(DATA.characters[deck]||[]).find(x=>x.id===id); return c?buildCharPreview(c,deck):''; },
-  feList:()=>(DATA.firsteds||[]).map(f=>({id:f.id,name:f.name})),
+  feList:()=>feAll().map(f=>({id:f.id,name:f.name,cid:f.cid||null,deck:f.deck||null})),
+  feAll, feHas, feExpansionCmds, feOwnedList,
   feCard:(id)=>{ const f=firstedById(id); return f?buildFePreview(f):''; },
   abcList:(deck)=>(DATA.abcs[deck]||[]).map((a,i)=>({i:i,term:(a.term||a.name||('#'+i))})),
   abcCard:(deck,i)=>{ const a=(DATA.abcs[deck]||[])[i]; return a?buildAbcPreview(a):''; },
