@@ -3541,7 +3541,31 @@ const LIMITS={ ch:14, ab:36, bm:20, cr:4, fe:2, total:62 };   // builder CEILING
 /* ch is 14, not 12: gatsby and hamlet ship 13 characters and oz ships 14, so a
    ceiling of 12 flagged three untouched starter decks as over-cap. */
 const MINIMA={ ch:8,  ab:24, bm:10, cr:2, fe:2 };             // builder FLOOR per category
+/* feFor stays BASE-ONLY on purpose: it seeds starter decks, and a starter deck
+   should not open with an expansion commander. */
 function feFor(k){ return (DATA.firsteds||[]).filter(f=>f.deck===k).map(f=>f.id).slice(0,LIMITS.fe); }
+/* ---- the First Edition roster, base + expansions (fix_fe_full_merge.py) ----
+   Every expansion commander carries a BASE deck key, so everything downstream
+   -- Pagemaster books, deck pools, set names -- works unchanged. */
+function feExpansionCmds(){
+  var out=[], E=window.EXPANSIONS||{};
+  for(var k in E){ var ed=E[k]; if(!ed) continue;
+    ((ed.battle&&ed.battle.commanders)||[]).forEach(function(c){ out.push(c); });
+    ((ed.boosterPool&&ed.boosterPool.commanders)||[]).forEach(function(c){ out.push(c); });
+  }
+  return out;
+}
+function feAll(){ return (DATA.firsteds||[]).concat(feExpansionCmds()); }
+/* Ownership spans two namespaces that mean different things and are saved
+   separately: expansion cards live in META.editionCards keyed by cid, base
+   first editions in META.commanders keyed by id. This reads both; it does not
+   merge them. */
+function feHas(f){
+  if(!f) return false;
+  if(sbx()) return true;
+  if(f.cid) return edHas(f.cid);
+  return (META.commanders||[]).indexOf(f.id)>=0;
+}
 function firstedById(id){ var f=(DATA.firsteds||[]).find(x=>x.id===id); if(f) return f;
   var E=window.EXPANSIONS||{}; for(var k in E){ if(E[k].battle){ var m=(E[k].battle.commanders||[]).find(x=>x.id===id); if(m) return m; } if(E[k].boosterPool){ var m2=(E[k].boosterPool.commanders||[]).find(x=>x.id===id); if(m2) return m2; } } return null; }
 /* ---- Expansion edition helpers (edition-driven; augment matching base deck only) ---- */
@@ -5795,7 +5819,9 @@ function pmPickerScreen(){
   const pick=(APP.pmCommanders||[]);
   const owned=(typeof feOwnedList==='function')?feOwnedList():(DATA.firsteds||[]);
   const slots=[0,1].map(function(i){
-    const f=(DATA.firsteds||[]).find(function(x){ return x.id===pick[i]; });
+    /* firstedById already spans expansions; the raw array lookup did not, so a
+       chosen expansion commander rendered as an empty slot. */
+    const f=firstedById(pick[i]);
     if(!f) return '<div class="pm-slot"><div class="lbl">Commander '+(i+1)+'</div><div class="empty">choose below</div></div>';
     return '<div class="pm-slot filled" style="border-color:'+(f.accent||'#241F1B')+'">'
       + '<button class="x" data-do="pm-drop:'+i+'">\u2715</button>'
@@ -6953,8 +6979,17 @@ function devDo(what){
     case 'lfset':   if(typeof SCRIM!=='undefined'&&SCRIM&&SCRIM.active){ SCRIM.lf=devNum('dv-lf'); devLog('Late Fees set to '+SCRIM.lf); } else devLog('No active run.'); break;
     case 'decks':   META.decks=allDecks.slice(); devLog('All '+allDecks.length+' decks unlocked'); break;
     case 'cmdrs':   META.commanders=allDecks.slice(); devLog('All commanders granted'); break;
-    case 'firsteds':{ const ids=(typeof DATA!=='undefined'&&DATA.firsteds)?Object.keys(DATA.firsteds):[];
-                     META.editionCards=ids.slice(); devLog(ids.length+' first editions granted'); break; }
+    case 'firsteds':{
+      /* was Object.keys() on an ARRAY -- it granted ["0","1","2"...] into the
+         edition namespace, so it never worked. Grant both namespaces properly. */
+      const _all=(typeof feAll==='function')?feAll():[];
+      const baseIds=_all.filter(function(f){return !f.cid;}).map(function(f){return f.id;});
+      const edCids=_all.filter(function(f){return !!f.cid;}).map(function(f){return f.cid;});
+      const seen={}; (META.commanders||[]).concat(baseIds).forEach(function(x){seen[x]=1;});
+      META.commanders=Object.keys(seen);
+      const seenEd={}; (META.editionCards||[]).concat(edCids).forEach(function(x){seenEd[x]=1;});
+      META.editionCards=Object.keys(seenEd);
+      devLog(_all.length+' first editions granted ('+baseIds.length+' base, '+edCids.length+' expansion)'); break; }
     case 'packs':   META.packs=(META.packs||0)+10; devLog('Packs +10 \u2192 '+META.packs); break;
     case 'foils':   META.foils=(META.foils||0)+10; devLog('Foils +10 \u2192 '+META.foils); break;
     case 'bosses':  if(typeof SCRIM_BOSSES!=='undefined'&&SCRIM_BOSSES){ META.bossSeen=Object.keys(SCRIM_BOSSES); devLog('All '+META.bossSeen.length+' bosses revealed'); } else devLog('Boss table unavailable.'); break;
@@ -7590,14 +7625,18 @@ function deckUnlocked(k){ return sbx() || !deckLocked(k) || (META.decks||[]).ind
 function feOwned(id){
   if(sbx()) return true;
   var f=(DATA.firsteds||[]).find(function(x){ return x.id===id; });
-  if(!f) return false;
+  if(!f){
+    /* an expansion commander: owned through the edition namespace instead */
+    var x=firstedById(id);
+    return !!(x && x.cid && edHas(x.cid));
+  }
   var k=f.deck;
   if(!k) return true;                      /* a commander with no book is always available */
   if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k);
   var d=(META.deckCards||{})[k]||{};
   return (d.fe||[]).indexOf(id)>=0 || (META.decks||[]).indexOf(k)>=0;
 }
-function feOwnedList(){ return (DATA.firsteds||[]).filter(function(f){ return feOwned(f.id); }); }
+function feOwnedList(){ return feAll().filter(function(f){ return feOwned(f.id); }); }
 function deckOwnCh(k,id){ if(sbx()) return true; if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ch||[]).indexOf(id)>=0; }
 function deckOwnAb(k,i){ if(sbx()) return true; if(!deckLocked(k)||!deckUnlocked(k)) return !deckLocked(k); var d=(META.deckCards||{})[k]||{}; return (d.ab||[]).indexOf(+i)>=0; }
 function licenseDeck(k){
@@ -8012,7 +8051,9 @@ function scrimRollBosses(){
 function scrimActMul(){ if(SCRIM.doctoral){ const s=SCRIM.semester||1; return (1.35 + 0.13*(s-1))*honorsMods().dmgMul; } const a=SCRIM.act||1; const base=1.0 + 0.07*(a-1); return base*honorsMods().dmgMul; }
 function scrimAccFloor(){ if(SCRIM.doctoral){ const s=SCRIM.semester||1; return Math.min(0.98, 0.82 + 0.02*(s-1) + honorsMods().acc); } const a=SCRIM.act||1; const base=0.70 + 0.03*(a-1); return Math.min(0.98, base+honorsMods().acc); }
 function scrimRollFirstEds(n){
-  const all=(DATA.firsteds||[]).filter(f=>f.tier!=='ultra').map(f=>f.id);
+  /* pool widened to include expansion commanders; ownership policy unchanged
+     (this path has always been ownership-blind, as has the Book Fair swap). */
+  const all=feAll().filter(f=>f.tier!=='ultra').map(f=>f.id);
   const have=SCRIM.team.filter(r=>r.fe).map(r=>r.id);
   const pool=shuffle(all.filter(id=>have.indexOf(id)<0));
   return pool.slice(0,n);
@@ -8476,7 +8517,7 @@ function scrimEventChoose(i){
     case 'part': { const a=grantArt(); msg=a?('The professor hands you <b>'+a.ic+' '+a.name+'</b>.'):'You already own everything on offer.'; break; }
     case 'settle': SCRIM.lf-=ch.need; msg='Settled. The librarian nods approvingly.'; break;
     case 'curse': SCRIM.team.forEach(t=>{ t.maxHp=Math.max(20,t.maxHp-6); if(t.curHp>t.maxHp)t.curHp=t.maxHp; }); msg='The distraction lingers \u2014 <b>\u22126 Max HP</b> to your roster for the rest of the run.'; break;
-    case 'swap': { const feids=(DATA.firsteds||[]).map(f=>f.id).filter(id=>!SCRIM.team.some(t=>t.fe&&t.id===id)); if(!feids.length){ msg='No substitutes are available.'; break; } const feid=feids[rnd(feids.length)]; const fd=firstedById(feid); if(!fd){ msg='No substitutes are available.'; break; } const idx=SCRIM.team.findIndex(t=>!t.fe); const slot=idx>=0?idx:0; const mx=fd.hp||90; SCRIM.team[slot]={fe:true,id:feid,deck:fd.deck,curHp:mx,maxHp:mx}; if((META.commanders||[]).indexOf(feid)<0){ META.commanders.push(feid); metaSave(); } msg='A substitute steps in: <b>'+fd.name+'</b> joins your roster.'; break; }
+    case 'swap': { const feids=feAll().map(f=>f.id).filter(id=>!SCRIM.team.some(t=>t.fe&&t.id===id)); if(!feids.length){ msg='No substitutes are available.'; break; } const feid=feids[rnd(feids.length)]; const fd=firstedById(feid); if(!fd){ msg='No substitutes are available.'; break; } const idx=SCRIM.team.findIndex(t=>!t.fe); const slot=idx>=0?idx:0; const mx=fd.hp||90; SCRIM.team[slot]={fe:true,id:feid,deck:fd.deck,curHp:mx,maxHp:mx}; if((META.commanders||[]).indexOf(feid)<0){ META.commanders.push(feid); metaSave(); } msg='A substitute steps in: <b>'+fd.name+'</b> joins your roster.'; break; }
     case 'lfcard': { const decks=Object.keys(DATA.characters); const d=decks[rnd(decks.length)]; const ci=rnd(DATA.abcs[d].length); SCRIM.deck.ab.push({d:d,i:ci}); const cd=DATA.abcs[d][ci]; msg='From the papers: a new <b>'+(cd?cd.type:'ABC')+'</b> card joins your deck.'; break; }
     case 'lfart': { const a=grantArt(); msg=a?('From the trinkets: <b>'+a.ic+' '+a.name+'</b>.'):'The trinket pile is bare.'; break; }
     case 'cram': SCRIM.team.forEach(t=>{ t.curHp=t.maxHp; }); SCRIM._noNextReward=true; msg='Rested and ready \u2014 <b>team healed to full.</b> (Your next Scrimmage gives no card.)'; break;
@@ -8705,7 +8746,7 @@ function scrimTeamArchetypes(){
   ((SCRIM&&SCRIM.team)||[]).forEach(function(t){
     if(t.curHp<=0) return;
     let c=null;
-    if(t.fe){ c=(DATA.firsteds||[]).find(function(f){return f.id===t.id;}); }
+    if(t.fe){ c=firstedById(t.id); }
     else { const dk=DATA.characters[t.deck]||[]; c=dk.find(function(x){return x.id===t.id;}); }
     if(c&&c.archetype) out[c.archetype]=(out[c.archetype]||0)+1;
   });
@@ -8820,7 +8861,8 @@ function scrimSpineAbbrev(name){
 function scrimLibraryCard(){
   const st=META.stats||{}, rank=tenureRank(), slots=perkSlots();
   const nextAt=rank>=2?null:(rank>=1?10:4);
-  const catalog=Math.round((((META.commanders||[]).length+(META.perks||[]).length)/((DATA.firsteds||[]).length+Object.keys(SCRIM_PERKS).length))*100);
+  const _feAll=feAll(), _feGot=_feAll.filter(feHas).length;
+  const catalog=Math.round(((_feGot+(META.perks||[]).length)/(_feAll.length+Object.keys(SCRIM_PERKS).length))*100);
   const fast=st.fastestMs?Math.floor(st.fastestMs/60000)+'m '+Math.floor((st.fastestMs%60000)/1000)+'s':'\u2014';
   const furthest=st.bestAct>=8?'Graduated':(st.bestAct>0?('Act '+Math.min(7,st.bestAct)):'\u2014');
   const p=META.patron||{name:'Author_1E',card:'#LUL',issued:''};
@@ -9090,7 +9132,7 @@ function scrimRunDeckScreen(){
   } else if(tab==='team'){
     const rows=((SCRIM.team)||[]).map(function(t){
       let c=null;
-      if(t.fe) c=(DATA.firsteds||[]).find(function(f){return f.id===t.id;});
+      if(t.fe) c=firstedById(t.id);
       else c=(DATA.characters[t.deck]||[]).find(function(x){return x.id===t.id;});
       const nm=c?c.name:t.id, ar=c&&c.archetype?c.archetype:'\u2014';
       const dead=t.curHp<=0;
@@ -9155,8 +9197,9 @@ function scrimVShop(){
       <div class="vault-perks">${perkChips}</div>${infoHtml}</div>`;
 }
 function scrimVFirstEds(){
-  const owned=(META.commanders||[]).length, total=(DATA.firsteds||[]).length;
-  const shelf=(DATA.firsteds||[]).map((f,i)=>{const got=(META.commanders||[]).indexOf(f.id)>=0;
+  const _all=feAll();
+  const owned=_all.filter(feHas).length, total=_all.length;
+  const shelf=_all.map((f,i)=>{const got=feHas(f);
     const h=128+((i*29)%34);
     return `<button class="lib-spine ${got?'got':''}" style="height:${h}px;--sp:${f.accent||'#5a4a3a'}" data-scrim="fecard:${f.id}" title="${f.name}">${got?'<span class="sp-star">\u2b50</span>':''}<span class="sp-name">${scrimSpineAbbrev(f.name)}</span></button>`;}).join('');
   return `<div class="scrim-title sm vault-tabtitle">\ud83d\udcd6 1st Editions</div>
@@ -9190,7 +9233,8 @@ window.ABC_EXPORT = {
   decks:()=>Object.keys(DATA.characters||{}),
   chars:(deck)=>(DATA.characters[deck]||[]).map(c=>({id:c.id,name:c.name})),
   charCard:(deck,id)=>{ const c=(DATA.characters[deck]||[]).find(x=>x.id===id); return c?buildCharPreview(c,deck):''; },
-  feList:()=>(DATA.firsteds||[]).map(f=>({id:f.id,name:f.name})),
+  feList:()=>feAll().map(f=>({id:f.id,name:f.name,cid:f.cid||null,deck:f.deck||null})),
+  feAll, feHas, feExpansionCmds, feOwnedList,
   feCard:(id)=>{ const f=firstedById(id); return f?buildFePreview(f):''; },
   abcList:(deck)=>(DATA.abcs[deck]||[]).map((a,i)=>({i:i,term:(a.term||a.name||('#'+i))})),
   abcCard:(deck,i)=>{ const a=(DATA.abcs[deck]||[])[i]; return a?buildAbcPreview(a):''; },
