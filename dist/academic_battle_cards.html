@@ -4292,7 +4292,7 @@ function dealOpening(){
     const step=()=>{
       if(!S){ return; }
       if(i>=n){ busy=false; S.turn='you';
-        if(S.drawn){ seedOpeningHand(); S.you.hand.forEach(c=>c._faceDown=true); S.phase='reveal'; S.mullCount=1; pushLog('Opening hand dealt — flip your cards.'); render(); return; }
+        if(S.drawn){ seedOpeningHand(); seedOpeningFe(); S.you.hand.forEach(c=>c._faceDown=true); S.phase='reveal'; S.mullCount=1; pushLog('Opening hand dealt — flip your cards.'); render(); return; }
         S.phase='draw'; pushLog('Cards dealt. Your turn — DRAW phase.'); render(); startTurnTimer(); return; }
       dealOne('you'); flickDeck('you'); render();
       setTimeout(()=>{ if(!S){ return; } dealOne('opp'); flickDeck('opp'); render(); i++; setTimeout(step,150); }, 170);
@@ -4316,6 +4316,35 @@ function seedOpeningHand(){
   pushLog('Seeded \u2014 the opening always holds at least one character.');
   return true;
 }
+/* Commanders open in HAND, not on the field and not buried in the deck.
+   Shuffled in, a 1E sat 29 cards deep on average, so four games in five its
+   caveat never had a chance to fire. Held in hand, entering play through the
+   normal path, it behaves like any other character -- benefit and cost both. */
+function seedOpeningFe(){
+  const p=S&&S.you; if(!p||!p.hand||!S.drawn) return 0;
+  let moved=0;
+  for(;;){
+    const di=p.deck.findIndex(c=>c.cat==='char' && c.fe &&
+      !p.hand.some(h=>h.cat==='char' && h.fe && h.charId===c.charId));
+    if(di<0) break;
+    /* Prefer trading away a non-character. But if the deal was already
+       character-heavy, trade a NON-FE character instead: that keeps the trivia
+       count untouched and still guarantees the commander is in hand. Declining
+       to seed here is what left 4.3% of openings without one, and a caveat that
+       skips one game in twenty is not a cost the card is paying. */
+    let hi=-1;
+    if(p.hand.filter(c=>c.cat!=='char').length>2) hi=p.hand.findIndex(c=>c.cat!=='char');
+    if(hi<0) hi=p.hand.findIndex(c=>c.cat==='char' && !c.fe);
+    if(hi<0) hi=p.hand.findIndex(c=>c.cat!=='char');
+    if(hi<0) break;
+    const fe=p.deck.splice(di,1)[0];
+    p.deck.push(p.hand[hi]); p.hand[hi]=fe; moved++;
+  }
+  if(moved){ shuffle(p.deck);
+    pushLog(moved===1 ? 'Your 1st Edition opens in hand \u2014 play it when you judge the moment.'
+                      : 'Your 1st Editions open in hand \u2014 play them when you judge the moment.'); }
+  return moved;
+}
 function drawnMulligan(){
   if(!S||!S.drawn||S.phase!=='reveal'||busy) return;
   if((S.mullCount||0)>=3){ toast('No mulligans left \u2014 keep this hand.'); return; }
@@ -4323,6 +4352,8 @@ function drawnMulligan(){
   p.deck=shuffle(p.deck.concat(p.hand.splice(0)));
   for(let k=0;k<S.settings.handSize;k++) dealOne('you');
   seedOpeningHand();
+  /* a mulligan must never cost you your commander */
+  seedOpeningFe();
   S.you.hand.forEach(c=>c._faceDown=true);
   S.phase='reveal'; S._mullPop=false;
   S.mullCount=(S.mullCount||0)+1;
@@ -9826,6 +9857,7 @@ try{ edBackfillArchetypes(); }catch(e){}
 window.ABC_DEBUG = {
   defaultDeck:(k)=>defaultDeck(k), compFor:(k)=>compFor(k), poolAb:(k)=>poolAb(k),
   makeBuilderState, builderFocus, handleBuilder, edModCount, clone,
+  seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,
   pmEncodeDeck, pmDecodeDeck, encodeDeck, decodeDeck, fillGaps,
