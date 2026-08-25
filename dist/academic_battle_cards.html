@@ -2020,6 +2020,51 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
   font-family:var(--cond);font-size:14px;letter-spacing:1px}
 .bdk-confirm[disabled]{opacity:.4;cursor:not-allowed}
 .bdx .ebx-sm{padding:4px 10px;min-width:0}
+
+/* ===== builder redesign, step 4 layout repair (fix_builder_ui_layout.py) =====
+   The 860px cap belonged to the single-column builder. Two columns need room:
+   below it the tab strip overflowed onto the deck rail and every grid collapsed
+   to one or two columns. */
+.builder.bdk{max-width:min(1560px,97vw)}
+/* a tab strip must never be able to overflow onto its neighbour again */
+.bdk-tabs{flex-wrap:wrap;row-gap:3px}
+.bdk-tab{font-size:13px;padding:6px 12px;letter-spacing:.9px}
+/* the rail: 235px a column, so entries stop truncating mid-word */
+.bdk-cols{flex:0 0 470px}
+
+/* ---- density: more per screen, same type size ---- */
+.bdk .bd-grid.ch{grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:6px}
+.bdk .bd-grid.ab{grid-template-columns:repeat(auto-fill,minmax(226px,1fr));gap:6px}
+.bdk .bd-bmgrid{grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:6px}
+.bdk .bd-chip{padding:5px 7px}
+.bdk .bd-chip.ab{min-height:0}
+.bdk .bd-bm{padding:6px 8px}
+.bdk .bd-sec{margin-bottom:10px}
+.bdk .bd-sec h3{margin:0 0 6px}
+/* the pool scrolls inside itself rather than driving the whole page */
+.bdk .bd-sec .bd-grid,.bdk .bd-sec .bd-bmgrid{max-height:62vh;overflow-y:auto;padding-right:4px}
+
+/* ---- narrower desktops: shed the rail width before shedding columns ---- */
+@media (max-width:1400px){
+  .bdk-cols{flex:0 0 420px}
+  .bdk .bd-grid.ch{grid-template-columns:repeat(auto-fill,minmax(164px,1fr))}
+  .bdk .bd-grid.ab{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+  .bdk .bd-bmgrid{grid-template-columns:repeat(auto-fill,minmax(222px,1fr))}
+}
+/* ---- tablet and below: the rail drops under the pool (already in step 4),
+        so the grids get the full width back ---- */
+@media (max-width:1100px){
+  .bdk-cols{flex:none;width:100%}
+  .bdk .bd-sec .bd-grid,.bdk .bd-sec .bd-bmgrid{max-height:none;overflow:visible}
+  .bdk-items{max-height:38vh}
+}
+@media (max-width:760px){
+  .bdk-tab{font-size:12px;padding:5px 9px;letter-spacing:.6px}
+  .bdk-cols{flex-direction:column}
+  .bdk .bd-grid.ch{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .bdk .bd-grid.ab{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+  .bdk .bd-bmgrid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
