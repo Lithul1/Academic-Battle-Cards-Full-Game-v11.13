@@ -3618,6 +3618,49 @@ function pmOn(){ try{ return APP.mode==='pagemaster'; }catch(e){ return false; }
    already existed and were already read by clampDeck and makeDeck; these
    accessors finish that migration so no site has to consult APP.mode. */
 function deckIsPm(def){ return !!(def && def.pm); }
+/* --- builder redesign, step 3 (fix_builder_columns_and_skins.py) -----------
+   Two decks live side by side. `def` and `code` are accessors onto the ACTIVE
+   column, so every existing call site that says APP.builder.def keeps working
+   and the split stays invisible to them. Neither column is ever nulled. */
+function makeBuilderState(pmDef, cuDef, active){
+  const st = {
+    active: (active==='pm') ? 'pm' : 'cu',
+    pm: { def: pmDef || null, code: '' },
+    cu: { def: cuDef || null, code: '' },
+    edFilter: 'all', fanOpen: true
+  };
+  Object.defineProperty(st, 'def', {
+    get(){ const c = st[st.active]; return c ? c.def : null; },
+    set(v){ const c = st[st.active]; if(c) c.def = v; },
+    enumerable: false, configurable: true
+  });
+  Object.defineProperty(st, 'code', {
+    get(){ const c = st[st.active]; return c ? c.code : ''; },
+    set(v){ const c = st[st.active]; if(c) c.code = v; },
+    enumerable: false, configurable: true
+  });
+  return st;
+}
+/* focus a column, seeding it if it has never been opened */
+function builderFocus(side){
+  const B = APP.builder; if(!B || (side!=='pm' && side!=='cu')) return;
+  if(!B[side].def){
+    if(side==='cu'){
+      const k=(APP.youDeck && APP.youDeck!=='surprise' && DATA.characters[APP.youDeck])
+        ? APP.youDeck : DECK_ORDER[0];
+      B.cu.def = APP.customDeck ? clone(APP.customDeck) : defaultDeck(k);
+    } else {
+      const a=(APP.pmCommanders||[]).slice(0,PM.fe);
+      if(a.length<PM.fe){ toast('Choose two commanders first.'); return; }
+      const bk=pmBooksOf(a[0],a[1]); if(!bk) return;
+      const s=(APP.pmDeck?clone(APP.pmDeck):pmSeedDeck(bk.books,a));
+      s.pm=true; s.books=bk.books.slice();
+      if(!s.fe || !s.fe.length) s.fe=a;
+      B.pm.def=s;
+    }
+  }
+  B.active = side;
+}
 /* Commanders live on the deck. Decks saved before this patch kept them in
    APP.pmCommanders -- read through for one release, then drop in step 5. */
 function feOf(def){
@@ -3715,15 +3758,24 @@ function bdDeckBox(k,sel){ var img=(window.DECKBOX&&window.DECKBOX[k])||'';
   return '<button class="bdx '+(sel?'sel':'')+(lk?' lk':'')+'" data-bld="set:'+k+'" title="'+setName(k)+(lk?' \u2014 locked (buy a Deck License in the Vault)':'')+'">'
     +'<span class="bdx-im"><img src="'+img+'" alt="'+setName(k)+'">'+(lk?'<span class="bdx-lock">\uD83D\uDD12</span>':'')+'</span>'
     +'<span class="bdx-bdg">'+(sel?'\u2713':'')+setName(k)+'</span>'+(lk?'':dot)+'</button>'; }
+/* how many characters in the working deck currently wear expansion art */
+function edModCount(){
+  try{
+    var d=APP.builder&&APP.builder.def; if(!d||!d.ed) return 0;
+    return Object.keys(d.ed).filter(function(id){ return d.ed[id]==='modern'; }).length;
+  }catch(e){ return 0; }
+}
 function bdExpansionShelf(k,open){ var eds=editionsForDeck(k); if(!eds.length) return '';
   var e=eds[0], flt=(APP.builder.edFilter||'all');
   var got=edAnyCollected(e), n=edCountFor(e), tot=(e.counts&&e.counts.total)||43;
   var lbl = flt==='modern' ? '\u2713 '+e.name : (flt==='base' ? 'Base only' : 'All (mixed)');
   var body = got
-    ? '<button class="ebx '+(flt!=='base'?'on':'')+' flt-'+flt+'" data-bld="edcycle:'+k+'" title="Click to cycle: Base only \u2192 '+e.name+' \u2192 All">'
+    ? '<button class="ebx on" data-bld="edall:mod" title="Set every eligible character to '+e.name+' art">'
       +'<span class="ebx-im"><img src="'+(e.box||'')+'" alt="'+e.name+'"></span>'
-      +'<span class="ebx-bdg">'+lbl+'</span></button>'
-      +'<span class="ebx-note"><b>'+e.name+'</b> \u00b7 '+n+'/'+tot+' collected<br><small>Click the box to cycle: <b>Base only</b> \u2192 <b>'+e.name+'</b> \u2192 <b>All</b> (mixed).</small></span>'
+      +'<span class="ebx-bdg">All '+e.name+'</span></button>'
+      +'<button class="ebx ebx-sm" data-bld="edall:base" title="Set every character back to base art">'
+      +'<span class="ebx-bdg">All Base</span></button>'
+      +'<span class="ebx-note"><b>'+e.name+'</b> \u00b7 '+n+'/'+tot+' collected \u00b7 '+edModCount()+' in this deck<br><small>These set every character at once. Use the <b>Base / Mod</b> switch on a character to mix them.</small></span>'
     : '<span class="ebx locked"><span class="ebx-lk">?</span><span class="ebx-bdg lk">Locked</span></span>'
       +'<span class="ebx-note"><b>'+e.name+'</b><br><small>Pull your first card from a '+e.name+' Portfolio and the box appears here.</small></span>';
   return '<div class="bd-fan'+(open?' open':'')+'"><div class="bd-fan-in"><span class="bd-fan-lb">\u25C6 Expansions</span>'+body+'</div></div>'; }
@@ -7246,8 +7298,11 @@ function handleBuilder(cmd){
   const [op,arg]=cmd.split(':');
   if(op==='set'){ if(!deckUnlocked(arg)){ toast(setName(arg)+' is locked \u2014 buy a Deck License in the Vault.'); return; }
     if(def.d===arg){ B.fanOpen=(B.fanOpen===false); } else { B.def=defaultDeck(arg); B.code=''; B.edFilter='all'; B.fanOpen=true; } }
-  else if(op==='edcycle'){ var order=['base','modern','all']; var cur=B.edFilter||'all';
-    var nx=order[(order.indexOf(cur)+1)%3]; handleBuilder('edfilter:'+nx); return; }
+  else if(op==='edcycle'){
+    /* retired: the old three-way cycle passed through a state that wiped
+       def.ed. Kept as an alias so any stale markup degrades to a safe no-op. */
+    var order=['base','modern','all'], cur=B.edFilter||'all';
+    handleBuilder('edfilter:'+order[(order.indexOf(cur)+1)%3]); return; }
   else if(op==='ch'){ const i=def.ch.indexOf(arg); if(i>=0) def.ch.splice(i,1); else if(def.ch.length<pmCaps().ch) def.ch.push(arg); B.code=''; }
   else if(op==='ab'){ const n=+arg, i=def.ab.indexOf(n); if(i>=0) def.ab.splice(i,1); else if(def.ab.length<pmCaps().ab) def.ab.push(n); B.code=''; }
   else if(op==='edbase'){ if(def.ed) delete def.ed[arg]; B.code=''; }
@@ -7255,10 +7310,23 @@ function handleBuilder(cmd){
   else if(op==='edab'){ const cid=arg.replace(/;/g,':'); def.edab=def.edab||[]; const i=def.edab.indexOf(cid); if(i>=0) def.edab.splice(i,1); else if(deckCounts(def).ab<LIMITS.ab) def.edab.push(cid); B.code=''; }
   else if(op==='edbm+'){ const cid=arg.replace(/;/g,':'); def.edbm=def.edbm||{}; if(deckCounts(def).bm<LIMITS.bm) def.edbm[cid]=(def.edbm[cid]||0)+1; B.code=''; }
   else if(op==='edbm-'){ const cid=arg.replace(/;/g,':'); def.edbm=def.edbm||{}; if(def.edbm[cid]){ def.edbm[cid]--; if(!def.edbm[cid]) delete def.edbm[cid]; } B.code=''; }
-  else if(op==='edfilter'){ APP.builder.edFilter=arg;
+  else if(op==='edfilter'){
+    /* Cosmetic only now. This used to double as a bulk skin setter, and
+       cycling through 'base' to reach 'all' wiped def.ed -- every per-card
+       Base/Mod choice, silently. Bulk changes are explicit actions below. */
+    APP.builder.edFilter=arg; }
+  else if(op==='edall'){
+    /* explicit, non-destructive bulk skin actions */
     def.ed=def.ed||{};
-    if(arg==='modern'){ (DATA.characters[def.d]||[]).forEach(function(ch){ if(edCharFor(def.d,ch.id)) def.ed[ch.id]='modern'; }); }
-    else if(arg==='base'){ def.ed={}; }
+    const _bks=booksOf(def)||[def.d];
+    if(arg==='mod'){
+      _bks.forEach(function(bk){ (DATA.characters[bk]||[]).forEach(function(ch){
+        if(edCharFor(bk,ch.id)) def.ed[ch.id]='modern'; }); });
+      toast('All eligible characters set to the expansion art.');
+    } else {
+      def.ed={};
+      toast('All characters set to base art.');
+    }
     B.code=''; }
   else if(op==='cr'){ const n=+arg, i=def.cr.indexOf(n); if(i>=0) def.cr.splice(i,1); else if(def.cr.length<pmCaps().cr && ownCrit(n)) def.cr.push(n); B.code=''; }
   else if(op==='fe'){ if(!def.fe)def.fe=[]; const i=def.fe.indexOf(arg);
@@ -7298,6 +7366,8 @@ function handleBuilder(cmd){
         const errs=pagemasterLegal(a[0],a[1],d2);
         if(errs.length){ toast('Not legal yet \u2014 '+errs[0]); return; }
         APP.pmDeck=clone(d2); APP.youDeck=d2.books[0];
+        /* saves this column only; the Custom column keeps whatever it holds */
+        if(APP.builder && APP.builder.pm) APP.builder.pm.def=clone(d2);
         APP.codeMsg={text:'Pagemaster deck ready.',ok:true};
         APP.screen='custom'; render(); return;
       }
@@ -7439,7 +7509,9 @@ document.addEventListener('click',e=>{
       /* the deck now OWNS its mode, its books and its commanders */
       _seed.pm=true; _seed.books=bk.books.slice();
       if(!_seed.fe || !_seed.fe.length) _seed.fe=a.slice(0,PM.fe);
-      APP.builder={ def:_seed, code:'' };
+      /* seed the Pagemaster column, keeping any Custom column already open */
+      if(APP.builder && APP.builder.cu){ APP.builder.pm.def=_seed; APP.builder.pm.code=''; APP.builder.active='pm'; }
+      else { APP.builder=makeBuilderState(_seed, null, 'pm'); }
       APP.codeMsg=null; APP.screen='builder'; render(); }
     else if(d==='go-drawn'){ APP.mode='custom'; APP.drawnMode=true; APP.screen='difficulty'; render(); }
     else if(d==='go-scrim'){ APP.drawnMode=false; scrimOpen(); }
@@ -7488,8 +7560,11 @@ document.addEventListener('click',e=>{
     else if(d==='benchclose'){ S._benchView=null; render(); }
     else if(d.startsWith('lens:')){ const P=d.slice(5)==='opp'?S.opp:S.you; P._lensOpen=!P._lensOpen; render(); }
     else if(d==='close-pile'){ S.viewPile=null; render(); }
-    else if(d==='builder'){ const _k=(APP.youDeck && APP.youDeck!=='surprise' && DATA.characters[APP.youDeck]) ? APP.youDeck : DECK_ORDER[0];  /* 'surprise' is a UI sentinel, not a deck key — defaultDeck() throws on it, which used to kill this handler and leave the button looking dead until a refresh */ APP.builder={ def:APP.customDeck?clone(APP.customDeck):defaultDeck(_k), code:'' }; APP.codeMsg=null; APP.screen='builder'; render(); }
-    else if(d==='bd-mark-custom'){ /* reserved: step 3 */ render(); }
+    else if(d==='builder'){ const _k=(APP.youDeck && APP.youDeck!=='surprise' && DATA.characters[APP.youDeck]) ? APP.youDeck : DECK_ORDER[0];  /* 'surprise' is a UI sentinel, not a deck key — defaultDeck() throws on it, which used to kill this handler and leave the button looking dead until a refresh */ const _cud=APP.customDeck?clone(APP.customDeck):defaultDeck(_k);
+      if(APP.builder && APP.builder.cu){ APP.builder.cu.def=_cud; APP.builder.cu.code=''; APP.builder.active='cu'; }
+      else { APP.builder=makeBuilderState(null, _cud, 'cu'); } APP.codeMsg=null; APP.screen='builder'; render(); }
+    else if(d==='bdcol:pm'){ builderFocus('pm'); render(); }
+    else if(d==='bdcol:cu'){ builderFocus('cu'); render(); }
     else if(d==='loadcode'){ const el=document.getElementById('codein'); const _raw=el?el.value:'';
       if(isPmCode(_raw) && !pmOn()){
         APP.codeMsg={text:'That is a Pagemaster code \u2014 open Pagemaster to use it.',ok:false}; render(); return; }
@@ -9349,6 +9424,7 @@ try{ edBackfillArchetypes(); }catch(e){}
 
 window.ABC_DEBUG = {
   defaultDeck:(k)=>defaultDeck(k), compFor:(k)=>compFor(k), poolAb:(k)=>poolAb(k),
+  makeBuilderState, builderFocus, handleBuilder, edModCount, clone,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,
   pmEncodeDeck, pmDecodeDeck, encodeDeck, decodeDeck, fillGaps,
   applySiphon, siphonOwner, statusKeys, STATUS_NAME, endTurn, performAttack, thesisMet, condMatch,
