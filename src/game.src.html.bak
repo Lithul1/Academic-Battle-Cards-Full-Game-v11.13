@@ -3856,7 +3856,16 @@ function clampDeck(def){
   }).slice(0,_CAP.ab);
   def.bm=(def.bm||[]).filter(i=>i>=0&&i<DATA.bookmarks.length).slice(0,_CAP.bm);
   def.cr=(def.cr||[]).filter(i=>i>=0&&i<DATA.crits.length).slice(0,_CAP.cr);
-  def.fe=(def.fe||[]).filter(id=>firstedById(id)).filter((id,i,a)=>a.indexOf(id)===i).slice(0,LIMITS.fe);
+  /* A commander must belong to a book this deck actually plays. ch and ab were
+     already filtered to _bks; fe was not, so a Custom Gatsby deck could anchor
+     on the Macbeth commander and none of its synergies could ever fire.
+     Pagemaster is unaffected -- its books are derived from its commanders, so
+     they are in-book by construction. */
+  const _feWas=(def.fe||[]).length;
+  def.fe=(def.fe||[]).filter(id=>firstedById(id))
+    .filter(function(id){ const f=firstedById(id); return !f.deck || _bks.indexOf(f.deck)>=0; })
+    .filter((id,i,a)=>a.indexOf(id)===i).slice(0,LIMITS.fe);
+  if(def.fe.length<_feWas) def._repaired=true;
   /* Ownership repair: strip what you don't own, then REPLACE it with cards you do own
      (never silently leave a deck short — that produced decks with 0 bookmarks). */
   const _was={ch:(def.ch||[]).length, ab:(def.ab||[]).length, cr:(def.cr||[]).length, bm:(def.bm||[]).length};
@@ -3866,7 +3875,7 @@ function clampDeck(def){
     return deckOwnAb(k,r); });
   def.cr=(def.cr||[]).filter(i=>ownCrit(i));
   (function(){ const cnt={}; def.bm=(def.bm||[]).filter(i=>{ cnt[i]=(cnt[i]||0)+1; return cnt[i]<=bmOwned(i); }); })();
-  def._repaired=(def.ch.length<_was.ch)||(def.ab.length<_was.ab)||(def.cr.length<_was.cr)||(def.bm.length<_was.bm);
+  def._repaired=!!def._repaired||(def.ch.length<_was.ch)||(def.ab.length<_was.ab)||(def.cr.length<_was.cr)||(def.bm.length<_was.bm);
   if(def._repaired){
     const capTo=(n,lim)=>Math.min(n,lim);
     // characters
@@ -3902,14 +3911,22 @@ function fillGaps(def, comp){
   const k=def.d;
   // comp is the deck's own composition; fall back to the builder ceiling
   const C = comp || { ch:LIMITS.ch, ab:LIMITS.ab, bm:LIMITS.bm, cr:LIMITS.cr };
+  /* The per-section ceilings do not sum to the deck total (14+36+20+4+2 = 76
+     against a total of 62), so filling every section to its own cap overfills
+     by fourteen. Nothing downstream catches it: clampDeck slices per section
+     and never checks the total. Bound every top-up by the remaining total.
+     This cannot affect defaultDeck -- every DECK_COMP sums to 60. */
+  const _totCap = (C.total || LIMITS.total || 62);
+  const _room = () => _totCap - ((def.ch||[]).length + (def.ab||[]).length
+                    + (def.bm||[]).length + (def.cr||[]).length + (def.fe||[]).length);
   const allCh=poolCh(k);
-  while(def.ch.length<C.ch){ const miss=allCh.filter(id=>!def.ch.includes(id)); if(!miss.length) break; def.ch.push(miss[rnd(miss.length)]); }
+  while(def.ch.length<C.ch && _room()>0){ const miss=allCh.filter(id=>!def.ch.includes(id)); if(!miss.length) break; def.ch.push(miss[rnd(miss.length)]); }
   const allAb=poolAb(k);
-  while(def.ab.length<C.ab){ const miss=allAb.filter(i=>!def.ab.includes(i)); if(!miss.length) break; def.ab.push(miss[rnd(miss.length)]); }
+  while(def.ab.length<C.ab && _room()>0){ const miss=allAb.filter(i=>!def.ab.includes(i)); if(!miss.length) break; def.ab.push(miss[rnd(miss.length)]); }
   const allCr=poolCr();
-  while(def.cr.length<C.cr){ const miss=allCr.filter(i=>!def.cr.includes(i)); if(!miss.length) break; def.cr.push(miss[rnd(miss.length)]); }
+  while(def.cr.length<C.cr && _room()>0){ const miss=allCr.filter(i=>!def.cr.includes(i)); if(!miss.length) break; def.cr.push(miss[rnd(miss.length)]); }
   const slots=poolBmSlots();
-  while(def.bm.length<C.bm){
+  while(def.bm.length<C.bm && _room()>0){
     const used={}; def.bm.forEach(i=>used[i]=(used[i]||0)+1);
     const avail=slots.filter(i=>(used[i]||0)<bmOwned(i));
     const fresh=avail.filter(i=>!(used[i]>0));
@@ -6097,7 +6114,7 @@ function builderScreen(){
     <div class="bd-sec"><h3>Attack / Block cards <small>${_books.map(b=>setName(b)).join(' + ')} trivia · max ${CAP.ab}</small></h3><div class="bd-grid ab">${abRow}</div></div>
     <div class="bd-sec"><h3>Bookmarks <small>${pmOn()?'one copy each':'add copies'} · max ${CAP.bm} total</small></h3><div class="bd-bmgrid">${bmRow}</div></div>
     <div class="bd-sec"><h3>Crit-Cards (Critical Lenses) <small>pick up to ${CAP.cr}</small></h3><div class="bd-grid ch">${crRow}</div></div>
-    <div class="bd-sec"><h3>1st Editions <small>Commander-style deck anchors · pick up to ${LIMITS.fe} · not locked to their decks in Custom Play</small></h3><div class="bd-grid ch">${feRow}</div></div>
+    <div class="bd-sec"><h3>1st Editions <small>Commander-style deck anchors · pick up to ${LIMITS.fe} · from ${(pmOn()&&pmBuildBooks()||[k]).map(setName).join(' or ')}</small></h3><div class="bd-grid ch">${feRow}</div></div>
   </div>`;
 }
 
@@ -7207,13 +7224,30 @@ function handleBuilder(cmd){
     else if(arg==='base'){ def.ed={}; }
     B.code=''; }
   else if(op==='cr'){ const n=+arg, i=def.cr.indexOf(n); if(i>=0) def.cr.splice(i,1); else if(def.cr.length<pmCaps().cr && ownCrit(n)) def.cr.push(n); B.code=''; }
-  else if(op==='fe'){ if(!def.fe)def.fe=[]; const i=def.fe.indexOf(arg); if(i>=0) def.fe.splice(i,1); else if(def.fe.length<LIMITS.fe) def.fe.push(arg); B.code=''; }
+  else if(op==='fe'){ if(!def.fe)def.fe=[]; const i=def.fe.indexOf(arg);
+      if(i>=0){ def.fe.splice(i,1); }
+      else if(def.fe.length<LIMITS.fe){
+        /* refuse a commander from a book this deck does not play */
+        const _f=firstedById(arg);
+        const _bk=(pmOn()&&pmBuildBooks())||[def.d];
+        if(_f && _f.deck && _bk.indexOf(_f.deck)<0){
+          toast(_f.name+' belongs to '+setName(_f.deck)+' \u2014 this deck plays '+_bk.map(setName).join(' + ')+'.');
+        } else { def.fe.push(arg); }
+      }
+      B.code=''; }
   else if(op==='bm+'){ const n=+arg; const have=def.bm.filter(x=>x===n).length;
       const _cap=pmCaps(), _copies=pmOn()?PM.bmCopies:bmOwned(n);
       if(def.bm.length<_cap.bm && have<_copies) def.bm.push(n); B.code=''; }
   else if(op==='bm-'){ const i=def.bm.indexOf(+arg); if(i>=0) def.bm.splice(i,1); B.code=''; }
   else if(op==='reset'){ B.def=defaultDeck(def.d); B.code=''; }
-  else if(op==='fill'){ fillGaps(def); clampDeck(def); B.code=''; toast('Filled gaps with random cards.'); }
+  else if(op==='fill'){
+      /* Pass the deck's OWN composition. Called bare, fillGaps fell back to the
+         per-section LIMITS, which sum to 76 against a 62-card deck. Pagemaster
+         caps already sum to 62 exactly; compFor() sums to 60 plus commanders. */
+      const _comp = pmOn()
+        ? { ch:PM.ch, ab:PM.ab, bm:PM.bm, cr:PM.cr, total:PM.total }
+        : Object.assign({}, compFor(def.d), { total:LIMITS.total });
+      fillGaps(def, _comp); clampDeck(def); B.code=''; toast('Filled gaps with random cards.'); }
   else if(op==='gencode'){ clampDeck(def);
       B.code = pmOn() ? pmEncodeDeck(Object.assign({}, def, {books:pmBuildBooks()||[def.d], fe:(APP.pmCommanders||[]).slice(0,PM.fe)}))
                       : encodeDeck(def); }
