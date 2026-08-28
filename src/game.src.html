@@ -2134,6 +2134,35 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 @media (prefers-reduced-motion: reduce){
   .char.chg-pulse,.pc-move.chg-lit,.pc-move.chg-lit::after{animation:none}
 }
+
+/* ===== floating opponent log (fix_floating_log.py) ===== */
+.feed{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--handh,150px) + 26px);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  width:min(430px,86vw);pointer-events:none;z-index:36}
+.fl{width:100%;box-sizing:border-box;padding:8px 12px;border-radius:9px;
+  border:2px solid var(--ink,#241F1B);border-left-width:7px;
+  background:#EFE2E0;color:var(--ink,#241F1B);
+  font-family:var(--body,Georgia),serif;font-size:14px;line-height:1.35;
+  box-shadow:0 3px 0 rgba(0,0,0,.32);
+  animation:flIn .22s ease-out both, flOut .55s ease-in forwards}
+.fl b{font-family:var(--cond),sans-serif;font-size:10px;letter-spacing:1.1px;
+  text-transform:uppercase;display:block;margin-bottom:2px;opacity:.72}
+.fl.k-atk{border-left-color:#C8443C} .fl.k-atk b{color:#C8443C}
+.fl.k-blk{border-left-color:#4A90C2} .fl.k-blk b{color:#4A90C2}
+.fl.k-pos{border-left-color:#3f7a55} .fl.k-pos b{color:#3f7a55}
+.fl.k-neg{border-left-color:#8E4B8B} .fl.k-neg b{color:#8E4B8B}
+.fl.k-ko{border-left-color:var(--gold,#E6B85C);background:var(--ink,#241F1B);color:var(--cream,#F2E6C6)}
+.fl.k-ko b{color:var(--gold,#E6B85C)}
+.fl.k-sys{border-left-color:#6b5b45;font-size:13px}
+@keyframes flIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes flOut{to{opacity:0;transform:translateY(-6px)}}
+@media (max-width:760px){
+  .feed{width:92vw;bottom:calc(var(--handh,86px) + 16px)}
+  .fl{font-size:12.5px;padding:6px 9px}
+}
+@media (prefers-reduced-motion: reduce){
+  .fl{animation:flIn .01s both, flOut .01s forwards}
+}
 </style>
 </head>
 <body>
@@ -4467,6 +4496,48 @@ const foeOf = side => side==='you'?S.opp:S.you;
 const active = p => p.team[p.activeIdx];
 const who = p => p===S.you?'You':'Opponent';
 function pushLog(t){ if(!S) return; S.log.unshift(t); if(S.log.length>70) S.log.pop(); }
+/* ---- floating opponent log (fix_floating_log.py) ----
+   A second channel beside the drawer. pushLog keeps recording everything; this
+   surfaces only the opponent's board-changing moves, so you can watch the board
+   instead of the log. */
+const FLASH_MAX = 4;
+function flashLog(side, kind, text, hold){
+  if(!S) return;
+  /* opponent-only. Widening this to both sides means deleting this line. */
+  if(side !== 'opp') return;
+  if(!S._flash) S._flash = [];
+  S._flash.push({ id:(S._flashId=(S._flashId||0)+1), kind:kind||'sys',
+                  text:String(text||''), at:Date.now(), hold:(hold||4)*1000 });
+  /* a burst must never bury the board: push the oldest out early */
+  while(S._flash.length > FLASH_MAX) S._flash.shift();
+  flashTick();
+}
+let _flashTimer = null;
+function flashTick(){
+  if(_flashTimer) return;
+  _flashTimer = setInterval(function(){
+    if(!S || !S._flash || !S._flash.length){
+      clearInterval(_flashTimer); _flashTimer=null; return;
+    }
+    const now = Date.now();
+    const before = S._flash.length;
+    S._flash = S._flash.filter(function(f){ return now - f.at < f.hold + 600; });
+    if(S._flash.length !== before){ try{ render(); }catch(e){} }
+    if(!S._flash.length){ clearInterval(_flashTimer); _flashTimer=null; }
+  }, 250);
+}
+function flashFeed(){
+  if(!S || !S._flash || !S._flash.length) return '';
+  const now = Date.now();
+  return '<div class="feed">' + S._flash.map(function(f){
+    /* Negative delay resumes the animation mid-flight, so a re-render does not
+       restart the fade and strand the line on screen. */
+    const el = (now - f.at) / 1000;
+    return '<div class="fl k-'+f.kind+'" style="--hold:'+(f.hold/1000)+'s;'
+         + 'animation-delay:'+(-el)+'s,'+((f.hold/1000)-el)+'s">'
+         + '<b>Opponent</b>'+f.text+'</div>';
+  }).join('') + '</div>';
+}
 
 /* ---------------- crit-card (Critical Lens) engine ---------------- */
 function critFx(side){ const c=S[side]&&S[side].crit; return c?c.fx:null; }
@@ -4694,6 +4765,7 @@ function startTurn(){
   S._turnNo=(S._turnNo||0)+1;
   S.phase='draw';
   pushLog(`— ${p===S.you?'Your':"Opponent's"} turn —`);
+  flashLog(p===S.you?'you':'opp','sys','Their turn begins.',2.2);
   // poison ticks at the start of each turn
   if(S.poison>0){
     ['you','opp'].forEach(k=>{ const a=active(S[k]); if(a&&a.hp>0){ const _pz=applyDmg(a,20); if(_pz>0) pushLog(`Poison: ${a.name} loses ${_pz} HP.`);} });
@@ -4702,7 +4774,8 @@ function startTurn(){
   // Burn / Spill tick (lose 10 HP, once per round); expire this player's timed statuses (Hardcover, Laminate, Glue, Tear cost-up)
   // ticks once per round: only the player whose turn is starting
   { const _tk=S.turn; S[_tk].team.forEach(c=>{
-    if(c.hp>0 && (c.status.burn||c.status.spill)){ let loss=0; if(c.status.burn)loss=10; if(c.status.spill)loss=Math.max(loss,c.status.spillAmt||10); const _bs=applyDmg(c,loss); if(_bs>0) pushLog(`${c.status.burn?'Burn':'Spill'}: ${c.name} loses ${_bs} HP.`); }
+    if(c.hp>0 && (c.status.burn||c.status.spill)){ let loss=0; if(c.status.burn)loss=10; if(c.status.spill)loss=Math.max(loss,c.status.spillAmt||10); const _bs=applyDmg(c,loss); if(_bs>0){ pushLog(`${c.status.burn?'Burn':'Spill'}: ${c.name} loses ${_bs} HP.`);
+      flashLog(_tk,'neg',`${c.status.burn?'Burn':'Spill'} \u2014 ${c.name} loses ${_bs} HP.`,3); } }
   }); checkKO(S[_tk],_tk); }
   // ---- Siphon: drains the victim at the start of its own turn, feeds the owner ----
   { const _sk=S.turn, _P=S[_sk]; _P._leechTurn=0;
@@ -5604,6 +5677,9 @@ function doBlock(){
   if(neg || amt>=dmg) atkCtx._fullBlock=true;
   if(b.forceSwitchSelf==='bench'){ const alt=D.team.map((c,i)=>({c,i})).filter(o=>o.i!==D.activeIdx&&o.c.hp>0); if(alt.length){ doSwitch(D, alt[0].i); pushLog(`${def.name} slips to Backstage.`); } }
   pushLog(`${def.name} blocks with ${b.n} (${neg?'all damage negated':'-'+amt}).`);
+  /* the defender is the side NOT attacking, so this floats when the opponent
+     is the one holding the guard */
+  flashLog(side==='you'?'opp':'you','blk',`${def.name} blocks with ${b.n} \u2014 ${neg?'all damage negated':'-'+amt}.`);
   finishAttack(neg?dmg:amt,neg);
 }
 function resolveDefense(useBlock){
@@ -5622,6 +5698,7 @@ function finishAttack(blocked,negated,forceNet){
   S.lastAtk={ side:side, name:ab.n, dmg:dmg, inflict:[].concat(ab.inflict||[]).filter(Boolean) };   /* Plagiarism source */
   net=applyDmg(def,net);
   pushLog(`${att.name} uses ${ab.n}: ${net} damage to ${def.name}. (${def.hp}/${def.maxHp} HP)`);
+  flashLog(side,'atk',`${att.name} uses ${ab.n} \u2014 ${net} damage to ${def.name}.`);
   if(pierce) pushLog(`${ab.n} pierced the defense!`);
   if(ab.sacrifice && !symbolsOff()){ const _sac=applyDmg(att,ab.sacrifice); if(_sac>0) pushLog(`${att.name} sacrifices ${_sac} HP.`); }
   if(ab.stripBlocks && def.blkCharge.length){ const n=def.blkCharge.length; D.discard.push(...def.blkCharge.splice(0)); pushLog(`Quick-Sand Crash buries ${def.name}'s defense — ${n} Block ABC lost.`); }
@@ -5698,6 +5775,9 @@ function checkKO(p,side){
     const attacker=foeOf(side); attacker.kos++;
     if(attacker.flags && attacker.flags.extracredit){ attacker.flags.extracredit=false; drawN((side==='you')?'opp':'you',2); pushLog(`${who(attacker)} cashes in Extra Credit \u2014 draw 2.`); }
     pushLog(`${a.name} is knocked out!`);
+  /* `side` here is the side LOSING the character; float it when the opponent
+     lands the knockout, i.e. when the fallen character is yours */
+  flashLog(side==='you'?'opp':'you','ko',`${a.name} is knocked out.`);
     if(attacker.kos>=S.settings.koTarget){ S.over=true; S.winner=(attacker===S.you)?'you':'opp'; pushLog(`${who(attacker)} reached ${S.settings.koTarget} knockouts — match over!`); }
     const next=p.team.findIndex(c=>c.hp>0);
     if(next>=0){ const _fallen=a; doSwitch(p,next); const _succ=p.team[next]; pushLog(`${_succ.name} steps up.`);
@@ -7341,7 +7421,8 @@ function renderGame(root){
    </div></div>
    <div class="hand-wrap ${S._handOpen?'open':''}"><button class="hand-toggle" data-do="hand">&#127136; Your hand (${you.hand.length}) ${S._handOpen?'&#9662;':'&#9652;'}</button><div class="hand-label">Your hand <span class="hand-hint">— tap to charge your active, or drag ⚔/⛊ onto any of your characters (even backstage)</span></div>
      <div class="hand" style="--n:${you.hand.length}">${you.hand.map((c,i)=>handCard(c,i)).join('')||'<span class="empty">No cards</span>'}</div></div>
-   <button class="logtoggle" data-do="log">☰ Log</button>
+   ${flashFeed()}
+  <button class="logtoggle" data-do="log">☰ Log</button>
    <div class="log ${S._logopen?'open':''}">${S.log.map(l=>`<div>${l}</div>`).join('')}</div>
    ${S.pending?triviaModal():''}${S._ip?ipModal():''}
    ${S.defend?defendModal():''}
@@ -9997,6 +10078,7 @@ window.ABC_DEBUG = {
   defaultDeck:(k)=>defaultDeck(k), compFor:(k)=>compFor(k), poolAb:(k)=>poolAb(k),
   makeBuilderState, builderFocus, handleBuilder, edModCount, clone,
   fxChargeGlow, moveFull, chargeSnap, chargeReport, SFX,
+  flashLog, flashFeed,
   seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,
