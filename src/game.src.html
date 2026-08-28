@@ -7219,21 +7219,61 @@ function chargeReport(side, ch, before){
    pure CSS animations added to the live node, so a re-render simply clears
    them -- nothing to unwind. */
 function fxChargeGlow(side, ch, which){
+  /* The board is `.side.you-side` / `.side.opp-side`, and the active character
+     is the only `.char` on a side, tagged `.char.you` / `.char.opp`. There is
+     no data-uid and no .active class -- an earlier version guessed at all
+     three and silently lit nothing. */
+  const sel = side==='you' ? '.char.you' : '.char.opp';
+  const cls = which==='blk' ? 'chg-blk' : 'chg-atk';
+  const rowSel = which==='blk' ? '.pc-move.blk' : '.pc-move.atk';
+  const DUR = 900;
   try{
-    setTimeout(function(){
-      const root=document.querySelector('.side.'+(side==='you'?'you':'opp'))||document;
-      const card=root.querySelector('.char[data-uid="'+ch.uid+'"]')
-              || root.querySelector('.char.active') || root.querySelector('.char');
-      if(!card) return;
-      card.classList.remove('chg-pulse'); void card.offsetWidth;
-      card.classList.add('chg-pulse', which==='blk'?'chg-blk':'chg-atk');
-      const row=card.querySelector('.pc-move.'+(which==='blk'?'blk':'atk'));
-      if(row){ row.classList.remove('chg-lit'); void row.offsetWidth; row.classList.add('chg-lit'); }
-      setTimeout(function(){
+    /* One glow at a time. Two moves can come online on the same attach, and a
+       previous glow's cleanup tick would otherwise strip the new one's classes
+       partway through -- the old glow tidying up after the new one. */
+    if(window._chgFxStop){ try{ window._chgFxStop(); }catch(e){} }
+    /* wipe any leftover glow from either card, so a new colour never stacks on
+       an old one */
+    ['.char.you','.char.opp'].forEach(function(q){
+      const n=document.querySelector(q); if(!n) return;
+      n.classList.remove('chg-pulse','chg-atk','chg-blk');
+      n.querySelectorAll('.pc-move.chg-lit').forEach(function(r){ r.classList.remove('chg-lit'); });
+    });
+    const paint = function(){
+      const card=document.querySelector(sel);
+      if(!card) return false;
+      if(!card.classList.contains('chg-pulse')){
+        card.classList.add('chg-pulse', cls);
+      }
+      const row=card.querySelector(rowSel);
+      if(row && !row.classList.contains('chg-lit')) row.classList.add('chg-lit');
+      return true;
+    };
+    /* render() replaces the board wholesale and runs more than once around an
+       attach, so a class set on a live node is wiped mid animation. Re-apply
+       for the animation's own length, then stop. */
+    const t0=Date.now();
+    let tick=null;
+    const stop=function(){
+      if(tick){ clearInterval(tick); tick=null; }
+      /* If a newer glow has taken over, this one stops its timer and touches
+         nothing: a superseded glow tidying up would strip the new one's
+         classes mid-animation. */
+      if(window._chgFxStop!==stop) return;
+      window._chgFxStop=null;
+      const card=document.querySelector(sel);
+      if(card){
         card.classList.remove('chg-pulse','chg-atk','chg-blk');
+        const row=card.querySelector(rowSel);
         if(row) row.classList.remove('chg-lit');
-      }, 900);
-    }, 30);
+      }
+    };
+    window._chgFxStop=stop;
+    tick=setInterval(function(){
+      if(Date.now()-t0>DUR){ stop(); return; }
+      paint();
+    }, 90);
+    setTimeout(paint, 20);
   }catch(e){}
 }
 function fxAttack(side,dmg){ try{SFX.attack();}catch(e){} cfxHurt(side,dmg); const big=dmg>=40;                 // keeps the crit styling on the damage number
@@ -9956,6 +9996,7 @@ try{ edBackfillArchetypes(); }catch(e){}
 window.ABC_DEBUG = {
   defaultDeck:(k)=>defaultDeck(k), compFor:(k)=>compFor(k), poolAb:(k)=>poolAb(k),
   makeBuilderState, builderFocus, handleBuilder, edModCount, clone,
+  fxChargeGlow, moveFull, chargeSnap, chargeReport, SFX,
   seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,
