@@ -2111,6 +2111,29 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
   .bdk .bd-bmgrid{grid-template-columns:1fr}
   .bdk-colrow{flex-direction:column}
 }
+
+/* ===== attach + charge-complete feedback (fix_attach_charge_cues.py) ===== */
+@keyframes chgPulse{
+  0%{box-shadow:0 0 0 0 var(--chg,rgba(230,184,92,.85)),0 0 0 0 rgba(0,0,0,0)}
+  35%{box-shadow:0 0 0 4px var(--chg,rgba(230,184,92,.85)),0 0 18px 6px var(--chg,rgba(230,184,92,.5))}
+  100%{box-shadow:0 0 0 0 rgba(0,0,0,0),0 0 0 0 rgba(0,0,0,0)}
+}
+.char.chg-pulse{animation:chgPulse .85s ease-out 1}
+.char.chg-atk{--chg:rgba(200,68,60,.9)}
+.char.chg-blk{--chg:rgba(74,144,194,.9)}
+@keyframes chgLit{
+  0%{filter:brightness(1)}
+  30%{filter:brightness(1.55) saturate(1.3)}
+  100%{filter:brightness(1)}
+}
+.pc-move.chg-lit{animation:chgLit .85s ease-out 1;position:relative}
+.pc-move.chg-lit::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  animation:chgLit .85s ease-out 1;
+  box-shadow:inset 0 0 0 2px currentColor}
+@media (prefers-reduced-motion: reduce){
+  .char.chg-pulse,.pc-move.chg-lit,.pc-move.chg-lit::after{animation:none}
+}
 </style>
 </head>
 <body>
@@ -4878,7 +4901,10 @@ function attach(side,handIdx,correct,targetUid){
       if(card.type==='ATTACK' && aFull && !bFull){ pile=act.blkCharge; pushLog(`Dark Magic — ${act.name} bends the charge to her guard.`); }
       else if(card.type==='BLOCK' && bFull && !aFull){ pile=act.atkCharge; pushLog(`Dark Magic — ${act.name} bends the charge to her attack.`); }
     }
+    const _snap=chargeSnap(act);
     pile.push(card);
+    if(side==='you'){ try{ SFX.attach(card.type==='ATTACK'?'atk':'blk'); }catch(e){} }
+    chargeReport(side, act, _snap);
     if(hasCrit(side,'reader') && p.crit && p.crit.declared===card.type){
       pile.push({type:card.type,power:0,_wild:true});
       pushLog('Reader-Response: that answer counts as two charges.');
@@ -6901,6 +6927,29 @@ const SFX = (function(){
   function heal(){ if(!sfxOn||!ctx) return; const t=now(); [523.25,659.25,783.99].forEach((f,i)=>beep(f,t+i*0.06,0.26,'sine',0.2)); }
   function status(kind){ if(!sfxOn||!ctx) return; const t=now(); const up=kind==='pos'; beep(up?520:360,t,0.12,'triangle',0.18,up?740:250); }
   function ko(){ if(!sfxOn||!ctx) return; const t=now(); beep(220,t,0.5,'sawtooth',0.3,60); noise(t,0.3,0.18,600); beep(110,t+0.05,0.6,'sine',0.25,45); }
+  /* ---- attach + charge feedback ----
+     A recorded sample wins automatically if one is ever added: SFX.card()
+     checks window.ABC_SND first, and these names match the sfx_ convention. */
+  function attach(kind){
+    if(!sfxOn||!ctx) return;
+    if(FILEAUD['sfx_attach_'+kind]){ playSfxFile('attach_'+kind,0.6); return; }
+    const t=now();
+    if(kind==='blk'){                   /* lower, rounder -- the blue language */
+      beep(300,t,0.09,'triangle',0.20,380); noise(t,0.035,0.07,900);
+    } else if(kind==='bm'){             /* bookmarks get their own voice */
+      beep(660,t,0.07,'sine',0.16,880); beep(990,t+0.05,0.10,'sine',0.13,1180);
+    } else {                            /* attack -- brighter, rising */
+      beep(520,t,0.08,'square',0.18,700); noise(t,0.03,0.08,2200);
+    }
+  }
+  /* One chime for attack and block alike. The foe's is quieter and a fifth
+     lower, so you can tell whose move came online without looking. */
+  function chargeFull(foe){
+    if(!sfxOn||!ctx) return;
+    if(FILEAUD['sfx_charge_full']&&!foe){ playSfxFile('charge_full',0.7); return; }
+    const t=now(), k=foe?0.66:1, v=foe?0.13:0.22;
+    [784,1047,1319].forEach((f,i)=>beep(f*k,t+i*0.055,0.30,'sine',v));
+  }
   // ---- vinyl crackle & tape hiss (the lofi imperfection) ----
   function makeVinyl(){
     const dur=4.0, n=Math.floor(ctx.sampleRate*dur), buf=ctx.createBuffer(1,n,ctx.sampleRate), ch=buf.getChannelData(0);
@@ -7113,7 +7162,7 @@ const SFX = (function(){
   function setSfxVol(v){ sfxVol=Math.max(0,Math.min(1,v)); if(sfxGain) sfxGain.gain.value=0.75*sfxVol; }
   function toggleMusic(){ musicOn=!musicOn; if(musicOn){ unlock(); startMusic(); } else stopMusic(); return musicOn; }
   function toggleSfx(){ sfxOn=!sfxOn; return sfxOn; }
-  return { unlock, attack, block, heal, status, ko, toggleMusic, toggleSfx, isMusicOn:()=>musicOn, isSfxOn:()=>sfxOn,
+  return { unlock, attack, block, heal, status, ko, attach, chargeFull, toggleMusic, toggleSfx, isMusicOn:()=>musicOn, isSfxOn:()=>sfxOn,
     setTrack, getTrack:()=>musicTrack, setMusicVol, setSfxVol, getMusicVol:()=>musicVol, getSfxVol:()=>sfxVol, card:playSfxFile, contextTrack };
 })();
 function spawnKO(side,name){
@@ -7140,6 +7189,53 @@ function fxAt(side, html, dur){
 }
 function cfxHurt(side,dmg){ if(typeof document==='undefined'||!side) return; const big=dmg>=40, bigShake=dmg>=55; requestAnimationFrame(function(){ const el=document.querySelector('.char.'+side); if(el&&el.classList){ el.classList.remove('cfx-hurt','cfx-crit'); void el.offsetWidth; el.classList.add(big?'cfx-crit':'cfx-hurt'); setTimeout(function(){ try{el.classList.remove('cfx-hurt','cfx-crit');}catch(e){} },420); } const board=document.querySelector('.board'); if(board&&board.classList){ board.classList.remove('cfx-shake','cfx-shake-big'); void board.offsetWidth; board.classList.add(bigShake?'cfx-shake-big':'cfx-shake'); setTimeout(function(){ try{board.classList.remove('cfx-shake','cfx-shake-big');}catch(e){} },470); } }); }
 function fxHpTrails(){ if(typeof document==='undefined') return; document.querySelectorAll('.pc-hp').forEach(bar=>{ const u=bar.querySelector('u'), i=bar.querySelector('i'); if(u&&i&&u.style.width!==i.style.width){ requestAnimationFrame(()=>{ try{u.style.width=i.style.width;}catch(e){} }); } }); }
+/* ---- attach + charge-complete feedback (fix_attach_charge_cues.py) ----
+   "Full" here is deliberately the RAW ab.cost, matching the move button, the
+   readiness gate and the n/cost counter on the card. attackCostFor() computes a
+   different number in some situations; until those are reconciled the cue
+   follows what the player can actually see and click. */
+function moveFull(ch, which){
+  if(!ch) return false;
+  const ab = which==='blk' ? ch.blk : ch.atk;
+  if(!ab || ab.cost==null) return false;
+  const n = (which==='blk' ? ch.blkCharge : ch.atkCharge) || [];
+  return n.length >= ab.cost;
+}
+/* Snapshot before an attach so we can tell a move that JUST came online from
+   one that was already there -- otherwise the chime repeats on every attach. */
+function chargeSnap(ch){
+  return ch ? { atk:moveFull(ch,'atk'), blk:moveFull(ch,'blk') } : null;
+}
+function chargeReport(side, ch, before){
+  if(!ch||!before) return;
+  ['atk','blk'].forEach(function(w){
+    if(!before[w] && moveFull(ch,w)){
+      try{ SFX.chargeFull(side!=='you'); }catch(e){}
+      fxChargeGlow(side, ch, w);
+    }
+  });
+}
+/* The move row lights in its own colour and the card edge pulses once. Both are
+   pure CSS animations added to the live node, so a re-render simply clears
+   them -- nothing to unwind. */
+function fxChargeGlow(side, ch, which){
+  try{
+    setTimeout(function(){
+      const root=document.querySelector('.side.'+(side==='you'?'you':'opp'))||document;
+      const card=root.querySelector('.char[data-uid="'+ch.uid+'"]')
+              || root.querySelector('.char.active') || root.querySelector('.char');
+      if(!card) return;
+      card.classList.remove('chg-pulse'); void card.offsetWidth;
+      card.classList.add('chg-pulse', which==='blk'?'chg-blk':'chg-atk');
+      const row=card.querySelector('.pc-move.'+(which==='blk'?'blk':'atk'));
+      if(row){ row.classList.remove('chg-lit'); void row.offsetWidth; row.classList.add('chg-lit'); }
+      setTimeout(function(){
+        card.classList.remove('chg-pulse','chg-atk','chg-blk');
+        if(row) row.classList.remove('chg-lit');
+      }, 900);
+    }, 30);
+  }catch(e){}
+}
 function fxAttack(side,dmg){ try{SFX.attack();}catch(e){} cfxHurt(side,dmg); const big=dmg>=40;                 // keeps the crit styling on the damage number
   const huge=dmg>=60;                // the cleaver is reserved for a genuinely big hit
   fxAt(side, `<div class="cfx-ring atk"></div><div class="cfx-img ${huge?'crit':'strike'}"></div><div class="cfx-float atk${big?' crit':''}">${big?('\u2212'+dmg+'!'):('\u2694 \u2212'+dmg)}</div>`, huge?1100:1000); }
@@ -7449,7 +7545,10 @@ function mgAnswer(choice){
   const i=S.you.discard.indexOf(st.card);
   if(i>=0) S.you.discard.splice(i,1);
   const act=active(S.you);
+  const _snap2=chargeSnap(act);
   (String(st.card.type).toUpperCase()==='ATTACK'?act.atkCharge:act.blkCharge).push(st.card);
+  try{ SFX.attach(String(st.card.type).toUpperCase()==='ATTACK'?'atk':'blk'); }catch(e){}
+  chargeReport('you', act, _snap2);
   S.you.attachesLeft=Math.max(0,(S.you.attachesLeft||0)-1);
   S._mg=null; busy=false;
   toast('Reclaimed — the card is charged.','good');
