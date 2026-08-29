@@ -989,7 +989,11 @@ body.dragging-abc{cursor:grabbing}
 /* iPad LANDSCAPE hand size. Must sit after the coarse-pointer block above, which
    matches every tablet and would otherwise win the cascade on equal specificity.
    Drawn Mode character cards carry a portrait, a name and two buttons. */
-@media (pointer:coarse) and (orientation:landscape) and (min-width:1000px){
+/* A landscape PHONE is coarse, landscape and >1000px wide, exactly like an
+   iPad -- but it has roughly 390px of height instead of 800. Gating this on
+   width alone sent iPad-sized cards to phones, where the hand ate the screen
+   and the board was scaled down to strips. Height is the real constraint. */
+@media (pointer:coarse) and (orientation:landscape) and (min-width:1000px) and (min-height:700px){
   body[data-screen="play"] .hand{
     --card-h:150px;--fan-step:4.5deg;--fan-arc:1.7px;
     --fan-lift:26px;--fan-scale:1.16;--tuck-frac:0.09;
@@ -2162,6 +2166,32 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 }
 @media (prefers-reduced-motion: reduce){
   .fl{animation:flIn .01s both, flOut .01s forwards}
+}
+
+/* ===== landscape phone + move names (fix_landscape_and_movename.py) ===== */
+/* Short landscape: phones held sideways. Declared rather than inherited --
+   inheriting is how the iPad rule reached a phone to begin with. */
+@media (pointer:coarse) and (orientation:landscape) and (max-height:699px){
+  body[data-screen="play"] .hand{
+    --card-h:84px;--fan-step:5deg;--fan-arc:1.6px;
+    --fan-lift:16px;--fan-scale:1.5;--tuck-frac:0.14;
+    padding:6px 4px 2px;
+  }
+  /* give the board back the height the hand was taking */
+  body[data-screen="play"] .hand-wrap{padding:2px 8px 3px}
+  body[data-screen="play"] .bench-mini{width:44px;height:32px}
+  body[data-screen="play"] .pc-art{max-height:26vh}
+}
+/* The move name was flex:1 + min-width:0 + nowrap + ellipsis, so it surrendered
+   all its width to the counter and the cost chip and then clipped to nothing:
+   "The T...", "Norw...", "Shield...". Let it wrap; stop the chips shrinking. */
+.pc-move .pc-mn{white-space:normal;overflow:visible;text-overflow:clip;
+  line-height:1.08;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow-wrap:anywhere}
+.pc-move .pc-mc,.pc-move .pc-chip{flex:0 0 auto}
+.pc-move{align-items:center;min-height:0}
+@media (pointer:coarse) and (orientation:landscape) and (max-height:699px){
+  .pc-move .pc-mn{-webkit-line-clamp:1;font-size:10.5px}
 }
 </style>
 </head>
