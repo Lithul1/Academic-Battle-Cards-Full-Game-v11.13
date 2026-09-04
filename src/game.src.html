@@ -2193,6 +2193,35 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 @media (pointer:coarse) and (orientation:landscape) and (max-height:699px){
   .pc-move .pc-mn{-webkit-line-clamp:1;font-size:10.5px}
 }
+
+/* ===== play-to-centre zoom (fix_opponent_zoom.py) ===== */
+.zoomwrap{position:fixed;inset:0;display:grid;place-items:center;z-index:38;
+  pointer-events:none}
+.zoomcard{
+  animation:zmIn .28s cubic-bezier(.2,.9,.3,1.3) both, zmOut .45s ease-in forwards;
+  filter:drop-shadow(0 14px 26px rgba(0,0,0,.55));position:relative;
+  transform-origin:center}
+.zoomtag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  background:var(--ink,#241F1B);color:var(--gold,#E6B85C);
+  font-family:var(--cond),sans-serif;font-size:10px;letter-spacing:1.3px;
+  text-transform:uppercase;padding:3px 11px;border-radius:20px;
+  border:2px solid var(--gold,#E6B85C);white-space:nowrap;z-index:2}
+/* the shared preview card is sized for a modal; hold it at a readable size
+   without letting it exceed the board */
+.zoomcard .pv-card{max-width:min(330px,80vw);max-height:74vh;overflow:hidden}
+@keyframes zmIn{from{opacity:0;transform:scale(.62) translateY(26px)}
+                to{opacity:1;transform:none}}
+@keyframes zmOut{to{opacity:0;transform:scale(.94) translateY(-14px)}}
+@media (max-width:760px){
+  .zoomcard .pv-card{max-width:min(280px,86vw);max-height:62vh}
+}
+@media (pointer:coarse) and (orientation:landscape) and (max-height:699px){
+  .zoomcard .pv-card{max-width:min(230px,44vw);max-height:80vh}
+  .zoomtag{font-size:9px;padding:2px 8px}
+}
+@media (prefers-reduced-motion: reduce){
+  .zoomcard{animation:zmIn .01s both, zmOut .01s forwards}
+}
 </style>
 </head>
 <body>
@@ -4556,6 +4585,49 @@ function flashTick(){
     if(!S._flash.length){ clearInterval(_flashTimer); _flashTimer=null; }
   }, 250);
 }
+/* ---- play-to-centre zoom (fix_opponent_zoom.py) ----
+   The opponent's unreadable plays, shown big enough to actually read. */
+function zoomCard(side, html, hold){
+  if(!S || side !== 'opp') return;      /* your own plays are already in hand */
+  if(!html) return;
+  S._zoom = { html:html, at:Date.now(), hold:(hold||2600) };
+  zoomTick();
+}
+let _zoomTimer = null;
+function zoomTick(){
+  if(_zoomTimer) return;
+  _zoomTimer = setInterval(function(){
+    if(!S || !S._zoom){ clearInterval(_zoomTimer); _zoomTimer=null; return; }
+    if(Date.now() - S._zoom.at > S._zoom.hold + 500){
+      S._zoom = null; clearInterval(_zoomTimer); _zoomTimer=null;
+      try{ render(); }catch(e){}
+    }
+  }, 200);
+}
+/* Build the same card face the player would see on inspect, so the zoom can
+   never drift from the real card. */
+function zoomHtmlFor(card){
+  try{
+    if(!card) return '';
+    if(card.cat==='bookmark' || card.bm || card.rarity){
+      const b = (typeof card.i==='number' && DATA.bookmarks[card.i]) ? DATA.bookmarks[card.i] : card;
+      return buildBmPreview(b);
+    }
+    if(card.fe) return buildFePreview(card);
+    if(card.cat==='char' || card.atk) return buildCharPreview(card, card.deck||card.d||'');
+    if(card.cat==='abc') return buildAbcPreview(card);
+  }catch(e){}
+  return '';
+}
+function zoomLayer(){
+  if(!S || !S._zoom) return '';
+  const el = (Date.now() - S._zoom.at) / 1000;
+  const h  = S._zoom.hold / 1000;
+  return '<div class="zoomwrap"><div class="zoomcard" style="'
+       + 'animation-delay:'+(-el)+'s,'+(h-el)+'s">'
+       + '<div class="zoomtag">Opponent plays</div>'
+       + S._zoom.html + '</div></div>';
+}
 function flashFeed(){
   if(!S || !S._flash || !S._flash.length) return '';
   const now = Date.now();
@@ -5113,6 +5185,8 @@ function playBookmark(side,idx){
   if(_bmCap<=0){ if((P.flags.bmCount||0)>=0 && side==='you') toast('No Bookmarks while she holds the circle.'); return; }
   if((P.flags.bmCount||0)>=_bmCap){ if(side==='you') toast('Up to '+_bmCap+' bookmark'+(_bmCap>1?'s':'')+' per turn.'); return; }
   const card=P.hand[idx], isYou=side==='you', act=active(P);
+  /* the opponent's bookmark resolves at once and is invisible otherwise */
+  if(!isYou) zoomCard(side, zoomHtmlFor(card), 2600);
   const lbl=(c)=>c?(c.name||(c.word?('\u201c'+c.word+'\u201d '+(c.type||'')):(c.type||'Card'))):'Card';
   const remove=()=>{ const i=P.hand.indexOf(card); if(i>=0) P.hand.splice(i,1);
     /* Mise En Sc\u00e8ne \u2014 the first instant-effect Bookmark each turn returns to hand instead of discarding. */
@@ -5127,7 +5201,7 @@ function playBookmark(side,idx){
   switch(card.effect){
     case 'heal':{
       const living=P.team.filter(c=>c.hp>0);
-      const go=t=>{ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ toast&&toast(`${t.name} cannot be healed.`); pushLog(`${t.name} refuses aid — Total Isolation.`); remove(); commit(); render(); return; } const before=t.hp; t.hp=t.maxHp; pushLog(`${who(P)} used First Aid Kit — ${t.name} restored to full.`); fxHeal(sideOfChar(t),t.hp-before); remove(); commit(); render(); };
+      const go=t=>{ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ sideToast(side,`${t.name} cannot be healed.`); pushLog(`${t.name} refuses aid — Total Isolation.`); remove(); commit(); render(); return; } const before=t.hp; t.hp=t.maxHp; pushLog(`${who(P)} used First Aid Kit — ${t.name} restored to full.`); fxHeal(sideOfChar(t),t.hp-before); remove(); commit(); render(); };
       if(isYou && living.length>1) askPick('Heal which character?', living.map(c=>({label:`${c.name}  ${c.hp}/${c.maxHp}`,val:c.uid})), uid=>go(living.find(c=>c.uid===uid)));
       else { const t=living.sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]; t?go(t):remove(); }
       return;
@@ -5399,7 +5473,10 @@ function playBookmark(side,idx){
     }
     case 'defib':{
       const others=P.hand.filter(c=>c!==card);
-      if(P.grave.length===0 || others.length<3){ toast("Defibrillator needs a KO'd ally and 3 cards."); return; }
+      if(P.grave.length===0 || others.length<3){
+        sideToast(side,"Defibrillator needs a KO'd ally and 3 cards.");
+        if(side!=='you') pushLog('Opponent\u2019s Defibrillator fizzles \u2014 no KO\u2019d ally to revive.');
+        return; }
       const go=g=>{ remove();
         P.hand.filter(c=>c!==card).slice(0,3).forEach(c=>{ const i=P.hand.indexOf(c); if(i>=0){P.hand.splice(i,1);P.discard.push(c);} });
         const gi=P.grave.indexOf(g); if(gi>=0) P.grave.splice(gi,1);
@@ -5412,7 +5489,7 @@ function playBookmark(side,idx){
     }
     case 'trading':{
       const bench=P.team.map((c,i)=>({c,i})).filter(o=>o.i!==P.activeIdx && o.c.hp>0);
-      if(!bench.length){ toast('No benched character to swap in.'); return; }
+      if(!bench.length){ sideToast(side,'No benched character to swap in.'); return; }
       const go=i=>{ doSwitch(P,i); pushLog(`${who(P)} used Trading Places — ${P.team[i].name} steps up.`); remove(); commit(); render(); };
       if(isYou && bench.length>1) askPick('Swap to which character?', bench.map(o=>({label:`${o.c.name}  ${o.c.hp}/${o.c.maxHp}`,val:o.i})), i=>go(i));
       else go(bench[0].i);
@@ -5472,7 +5549,7 @@ function playBookmark(side,idx){
       pushLog(`Trial Verdict: ${oa.name} is stripped of ${n} positive effect${n!==1?'s':''} and Smudged.`);
       remove(); break;
     }
-    default: toast('No effect'); return;
+    default: sideToast(side,'No effect'); return;
   }
   commit();
   render();
@@ -5550,7 +5627,7 @@ function doSwitch(p, newIdx, opts){
   }
 }
 function performAttack(side,abilKey){           // == beginAttack
-  if(S&&S.drawn){ const _ap=S[arguments[0]]||S.you; if(!_ap||!_ap.team[_ap.activeIdx]||_ap.team[_ap.activeIdx].hp<=0){ toast&&toast('No Active character on the field.'); return false; } }
+  if(S&&S.drawn){ const _ap=S[arguments[0]]||S.you; if(!_ap||!_ap.team[_ap.activeIdx]||_ap.team[_ap.activeIdx].hp<=0){ sideToast(side,'No Active character on the field.'); return false; } }
   const A=S[side], att=active(A), ab=att[abilKey];
   if(!A.critTurn) A.critTurn={};
   if((abilKey==='atk'||abilKey==='atk2') && A.flags.skipAttack){ A.flags.skipAttack=false; var _fl=A.flags.skipAttackFlavor||"Hamlet's hesitation", _nm=A.flags.skipAttackName||"Anticipatory Madness"; if(side==='you') toast(_fl+" — attack skipped."); pushLog(`${who(A)} must skip the attack declaration (${_nm}).`); A.flags.skipAttackFlavor=null; A.flags.skipAttackName=null; return false; }
@@ -5559,9 +5636,13 @@ function performAttack(side,abilKey){           // == beginAttack
   let cost=attackCostFor(side,ab);
   if(att.status.costUp) cost+=1;
   const pool=()=> hasCrit(side,'queer') ? (att.atkCharge.length+att.blkCharge.length) : att.atkCharge.length;
-  if(cost!=null && pool()<cost){ toast(`Need ${cost} ATTACK ABCs (have ${pool()}).`); return false; }
+  if(cost!=null && pool()<cost){
+    sideToast(side, `Need ${cost} ATTACK ABCs (have ${pool()}).`);
+    /* keep the information, lose the misdirected message */
+    if(side!=='you') pushLog(`Opponent cannot pay for ${ab.n||'that attack'} \u2014 needs ${cost}, has ${pool()}.`);
+    return false; }
   const D=foeOf(side), dKey=(D===S.you?'you':'opp'), def=active(D);
-  if(!def||def.hp<=0){ toast('No target.'); return false; }
+  if(!def||def.hp<=0){ sideToast(side,'No target.'); return false; }
   if(ab.cleanseAlly){ const ally=A.team.find(c=>c.hp>0 && c.status[ab.cleanseAlly]); if(ally){ delete ally.status[ab.cleanseAlly]; pushLog(`${att.name} clears ${statusName(ab.cleanseAlly)} from ${ally.name}.`); } }
   let dmg=calcDamage(att,ab);
   { const _neg=['rip','smudge','burn','spill','glue','tear','weaken']; const _hasNeg=(c)=>c&&c.status&&_neg.some(k=>c.status[k]); const _dbl=_hasNeg(att)||_hasNeg(def);
@@ -5946,7 +6027,9 @@ function aiTurn(){
       const crippled = a0.status.rip || (a0.hp<a0.maxHp*0.25 && p.team.filter((c,i)=>i!==p.activeIdx && c.hp>0).length);
       if(crippled){
         const alt=p.team.findIndex((c,i)=>i!==p.activeIdx && c.hp>0 && !c.status.rip);
-        if(alt>=0){ try{ doSwitch(p,alt); p.flags.swapped=true; pushLog('Opponent pulls back a crippled character.'); }catch(e){} }
+        if(alt>=0){ try{ doSwitch(p,alt); p.flags.swapped=true; pushLog('Opponent pulls back a crippled character.');
+          const _in=active(p); if(_in) zoomCard('opp', zoomHtmlFor(_in), 2200);
+          flashLog('opp','sys',`${_in?_in.name:'A character'} steps up.`,2.4); }catch(e){} }
       }
     }
     const step=()=>{
@@ -7451,7 +7534,8 @@ function renderGame(root){
    </div></div>
    <div class="hand-wrap ${S._handOpen?'open':''}"><button class="hand-toggle" data-do="hand">&#127136; Your hand (${you.hand.length}) ${S._handOpen?'&#9662;':'&#9652;'}</button><div class="hand-label">Your hand <span class="hand-hint">— tap to charge your active, or drag ⚔/⛊ onto any of your characters (even backstage)</span></div>
      <div class="hand" style="--n:${you.hand.length}">${you.hand.map((c,i)=>handCard(c,i)).join('')||'<span class="empty">No cards</span>'}</div></div>
-   ${flashFeed()}
+   ${zoomLayer()}
+  ${flashFeed()}
   <button class="logtoggle" data-do="log">☰ Log</button>
    <div class="log ${S._logopen?'open':''}">${S.log.map(l=>`<div>${l}</div>`).join('')}</div>
    ${S.pending?triviaModal():''}${S._ip?ipModal():''}
@@ -7876,6 +7960,15 @@ function tuneScreen(){
 /* ---------------- toasts / fx ---------------- */
 let toastT=null;
 function toast(msg,kind=''){ let el=$('#toast'); if(!el){el=document.createElement('div');el.id='toast';document.body.appendChild(el);} el.textContent=msg; el.className='show '+kind; clearTimeout(toastT); toastT=setTimeout(()=>{el.className='';},1500); }
+/* A toast is addressed to the PLAYER. Engine functions run for both sides, so
+   any toast raised from one needs to know whose failure it describes -- an
+   unguarded one shows the opponent's problem as though it were yours. Putting
+   the check here means it is made once instead of re-remembered at every new
+   failure branch. (fix_side_toast.py) */
+function sideToast(side, msg, kind){
+  if(side !== 'you') return;
+  toast(msg, kind||'');
+}
 function flash(side){ const el=$(`.char.${side}`); if(el){ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); } }
 
 /* ---------------- events ---------------- */
@@ -10109,6 +10202,8 @@ window.ABC_DEBUG = {
   makeBuilderState, builderFocus, handleBuilder, edModCount, clone,
   fxChargeGlow, moveFull, chargeSnap, chargeReport, SFX,
   flashLog, flashFeed,
+  zoomCard, zoomLayer, zoomHtmlFor,
+  sideToast, playBookmark, performAttack,
   seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,
