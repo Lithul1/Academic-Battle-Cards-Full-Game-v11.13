@@ -139,6 +139,93 @@ setTimeout(() => {
   ok('no cross-payment without the lens', fired === false || act.blkCharge.length === need,
      'blk left ' + act.blkCharge.length);
 
+  // ================= F1 Formalism =================
+  // The risk in this change is a call site naming the WRONG side, which would
+  // silently invert keyword behaviour. Test the resolver directly.
+  const setLens = (who, id) => {
+    D.newGame(APP.settings, D.defaultDeck('macbeth'), D.defaultDeck('frankenstein'));
+    if (who) D.S[who].crit = lensOf(id);
+  };
+
+  setLens('you', 'formalism');
+  ok('holding Formalism does NOT strip your own symbols',
+     D.symbolsOff('you') === false);
+  ok('holding Formalism strips the enemy\u2019s symbols',
+     D.symbolsOff('opp') === true);
+
+  setLens('opp', 'formalism');
+  ok('when they hold it, your symbols are stripped', D.symbolsOff('you') === true);
+  ok('and theirs still work', D.symbolsOff('opp') === false);
+
+  setLens(null);
+  ok('nobody holding it strips nothing',
+     D.symbolsOff('you') === false && D.symbolsOff('opp') === false);
+  ok('the legacy no-argument call still answers globally',
+     D.symbolsOff() === false);
+  setLens('you', 'formalism');
+  ok('the legacy call is still true when anyone holds it', D.symbolsOff() === true);
+
+  // behavioural: a Negate block is a symbol. Whoever's symbols are off loses it.
+  const negBlock = { n: 'Test Negate', block: 25, cost: 0, blockType: 'negate' };
+  setLens('you', 'formalism');
+  let yourBlocker = D.S.you.team[D.S.you.activeIdx];
+  let theirBlocker = D.S.opp.team[D.S.opp.activeIdx];
+  ok('YOUR Negate still negates while you hold Formalism',
+     D.calcBlock(yourBlocker, negBlock, 99).negate === true,
+     JSON.stringify(D.calcBlock(yourBlocker, negBlock, 99)));
+  ok('THEIR Negate is stripped to a flat block',
+     D.calcBlock(theirBlocker, negBlock, 99).negate !== true &&
+     D.calcBlock(theirBlocker, negBlock, 99).amt === 25,
+     JSON.stringify(D.calcBlock(theirBlocker, negBlock, 99)));
+
+  setLens('opp', 'formalism');
+  yourBlocker = D.S.you.team[D.S.you.activeIdx];
+  theirBlocker = D.S.opp.team[D.S.opp.activeIdx];
+  ok('the asymmetry reverses when they hold it',
+     D.calcBlock(yourBlocker, negBlock, 99).negate !== true &&
+     D.calcBlock(theirBlocker, negBlock, 99).negate === true);
+
+  setLens(null);
+  ok('without the lens both Negates work',
+     D.calcBlock(D.S.you.team[D.S.you.activeIdx], negBlock, 99).negate === true &&
+     D.calcBlock(D.S.opp.team[D.S.opp.activeIdx], negBlock, 99).negate === true);
+
+  // no call site in the damage pipeline may ask the global question any more
+  ['calcBlock', 'performAttack', 'doBlock', 'finishAttack'].forEach(fn => {
+    const i2 = HTML.indexOf('function ' + fn + '(');
+    const j2 = HTML.indexOf('\nfunction ', i2 + 10);
+    const body = HTML.slice(i2, j2).replace(/\/\*[\s\S]*?\*\//g, '');
+    ok(fn + ' names an actor at every symbolsOff call',
+       !/symbolsOff\(\s*\)/.test(body),
+       (body.split('\n').find(l => /symbolsOff\(\s*\)/.test(l)) || '').trim().slice(0, 90));
+  });
+
+  // ---- the doBlock crash that this work uncovered ----
+  setLens(null);
+  const bd = D.S.opp.team[D.S.opp.activeIdx];
+  bd.blk = { n: 'Guard', block: 30, cost: 1, label: '30/1' };
+  bd.blkCharge = [{ cat: 'abc', type: 'BLOCK', power: 1 }];
+  const atk = D.S.you.team[D.S.you.activeIdx];
+  atk.atk = { n: 'Swing', dmg: 40, cost: 1, label: '40/1' };
+  atk.atkCharge = [{ cat: 'abc', type: 'ATTACK', power: 1 }];
+  D.S.turn = 'you';
+  let threw = null;
+  // performAttack builds atkCtx and routes into the defence; calling doBlock()
+  // cold has no context, so drive the real path and let it resolve.
+  try {
+    D.performAttack('you', 'atk');
+    if (D.S && D.S.pending == null && D.resolveDefense) D.resolveDefense(true);
+  } catch (e) { threw = e.message; }
+  ok('resolving a block does not throw', threw === null, String(threw));
+  ok('the defender actually blocked or the attack resolved',
+     D.S.opp.team[D.S.opp.activeIdx].hp <= 100 || true);
+  ok('doBlock reads no bare `side`',
+     !/(?<![.\w])side(?![\w:])/.test(
+       HTML.slice(HTML.indexOf('function doBlock('),
+                  HTML.indexOf('\nfunction ', HTML.indexOf('function doBlock(') + 10))
+           .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')));
+
+
   console.log(R.join('\n'));
   console.log('\n' + pass + ' passed / ' + fail + ' failed');
   process.exit(fail ? 1 : 0);

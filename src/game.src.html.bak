@@ -5201,7 +5201,7 @@ function playBookmark(side,idx){
   switch(card.effect){
     case 'heal':{
       const living=P.team.filter(c=>c.hp>0);
-      const go=t=>{ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ toast&&toast(`${t.name} cannot be healed.`); pushLog(`${t.name} refuses aid — Total Isolation.`); remove(); commit(); render(); return; } const before=t.hp; t.hp=t.maxHp; pushLog(`${who(P)} used First Aid Kit — ${t.name} restored to full.`); fxHeal(sideOfChar(t),t.hp-before); remove(); commit(); render(); };
+      const go=t=>{ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ sideToast(side,`${t.name} cannot be healed.`); pushLog(`${t.name} refuses aid — Total Isolation.`); remove(); commit(); render(); return; } const before=t.hp; t.hp=t.maxHp; pushLog(`${who(P)} used First Aid Kit — ${t.name} restored to full.`); fxHeal(sideOfChar(t),t.hp-before); remove(); commit(); render(); };
       if(isYou && living.length>1) askPick('Heal which character?', living.map(c=>({label:`${c.name}  ${c.hp}/${c.maxHp}`,val:c.uid})), uid=>go(living.find(c=>c.uid===uid)));
       else { const t=living.sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0]; t?go(t):remove(); }
       return;
@@ -5473,7 +5473,10 @@ function playBookmark(side,idx){
     }
     case 'defib':{
       const others=P.hand.filter(c=>c!==card);
-      if(P.grave.length===0 || others.length<3){ toast("Defibrillator needs a KO'd ally and 3 cards."); return; }
+      if(P.grave.length===0 || others.length<3){
+        sideToast(side,"Defibrillator needs a KO'd ally and 3 cards.");
+        if(side!=='you') pushLog('Opponent\u2019s Defibrillator fizzles \u2014 no KO\u2019d ally to revive.');
+        return; }
       const go=g=>{ remove();
         P.hand.filter(c=>c!==card).slice(0,3).forEach(c=>{ const i=P.hand.indexOf(c); if(i>=0){P.hand.splice(i,1);P.discard.push(c);} });
         const gi=P.grave.indexOf(g); if(gi>=0) P.grave.splice(gi,1);
@@ -5486,7 +5489,7 @@ function playBookmark(side,idx){
     }
     case 'trading':{
       const bench=P.team.map((c,i)=>({c,i})).filter(o=>o.i!==P.activeIdx && o.c.hp>0);
-      if(!bench.length){ toast('No benched character to swap in.'); return; }
+      if(!bench.length){ sideToast(side,'No benched character to swap in.'); return; }
       const go=i=>{ doSwitch(P,i); pushLog(`${who(P)} used Trading Places — ${P.team[i].name} steps up.`); remove(); commit(); render(); };
       if(isYou && bench.length>1) askPick('Swap to which character?', bench.map(o=>({label:`${o.c.name}  ${o.c.hp}/${o.c.maxHp}`,val:o.i})), i=>go(i));
       else go(bench[0].i);
@@ -5546,7 +5549,7 @@ function playBookmark(side,idx){
       pushLog(`Trial Verdict: ${oa.name} is stripped of ${n} positive effect${n!==1?'s':''} and Smudged.`);
       remove(); break;
     }
-    default: toast('No effect'); return;
+    default: sideToast(side,'No effect'); return;
   }
   commit();
   render();
@@ -5624,7 +5627,7 @@ function doSwitch(p, newIdx, opts){
   }
 }
 function performAttack(side,abilKey){           // == beginAttack
-  if(S&&S.drawn){ const _ap=S[arguments[0]]||S.you; if(!_ap||!_ap.team[_ap.activeIdx]||_ap.team[_ap.activeIdx].hp<=0){ toast&&toast('No Active character on the field.'); return false; } }
+  if(S&&S.drawn){ const _ap=S[arguments[0]]||S.you; if(!_ap||!_ap.team[_ap.activeIdx]||_ap.team[_ap.activeIdx].hp<=0){ sideToast(side,'No Active character on the field.'); return false; } }
   const A=S[side], att=active(A), ab=att[abilKey];
   if(!A.critTurn) A.critTurn={};
   if((abilKey==='atk'||abilKey==='atk2') && A.flags.skipAttack){ A.flags.skipAttack=false; var _fl=A.flags.skipAttackFlavor||"Hamlet's hesitation", _nm=A.flags.skipAttackName||"Anticipatory Madness"; if(side==='you') toast(_fl+" — attack skipped."); pushLog(`${who(A)} must skip the attack declaration (${_nm}).`); A.flags.skipAttackFlavor=null; A.flags.skipAttackName=null; return false; }
@@ -5633,9 +5636,13 @@ function performAttack(side,abilKey){           // == beginAttack
   let cost=attackCostFor(side,ab);
   if(att.status.costUp) cost+=1;
   const pool=()=> hasCrit(side,'queer') ? (att.atkCharge.length+att.blkCharge.length) : att.atkCharge.length;
-  if(cost!=null && pool()<cost){ toast(`Need ${cost} ATTACK ABCs (have ${pool()}).`); return false; }
+  if(cost!=null && pool()<cost){
+    sideToast(side, `Need ${cost} ATTACK ABCs (have ${pool()}).`);
+    /* keep the information, lose the misdirected message */
+    if(side!=='you') pushLog(`Opponent cannot pay for ${ab.n||'that attack'} \u2014 needs ${cost}, has ${pool()}.`);
+    return false; }
   const D=foeOf(side), dKey=(D===S.you?'you':'opp'), def=active(D);
-  if(!def||def.hp<=0){ toast('No target.'); return false; }
+  if(!def||def.hp<=0){ sideToast(side,'No target.'); return false; }
   if(ab.cleanseAlly){ const ally=A.team.find(c=>c.hp>0 && c.status[ab.cleanseAlly]); if(ally){ delete ally.status[ab.cleanseAlly]; pushLog(`${att.name} clears ${statusName(ab.cleanseAlly)} from ${ally.name}.`); } }
   let dmg=calcDamage(att,ab);
   { const _neg=['rip','smudge','burn','spill','glue','tear','weaken']; const _hasNeg=(c)=>c&&c.status&&_neg.some(k=>c.status[k]); const _dbl=_hasNeg(att)||_hasNeg(def);
@@ -5783,7 +5790,9 @@ function doBlock(){
   pushLog(`${def.name} blocks with ${b.n} (${neg?'all damage negated':'-'+amt}).`);
   /* the defender is the side NOT attacking, so this floats when the opponent
      is the one holding the guard */
-  flashLog(side==='you'?'opp':'you','blk',`${def.name} blocks with ${b.n} \u2014 ${neg?'all damage negated':'-'+amt}.`);
+  /* dKey IS the blocking side -- doBlock has no `side` in scope, and reading one
+     threw on every successful block. flashLog already filters to the opponent. */
+  flashLog(dKey,'blk',`${def.name} blocks with ${b.n} \u2014 ${neg?'all damage negated':'-'+amt}.`);
   finishAttack(neg?dmg:amt,neg);
 }
 function resolveDefense(useBlock){
@@ -7953,6 +7962,15 @@ function tuneScreen(){
 /* ---------------- toasts / fx ---------------- */
 let toastT=null;
 function toast(msg,kind=''){ let el=$('#toast'); if(!el){el=document.createElement('div');el.id='toast';document.body.appendChild(el);} el.textContent=msg; el.className='show '+kind; clearTimeout(toastT); toastT=setTimeout(()=>{el.className='';},1500); }
+/* A toast is addressed to the PLAYER. Engine functions run for both sides, so
+   any toast raised from one needs to know whose failure it describes -- an
+   unguarded one shows the opponent's problem as though it were yours. Putting
+   the check here means it is made once instead of re-remembered at every new
+   failure branch. (fix_side_toast.py) */
+function sideToast(side, msg, kind){
+  if(side !== 'you') return;
+  toast(msg, kind||'');
+}
 function flash(side){ const el=$(`.char.${side}`); if(el){ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); } }
 
 /* ---------------- events ---------------- */
@@ -10187,6 +10205,7 @@ window.ABC_DEBUG = {
   fxChargeGlow, moveFull, chargeSnap, chargeReport, SFX,
   flashLog, flashFeed,
   zoomCard, zoomLayer, zoomHtmlFor,
+  sideToast, playBookmark, performAttack,
   seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,
