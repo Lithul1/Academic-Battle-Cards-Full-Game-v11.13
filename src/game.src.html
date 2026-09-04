@@ -2222,6 +2222,11 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 @media (prefers-reduced-motion: reduce){
   .zoomcard{animation:zmIn .01s both, zmOut .01s forwards}
 }
+
+/* ===== Affective Fallacy, second reading (fix_lens_affective_a2.py) ===== */
+.trivia.af-offer .tri-head,.trivia.af-ask .tri-head{background:#8E4B8B}
+.trivia.af-offer .tri-q,.trivia.af-ask .tri-q{line-height:1.45}
+.trivia.af-offer .tri-opt b,.trivia.af-ask .tri-opt b{color:#8E4B8B}
 </style>
 </head>
 <body>
@@ -5116,7 +5121,9 @@ function attach(side,handIdx,correct,targetUid){
     else { p.hand.splice(handIdx,1); p.discard.push(card); p.attachesLeft--; pushLog(`${who(p)} missed the question — ${card.type} card discarded.`); }
     if(pHasPassive(p,'failDiscardRandom') && p.hand.length){ const d=p.hand.splice(rnd(p.hand.length),1)[0]; p.discard.push(d); pushLog('Cold Logic: the slip costs a random card from hand.'); }
     if(pHasPassive(p,'failSkipAttack')){ p.flags.skipAttack=true; var _sc=pPassiveChar(p,'failSkipAttack'), _pn=(_sc&&_sc.passive&&_sc.passive.name)||'Anticipatory Madness'; p.flags.skipAttackName=_pn; p.flags.skipAttackFlavor=(_sc&&_sc.passive&&_sc.passive.skipFlavor)||_pn; pushLog(_pn+': your next attack declaration will be skipped.'); }
-    if(affectiveOn() && act && act.hp>0){ const _af=applyDmg(act,10); if(_af>0) pushLog(`Critical anxiety: ${act.name} takes ${_af} damage.`); checkKO(p,side); }
+    /* A2 replaced the automatic wrong-answer damage. It was symmetrical, and the
+     player answers far more trivia than the AI, so the lens punished its own
+     holder. The risk now lives in the optional second question instead. */
   }
   render();
 }
@@ -6194,7 +6201,11 @@ function answerTrivia(choice,skipRetry){
     if(rs==='e_politics'){ const boss=active(S.opp); if(boss&&boss.hp>0){ boss.hp=Math.min(boss.maxHp,boss.hp+8); pushLog('Office Politics \u2014 the examiner heals 8 HP.'); } }
   }
   if(!correct){ const me=S.you.team[S.you.activeIdx]; if(me&&me.fe&&me.passive&&me.passive.failDiscardRandom&&S.you.hand.length){ const ri=Math.floor(Math.random()*S.you.hand.length); const lost=S.you.hand.splice(ri,1)[0]; if(lost){ S.you.discard.push(lost); pushLog(`${me.name}'s composure shatters — a card slips from your hand.`); } } }
+  /* Affective Fallacy (A2): the offer comes after a CORRECT answer, once the
+     attach has resolved, so the second question never competes with the first. */
+  const _afWant = correct && typeof hasCrit==='function' && hasCrit('you','affective');
   attach('you',pend.handIdx,correct,pend.target);
+  if(_afWant){ try{ afOffer('you'); }catch(e){} }
 }
 
 /* ================= RENDERING ================= */
@@ -7549,7 +7560,7 @@ function renderGame(root){
   ${flashFeed()}
   <button class="logtoggle" data-do="log">☰ Log</button>
    <div class="log ${S._logopen?'open':''}">${S.log.map(l=>`<div>${l}</div>`).join('')}</div>
-   ${S.pending?triviaModal():''}${S._ip?ipModal():''}
+   ${S.pending?triviaModal():''}${S._af?afModal():''}${S._ip?ipModal():''}
    ${S.defend?defendModal():''}
    ${S.picker?pickerModal():''}
    ${S.viewPile?pileModal():''}
@@ -7704,6 +7715,82 @@ function ipModal(){
     </div></div></div>`;
 }
 function pend0(st){ const c=st.pend&&st.pend.card; return c? (String(c.type).toUpperCase()==='ATTACK'?'Attack card':'Block card') : 'card'; }
+/* ---- Affective Fallacy (A2): read further, at a risk ----
+   Offered after a correct answer. The question is drawn at random from the
+   player's own book pool, so it cannot be the card just answered and cannot be
+   chosen -- the digital equivalent of the opponent picking from the tome. */
+function afOffer(side){
+  if(side!=='you') return false;               /* the AI does not gamble */
+  if(!hasCrit('you','affective')) return false;
+  if(S._af || S.pending) return false;         /* never stack on another prompt */
+  const act=active(S.you);
+  if(!act || act.hp<=0) return false;
+  const k=S.you.setKey || (S.you.def&&S.you.def.d);
+  const pool=(DATA.abcs[k]||[]).filter(a=>a && a.q && a.opts && a.opts.length);
+  if(!pool.length) return false;
+  const q=pool[rnd(pool.length)];
+  S._af={ q:q.q, opts:q.opts.slice(), ans:q.ans, stage:'offer' };
+  return true;
+}
+function afDecline(){
+  if(!S||!S._af) return;
+  S._af=null;
+  pushLog('You set the book down \u2014 no further reading.');
+  try{ render(); }catch(e){}
+}
+function afAccept(){
+  if(!S||!S._af) return;
+  S._af.stage='ask';
+  try{ render(); }catch(e){}
+}
+function afAnswer(choice){
+  if(!S||!S._af||S._af.stage!=='ask') return;
+  const correct = choice===S._af.ans;
+  const act=active(S.you);
+  S._af=null;
+  try{ triviaStamp(correct); }catch(e){}
+  if(correct){
+    if(act){
+      const before=act.hp;
+      act.hp=Math.min(act.maxHp, act.hp+20);
+      const healed=act.hp-before;
+      if(!S.you.deck.length && S.you.discard.length) S.you.deck=shuffle(S.you.discard.splice(0));
+      if(S.you.deck.length) S.you.hand.push(S.you.deck.shift());
+      pushLog(`Affective Fallacy: the reading moves you \u2014 ${act.name} recovers ${healed} HP and you draw a card.`);
+    }
+    toast('Read further \u2014 correct! +20 HP and a card.','good');
+    try{ SFX.heal(); }catch(e){}
+  } else {
+    if(act){
+      const hurt=applyDmg(act,10);
+      if(hurt>0) pushLog(`Affective Fallacy: the reading unsettles you \u2014 ${act.name} takes ${hurt}.`);
+      checkKO(S.you,'you');
+    }
+    toast('Read further \u2014 wrong. Your Active takes 10.','bad');
+    try{ SFX.status('burn'); }catch(e){}
+  }
+  try{ render(); }catch(e){}
+}
+function afModal(){
+  if(!S||!S._af) return '';
+  if(S._af.stage==='offer'){
+    return `<div class="modal-bg"><div class="trivia af-offer">
+      <div class="tri-head">\u2726 AFFECTIVE FALLACY</div>
+      <div class="tri-sub">Read further? A second question, drawn at random from your book.</div>
+      <div class="tri-q">Correct: your Active recovers <b>20 HP</b> and you draw a card.<br>Wrong: your Active takes <b>10</b>.</div>
+      <div class="tri-opts">
+        <button class="tri-opt" data-af="yes"><b>A</b> Read further</button>
+        <button class="tri-opt" data-af="no"><b>B</b> Set it down</button>
+      </div></div></div>`;
+  }
+  return `<div class="modal-bg"><div class="trivia af-ask">
+    <div class="tri-head">\u2726 AFFECTIVE FALLACY \u00b7 second reading</div>
+    <div class="tri-sub tri-retry">No retry. Correct heals 20 and draws; wrong costs 10.</div>
+    <div class="tri-q">${scrimTriviaText(S._af.q)}</div>
+    <div class="tri-opts">${S._af.opts.map((o,i)=>
+      `<button class="tri-opt" data-afans="${i}"><b>${'ABCD'[i]}</b> ${o}</button>`).join('')}</div>
+    </div></div>`;
+}
 function triviaModal(){
   const c=S.pending.card;
   return `<div class="modal-bg"><div class="trivia ${c.type.toLowerCase()}">
@@ -8370,6 +8457,8 @@ document.addEventListener('click',e=>{
     else if(d.startsWith('swap:')){ const uid=d.slice(5); const p=S.you; if(S.turn!=='you'||busy||S.over||p.flags.attacked){ toast('You can only swap on your turn, before attacking.'); return; } if(p.flags.swapped){ toast('Only one swap per turn.'); return; } const idx=p.team.findIndex(c=>c.uid===uid&&c.hp>0); if(idx<0||idx===p.activeIdx) return; if(active(p).status.glue){ toast('Your Active is Glued — it cannot switch.'); return; } doSwitch(p,idx); p.flags.swapped=true; pushLog(`${p.team[idx].name} steps up to Active.`); render(); }
     return;
   }
+  if(t.dataset.af!=null){ if(t.dataset.af==='yes') afAccept(); else afDecline(); return; }
+  if(t.dataset.afans!=null){ afAnswer(+t.dataset.afans); return; }
   if(t.dataset.ans!=null){ if(S&&S._mg) mgAnswer(+t.dataset.ans); else answerTrivia(+t.dataset.ans); return; }
   if(t.dataset.def!=null){ resolveDefense(t.dataset.def==='1'); return; }
   if(t.dataset.mgpick!=null){ mgSelect(+t.dataset.mgpick); return; }
@@ -10216,6 +10305,7 @@ window.ABC_DEBUG = {
   zoomCard, zoomLayer, zoomHtmlFor,
   sideToast, playBookmark, performAttack,
   symbolsOff, calcBlock, doBlock, critFx, sideOfChar,
+  afOffer, afAccept, afDecline, afAnswer, afModal,
   seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,

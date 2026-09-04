@@ -226,6 +226,85 @@ setTimeout(() => {
            .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')));
 
 
+  // ================= A2 Affective Fallacy =================
+  const afGame = () => { setLens('you', 'affective');
+                         return D.S.you.team[D.S.you.activeIdx]; };
+
+  setLens(null);
+  ok('no offer without the lens', D.afOffer('you') === false);
+
+  let a = afGame();
+  ok('a correct answer offers a second reading', D.afOffer('you') === true);
+  ok('the offer is held in state, not the DOM', !!D.S._af && D.S._af.stage === 'offer');
+  // setLens builds a macbeth deck, so read the book from state rather than
+  // assuming one
+  const myBook = D.S.you.setKey;
+  ok('the question comes from your own book pool',
+     (win.DATA.abcs[myBook] || []).some(q => q.q === D.S._af.q),
+     myBook + ': ' + D.S._af.q);
+  ok('and not from the opponent\u2019s book',
+     !(win.DATA.abcs[D.S.opp.setKey] || []).some(q => q.q === D.S._af.q) ||
+     myBook === D.S.opp.setKey);
+  ok('the opponent is never offered it', D.afOffer('opp') === false);
+
+  // declining must cost nothing -- the fault these rewrites exist to remove
+  a = afGame(); D.afOffer('you');
+  const hp0 = a.hp, hand0 = D.S.you.hand.length;
+  D.afDecline();
+  ok('declining clears the prompt', !D.S._af);
+  ok('declining costs no HP', a.hp === hp0);
+  ok('declining costs no cards', D.S.you.hand.length === hand0);
+
+  // correct: heal 20 and draw
+  a = afGame(); a.hp = a.maxHp - 50;
+  D.afOffer('you'); D.afAccept();
+  ok('accepting shows the question', D.S._af && D.S._af.stage === 'ask');
+  const h1 = a.hp, d1 = D.S.you.hand.length;
+  D.afAnswer(D.S._af.ans);
+  ok('a correct second reading heals 20', a.hp === h1 + 20, h1 + ' -> ' + a.hp);
+  ok('and draws a card', D.S.you.hand.length === d1 + 1);
+  ok('and clears the prompt', !D.S._af);
+
+  // healing must not overshoot max HP
+  a = afGame(); a.hp = a.maxHp - 5;
+  D.afOffer('you'); D.afAccept(); D.afAnswer(D.S._af.ans);
+  ok('healing never exceeds max HP', a.hp === a.maxHp, a.hp + '/' + a.maxHp);
+
+  // wrong: 10 to your own Active
+  a = afGame(); a.hp = a.maxHp;
+  D.afOffer('you'); D.afAccept();
+  const wrongPick = (D.S._af.ans + 1) % D.S._af.opts.length;
+  const h2 = a.hp;
+  D.afAnswer(wrongPick);
+  ok('a wrong second reading costs 10', a.hp === h2 - 10, h2 + ' -> ' + a.hp);
+  ok('and clears the prompt', !D.S._af);
+
+  // it must never stack on the first question
+  a = afGame();
+  D.S.pending = { card: { q: 'x', opts: ['a'], ans: 0 }, handIdx: 0, target: a.uid };
+  ok('no offer while a trivia question is open', D.afOffer('you') === false);
+  D.S.pending = null;
+
+  // the old automatic symmetrical damage is retired
+  ok('wrong answers no longer damage automatically',
+     HTML.indexOf('Critical anxiety:') < 0);
+
+  // ---- card text must match what the engine does ----
+  const txt = id => (win.DATA.crits.find(c => c.id === id) || {}).passive || '';
+  ok('Formalism card says ENEMY moves', /ENEMY moves/i.test(txt('formalism')), txt('formalism'));
+  ok('Affective card describes the second reading',
+     /second question/i.test(txt('affective')), txt('affective'));
+  ok('Structuralism card says the order is optional',
+     /optional/i.test(txt('structuralism')), txt('structuralism'));
+  ok('Archetypal card describes the archetype count',
+     /archetype/i.test(txt('archetypal')), txt('archetypal'));
+  ok('Deconstruction card describes cross-payment and Exposed',
+     /Exposed/.test(txt('deconstruct')), txt('deconstruct'));
+  ok('no lens card promises First Strike',
+     !win.DATA.crits.some(c => /First Strike/.test(
+       [c.passive, c.thesis, c.reward].join(' '))));
+
+
   console.log(R.join('\n'));
   console.log('\n' + pass + ' passed / ' + fail + ' failed');
   process.exit(fail ? 1 : 0);

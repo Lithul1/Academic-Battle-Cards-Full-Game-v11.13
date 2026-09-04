@@ -4644,7 +4644,14 @@ function flashFeed(){
 /* ---------------- crit-card (Critical Lens) engine ---------------- */
 function critFx(side){ const c=S[side]&&S[side].crit; return c?c.fx:null; }
 function hasCrit(side,fx){ return critFx(side)===fx; }
-function symbolsOff(){ return critFx('you')==='formalism'||critFx('opp')==='formalism'; }
+/* Formalism (F1) strips the ENEMY's symbols, not everyone's. `actor` is the
+   side whose move is being resolved; its symbols are off when the OPPOSING side
+   is running Formalism. Called with no argument it answers the old global
+   question, so untouched callers keep their previous behaviour. */
+function symbolsOff(actor){
+  if(actor!=='you' && actor!=='opp') return critFx('you')==='formalism'||critFx('opp')==='formalism';
+  return critFx(actor==='you'?'opp':'you')==='formalism';
+}
 function deconOn(){ return critFx('you')==='deconstruct'||critFx('opp')==='deconstruct'; }
 function affectiveOn(){ return critFx('you')==='affective'||critFx('opp')==='affective'; }
 // Escalate: each use of a move costs one more ABC than the last, up to a cap.
@@ -5599,7 +5606,8 @@ function calcDamage(ch,ab){
 }
 function calcBlock(ch,ab,incoming){
   if(!ab) return {amt:0};
-  if(typeof symbolsOff==='function' && symbolsOff()) return {amt:ab.block||0};
+  /* ab is `ch`'s own block, so the actor is whoever holds it */
+  if(typeof symbolsOff==='function' && symbolsOff(sideOfChar(ch))) return {amt:ab.block||0};
   if(ab.blockType==='negate') return {amt:incoming,negate:true};
   if(ab.blockType==='capto') return {amt:Math.max(0,incoming-(ab.cap||10))};
   if(ab.blockType==='perTurn') return {amt:(ab.base||0)+(ab.step||10)*Math.max(1,ch.turnsInPlay)};
@@ -5689,15 +5697,16 @@ function performAttack(side,abilKey){           // == beginAttack
   if(side==='you') A.flags.attacked=true;
   let pierce=(ab.flags||[]).includes('pierce') || condPierce;
   if(hasCrit(side,'psycho') && def.blkCharge.length===0){ pierce=true; }
-  if(symbolsOff()) pierce=false;
+  if(symbolsOff(side)) pierce=false;
   if(S.scrim && S.scrim.ruleShift==='pintendo' && side==='opp'){ const bb=def.blk; const full=bb && bb.cost!=null && def.blkCharge.length>=blockCostFor(def,bb); if(!full){ pierce=true; } }
   if(ab.escalate) escBump(att,'Atk');
-  if(ab.siphon && !symbolsOff()) applySiphon(def,att,side,ab.siphon);
+  if(ab.siphon && !symbolsOff(side)) applySiphon(def,att,side,ab.siphon);
   atkCtx={side,A,att,ab,D,dKey,def,dmg,pierce,condInflict,condFoeDiscard};
   // ---- Riposte: armed whenever the defender's block is charged, block or no block ----
   { const rb=def.blk&&def.blk.riposte;
     const armed = rb && def.blk.cost!=null && def.blkCharge.length>=blockCostFor(def,def.blk);
-    if(armed && !symbolsOff() && att._ripostedTurn!==S._turnNo){
+    /* def.blk.riposte -- the defender's symbol, not the attacker's */
+    if(armed && !symbolsOff(dKey) && att._ripostedTurn!==S._turnNo){
       att._ripostedTurn=S._turnNo;
       const mode=rb.mode||'hp';
       if(mode==='charge'){
@@ -5771,7 +5780,7 @@ function doBlock(){
   if(hasCrit(dKey,'newhist') && !neg){ amt+=10; pushLog('New Historicism: block reduces an extra 10.'); }
   if(def.status.antiq && !neg){ amt+=10; pushLog("Antiquarian's Eye: block reduces an extra 10."); }
   D.discard.push(...spentBlk.filter(c=>!c._wild));
-  if(!symbolsOff()){
+  if(!symbolsOff(dKey)){
     if(b.grant){ grant(def,b.grant); pushLog(`${def.name} gains ${b.grant}.`); }
     if(b.inflictAtt && att.hp>0){ if(inflict(att,b.inflictAtt)) pushLog(`${att.name} is afflicted with ${b.inflictAtt.charAt(0).toUpperCase()+b.inflictAtt.slice(1)}.`); }
     if(b.siphon){ applySiphon(att,def,dKey,b.siphon); }
@@ -5804,7 +5813,7 @@ function finishAttack(blocked,negated,forceNet){
   let net=(forceNet!=null)?forceNet:(negated?0:Math.max(0,dmg-(pierce?0:blocked)));
   if(def.status.hardcover && !pierce && !ab.ignoreDefBuffs && net>0 && !(def.fe&&def.passive&&def.passive.noDamageReduction)){ net=Math.max(0,net-10); pushLog(`${def.name}'s Hardcover reduces 10 damage.`); }
   if(def.fe&&def.passive&&def.passive.nakedVuln&&def.blkCharge.length===0&&net>0){ net+=def.passive.nakedVuln; pushLog(`${def.name} is exposed (no Block ABC) — +${def.passive.nakedVuln} damage.`); }
-  if(ab.sacrifice && hasCrit(dKey,'feminist') && !symbolsOff() && net>30){ net=30; pushLog('Feminist Lens caps the Sacrifice attack at 30.'); }
+  if(ab.sacrifice && hasCrit(dKey,'feminist') && !symbolsOff(side) && net>30){ net=30; pushLog('Feminist Lens caps the Sacrifice attack at 30.'); }
   if(D._teamShield && net>0){ const _r=Math.min(net,D._teamShield); net-=_r; pushLog(`${who(D)}'s allies stand together — ${_r} damage reduced.`); }
   if(S.scrim && scrimHas('gradecurve') && S.opp && S.opp.team.indexOf(def)>=0 && net>def.hp && att.hp>0){ const over=net-def.hp, heal=Math.round(over/2); if(heal>0){ att.hp=Math.min(att.maxHp,att.hp+heal); pushLog('Grade Curve \u2014 overkill heals '+att.name+' +'+heal+'.'); } }
   if(net>0 && blocked>0 && def.blk && def.blk.collateral){ const bench=D.team.filter((c,i)=>i!==D.activeIdx && c.hp>0); if(bench.length){ const bc=bench[rnd(bench.length)]; applyDmg(bc,net); pushLog(`Collateral Damage \u2014 ${net} overflow spills onto ${bc.name} backstage.`); net=0; if(bc.hp<=0) checkKO(D,dKey); } }
@@ -5813,9 +5822,9 @@ function finishAttack(blocked,negated,forceNet){
   pushLog(`${att.name} uses ${ab.n}: ${net} damage to ${def.name}. (${def.hp}/${def.maxHp} HP)`);
   flashLog(side,'atk',`${att.name} uses ${ab.n} \u2014 ${net} damage to ${def.name}.`);
   if(pierce) pushLog(`${ab.n} pierced the defense!`);
-  if(ab.sacrifice && !symbolsOff()){ const _sac=applyDmg(att,ab.sacrifice); if(_sac>0) pushLog(`${att.name} sacrifices ${_sac} HP.`); }
+  if(ab.sacrifice && !symbolsOff(side)){ const _sac=applyDmg(att,ab.sacrifice); if(_sac>0) pushLog(`${att.name} sacrifices ${_sac} HP.`); }
   if(ab.stripBlocks && def.blkCharge.length){ const n=def.blkCharge.length; D.discard.push(...def.blkCharge.splice(0)); pushLog(`Quick-Sand Crash buries ${def.name}'s defense — ${n} Block ABC lost.`); }
-  if(!symbolsOff()){
+  if(!symbolsOff(side)){
     if(ab.inflictIfHas && def.hp>0){ const _p=[].concat(ab.inflict)[0], _h=ab.inflictIfHas.has, _t=ab.inflictIfHas.then; if(def.status[_h]){ if(inflict(def,_t)) pushLog(`${def.name} already had ${statusName(_h)} \u2014 afflicted with ${statusName(_t)}!`); } else if(_p){ if(inflict(def,_p)) pushLog(`${def.name} is afflicted with ${statusName(_p)}.`); } }
     if(ab.inflict && !ab.inflictIfHas && def.hp>0){ [].concat(ab.inflict).forEach(function(_st){ if(inflict(def,_st,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(_st)}.`); }); }
     if(atkCtx&&atkCtx.condInflict && def.hp>0){ if(inflict(def,atkCtx.condInflict,ab.pierceLaminate)) pushLog(`${def.name} is afflicted with ${statusName(atkCtx.condInflict)}.`); }
@@ -10206,6 +10215,7 @@ window.ABC_DEBUG = {
   flashLog, flashFeed,
   zoomCard, zoomLayer, zoomHtmlFor,
   sideToast, playBookmark, performAttack,
+  symbolsOff, calcBlock, doBlock, critFx, sideOfChar,
   seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,
