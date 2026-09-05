@@ -2227,6 +2227,33 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .trivia.af-offer .tri-head,.trivia.af-ask .tri-head{background:#8E4B8B}
 .trivia.af-offer .tri-q,.trivia.af-ask .tri-q{line-height:1.45}
 .trivia.af-offer .tri-opt b,.trivia.af-ask .tri-opt b{color:#8E4B8B}
+
+/* ===== crit chip layout (fix_crit_chip_layout.py) =====
+   .bd-nm had no min-width, so in a flex row a long lens name refused to shrink
+   and pushed the magnifier and the tick outside the tile. The character chips
+   already handled this; the crit chips never did, and the four-column grid made
+   it visible. */
+.bd-chip.crt{padding-right:30px;align-items:flex-start}
+.bd-chip.crt .bd-nm{
+  min-width:0;flex:1 1 auto;
+  white-space:normal;overflow-wrap:anywhere;
+  font-size:12.5px;line-height:1.15;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bd-chip.crt .bd-cav{flex:0 0 auto}
+/* pin the controls inside the tile, as the character chips do */
+.bd-chip.crt .bd-pv{
+  position:absolute;right:6px;bottom:5px;top:auto;
+  font-size:13px;line-height:1;padding:2px;opacity:.65;
+  width:20px;height:20px;display:grid;place-items:center;border-radius:5px}
+.bd-chip.crt .bd-pv:hover{opacity:1;background:rgba(0,0,0,.08)}
+.bd-chip.crt .bd-mk{position:absolute;top:5px;right:7px;font-size:14px;line-height:1}
+/* the locked tiles carry a second line, so they need the room too */
+.bd-chip.crt.lockcard .bd-nm{-webkit-line-clamp:4}
+.bd-chip.crt .lk-hint{white-space:normal;overflow-wrap:anywhere}
+@media (max-width:760px){
+  .bd-chip.crt .bd-nm{font-size:11.5px;-webkit-line-clamp:2}
+  .bd-chip.crt .bd-cav{width:26px;height:26px}
+}
 </style>
 </head>
 <body>
@@ -3353,16 +3380,16 @@ const DATA = {
       passive:'Subvert structure \u2014 your abilities may be paid with either \u2694 or \u26ca charges.',
       thesis:'Pay an ability cost using mismatched-colour charges.', reward:'Fully heal your Active.' },
     { id:'archetypal', name:'Archetypal Lens', accent:'#C2861A', img:'', fx:'archetypal',
-      passive:'Hero / Villain characters gain First Strike when fully charged.',
+      passive:'The monomyth \u2014 your Active gains +10 attack for each distinct archetype among your living characters.',
       thesis:'A declared attack and block resolve to the exact same value.', reward:'Draw up to your hand limit.' },
     { id:'formalism', name:'Formalism', accent:'#5C7CA6', img:'', fx:'formalism',
-      passive:'Strip the context \u2014 all special symbols (Pierce, Negate, Cap, First Strike, Sacrifice) are ignored.',
+      passive:'Strip the context \u2014 special symbols (Pierce, Negate, Cap, Sacrifice) are ignored on ENEMY moves. Yours still work.',
       thesis:'Knock out an enemy with a plain attack that has no keywords.', reward:'Draw 2 cards.' },
     { id:'deconstruct', name:'Deconstruction', accent:'#3E8E7E', img:'', fx:'deconstruct',
-      passive:'Binary inversion \u2014 Negate now doubles incoming damage, and Pierce can be blocked.',
+      passive:'Binary inversion \u2014 your blocks may pay for attacks and your attacks for blocks. Each mismatched payment leaves your own Active Exposed.',
       thesis:'An opponent Bookmark tries to skip your turn or stop your damage.', reward:'Cancel it and deal 20 damage.' },
     { id:'structuralism', name:'Structuralism', accent:'#5A6E8A', img:'', fx:'structuralism',
-      passive:'Rigid order \u2014 you may only charge ABC cards in ascending Power order (1\u21924).',
+      passive:'Rigid order \u2014 charging in ascending Power order is optional, and every charge that keeps the sequence counts double.',
       thesis:'Charge one \u2694, one \u26ca, and play a Bookmark in one Main Phase.', reward:'Opponent cannot use Bookmarks next turn.' },
     { id:'reader', name:'Reader-Response', accent:'#9C3B57', img:'', fx:'reader',
       passive:'On deploy, name \u2694 or \u26ca \u2014 a correct answer of that type counts as two charges.',
@@ -3377,7 +3404,7 @@ const DATA = {
       passive:'While a same-author ally sits in your KO pile, your attacks cost 1 less \u2694.',
       thesis:'Play a Bookmark while you hold a same-book character.', reward:'Draw 3 cards.' },
     { id:'affective', name:'Affective Fallacy', accent:'#241F1B', img:'', fx:'affective',
-      passive:'Critical anxiety \u2014 any wrong trivia answer deals 10 damage to that player\u2019s Active.',
+      passive:'Read further \u2014 after a correct answer you may take a second question, drawn at random from your book. Correct: heal your Active 20 and draw a card. Wrong: your Active takes 10.',
       thesis:'The opponent answers two trivia questions wrong in one turn.', reward:'Opponent shuffles their hand away and redraws 3.' },
     /* ===== NEW CARDS PATCH (Aug 2026) — Draft 3 LOCKED wave ===== */
     { id:'mise', name:'Mise En Scène', accent:'#4A6C8C', img:'', fx:'mise',
@@ -5063,10 +5090,18 @@ function attach(side,handIdx,correct,targetUid){
   const act=(targetUid && p.team.find(c=>c.uid===targetUid && c.hp>0)) || active(p);
   if(!p.critTurn) p.critTurn={};
   // Structuralism: charge only in ascending Power order
+  /* Structuralism (S1): the ascent is OPTIONAL and rewarded. Nothing is ever
+     refused -- a charge that continues the ascent simply counts twice. The
+     bonus is a synthetic _wild entry, the same device Reader-Response and Mise
+     En Scene use, and _wild entries are excluded from the test above, so a
+     doubled charge cannot raise the bar against itself.
+     The old branch refused the attach and returned WITHOUT repainting, which
+     left the trivia question stranded on screen. */
+  let _structDouble=false;
   if(correct && hasCrit(side,'structuralism')){
     const charged=act.atkCharge.concat(act.blkCharge).filter(c=>!c._wild);
     const lastPow=charged.length?Math.max(...charged.map(c=>c.power||0)):0;
-    if((card.power||0)<lastPow){ if(side==='you') toast('Structuralism: charge in ascending Power order.'); return; }
+    if((card.power||0)>=lastPow) _structDouble=true;
   }
   if(correct && p.flags.doubleTrivia){
     if(!p.flags._dblHalf){ p.flags._dblHalf=true; p.attachesLeft--; p.hand.splice(handIdx,1); p.discard.push(card); pushLog("Macbeth's curse — one more correct answer is needed before an ABC will attach."); render(); return; }
@@ -5090,6 +5125,11 @@ function attach(side,handIdx,correct,targetUid){
     }
     const _snap=chargeSnap(act);
     pile.push(card);
+    if(_structDouble){
+      pile.push({cat:'abc',type:card.type,power:0,_wild:true,_struct:true});
+      if(side==='you') toast('Structuralism: the pattern holds \u2014 that charge counts double.','good');
+      pushLog(`${act.name} keeps the sequence \u2014 the charge counts twice.`);
+    }
     if(side==='you'){ try{ SFX.attach(card.type==='ATTACK'?'atk':'blk'); }catch(e){} }
     chargeReport(side, act, _snap);
     if(hasCrit(side,'reader') && p.crit && p.crit.declared===card.type){
@@ -5650,7 +5690,9 @@ function performAttack(side,abilKey){           // == beginAttack
   if((abilKey==='atk'||abilKey==='atk2') && att.status.oop){ if(side==='you') toast(`${att.name} is Out of Print — it cannot attack.`); return false; }
   let cost=attackCostFor(side,ab);
   if(att.status.costUp) cost+=1;
-  const pool=()=> hasCrit(side,'queer') ? (att.atkCharge.length+att.blkCharge.length) : att.atkCharge.length;
+  /* Deconstruction (D3) collapses the attack/block binary exactly as Queer
+     Theory collapses the colour one, so it shares the pool. */
+  const pool=()=> (hasCrit(side,'queer')||hasCrit(side,'deconstruct')) ? (att.atkCharge.length+att.blkCharge.length) : att.atkCharge.length;
   if(cost!=null && pool()<cost){
     sideToast(side, `Need ${cost} ATTACK ABCs (have ${pool()}).`);
     /* keep the information, lose the misdirected message */
@@ -5677,7 +5719,19 @@ function performAttack(side,abilKey){           // == beginAttack
   if(att._burnBonus){ dmg+=att._burnBonus; pushLog(`Burn the Notes: +${att._burnBonus} damage.`); delete att._burnBonus; }
   if(att._sagaBonus){ dmg+=att._sagaBonus; pushLog(`The Saga pays off: +${att._sagaBonus} damage.`); delete att._sagaBonus; }
   let spentAtk=spend(att.atkCharge,cost);
-  if(spentAtk.length<cost && hasCrit(side,'queer')){ const more=spend(att.blkCharge,cost-spentAtk.length); if(more.length) A.critTurn.queerMismatch=true; spentAtk.push(...more); }
+  if(spentAtk.length<cost && (hasCrit(side,'queer')||hasCrit(side,'deconstruct'))){
+    const more=spend(att.blkCharge,cost-spentAtk.length);
+    if(more.length){
+      if(hasCrit(side,'queer')) A.critTurn.queerMismatch=true;
+      if(hasCrit(side,'deconstruct')){
+        /* the price of collapsing the binary. Margin Notes would NOT work here
+           -- it is a POSITIVE status in this engine, so it would have been a
+           gift rather than a cost. */
+        att.status=att.status||{}; att.status.exposed=true;
+        pushLog(`${att.name} pays a block into an attack \u2014 the binary collapses, and ${att.name} is Exposed.`);
+      }
+    }
+    spentAtk.push(...more); }
   if(spentAtk.some(c=>c&&c._inherited)){ A.critEver=A.critEver||{}; A.critEver.adaptSpent=true; }   /* Adaptation thesis */
   if(ab.selfDiscardBlk){ for(let i=0;i<ab.selfDiscardBlk;i++){ if(att.blkCharge.length) A.discard.push(att.blkCharge.shift()); } pushLog(`${att.name} discards ${ab.selfDiscardBlk} Block ABC.`); }
   if(ab.selfDiscardAtk){ for(let i=0;i<ab.selfDiscardAtk;i++){ if(att.atkCharge.length) A.discard.push(att.atkCharge.shift()); } pushLog(`${att.name} discards ${ab.selfDiscardAtk} Attack ABC.`); }
@@ -5693,6 +5747,14 @@ function performAttack(side,abilKey){           // == beginAttack
     if(S._adrenaline){ dmg=Math.round(dmg*1.1); S._adrenaline=false; pushLog('Adrenaline surge \u2014 +10% damage.'); }
   }
   if(hasCrit(side,'marxist') && (ab.cost===1||ab.cost===2) && def.atk && (def.atk.cost===3||def.atk.cost===4)){ dmg+=10; pushLog('Marxist Lens: +10 class-struggle damage.'); }
+  /* Archetypal (AR1): the monomyth. Every character carries an archetype and
+     no lens has ever read one. Replaces a passive that named First Strike, a
+     mechanic the engine does not have. */
+  if(hasCrit(side,'archetypal')){
+    const kinds={}; (A.team||[]).forEach(function(c){ if(c && c.hp>0 && c.archetype) kinds[c.archetype]=1; });
+    const n=Object.keys(kinds).length;
+    if(n>0){ dmg+=n*10; pushLog(`Archetypal Lens: +${n*10} \u2014 ${n} archetype${n===1?'':'s'} in the story.`); }
+  }
   if(A.flags.supercharge){ dmg*=2; A.flags.supercharge=false; pushLog('Supercharger: damage doubled!'); }
   if(att.status.highlight){ dmg+=20; delete att.status.highlight; pushLog(`${att.name} is Highlighted — +20 damage.`); }
   if(def.status.tear){ dmg+=10; pushLog(`${def.name} is Torn — +10 incoming damage.`); }
@@ -6206,6 +6268,11 @@ function answerTrivia(choice,skipRetry){
   const _afWant = correct && typeof hasCrit==='function' && hasCrit('you','affective');
   attach('you',pend.handIdx,correct,pend.target);
   if(_afWant){ try{ afOffer('you'); }catch(e){} }
+  /* attach() has several early returns and repaints on only some of them.
+     S.pending is already null here, so a repaint is always correct and is the
+     only thing that guarantees the trivia panel comes down -- whatever new
+     refusal path is added to attach() later. */
+  try{ render(); }catch(e){}
 }
 
 /* ================= RENDERING ================= */

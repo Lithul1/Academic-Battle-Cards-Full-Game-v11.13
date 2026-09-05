@@ -2222,6 +2222,11 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 @media (prefers-reduced-motion: reduce){
   .zoomcard{animation:zmIn .01s both, zmOut .01s forwards}
 }
+
+/* ===== Affective Fallacy, second reading (fix_lens_affective_a2.py) ===== */
+.trivia.af-offer .tri-head,.trivia.af-ask .tri-head{background:#8E4B8B}
+.trivia.af-offer .tri-q,.trivia.af-ask .tri-q{line-height:1.45}
+.trivia.af-offer .tri-opt b,.trivia.af-ask .tri-opt b{color:#8E4B8B}
 </style>
 </head>
 <body>
@@ -3348,16 +3353,16 @@ const DATA = {
       passive:'Subvert structure \u2014 your abilities may be paid with either \u2694 or \u26ca charges.',
       thesis:'Pay an ability cost using mismatched-colour charges.', reward:'Fully heal your Active.' },
     { id:'archetypal', name:'Archetypal Lens', accent:'#C2861A', img:'', fx:'archetypal',
-      passive:'Hero / Villain characters gain First Strike when fully charged.',
+      passive:'The monomyth \u2014 your Active gains +10 attack for each distinct archetype among your living characters.',
       thesis:'A declared attack and block resolve to the exact same value.', reward:'Draw up to your hand limit.' },
     { id:'formalism', name:'Formalism', accent:'#5C7CA6', img:'', fx:'formalism',
-      passive:'Strip the context \u2014 all special symbols (Pierce, Negate, Cap, First Strike, Sacrifice) are ignored.',
+      passive:'Strip the context \u2014 special symbols (Pierce, Negate, Cap, Sacrifice) are ignored on ENEMY moves. Yours still work.',
       thesis:'Knock out an enemy with a plain attack that has no keywords.', reward:'Draw 2 cards.' },
     { id:'deconstruct', name:'Deconstruction', accent:'#3E8E7E', img:'', fx:'deconstruct',
-      passive:'Binary inversion \u2014 Negate now doubles incoming damage, and Pierce can be blocked.',
+      passive:'Binary inversion \u2014 your blocks may pay for attacks and your attacks for blocks. Each mismatched payment leaves your own Active Exposed.',
       thesis:'An opponent Bookmark tries to skip your turn or stop your damage.', reward:'Cancel it and deal 20 damage.' },
     { id:'structuralism', name:'Structuralism', accent:'#5A6E8A', img:'', fx:'structuralism',
-      passive:'Rigid order \u2014 you may only charge ABC cards in ascending Power order (1\u21924).',
+      passive:'Rigid order \u2014 charging in ascending Power order is optional, and every charge that keeps the sequence counts double.',
       thesis:'Charge one \u2694, one \u26ca, and play a Bookmark in one Main Phase.', reward:'Opponent cannot use Bookmarks next turn.' },
     { id:'reader', name:'Reader-Response', accent:'#9C3B57', img:'', fx:'reader',
       passive:'On deploy, name \u2694 or \u26ca \u2014 a correct answer of that type counts as two charges.',
@@ -3372,7 +3377,7 @@ const DATA = {
       passive:'While a same-author ally sits in your KO pile, your attacks cost 1 less \u2694.',
       thesis:'Play a Bookmark while you hold a same-book character.', reward:'Draw 3 cards.' },
     { id:'affective', name:'Affective Fallacy', accent:'#241F1B', img:'', fx:'affective',
-      passive:'Critical anxiety \u2014 any wrong trivia answer deals 10 damage to that player\u2019s Active.',
+      passive:'Read further \u2014 after a correct answer you may take a second question, drawn at random from your book. Correct: heal your Active 20 and draw a card. Wrong: your Active takes 10.',
       thesis:'The opponent answers two trivia questions wrong in one turn.', reward:'Opponent shuffles their hand away and redraws 3.' },
     /* ===== NEW CARDS PATCH (Aug 2026) — Draft 3 LOCKED wave ===== */
     { id:'mise', name:'Mise En Scène', accent:'#4A6C8C', img:'', fx:'mise',
@@ -5058,10 +5063,18 @@ function attach(side,handIdx,correct,targetUid){
   const act=(targetUid && p.team.find(c=>c.uid===targetUid && c.hp>0)) || active(p);
   if(!p.critTurn) p.critTurn={};
   // Structuralism: charge only in ascending Power order
+  /* Structuralism (S1): the ascent is OPTIONAL and rewarded. Nothing is ever
+     refused -- a charge that continues the ascent simply counts twice. The
+     bonus is a synthetic _wild entry, the same device Reader-Response and Mise
+     En Scene use, and _wild entries are excluded from the test above, so a
+     doubled charge cannot raise the bar against itself.
+     The old branch refused the attach and returned WITHOUT repainting, which
+     left the trivia question stranded on screen. */
+  let _structDouble=false;
   if(correct && hasCrit(side,'structuralism')){
     const charged=act.atkCharge.concat(act.blkCharge).filter(c=>!c._wild);
     const lastPow=charged.length?Math.max(...charged.map(c=>c.power||0)):0;
-    if((card.power||0)<lastPow){ if(side==='you') toast('Structuralism: charge in ascending Power order.'); return; }
+    if((card.power||0)>=lastPow) _structDouble=true;
   }
   if(correct && p.flags.doubleTrivia){
     if(!p.flags._dblHalf){ p.flags._dblHalf=true; p.attachesLeft--; p.hand.splice(handIdx,1); p.discard.push(card); pushLog("Macbeth's curse — one more correct answer is needed before an ABC will attach."); render(); return; }
@@ -5085,6 +5098,11 @@ function attach(side,handIdx,correct,targetUid){
     }
     const _snap=chargeSnap(act);
     pile.push(card);
+    if(_structDouble){
+      pile.push({cat:'abc',type:card.type,power:0,_wild:true,_struct:true});
+      if(side==='you') toast('Structuralism: the pattern holds \u2014 that charge counts double.','good');
+      pushLog(`${act.name} keeps the sequence \u2014 the charge counts twice.`);
+    }
     if(side==='you'){ try{ SFX.attach(card.type==='ATTACK'?'atk':'blk'); }catch(e){} }
     chargeReport(side, act, _snap);
     if(hasCrit(side,'reader') && p.crit && p.crit.declared===card.type){
@@ -5116,7 +5134,9 @@ function attach(side,handIdx,correct,targetUid){
     else { p.hand.splice(handIdx,1); p.discard.push(card); p.attachesLeft--; pushLog(`${who(p)} missed the question — ${card.type} card discarded.`); }
     if(pHasPassive(p,'failDiscardRandom') && p.hand.length){ const d=p.hand.splice(rnd(p.hand.length),1)[0]; p.discard.push(d); pushLog('Cold Logic: the slip costs a random card from hand.'); }
     if(pHasPassive(p,'failSkipAttack')){ p.flags.skipAttack=true; var _sc=pPassiveChar(p,'failSkipAttack'), _pn=(_sc&&_sc.passive&&_sc.passive.name)||'Anticipatory Madness'; p.flags.skipAttackName=_pn; p.flags.skipAttackFlavor=(_sc&&_sc.passive&&_sc.passive.skipFlavor)||_pn; pushLog(_pn+': your next attack declaration will be skipped.'); }
-    if(affectiveOn() && act && act.hp>0){ const _af=applyDmg(act,10); if(_af>0) pushLog(`Critical anxiety: ${act.name} takes ${_af} damage.`); checkKO(p,side); }
+    /* A2 replaced the automatic wrong-answer damage. It was symmetrical, and the
+     player answers far more trivia than the AI, so the lens punished its own
+     holder. The risk now lives in the optional second question instead. */
   }
   render();
 }
@@ -5643,7 +5663,9 @@ function performAttack(side,abilKey){           // == beginAttack
   if((abilKey==='atk'||abilKey==='atk2') && att.status.oop){ if(side==='you') toast(`${att.name} is Out of Print — it cannot attack.`); return false; }
   let cost=attackCostFor(side,ab);
   if(att.status.costUp) cost+=1;
-  const pool=()=> hasCrit(side,'queer') ? (att.atkCharge.length+att.blkCharge.length) : att.atkCharge.length;
+  /* Deconstruction (D3) collapses the attack/block binary exactly as Queer
+     Theory collapses the colour one, so it shares the pool. */
+  const pool=()=> (hasCrit(side,'queer')||hasCrit(side,'deconstruct')) ? (att.atkCharge.length+att.blkCharge.length) : att.atkCharge.length;
   if(cost!=null && pool()<cost){
     sideToast(side, `Need ${cost} ATTACK ABCs (have ${pool()}).`);
     /* keep the information, lose the misdirected message */
@@ -5670,7 +5692,19 @@ function performAttack(side,abilKey){           // == beginAttack
   if(att._burnBonus){ dmg+=att._burnBonus; pushLog(`Burn the Notes: +${att._burnBonus} damage.`); delete att._burnBonus; }
   if(att._sagaBonus){ dmg+=att._sagaBonus; pushLog(`The Saga pays off: +${att._sagaBonus} damage.`); delete att._sagaBonus; }
   let spentAtk=spend(att.atkCharge,cost);
-  if(spentAtk.length<cost && hasCrit(side,'queer')){ const more=spend(att.blkCharge,cost-spentAtk.length); if(more.length) A.critTurn.queerMismatch=true; spentAtk.push(...more); }
+  if(spentAtk.length<cost && (hasCrit(side,'queer')||hasCrit(side,'deconstruct'))){
+    const more=spend(att.blkCharge,cost-spentAtk.length);
+    if(more.length){
+      if(hasCrit(side,'queer')) A.critTurn.queerMismatch=true;
+      if(hasCrit(side,'deconstruct')){
+        /* the price of collapsing the binary. Margin Notes would NOT work here
+           -- it is a POSITIVE status in this engine, so it would have been a
+           gift rather than a cost. */
+        att.status=att.status||{}; att.status.exposed=true;
+        pushLog(`${att.name} pays a block into an attack \u2014 the binary collapses, and ${att.name} is Exposed.`);
+      }
+    }
+    spentAtk.push(...more); }
   if(spentAtk.some(c=>c&&c._inherited)){ A.critEver=A.critEver||{}; A.critEver.adaptSpent=true; }   /* Adaptation thesis */
   if(ab.selfDiscardBlk){ for(let i=0;i<ab.selfDiscardBlk;i++){ if(att.blkCharge.length) A.discard.push(att.blkCharge.shift()); } pushLog(`${att.name} discards ${ab.selfDiscardBlk} Block ABC.`); }
   if(ab.selfDiscardAtk){ for(let i=0;i<ab.selfDiscardAtk;i++){ if(att.atkCharge.length) A.discard.push(att.atkCharge.shift()); } pushLog(`${att.name} discards ${ab.selfDiscardAtk} Attack ABC.`); }
@@ -5686,6 +5720,14 @@ function performAttack(side,abilKey){           // == beginAttack
     if(S._adrenaline){ dmg=Math.round(dmg*1.1); S._adrenaline=false; pushLog('Adrenaline surge \u2014 +10% damage.'); }
   }
   if(hasCrit(side,'marxist') && (ab.cost===1||ab.cost===2) && def.atk && (def.atk.cost===3||def.atk.cost===4)){ dmg+=10; pushLog('Marxist Lens: +10 class-struggle damage.'); }
+  /* Archetypal (AR1): the monomyth. Every character carries an archetype and
+     no lens has ever read one. Replaces a passive that named First Strike, a
+     mechanic the engine does not have. */
+  if(hasCrit(side,'archetypal')){
+    const kinds={}; (A.team||[]).forEach(function(c){ if(c && c.hp>0 && c.archetype) kinds[c.archetype]=1; });
+    const n=Object.keys(kinds).length;
+    if(n>0){ dmg+=n*10; pushLog(`Archetypal Lens: +${n*10} \u2014 ${n} archetype${n===1?'':'s'} in the story.`); }
+  }
   if(A.flags.supercharge){ dmg*=2; A.flags.supercharge=false; pushLog('Supercharger: damage doubled!'); }
   if(att.status.highlight){ dmg+=20; delete att.status.highlight; pushLog(`${att.name} is Highlighted — +20 damage.`); }
   if(def.status.tear){ dmg+=10; pushLog(`${def.name} is Torn — +10 incoming damage.`); }
@@ -6194,7 +6236,16 @@ function answerTrivia(choice,skipRetry){
     if(rs==='e_politics'){ const boss=active(S.opp); if(boss&&boss.hp>0){ boss.hp=Math.min(boss.maxHp,boss.hp+8); pushLog('Office Politics \u2014 the examiner heals 8 HP.'); } }
   }
   if(!correct){ const me=S.you.team[S.you.activeIdx]; if(me&&me.fe&&me.passive&&me.passive.failDiscardRandom&&S.you.hand.length){ const ri=Math.floor(Math.random()*S.you.hand.length); const lost=S.you.hand.splice(ri,1)[0]; if(lost){ S.you.discard.push(lost); pushLog(`${me.name}'s composure shatters — a card slips from your hand.`); } } }
+  /* Affective Fallacy (A2): the offer comes after a CORRECT answer, once the
+     attach has resolved, so the second question never competes with the first. */
+  const _afWant = correct && typeof hasCrit==='function' && hasCrit('you','affective');
   attach('you',pend.handIdx,correct,pend.target);
+  if(_afWant){ try{ afOffer('you'); }catch(e){} }
+  /* attach() has several early returns and repaints on only some of them.
+     S.pending is already null here, so a repaint is always correct and is the
+     only thing that guarantees the trivia panel comes down -- whatever new
+     refusal path is added to attach() later. */
+  try{ render(); }catch(e){}
 }
 
 /* ================= RENDERING ================= */
@@ -7549,7 +7600,7 @@ function renderGame(root){
   ${flashFeed()}
   <button class="logtoggle" data-do="log">☰ Log</button>
    <div class="log ${S._logopen?'open':''}">${S.log.map(l=>`<div>${l}</div>`).join('')}</div>
-   ${S.pending?triviaModal():''}${S._ip?ipModal():''}
+   ${S.pending?triviaModal():''}${S._af?afModal():''}${S._ip?ipModal():''}
    ${S.defend?defendModal():''}
    ${S.picker?pickerModal():''}
    ${S.viewPile?pileModal():''}
@@ -7704,6 +7755,82 @@ function ipModal(){
     </div></div></div>`;
 }
 function pend0(st){ const c=st.pend&&st.pend.card; return c? (String(c.type).toUpperCase()==='ATTACK'?'Attack card':'Block card') : 'card'; }
+/* ---- Affective Fallacy (A2): read further, at a risk ----
+   Offered after a correct answer. The question is drawn at random from the
+   player's own book pool, so it cannot be the card just answered and cannot be
+   chosen -- the digital equivalent of the opponent picking from the tome. */
+function afOffer(side){
+  if(side!=='you') return false;               /* the AI does not gamble */
+  if(!hasCrit('you','affective')) return false;
+  if(S._af || S.pending) return false;         /* never stack on another prompt */
+  const act=active(S.you);
+  if(!act || act.hp<=0) return false;
+  const k=S.you.setKey || (S.you.def&&S.you.def.d);
+  const pool=(DATA.abcs[k]||[]).filter(a=>a && a.q && a.opts && a.opts.length);
+  if(!pool.length) return false;
+  const q=pool[rnd(pool.length)];
+  S._af={ q:q.q, opts:q.opts.slice(), ans:q.ans, stage:'offer' };
+  return true;
+}
+function afDecline(){
+  if(!S||!S._af) return;
+  S._af=null;
+  pushLog('You set the book down \u2014 no further reading.');
+  try{ render(); }catch(e){}
+}
+function afAccept(){
+  if(!S||!S._af) return;
+  S._af.stage='ask';
+  try{ render(); }catch(e){}
+}
+function afAnswer(choice){
+  if(!S||!S._af||S._af.stage!=='ask') return;
+  const correct = choice===S._af.ans;
+  const act=active(S.you);
+  S._af=null;
+  try{ triviaStamp(correct); }catch(e){}
+  if(correct){
+    if(act){
+      const before=act.hp;
+      act.hp=Math.min(act.maxHp, act.hp+20);
+      const healed=act.hp-before;
+      if(!S.you.deck.length && S.you.discard.length) S.you.deck=shuffle(S.you.discard.splice(0));
+      if(S.you.deck.length) S.you.hand.push(S.you.deck.shift());
+      pushLog(`Affective Fallacy: the reading moves you \u2014 ${act.name} recovers ${healed} HP and you draw a card.`);
+    }
+    toast('Read further \u2014 correct! +20 HP and a card.','good');
+    try{ SFX.heal(); }catch(e){}
+  } else {
+    if(act){
+      const hurt=applyDmg(act,10);
+      if(hurt>0) pushLog(`Affective Fallacy: the reading unsettles you \u2014 ${act.name} takes ${hurt}.`);
+      checkKO(S.you,'you');
+    }
+    toast('Read further \u2014 wrong. Your Active takes 10.','bad');
+    try{ SFX.status('burn'); }catch(e){}
+  }
+  try{ render(); }catch(e){}
+}
+function afModal(){
+  if(!S||!S._af) return '';
+  if(S._af.stage==='offer'){
+    return `<div class="modal-bg"><div class="trivia af-offer">
+      <div class="tri-head">\u2726 AFFECTIVE FALLACY</div>
+      <div class="tri-sub">Read further? A second question, drawn at random from your book.</div>
+      <div class="tri-q">Correct: your Active recovers <b>20 HP</b> and you draw a card.<br>Wrong: your Active takes <b>10</b>.</div>
+      <div class="tri-opts">
+        <button class="tri-opt" data-af="yes"><b>A</b> Read further</button>
+        <button class="tri-opt" data-af="no"><b>B</b> Set it down</button>
+      </div></div></div>`;
+  }
+  return `<div class="modal-bg"><div class="trivia af-ask">
+    <div class="tri-head">\u2726 AFFECTIVE FALLACY \u00b7 second reading</div>
+    <div class="tri-sub tri-retry">No retry. Correct heals 20 and draws; wrong costs 10.</div>
+    <div class="tri-q">${scrimTriviaText(S._af.q)}</div>
+    <div class="tri-opts">${S._af.opts.map((o,i)=>
+      `<button class="tri-opt" data-afans="${i}"><b>${'ABCD'[i]}</b> ${o}</button>`).join('')}</div>
+    </div></div>`;
+}
 function triviaModal(){
   const c=S.pending.card;
   return `<div class="modal-bg"><div class="trivia ${c.type.toLowerCase()}">
@@ -8370,6 +8497,8 @@ document.addEventListener('click',e=>{
     else if(d.startsWith('swap:')){ const uid=d.slice(5); const p=S.you; if(S.turn!=='you'||busy||S.over||p.flags.attacked){ toast('You can only swap on your turn, before attacking.'); return; } if(p.flags.swapped){ toast('Only one swap per turn.'); return; } const idx=p.team.findIndex(c=>c.uid===uid&&c.hp>0); if(idx<0||idx===p.activeIdx) return; if(active(p).status.glue){ toast('Your Active is Glued — it cannot switch.'); return; } doSwitch(p,idx); p.flags.swapped=true; pushLog(`${p.team[idx].name} steps up to Active.`); render(); }
     return;
   }
+  if(t.dataset.af!=null){ if(t.dataset.af==='yes') afAccept(); else afDecline(); return; }
+  if(t.dataset.afans!=null){ afAnswer(+t.dataset.afans); return; }
   if(t.dataset.ans!=null){ if(S&&S._mg) mgAnswer(+t.dataset.ans); else answerTrivia(+t.dataset.ans); return; }
   if(t.dataset.def!=null){ resolveDefense(t.dataset.def==='1'); return; }
   if(t.dataset.mgpick!=null){ mgSelect(+t.dataset.mgpick); return; }
@@ -10216,6 +10345,7 @@ window.ABC_DEBUG = {
   zoomCard, zoomLayer, zoomHtmlFor,
   sideToast, playBookmark, performAttack,
   symbolsOff, calcBlock, doBlock, critFx, sideOfChar,
+  afOffer, afAccept, afDecline, afAnswer, afModal,
   seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,
