@@ -2227,6 +2227,33 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
 .trivia.af-offer .tri-head,.trivia.af-ask .tri-head{background:#8E4B8B}
 .trivia.af-offer .tri-q,.trivia.af-ask .tri-q{line-height:1.45}
 .trivia.af-offer .tri-opt b,.trivia.af-ask .tri-opt b{color:#8E4B8B}
+
+/* ===== crit chip layout (fix_crit_chip_layout.py) =====
+   .bd-nm had no min-width, so in a flex row a long lens name refused to shrink
+   and pushed the magnifier and the tick outside the tile. The character chips
+   already handled this; the crit chips never did, and the four-column grid made
+   it visible. */
+.bd-chip.crt{padding-right:30px;align-items:flex-start}
+.bd-chip.crt .bd-nm{
+  min-width:0;flex:1 1 auto;
+  white-space:normal;overflow-wrap:anywhere;
+  font-size:12.5px;line-height:1.15;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bd-chip.crt .bd-cav{flex:0 0 auto}
+/* pin the controls inside the tile, as the character chips do */
+.bd-chip.crt .bd-pv{
+  position:absolute;right:6px;bottom:5px;top:auto;
+  font-size:13px;line-height:1;padding:2px;opacity:.65;
+  width:20px;height:20px;display:grid;place-items:center;border-radius:5px}
+.bd-chip.crt .bd-pv:hover{opacity:1;background:rgba(0,0,0,.08)}
+.bd-chip.crt .bd-mk{position:absolute;top:5px;right:7px;font-size:14px;line-height:1}
+/* the locked tiles carry a second line, so they need the room too */
+.bd-chip.crt.lockcard .bd-nm{-webkit-line-clamp:4}
+.bd-chip.crt .lk-hint{white-space:normal;overflow-wrap:anywhere}
+@media (max-width:760px){
+  .bd-chip.crt .bd-nm{font-size:11.5px;-webkit-line-clamp:2}
+  .bd-chip.crt .bd-cav{width:26px;height:26px}
+}
 </style>
 </head>
 <body>

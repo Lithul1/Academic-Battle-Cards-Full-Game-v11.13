@@ -3923,6 +3923,17 @@ function pmOn(){ try{ return APP.mode==='pagemaster'; }catch(e){ return false; }
    already existed and were already read by clampDeck and makeDeck; these
    accessors finish that migration so no site has to consult APP.mode. */
 function deckIsPm(def){ return !!(def && def.pm); }
+/* Which charges may pay for an attack. Queer Theory collapses the colour
+   binary and Deconstruction collapses the attack/block one, so both may spend
+   the other pile. The engine and the button gate MUST agree -- they were
+   written separately and drifted, leaving an attack the engine allowed behind a
+   button that stayed disabled. One expression now, used by both. */
+function atkPoolOf(side, ch){
+  if(!ch) return 0;
+  const wide = hasCrit(side,'queer') || hasCrit(side,'deconstruct');
+  return wide ? ((ch.atkCharge||[]).length + (ch.blkCharge||[]).length)
+              : (ch.atkCharge||[]).length;
+}
 /* --- builder redesign, step 3 (fix_builder_columns_and_skins.py) -----------
    Two decks live side by side. `def` and `code` are accessors onto the ACTIVE
    column, so every existing call site that says APP.builder.def keeps working
@@ -5692,7 +5703,7 @@ function performAttack(side,abilKey){           // == beginAttack
   if(att.status.costUp) cost+=1;
   /* Deconstruction (D3) collapses the attack/block binary exactly as Queer
      Theory collapses the colour one, so it shares the pool. */
-  const pool=()=> (hasCrit(side,'queer')||hasCrit(side,'deconstruct')) ? (att.atkCharge.length+att.blkCharge.length) : att.atkCharge.length;
+  const pool=()=> atkPoolOf(side, att);
   if(cost!=null && pool()<cost){
     sideToast(side, `Need ${cost} ATTACK ABCs (have ${pool()}).`);
     /* keep the information, lose the misdirected message */
@@ -6935,7 +6946,7 @@ function charTile(p,side){
   const dead=ch.hp<=0, pct=Math.max(0,ch.hp/ch.maxHp*100); const _op=(ch._hpPrev!=null?ch._hpPrev:pct); ch._hpPrev=pct;
   const canAct = side==='you' && S.turn==='you' && S.phase==='engage' && !S.over && !p.flags.attacked && !busy;
   const effCost = attackCostFor(side,ch.atk);
-  const effPool = hasCrit(side,'queer') ? (ch.atkCharge.length+ch.blkCharge.length) : ch.atkCharge.length;
+  const effPool = atkPoolOf(side, ch);
   const atkReady = effPool>=effCost;
   const port = ch.img
     ? `<img class="port-img" src="${ch.img}" alt="${ch.name}" style="object-position:${ch.imgpos||'50% 20%'}">`
@@ -10373,6 +10384,7 @@ window.ABC_DEBUG = {
   sideToast, playBookmark, performAttack,
   symbolsOff, calcBlock, doBlock, critFx, sideOfChar,
   afOffer, afAccept, afDecline, afAnswer, afModal,
+  atkPoolOf,
   seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,
