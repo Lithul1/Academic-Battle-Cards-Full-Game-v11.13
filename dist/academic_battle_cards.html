@@ -3395,7 +3395,7 @@ const DATA = {
       passive:'On deploy, name \u2694 or \u26ca \u2014 a correct answer of that type counts as two charges.',
       thesis:'Answer two trivia of your named type in a row.', reward:'This Lens becomes a permanent wildcard charge.' },
     { id:'russian', name:'Russian Formalism', accent:'#8A8170', img:'', fx:'russian',
-      passive:'Defamiliarize \u2014 your Active\u2019s attack damage equals its current HP.',
+      passive:'Defamiliarize \u2014 your Active\u2019s attack damage equals half its current HP, rounded up.',
       thesis:'KO an enemy using a character whose printed attack was 20 or lower.', reward:'Swap your Active with a benched ally for free.' },
     { id:'ecocrit', name:'Ecocriticism', accent:'#6E7B53', img:'', fx:'ecocrit',
       passive:'Non-human characters ignore Pierce and gain +20 max HP.',
@@ -5716,7 +5716,13 @@ function performAttack(side,abilKey){           // == beginAttack
   { const _neg=['rip','smudge','burn','spill','glue','tear','weaken']; const _hasNeg=(c)=>c&&c.status&&_neg.some(k=>c.status[k]); const _dbl=_hasNeg(att)||_hasNeg(def);
     if(att.passive&&att.passive.id==='dangerlove') dmg+=_dbl?20:10;
     if(def&&def.passive&&def.passive.id==='dangerlove') dmg+=_dbl?40:20; }
-  if(hasCrit(side,'russian')){ dmg=att.hp; pushLog(`Russian Formalism: ${att.name}'s damage equals its HP (${dmg}).`); }
+  if(hasCrit(side,'russian')){
+    /* was dmg=att.hp, which put a healthy 140 HP character at 140 against a
+       40-70 band with no setup and no cap. Half, rounded up so a character on
+       1 HP still lands 1 rather than nothing. */
+    dmg=Math.ceil(att.hp/2);
+    pushLog(`Russian Formalism: ${att.name} strikes for half its HP (${dmg}).`);
+  }
   let condPierce=false, condInflict=null, condFoeDiscard=0;
   if(ab.koScale){ const n=(S[side].grave||[]).length; if(n){ dmg+=ab.koScale*n; pushLog(`${att.name}: +${ab.koScale*n} damage from ${n} fallen.`); } }
   if(ab.cond){ ab.cond.forEach(r=>{ if(condMatch(r,A,D,def)){ const t=r.then||{}; if(t.dmgSet!=null)dmg=t.dmgSet; if(t.dmgAdd)dmg+=t.dmgAdd; if(t.dmgMult)dmg=Math.round(dmg*t.dmgMult); if(t.pierce||(t.flags&&String(t.flags).toLowerCase().includes('pierce')))condPierce=true; if(t.inflict)condInflict=t.inflict; if(t.grant){ grant(att,t.grant); pushLog(`${att.name} gains ${statusName(t.grant)}.`); } if(t.foeDiscard)condFoeDiscard+=t.foeDiscard; if(r.log)pushLog(r.log); } }); }

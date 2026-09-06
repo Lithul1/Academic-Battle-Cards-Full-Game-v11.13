@@ -409,6 +409,42 @@ setTimeout(() => {
   }
 
 
+  // ---- Russian Formalism: half HP, not all of it ----
+  // The audit's largest outlier: dmg = att.hp put a healthy 140 HP character at
+  // 140 against a 40-70 band, with no setup and no cap.
+  const rfHit = (hp, withLens) => {
+    D.newGame(APP.settings, D.defaultDeck('gatsby'), D.defaultDeck('hamlet'));
+    if (withLens) D.S.you.crit = lensOf('russian');
+    const a = D.S.you.team[D.S.you.activeIdx];
+    const def = D.S.opp.team[D.S.opp.activeIdx];
+    a.hp = hp; a.maxHp = Math.max(hp, a.maxHp);
+    a.atk = { n: 'T', dmg: 40, cost: 1, label: '40/1' };
+    a.atkCharge = [{ type: 'ATTACK', power: 0 }];   // power 0: no card bonus
+    def.hp = 9999; def.maxHp = 9999;
+    def.blk = { n: 'n', block: 0, cost: 99, label: '0/99' }; def.blkCharge = [];
+    D.S.turn = 'you';
+    const before = def.hp;
+    D.performAttack('you', 'atk');
+    return before - D.S.opp.team[D.S.opp.activeIdx].hp;
+  };
+
+  [140, 120, 100, 71, 41, 11, 1].forEach(hp => {
+    ok('Russian Formalism at ' + hp + ' HP deals ' + Math.ceil(hp / 2),
+       rfHit(hp, true) === Math.ceil(hp / 2),
+       'got ' + rfHit(hp, true));
+  });
+  ok('a wounded character hits for less than a healthy one',
+     rfHit(60, true) < rfHit(140, true));
+  ok('1 HP still lands 1, never 0', rfHit(1, true) === 1);
+  ok('without the lens the printed damage stands', rfHit(140, false) === 40);
+  ok('the lens no longer deals full HP', rfHit(140, true) !== 140);
+  ok('the card text says half',
+     /half its current HP/.test((win.DATA.crits.find(c => c.id === 'russian') || {}).passive || ''),
+     (win.DATA.crits.find(c => c.id === 'russian') || {}).passive);
+  ok('no full-HP damage line survives in the build',
+     HTML.indexOf('dmg=att.hp;') < 0);
+
+
   console.log(R.join('\n'));
   console.log('\n' + pass + ' passed / ' + fail + ' failed');
   process.exit(fail ? 1 : 0);

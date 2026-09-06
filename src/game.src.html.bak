@@ -8417,7 +8417,10 @@ document.addEventListener('click',e=>{
     if(!(e.target.closest && e.target.closest('[data-do]'))) return;
   }
   if(e.target.classList && e.target.classList.contains('modal-bg') && S && S._benchView){ S._benchView=null; render(); return; }
-  const t=e.target.closest('[data-do],[data-idx],[data-act],[data-ans],[data-def],[data-pick],[data-deck],[data-opp],[data-diff],[data-pile],[data-bld],[data-audio],[data-benchinfo],[data-scrim],[data-ippick],[data-mgpick]');
+  /* The selector is an allow-list: a branch below is unreachable unless its
+   attribute appears here. data-af / data-afans were added to the handler
+   without being added here, so the Affective Fallacy buttons were dead. */
+  const t=e.target.closest('[data-do],[data-idx],[data-act],[data-ans],[data-def],[data-pick],[data-deck],[data-opp],[data-diff],[data-pile],[data-bld],[data-audio],[data-benchinfo],[data-scrim],[data-ippick],[data-mgpick],[data-af],[data-afans]');
   if(!t) return;
   if(t.dataset.benchinfo){ const [side,uid]=t.dataset.benchinfo.split(':'); S._benchView={side,uid}; render(); return; }
   if(t.dataset.audio){
