@@ -305,6 +305,110 @@ setTimeout(() => {
        [c.passive, c.thesis, c.reward].join(' '))));
 
 
+  // ---- D3: the BUTTON must agree with the engine ----
+  // The engine widened the pool for Deconstruction; the readiness gate that
+  // enables the attack button did not, so the engine allowed an attack the
+  // player could never click.
+  setLens('you', 'deconstruct');
+  const dact = D.S.you.team[D.S.you.activeIdx];
+  dact.atk = { n: 'Test', dmg: 60, cost: 3, label: '60/3' };
+  dact.blk = { n: 'Guard', block: 30, cost: 1, label: '30/1' };
+  dact.atkCharge = [{ type: 'ATTACK', power: 2 }, { type: 'ATTACK', power: 1 }];
+  dact.blkCharge = [{ type: 'BLOCK', power: 1 }];
+  D.S.turn = 'you'; D.S.phase = 'engage'; D.busy = false;
+  D.S.you.flags.attacked = false;
+  D.render();
+  const dbtn = doc.querySelector('.side.you-side .pc-move.atk');
+  ok('the engine and the gate agree on the pool',
+     D.atkPoolOf('you', dact) === 3, String(D.atkPoolOf('you', dact)));
+  ok('2 attack + 1 block covers a cost-3 attack',
+     dbtn && dbtn.classList.contains('ready'),
+     'button classes: ' + (dbtn ? dbtn.className : 'none'));
+  ok('and the button is actually clickable',
+     dbtn && !dbtn.hasAttribute('disabled'));
+
+  // without the lens the same charges must NOT be enough
+  setLens(null);
+  const nact = D.S.you.team[D.S.you.activeIdx];
+  nact.atk = { n: 'Test', dmg: 60, cost: 3, label: '60/3' };
+  nact.atkCharge = [{ type: 'ATTACK', power: 2 }, { type: 'ATTACK', power: 1 }];
+  nact.blkCharge = [{ type: 'BLOCK', power: 1 }];
+  ok('no cross-payment in the gate without the lens',
+     D.atkPoolOf('you', nact) === 2, String(D.atkPoolOf('you', nact)));
+
+  // Queer Theory keeps its own widening
+  setLens('you', 'queer');
+  const qact = D.S.you.team[D.S.you.activeIdx];
+  qact.atkCharge = [{ type: 'ATTACK', power: 1 }];
+  qact.blkCharge = [{ type: 'BLOCK', power: 1 }];
+  ok('Queer Theory still widens the pool', D.atkPoolOf('you', qact) === 2);
+
+  // neither expression may be computed independently again
+  ok('the pool is defined in exactly one place',
+     (HTML.match(/const effPool = atkPoolOf\(/g) || []).length === 1 &&
+     (HTML.match(/const pool=\(\)=> atkPoolOf\(/g) || []).length === 1);
+
+
+  // ---- A2 buttons must actually receive clicks ----
+  // The handler branched on data-af / data-afans, but the board's click
+  // selector is an ALLOW-LIST and those attributes were never added to it, so
+  // both buttons were dead and the panel could not be dismissed. Direct calls
+  // to afAccept()/afAnswer() passed happily; only a real click catches it.
+  const fire = el => el && el.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+
+  setLens('you', 'affective');
+  let ca = D.S.you.team[D.S.you.activeIdx];
+  ca.hp = ca.maxHp - 40;
+  D.afOffer('you'); D.render();
+  const yesBtn = doc.querySelector('[data-af="yes"]');
+  ok('the Read further button renders', !!yesBtn);
+  fire(yesBtn);
+  ok('clicking Read further advances to the question',
+     D.S._af && D.S._af.stage === 'ask',
+     'stage: ' + (D.S._af ? D.S._af.stage : 'cleared'));
+
+  D.render();
+  const optBtns = [...doc.querySelectorAll('[data-afans]')];
+  ok('the answer options render', optBtns.length >= 2, String(optBtns.length));
+  const hpA = ca.hp, handA = D.S.you.hand.length;
+  fire(optBtns[D.S._af.ans]);
+  ok('clicking the right answer heals 20', ca.hp === hpA + 20, hpA + ' -> ' + ca.hp);
+  ok('and draws a card', D.S.you.hand.length === handA + 1);
+  D.render();
+  ok('and the panel closes', !doc.querySelector('.af-offer, .af-ask'));
+
+  setLens('you', 'affective');
+  ca = D.S.you.team[D.S.you.activeIdx];
+  const hpB = ca.hp;
+  D.afOffer('you'); D.render();
+  fire(doc.querySelector('[data-af="no"]'));
+  ok('clicking Set it down dismisses the panel', !D.S._af);
+  ok('and costs nothing', ca.hp === hpB);
+
+  setLens('you', 'affective');
+  ca = D.S.you.team[D.S.you.activeIdx]; ca.hp = ca.maxHp;
+  D.afOffer('you'); D.render();
+  fire(doc.querySelector('[data-af="yes"]')); D.render();
+  const wrongIdx = (D.S._af.ans + 1) % D.S._af.opts.length;
+  const hpC = ca.hp;
+  fire(doc.querySelector('[data-afans="' + wrongIdx + '"]'));
+  ok('clicking a wrong answer costs 10', ca.hp === hpC - 10, hpC + ' -> ' + ca.hp);
+  ok('and the panel closes', !D.S._af);
+
+  // structural: no branch in the click handler may be unreachable
+  {
+    const i2 = HTML.indexOf("const t=e.target.closest('[data-do]");
+    const selEnd = HTML.indexOf("');", i2);
+    const selector = HTML.slice(i2, selEnd);
+    const body = HTML.slice(selEnd, HTML.indexOf('\n}', selEnd));
+    const branched = [...new Set([...body.matchAll(/t\.dataset\.([A-Za-z0-9_]+)/g)].map(m => m[1]))];
+    const kebab = n => 'data-' + n.replace(/([A-Z])/g, c => '-' + c.toLowerCase());
+    const dead = branched.filter(a => selector.indexOf('[' + kebab(a) + ']') < 0);
+    ok('every click-handler branch is reachable', dead.length === 0,
+       'unreachable: ' + dead.map(kebab).join(', '));
+  }
+
+
   console.log(R.join('\n'));
   console.log('\n' + pass + ' passed / ' + fail + ' failed');
   process.exit(fail ? 1 : 0);
