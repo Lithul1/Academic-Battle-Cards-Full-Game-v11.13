@@ -2254,6 +2254,93 @@ body[data-screen="menu"][data-menuscreen="tune"]::before{ background-image:var(-
   .bd-chip.crt .bd-nm{font-size:11.5px;-webkit-line-clamp:2}
   .bd-chip.crt .bd-cav{width:26px;height:26px}
 }
+
+/* ===== the board as one spread (fix_board_spread.py) =====
+   Each arena is a layer 62% tall, masked to fade toward the centre, so the two
+   overlap through the middle 24% and cross-fade. Layers with background-size:
+   cover, NOT background-size:100% 50% -- that stretches the art and cannot
+   honour a focal point. Everything here is z-index 0; the cards are raised. */
+body[data-screen="play"] .board{
+  position:relative; gap:0; padding:0; border-radius:14px;
+  overflow:hidden; isolation:isolate; background:#160f08;
+  box-shadow:inset 0 0 70px rgba(30,20,8,.38), 0 18px 32px rgba(0,0,0,.42);
+}
+body[data-screen="play"] .board-inner{gap:0!important; position:relative; z-index:1}
+body[data-screen="play"] .board::before,
+body[data-screen="play"] .board::after{
+  content:''; position:absolute; left:0; right:0; height:62%;
+  z-index:0; pointer-events:none;
+  background-repeat:repeat, no-repeat;
+  background-size:auto, cover;
+}
+body[data-screen="play"] .board::before{
+  top:0;
+  background-image:
+    repeating-linear-gradient(0deg,rgba(150,120,70,.045) 0 3px,rgba(0,0,0,0) 3px 7px),
+    var(--opp-art,none);
+  background-position:center, var(--opp-pos,center);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 58%,rgba(0,0,0,0) 100%);
+          mask-image:linear-gradient(180deg,#000 0%,#000 58%,rgba(0,0,0,0) 100%);
+}
+body[data-screen="play"] .board::after{
+  bottom:0;
+  background-image:
+    repeating-linear-gradient(0deg,rgba(150,120,70,.045) 0 3px,rgba(0,0,0,0) 3px 7px),
+    var(--you-art,none);
+  background-position:center, var(--you-pos,center bottom);
+  -webkit-mask-image:linear-gradient(0deg,#000 0%,#000 58%,rgba(0,0,0,0) 100%);
+          mask-image:linear-gradient(0deg,#000 0%,#000 58%,rgba(0,0,0,0) 100%);
+}
+/* the sides are layout only now -- the spread shows through them */
+body[data-screen="play"] .board .side{
+  position:relative; z-index:1; border-radius:0; margin:0;
+  background-image:none!important; background:none;
+}
+/* ownership tint: strongest at the outer edge, gone before the middle, so it
+   never draws a line where the worlds meet */
+body[data-screen="play"] .board .side::before{
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+  mix-blend-mode:soft-light; opacity:.5;
+}
+body[data-screen="play"] .board .side.opp-side::before{
+  background:linear-gradient(180deg, var(--opp-tint,#6b6257) 0%,
+    color-mix(in srgb, var(--opp-tint,#6b6257) 32%, transparent) 52%, transparent 82%);
+}
+body[data-screen="play"] .board .side.you-side::before{
+  background:linear-gradient(0deg, var(--you-tint,#6b6257) 0%,
+    color-mix(in srgb, var(--you-tint,#6b6257) 32%, transparent) 52%, transparent 82%);
+}
+body[data-screen="play"] .board .side.opp-side{
+  box-shadow:inset 0 3px 0 color-mix(in srgb, var(--opp-tint,#6b6257) 60%, transparent)}
+body[data-screen="play"] .board .side.you-side{
+  box-shadow:inset 0 -3px 0 color-mix(in srgb, var(--you-tint,#6b6257) 60%, transparent)}
+/* every card above the art and the tint */
+body[data-screen="play"] .board .side > *{position:relative; z-index:1}
+
+body[data-screen="play"] .board[data-opp="gatsby"]{--opp-art:var(--arena-gatsby);--opp-pos:center 62%;--opp-tint:#4d7a8c}
+body[data-screen="play"] .board[data-you="gatsby"]{--you-art:var(--arena-gatsby);--you-pos:center 62%;--you-tint:#4d7a8c}
+body[data-screen="play"] .board[data-opp="hamlet"]{--opp-art:var(--arena-hamlet);--opp-pos:center 60%;--opp-tint:#4d4f8c}
+body[data-screen="play"] .board[data-you="hamlet"]{--you-art:var(--arena-hamlet);--you-pos:center 60%;--you-tint:#4d4f8c}
+body[data-screen="play"] .board[data-opp="frankenstein"]{--opp-art:var(--arena-frankenstein);--opp-pos:center 55%;--opp-tint:#4d7c8c}
+body[data-screen="play"] .board[data-you="frankenstein"]{--you-art:var(--arena-frankenstein);--you-pos:center 55%;--you-tint:#4d7c8c}
+body[data-screen="play"] .board[data-opp="sherlock"]{--opp-art:var(--arena-sherlock);--opp-pos:center 58%;--opp-tint:#8d874d}
+body[data-screen="play"] .board[data-you="sherlock"]{--you-art:var(--arena-sherlock);--you-pos:center 58%;--you-tint:#8d874d}
+body[data-screen="play"] .board[data-opp="wonderland"]{--opp-art:var(--arena-wonderland);--opp-pos:center 66%;--opp-tint:#4d798c}
+body[data-screen="play"] .board[data-you="wonderland"]{--you-art:var(--arena-wonderland);--you-pos:center 66%;--you-tint:#4d798c}
+body[data-screen="play"] .board[data-opp="oz"]{--opp-art:var(--arena-oz);--opp-pos:center 66%;--opp-tint:#5c4e8f}
+body[data-screen="play"] .board[data-you="oz"]{--you-art:var(--arena-oz);--you-pos:center 66%;--you-tint:#5c4e8f}
+body[data-screen="play"] .board[data-opp="macbeth"]{--opp-art:var(--arena-castle);--opp-pos:center bottom;--opp-tint:#8c4d64}
+body[data-screen="play"] .board[data-you="macbeth"]{--you-art:var(--arena-castle);--you-pos:center bottom;--you-tint:#8c4d64}
+body[data-screen="play"] .board[data-opp="othello"]{--opp-art:var(--arena-castle);--opp-pos:center bottom;--opp-tint:#8c4d64}
+body[data-screen="play"] .board[data-you="othello"]{--you-art:var(--arena-castle);--you-pos:center bottom;--you-tint:#8c4d64}
+body[data-screen="play"] .board[data-opp="crucible"]{--opp-art:var(--arena-forest);--opp-pos:center bottom;--opp-tint:#4d8c64}
+body[data-screen="play"] .board[data-you="crucible"]{--you-art:var(--arena-forest);--you-pos:center bottom;--you-tint:#4d8c64}
+body[data-screen="play"] .board[data-opp="tewwg"]{--opp-art:var(--arena-city);--opp-pos:center bottom;--opp-tint:#8c2b21}
+body[data-screen="play"] .board[data-you="tewwg"]{--you-art:var(--arena-city);--you-pos:center bottom;--you-tint:#8c2b21}
+body[data-screen="play"] .board[data-opp="romeojuliet"]{--opp-art:var(--arena-city);--opp-pos:center 60%;--opp-tint:#8c2b21}
+body[data-screen="play"] .board[data-you="romeojuliet"]{--you-art:var(--arena-city);--you-pos:center 60%;--you-tint:#8c2b21}
+body[data-screen="play"] .board[data-opp="odyssey"]{--opp-art:var(--arena-city);--opp-pos:center 55%;--opp-tint:#8c2b21}
+body[data-screen="play"] .board[data-you="odyssey"]{--you-art:var(--arena-city);--you-pos:center 55%;--you-tint:#8c2b21}
 </style>
 </head>
 <body>
@@ -7625,7 +7712,7 @@ function renderGame(root){
      <div class="score"><span class="kos opp">Opp: ${opp.kos}/${S.settings.koTarget}</span><span class="kos you">You: ${you.kos}/${S.settings.koTarget}</span></div>
      <div class="tb-btns"><button data-do="settings">⚙ Tune</button><button data-do="title">⌂ Menu</button></div>
    </div>
-   <div class="board"><div class="board-inner">
+   <div class="board" data-opp="${opp.setKey}" data-you="${you.setKey}"><div class="board-inner">
      <div class="side opp-side" data-arena="${opp.setKey}">
        <div class="side-meta">Opponent · ${setName(opp.setKey)} · hand ${opp.hand.length}</div>
        <div class="row"><div class="bench">${benchTiles(opp,false)}</div>${charTile(opp,'opp')}${pilesFor(opp,'opp')}</div>
