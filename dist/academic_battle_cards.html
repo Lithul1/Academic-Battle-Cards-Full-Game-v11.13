@@ -2341,6 +2341,16 @@ body[data-screen="play"] .board[data-opp="romeojuliet"]{--opp-art:var(--arena-ci
 body[data-screen="play"] .board[data-you="romeojuliet"]{--you-art:var(--arena-city);--you-pos:center 60%;--you-tint:#8c2b21}
 body[data-screen="play"] .board[data-opp="odyssey"]{--opp-art:var(--arena-city);--opp-pos:center 55%;--opp-tint:#8c2b21}
 body[data-screen="play"] .board[data-you="odyssey"]{--you-art:var(--arena-city);--you-pos:center 55%;--you-tint:#8c2b21}
+
+/* ===== no dashed division (fix_board_dashed_borders.py) =====
+   .opp-side / .you-side kept `border:1px dashed` from before the arena art,
+   plus a tinted gradient that the spread's own ownership wash replaced. Both
+   drew a line where the two worlds are meant to meet. */
+body[data-screen="play"] .board .side.opp-side,
+body[data-screen="play"] .board .side.you-side{
+  border:0 !important;
+  background-image:none !important;
+}
 </style>
 </head>
 <body>

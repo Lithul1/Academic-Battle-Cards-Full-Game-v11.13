@@ -324,6 +324,12 @@ setTimeout(() => {
      !/z-index:[2-9]/.test(spread));
   ok('the ownership tint fades out before the middle',
      /transparent 82%/.test(spread));
+  ok('no dashed border divides the two halves',
+     !/\.(opp|you)-side\{[^}]*dashed/.test(
+       boardCss.slice(boardCss.lastIndexOf('/* ===== no dashed division'))),
+     'a dashed rule survives after the fix');
+  ok('the ownership hairlines survive the border removal',
+     /inset 0 3px 0 color-mix/.test(boardCss) && /inset 0 -3px 0 color-mix/.test(boardCss));
   ok('all twelve decks are wired',
      (spread.match(/\.board\[data-opp="/g) || []).length === 12,
      String((spread.match(/\.board\[data-opp="/g) || []).length));
