@@ -2351,6 +2351,27 @@ body[data-screen="play"] .board .side.you-side{
   border:0 !important;
   background-image:none !important;
 }
+
+/* ===== laptop vertical budget (fix_laptop_vertical.py) =====
+   Every --card-h rule was gated on pointer:coarse or on width, so a fine-pointer
+   laptop fell through to the desktop-monitor base of 150px and the hand ate a
+   quarter of a 900px viewport. The constraint is height, so the rule is too. */
+@media (pointer:fine){
+  body[data-screen="play"] .hand{
+    --card-h:clamp(86px, 13.5vh, 150px);
+    --fan-lift:clamp(12px, 2.4vh, 26px);
+  }
+}
+/* below a full-height screen, give the board back the padding as well */
+@media (pointer:fine) and (max-height:900px){
+  body[data-screen="play"] .hand-wrap{padding:3px 10px 5px}
+  body[data-screen="play"] .board .side{padding:5px}
+  body[data-screen="play"] .side-meta{font-size:10px;padding:1px 4px}
+}
+@media (pointer:fine) and (max-height:780px){
+  body[data-screen="play"] .hand-wrap{padding:2px 8px 4px}
+  body[data-screen="play"] .board .side{padding:4px}
+}
 </style>
 </head>
 <body>

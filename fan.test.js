@@ -92,6 +92,77 @@ setTimeout(() => {
   ok('each breakpoint declares a card height', heights.length >= 4,
      'found ' + heights.join(', '));
 
+  // ---- a landscape phone must not get iPad card sizing ----
+  // fix_hand_fan.py gated the iPad rule on width alone; a landscape iPhone is
+  // also coarse, also landscape and also >1000px wide, so it matched and got
+  // 150px cards on a ~390px-tall viewport. Height is the real constraint.
+  const rules = [];
+  {
+    const ls = css.split('\n'); const stack = []; let depth = 0;
+    ls.forEach(l => {
+      if (l.indexOf('@media') >= 0) stack.push([depth, l.trim()]);
+      if (l.indexOf('--card-h:') >= 0) {
+        // the laptop rule is a clamp(), not a plain px value -- resolve it at
+        // the height being simulated rather than assuming a literal
+        const ctx = stack.filter(s => s[0] < depth + 1);
+        const lit = l.match(/--card-h:(\d+)px/);
+        const cl  = l.match(/--card-h:clamp\((\d+)px,\s*([\d.]+)vh,\s*(\d+)px\)/);
+        const key = ctx.length ? ctx[ctx.length-1][1] : 'TOP';
+        if (lit) rules.push([key, +lit[1]]);
+        else if (cl) rules.push([key, { min:+cl[1], vh:+cl[2], max:+cl[3] }]);
+      }
+      depth += (l.split('{').length-1) - (l.split('}').length-1);
+      while (stack.length && stack[stack.length-1][0] >= depth) stack.pop();
+    });
+  }
+  const num = (q, k) => { const m = q.match(new RegExp(k + ':(\\d+)px')); return m ? +m[1] : null; };
+  const resolve = (w, h, coarse, land) => {
+    let win = null;
+    rules.forEach(([q, v]) => {
+      if (q === 'TOP') { if (win === null) win = v; return; }
+      if (q.indexOf('pointer:coarse') >= 0 && !coarse) return;
+      // ...and a fine-pointer rule must not reach a touch device
+      if (q.indexOf('pointer:fine') >= 0 && coarse) return;
+      if (q.indexOf('orientation:landscape') >= 0 && !land) return;
+      const mw = num(q,'min-width'), xw = num(q,'max-width');
+      const mh = num(q,'min-height'), xh = num(q,'max-height');
+      if (mw !== null && w < mw) return;
+      if (xw !== null && w > xw) return;
+      if (mh !== null && h < mh) return;
+      if (xh !== null && h > xh) return;
+      win = v;
+    });
+    if (win && typeof win === 'object')
+      return Math.round(Math.max(win.min, Math.min(win.max, win.vh * h / 100)));
+    return win;
+  };
+  const iPhoneLS = resolve(844, 390, true, true);
+  const iPadLS   = resolve(1180, 820, true, true);
+  ok('a landscape iPhone does not get iPad card height', iPhoneLS < 120,
+     'got ' + iPhoneLS + 'px on a 390px-tall viewport');
+  ok('an iPad in landscape still gets the big cards', iPadLS === 150, 'got ' + iPadLS);
+  ok('the two landscape devices resolve differently', iPhoneLS !== iPadLS);
+  ok('the iPad rule is gated on height, not width alone',
+     /orientation:landscape\) and \(min-width:1000px\) and \(min-height:\d+px\)/.test(css));
+  ok('a portrait phone is unaffected', resolve(390, 844, true, false) < 120);
+  // the laptop is now DELIBERATELY affected: 150px was a desktop-monitor value
+  // that squeezed the board on a 13" screen
+  ok('a 13\u2033 laptop gets a hand sized to its viewport',
+     resolve(1440, 900, false, false) === 122,
+     'got ' + resolve(1440, 900, false, false));
+  ok('a full-height monitor keeps the large cards',
+     resolve(1920, 1080, false, false) >= 145,
+     'got ' + resolve(1920, 1080, false, false));
+  ok('a very short laptop is clamped, not shrunk indefinitely',
+     resolve(1280, 620, false, false) === 86,
+     'got ' + resolve(1280, 620, false, false));
+
+  // ---- move names must wrap rather than clip to "The T..." ----
+  ok('move names may wrap', /\.pc-move \.pc-mn\{[^}]*white-space:normal/.test(css));
+  ok('the counter and cost chip stop shrinking',
+     /\.pc-move \.pc-mc,\.pc-move \.pc-chip\{flex:0 0 auto\}/.test(css));
+
+
   console.log(R.join('\n'));
   console.log('\n' + pass + ' passed / ' + fail + ' failed');
   process.exit(fail ? 1 : 0);
