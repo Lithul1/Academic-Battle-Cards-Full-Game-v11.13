@@ -335,6 +335,60 @@ setTimeout(() => {
      String((spread.match(/\.board\[data-opp="/g) || []).length));
 
 
+  // ---- turn time bar ----
+  // NB: in this suite `doc` is a helper that re-parses builder HTML. The timer
+  // lives on the live board, so use the real document.
+  const live = win.document;
+  APP.screen = 'play';
+  D.newGame(APP.settings, D.defaultDeck('gatsby'), D.defaultDeck('hamlet'));
+  D.S.turn = 'you'; D.S.settings.turnTimer = 60;
+  const barAt = t => { D.S._timeLeft = t; D.render();
+    const f = live.getElementById('turnbarfill');
+    return f ? parseFloat(f.style.width) : null; };
+  ok('the bar is full at the start', Math.round(barAt(60)) === 100, String(barAt(60)));
+  ok('it is half empty at half time', Math.round(barAt(30)) === 50, String(barAt(30)));
+  ok('and empty at zero', barAt(0) === 0, String(barAt(0)));
+  D.S._timeLeft = 30; D.render();
+  ok('plenty of time reads as neutral',
+     live.getElementById('turnclock').className.indexOf('low') < 0 &&
+     live.getElementById('turnclock').className.indexOf('warn') < 0);
+  D.S._timeLeft = 15; D.render();
+  ok('a third left warns', /warn/.test(live.getElementById('turnclock').className));
+  D.S._timeLeft = 4; D.render();
+  ok('under five seconds is urgent', /low/.test(live.getElementById('turnclock').className));
+  ok('the seconds stay readable inside the bar',
+     live.getElementById('turnbartext').textContent === '4s');
+
+  // paintTimer runs every second WITHOUT a render -- a render-only test misses
+  // exactly the path the player actually sees
+  D.S._timeLeft = 60; D.render();
+  const node = live.getElementById('turnclock');
+  D.S._timeLeft = 17; D.paintTimer();
+  ok('the per-second tick reuses the same node',
+     live.getElementById('turnclock') === node);
+  ok('the per-second tick moves the fill',
+     Math.round(parseFloat(live.getElementById('turnbarfill').style.width)) === 28,
+     live.getElementById('turnbarfill').style.width);
+  ok('the per-second tick updates the label',
+     live.getElementById('turnbartext').textContent === '17s');
+
+  // a shorter timer (the Sic Soc boss runs 15s) must scale, not clip
+  D.S.settings.turnTimer = 15; D.S._timeLeft = 15; D.render();
+  ok('a 15s timer starts full',
+     Math.round(parseFloat(live.getElementById('turnbarfill').style.width)) === 100);
+  D.S._timeLeft = 5; D.paintTimer();
+  ok('and is a third full at 5 of 15',
+     Math.round(parseFloat(live.getElementById('turnbarfill').style.width)) === 33,
+     live.getElementById('turnbarfill').style.width);
+
+  // presentation only: the mechanism must be untouched
+  ok('the timer still runs on its own interval',
+     /turnTimerId=setInterval\(tickTurnTimer,1000\)/.test(HTML));
+  ok('reduced motion disables the pulse',
+     /prefers-reduced-motion[\s\S]{0,140}\.turnbar\.low\{animation:none\}/.test(HTML));
+  APP.screen = 'builder';
+
+
   // ---------------- no regressions ----------
   const wrong = decks.filter(k => {
     const dd = D.defaultDeck(k);

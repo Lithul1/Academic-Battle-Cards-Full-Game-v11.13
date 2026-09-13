@@ -2351,6 +2351,55 @@ body[data-screen="play"] .board .side.you-side{
   border:0 !important;
   background-image:none !important;
 }
+
+/* ===== laptop vertical budget (fix_laptop_vertical.py) =====
+   Every --card-h rule was gated on pointer:coarse or on width, so a fine-pointer
+   laptop fell through to the desktop-monitor base of 150px and the hand ate a
+   quarter of a 900px viewport. The constraint is height, so the rule is too. */
+@media (pointer:fine){
+  body[data-screen="play"] .hand{
+    --card-h:clamp(86px, 13.5vh, 150px);
+    --fan-lift:clamp(12px, 2.4vh, 26px);
+  }
+}
+/* below a full-height screen, give the board back the padding as well */
+@media (pointer:fine) and (max-height:900px){
+  body[data-screen="play"] .hand-wrap{padding:3px 10px 5px}
+  body[data-screen="play"] .board .side{padding:5px}
+  body[data-screen="play"] .side-meta{font-size:10px;padding:1px 4px}
+}
+@media (pointer:fine) and (max-height:780px){
+  body[data-screen="play"] .hand-wrap{padding:2px 8px 4px}
+  body[data-screen="play"] .board .side{padding:4px}
+}
+
+/* ===== iOS arena mask (fix_ios_arena_mask.py) =====
+   The spread set mask-image but not mask-size or mask-repeat. WebKit on iOS
+   then lays the gradient out at its intrinsic size and tiles it, which masked
+   the player's arena away to nothing and left only the ownership tint. Desktop
+   defaults hid the omission. State all of it. */
+body[data-screen="play"] .board::before,
+body[data-screen="play"] .board::after{
+  -webkit-mask-size:100% 100%;  mask-size:100% 100%;
+  -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+  -webkit-mask-position:center;  mask-position:center;
+  -webkit-mask-origin:border-box; mask-origin:border-box;
+}
+/* Where masking is not available at all, keep the art and lose only the
+   cross-fade. A missing blend is a far smaller failure than a missing
+   background. */
+@supports not ((-webkit-mask-image: linear-gradient(#000,#000)) or (mask-image: linear-gradient(#000,#000))){
+  body[data-screen="play"] .board::before{
+    height:52%;
+    -webkit-mask-image:none; mask-image:none;
+    box-shadow:inset 0 -34px 30px -18px rgba(22,15,8,.92);
+  }
+  body[data-screen="play"] .board::after{
+    height:52%;
+    -webkit-mask-image:none; mask-image:none;
+    box-shadow:inset 0 34px 30px -18px rgba(22,15,8,.92);
+  }
+}
 </style>
 </head>
 <body>

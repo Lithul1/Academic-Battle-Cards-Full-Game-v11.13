@@ -2372,6 +2372,73 @@ body[data-screen="play"] .board .side.you-side{
   body[data-screen="play"] .hand-wrap{padding:2px 8px 4px}
   body[data-screen="play"] .board .side{padding:4px}
 }
+
+/* ===== iOS arena mask (fix_ios_arena_mask.py) =====
+   The spread set mask-image but not mask-size or mask-repeat. WebKit on iOS
+   then lays the gradient out at its intrinsic size and tiles it, which masked
+   the player's arena away to nothing and left only the ownership tint. Desktop
+   defaults hid the omission. State all of it. */
+body[data-screen="play"] .board::before,
+body[data-screen="play"] .board::after{
+  -webkit-mask-size:100% 100%;  mask-size:100% 100%;
+  -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+  -webkit-mask-position:center;  mask-position:center;
+  -webkit-mask-origin:border-box; mask-origin:border-box;
+}
+/* Where masking is not available at all, keep the art and lose only the
+   cross-fade. A missing blend is a far smaller failure than a missing
+   background. */
+@supports not ((-webkit-mask-image: linear-gradient(#000,#000)) or (mask-image: linear-gradient(#000,#000))){
+  body[data-screen="play"] .board::before{
+    height:52%;
+    -webkit-mask-image:none; mask-image:none;
+    box-shadow:inset 0 -34px 30px -18px rgba(22,15,8,.92);
+  }
+  body[data-screen="play"] .board::after{
+    height:52%;
+    -webkit-mask-image:none; mask-image:none;
+    box-shadow:inset 0 34px 30px -18px rgba(22,15,8,.92);
+  }
+}
+
+/* ===== turn time bar (fix_timer_bar.py) =====
+   Replaces the numeric chip. Reads from across a room, which two digits do not,
+   and earns its urgency by warming as it drains rather than only changing
+   colour at the end. The seconds stay inside it: a bar alone cannot tell you
+   whether you have eight seconds or two. */
+.turnbar{
+  position:relative; width:clamp(120px,22vw,210px); height:18px;
+  border-radius:9px; overflow:hidden;
+  background:rgba(0,0,0,.34);
+  border:1px solid #6b5a33;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
+  flex:0 0 auto;
+}
+.turnbar .tb-fill{
+  position:absolute; left:0; top:0; bottom:0;
+  background:linear-gradient(90deg,#7FB77E,#A8CE86);
+  transition:width .95s linear, background .5s ease;
+  border-radius:9px 0 0 9px;
+}
+.turnbar.warn .tb-fill{background:linear-gradient(90deg,#D79A3A,#E8C05A)}
+.turnbar.low  .tb-fill{background:linear-gradient(90deg,#B5352A,#D2543F)}
+.turnbar .tb-text{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-family:var(--cond),sans-serif; font-size:11px; letter-spacing:.8px;
+  font-weight:800; color:#F6ECD2; text-shadow:0 1px 2px rgba(0,0,0,.85);
+  pointer-events:none;
+}
+/* the last five seconds pulse -- motion, not just a colour change */
+@keyframes tbPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.turnbar.low{animation:tbPulse .9s ease-in-out infinite}
+@media (max-width:760px){
+  .turnbar{width:clamp(96px,30vw,150px);height:16px}
+  .turnbar .tb-text{font-size:10px}
+}
+@media (prefers-reduced-motion: reduce){
+  .turnbar.low{animation:none}
+  .turnbar .tb-fill{transition:none}
+}
 </style>
 </head>
 <body>
@@ -5003,8 +5070,18 @@ function tickTurnTimer(){
   if(S._timeLeft<=0){ stopTurnTimer(); if(S.scrim && S.scrim.ruleShift==='sicsoc'){ const a=active(S.you); if(a&&a.hp>0){ a.hp=Math.max(0,a.hp-20); pushLog('Doomscroll Clock — 20 distraction damage!'); checkKO(S.you,'you'); } } pushLog('⏱ Time! Your turn ends automatically.'); toast('Time up — turn passed.','bad'); if(S&&!S.over) endTurn(); }
 }
 function paintTimer(){
+  /* paintTimer runs every second WITHOUT a full render, so it must not rebuild
+     the element -- it sets the fill width and the label in place. */
   const el=document.getElementById('turnclock'); if(!el||!S) return;
-  const t=Math.max(0,S._timeLeft|0); el.textContent='⏱ '+t+'s'; el.classList.toggle('low', t<=5);
+  const tot=+(S.settings.turnTimer||60)||60;
+  const t=Math.max(0,S._timeLeft|0);
+  const fill=document.getElementById('turnbarfill');
+  const txt=document.getElementById('turnbartext');
+  if(fill) fill.style.width=Math.max(0,Math.min(100,(t/tot)*100))+'%';
+  if(txt) txt.textContent=t+'s';
+  el.setAttribute('aria-label', t+' seconds left');
+  el.classList.toggle('low', t<=5);
+  el.classList.toggle('warn', t>5 && t<=Math.max(8, tot*0.34));
 }
 function startTurn(){
   if(!S) return;
@@ -7749,7 +7826,15 @@ function renderGame(root){
        <div class="row"><div class="bench">${benchTiles(opp,false)}</div>${charTile(opp,'opp')}${pilesFor(opp,'opp')}</div>
        ${critChip(opp,'opp')}
      </div>
-     <div class="midline"><div class="phasehud">${phaseHud}</div>${S.turn==='you'&&!S.over?`<span id="turnclock" class="turnclock${(S._timeLeft<=5)?' low':''}">⏱ ${Math.max(0,(S._timeLeft!=null?S._timeLeft:(S.settings.turnTimer||60)))}s</span>`:''}<div class="actions">${actionBtn}</div></div>
+     <div class="midline"><div class="phasehud">${phaseHud}</div>${S.turn==='you'&&!S.over?(function(){
+      const _tot=+(S.settings.turnTimer||60)||60;
+      const _left=Math.max(0,(S._timeLeft!=null?S._timeLeft:_tot));
+      const _pct=Math.max(0,Math.min(100,(_left/_tot)*100));
+      const _st=_left<=5?' low':(_left<=Math.max(8,_tot*0.34)?' warn':'');
+      return `<div id="turnclock" class="turnbar${_st}" role="timer" aria-label="${_left} seconds left">`
+           + `<div id="turnbarfill" class="tb-fill" style="width:${_pct}%"></div>`
+           + `<span id="turnbartext" class="tb-text">${_left}s</span></div>`;
+    })():''}<div class="actions">${actionBtn}</div></div>
      <div class="side you-side" data-arena="${you.setKey}">
        ${critChip(you,'you')}
        <div class="row"><div class="bench">${benchTiles(you,true)}</div>${charTile(you,'you')}${pilesFor(you,'you')}</div>
@@ -10512,6 +10597,7 @@ window.ABC_DEBUG = {
   symbolsOff, calcBlock, doBlock, critFx, sideOfChar,
   afOffer, afAccept, afDecline, afAnswer, afModal,
   atkPoolOf,
+  paintTimer, startTurnTimer, stopTurnTimer,
   seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,
