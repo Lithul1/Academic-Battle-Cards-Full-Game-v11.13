@@ -2400,6 +2400,90 @@ body[data-screen="play"] .board::after{
     box-shadow:inset 0 34px 30px -18px rgba(22,15,8,.92);
   }
 }
+
+/* ===== turn time bar (fix_timer_bar.py) =====
+   Replaces the numeric chip. Reads from across a room, which two digits do not,
+   and earns its urgency by warming as it drains rather than only changing
+   colour at the end. The seconds stay inside it: a bar alone cannot tell you
+   whether you have eight seconds or two. */
+.turnbar{
+  position:relative; width:clamp(120px,22vw,210px); height:18px;
+  border-radius:9px; overflow:hidden;
+  background:rgba(0,0,0,.34);
+  border:1px solid #6b5a33;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
+  flex:0 0 auto;
+}
+.turnbar .tb-fill{
+  position:absolute; left:0; top:0; bottom:0;
+  background:linear-gradient(90deg,#7FB77E,#A8CE86);
+  transition:width .95s linear, background .5s ease;
+  border-radius:9px 0 0 9px;
+}
+.turnbar.warn .tb-fill{background:linear-gradient(90deg,#D79A3A,#E8C05A)}
+.turnbar.low  .tb-fill{background:linear-gradient(90deg,#B5352A,#D2543F)}
+.turnbar .tb-text{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-family:var(--cond),sans-serif; font-size:11px; letter-spacing:.8px;
+  font-weight:800; color:#F6ECD2; text-shadow:0 1px 2px rgba(0,0,0,.85);
+  pointer-events:none;
+}
+/* the last five seconds pulse -- motion, not just a colour change */
+@keyframes tbPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.turnbar.low{animation:tbPulse .9s ease-in-out infinite}
+@media (max-width:760px){
+  .turnbar{width:clamp(96px,30vw,150px);height:16px}
+  .turnbar .tb-text{font-size:10px}
+}
+@media (prefers-reduced-motion: reduce){
+  .turnbar.low{animation:none}
+  .turnbar .tb-fill{transition:none}
+}
+/* ===== Three-Act Evolution (Act cards) ===== */
+.act-badge{ position:absolute; top:5px; left:5px; z-index:6; font-family:var(--cond); font-size:9px; line-height:1; letter-spacing:1px;
+  padding:3px 6px; border-radius:5px; font-weight:800; box-shadow:0 1px 3px rgba(0,0,0,.45); }
+.act-badge.a2{ background:linear-gradient(90deg,#5a1414,#8c2a20,#5a1414); color:#f6dcd4; }
+.act-badge.a3{ background:linear-gradient(90deg,#caa53a,#f5e08a,#caa53a); color:#3a2b06; text-shadow:0 1px 0 rgba(255,255,255,.35); }
+.act-res{ position:absolute; top:5px; right:5px; z-index:6; font-family:var(--cond); font-size:9px; letter-spacing:1px; padding:3px 6px;
+  border-radius:5px; background:#1a0e10; color:#e9b3aa; border:1px solid #8c2a20; }
+.act-res.comic{ background:#123322; color:#cfeecf; border-color:#3f6c3a; }
+.act-pass{ position:absolute; left:5px; bottom:5px; z-index:6; max-width:calc(100% - 40px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  font-family:var(--cond); font-size:9.5px; letter-spacing:.6px; padding:3px 7px; border-radius:6px; background:rgba(26,14,16,.88); color:#f5c16c; border:1px solid #8c2a20; cursor:help; }
+.act-pass.live{ border-color:#f5c16c; box-shadow:0 0 0 2px rgba(245,193,108,.35); color:#ffe3a3; }
+/* Act II: the frame darkens and cracks -- conflict has marked the character */
+.char.act2{ --frame:#0c0506; --paper:#e2cbc4; box-shadow:0 -6px 0 -2px #d4bdb6, 0 -6px 0 0 #3a1a1a, 0 3px 0 rgba(40,25,12,.45), 0 5px 12px rgba(40,25,12,.18); }
+.char.act2 .pc-art{ filter:contrast(1.06) saturate(.92); }
+.act-crack{ position:absolute; inset:0; width:100%; height:100%; z-index:4; pointer-events:none; }
+.act-crack path{ fill:none; stroke:rgba(236,200,190,.8); stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+/* Act III: gilt proscenium and tied-back curtains -- the climax is staged */
+.char.act3{ --frame:#7a5a14; --paper:#f1e2c0; border-color:#b8902c;
+  box-shadow:0 -12px 0 -4px #d4bdb6, 0 -12px 0 -2px #3a1a1a, 0 -6px 0 -2px #e2cbc4, 0 -6px 0 0 #3a1a1a,
+             0 0 0 2px #3a2806, 0 0 0 4px #e3c35a, 0 4px 0 #3a2806, 0 10px 24px rgba(160,110,20,.35); }
+.char.act3 .pc-art{ border-color:#b8902c; box-shadow:inset 0 0 0 2px #f5e08a; }
+.act-curtain{ position:absolute; top:0; bottom:0; width:12%; z-index:3; pointer-events:none;
+  background:repeating-linear-gradient(90deg,#6e0f14 0 5px,#9c1c22 5px 9px,#5a0b10 9px 12px); box-shadow:inset 0 -8px 10px rgba(0,0,0,.35); }
+.act-curtain.l{ left:0; border-bottom-right-radius:100% 62%; }
+.act-curtain.r{ right:0; border-bottom-left-radius:100% 62%; }
+.act-valance{ position:absolute; left:0; right:0; top:0; height:12px; z-index:4; pointer-events:none;
+  background:radial-gradient(circle at 9px -2px,#9c1c22 8px,transparent 9px) 0 0/18px 12px repeat-x, linear-gradient(#6e0f14,#6e0f14) 0 0/100% 4px no-repeat;
+  border-bottom:1px solid rgba(245,224,138,.5); }
+/* the evolution moment */
+@keyframes actEvoDrop{ 0%{ transform:translateY(-40px) scale(1.08) rotate(-2deg); opacity:0; filter:brightness(1.8); }
+  55%{ transform:translateY(4px) scale(.98); opacity:1; filter:brightness(1.25); } 100%{ transform:none; filter:none; } }
+.char.evo-in{ animation:actEvoDrop .62s cubic-bezier(.2,.9,.25,1.2) both; }
+@media (prefers-reduced-motion: reduce){ .char.evo-in{ animation:none; } }
+/* Act cards in hand ride on the character hand card */
+.act-hc .hc-top.act2t{ background:linear-gradient(90deg,#5a1414,#8c2a20); color:#f6dcd4; }
+.act-hc .hc-top.act3t{ background:linear-gradient(90deg,#b8902c,#f5e08a); color:#3a2b06; }
+.act-cond{ font-family:var(--cond); font-size:9px; letter-spacing:.5px; text-align:center; padding:3px 5px; border-top:1px dashed #c9b58a; }
+.act-cond.met{ color:#1f6a3a; } .act-cond.unmet{ color:#8c2a20; }
+/* the Act III gate */
+.trivia.climax .tri-head{ background:linear-gradient(90deg,#6e0f14,#9c1c22 50%,#6e0f14); color:#f5e08a; border-bottom:3px solid #caa53a; }
+.gate-tag{ display:inline-block; font-family:var(--cond); font-size:10px; letter-spacing:1px; padding:2px 7px; border-radius:5px; margin-left:6px; vertical-align:middle; }
+.gate-tag.climax{ background:#9c1c22; color:#f5e08a; } .gate-tag.theme{ background:#1F6A6A; color:#FBF3DD; } .gate-tag.story{ background:#3a322b; color:#FBF3DD; }
+.tri-opt.gate-wrong{ background:#f2c2bc; border-color:#8C2A20; text-decoration:line-through; opacity:.8; }
+.tri-opt.gate-right{ background:#cfe8cf; border-color:#1f6a3a; }
+.gate-foot{ padding:0 16px 16px; display:flex; justify-content:flex-end; }
 </style>
 </head>
 <body>
@@ -3624,9 +3708,9 @@ const DATA = {
     { id:'outofprint', name:'Out of Print', kind:'STATUS', rarity:'R', text:'Discard 1 card. Enemy Active cannot attack for 2 turns. Cannot be cleansed, ignores 🛡️ Laminate, and switching does not cure it.', effect:'outofprint' },
     { id:'plagiarism', name:'Plagiarism', kind:'UTILITY', rarity:'R', text:"Repeat the opponent's last attack back at their Active — same damage and status effects, unblockable.", effect:'plagiarism' },
     /* --- Saga Bookmarks: multi-act, live in the Active ✦ zone until the final act --- */
-    { id:'serialnovel', name:'Serialized Novel', kind:'SUPPORT', rarity:'R', saga:true, stages:['draw1','draw1','draw1'], text:'Act I–III: draw 1 card at the start of each of your turns.', effect:'saga' },
-    { id:'threeact', name:'Three-Act Structure', kind:'UTILITY', rarity:'E', saga:true, stages:['draw1','tearfoe','atkboost30'], text:"Act I: draw 1. Act II: inflict 🪢 Tear on the enemy Active. Act III: your Active's next attack deals +30.", effect:'saga' },
-    { id:'deusex', name:'Deus Ex Machina', kind:'RESET', rarity:'L', saga:true, stages:['hardcover','heal30','revive'], text:'Act I: your Active gains 📕 Hardcover. Act II: heal your Active 30. Act III: return one knocked-out character to your bench at half HP.', effect:'saga' },
+    { id:'serialnovel', name:'Serialized Novel', kind:'SUPPORT', rarity:'R', saga:true, stages:['draw1','draw1','draw1'], text:'Chapter I–III: draw 1 card at the start of each of your turns.', effect:'saga' },
+    { id:'threeact', name:'Three-Act Structure', kind:'UTILITY', rarity:'E', saga:true, stages:['draw1','tearfoe','atkboost30'], text:"Chapter I: draw 1. Chapter II: inflict 🪢 Tear on the enemy Active. Chapter III: your Active's next attack deals +30.", effect:'saga' },
+    { id:'deusex', name:'Deus Ex Machina', kind:'RESET', rarity:'L', saga:true, stages:['hardcover','heal30','revive'], text:'Chapter I: your Active gains 📕 Hardcover. Chapter II: heal your Active 30. Chapter III: return one knocked-out character to your bench at half HP.', effect:'saga' },
   ],
   // -------- 1ST EDITION (Commander) CARDS --------
   firsteds: [
@@ -3953,6 +4037,33 @@ window.ABC_BOSS_IMG_ALT={sandroid:"data:image/jpeg;base64,__ABCASSET_1006__",dye
 window.ABC_SND={music_thereturn:"data:audio/mpeg;base64,__ABCASSET_125__",music_hiphop9:"data:audio/mpeg;base64,__ABCASSET_126__",sfx_card_slide:"data:audio/mpeg;base64,__ABCASSET_117__",sfx_card_place:"data:audio/mpeg;base64,__ABCASSET_118__",sfx_card_shove:"data:audio/mpeg;base64,__ABCASSET_119__",sfx_card_shuffle:"data:audio/mpeg;base64,__ABCASSET_120__",sfx_book_flip:"data:audio/mpeg;base64,__ABCASSET_121__",sfx_card_fan:"data:audio/mpeg;base64,__ABCASSET_122__",sfx_pack_open:"data:audio/mpeg;base64,__ABCASSET_123__",sfx_pack_take:"data:audio/mpeg;base64,__ABCASSET_124__",music_boss:"data:audio/mpeg;base64,__ABCASSET_127__"};
 window.ABC_BOSS_IMG={"dyefone":"data:image/webp;base64,__ABCASSET_909__","sandroid":"data:image/webp;base64,__ABCASSET_910__","sinstaram":"data:image/webp;base64,__ABCASSET_911__","claystation":"data:image/webp;base64,__ABCASSET_952__","pintendo":"data:image/webp;base64,__ABCASSET_953__","hexbox":"data:image/webp;base64,__ABCASSET_954__","sicsoc":"data:image/webp;base64,__ABCASSET_955__"};
 window.ABC_BOSS_IMGPOS={"dyefone":"44% 40%","sandroid":"48% 40%","sinstaram":"50% 40%"};
+</script>
+<script>
+/* THREE-ACT EVOLUTION: DATA */
+(function(){ var D=window.DATA; if(!D) return;
+  D.acts = [
+    { id:"macbeth_thane_of_cawdor", deck:"macbeth", act:2, from:"macbeth", base:["macbeth","macbeth"], plot:"hit",
+      name:"Thane of Cawdor", hp:160, archetype:"Outlaw", accent:"#5A6E8A", tags:["Thane"],
+      img:"data:image/webp;base64,__ABCASSET_1122__", imgpos:"50% 10%", hpos:"50% 22%",
+      atk:{n:"No Armour There", t:"\u201cNothing can stop me...\u201d Gains \ud83d\udde1\ufe0f Pierce.", cost:3, dmg:50, flags:["pierce"], label:"50/3"},
+      blk:{n:"Slip the Knot", t:"Macbeth eludes punishment. Prevent the next \ud83e\ude79 Glue.", cost:2, block:30, immuneNext:["glue"], label:"30/2"} },
+    { id:"macbeth_tyrant_of_dunsinane", deck:"macbeth", act:3, from:"macbeth_thane_of_cawdor", base:["macbeth","macbeth"], plot:"climaxQ", resolution:"tragic",
+      name:"Tyrant of Dunsinane", hp:190, archetype:"Fallen", accent:"#5A6E8A", tags:["King"],
+      img:"data:image/webp;base64,__ABCASSET_1123__", imgpos:"50% 8%", hpos:"50% 14%",
+      atk:{n:"Final Stand", t:"\u201cMy blood and my blade will cut through my enemies.\u201d Costs 20 of your own HP.", cost:3, dmg:70, sacrifice:20, label:"70/3"},
+      blk:{n:"Sleep No More", t:"\u201cWhat more can I sacrifice?!\u201d Discard a random card from hand to resolve.", cost:1, block:30, selfDiscardHand:1, label:"30/1"},
+      passive:{ id:"paranoia", name:"Violent Paranoia", text:"Attacks deal +20 while this card is below half health. Caveat: it can never be healed.", lowHpAtkAdd:20, noHeal:true } }
+  ];
+  D.actGate = D.actGate || {};
+  D.actGate.macbeth = [
+    { tag:"climax", q:"What finally breaks Macbeth\u2019s confidence in the last battle?", opts:["The witches take back their prophecy","Macduff reveals he was not born in the ordinary way","Lady Macbeth\u2019s ghost appears to him","Fleance returns with an army"], ans:1 },
+    { tag:"climax", q:"How does Birnam Wood \u201ccome to Dunsinane\u201d?", opts:["A storm uproots the forest","The witches enchant the trees","Malcolm\u2019s soldiers carry cut branches as cover","Macbeth orders the wood burned"], ans:2 },
+    { tag:"climax", q:"What news reaches Macbeth shortly before the final battle?", opts:["Banquo\u2019s ghost has returned","Duncan\u2019s sons have fled to France","The witches have been captured","Lady Macbeth is dead"], ans:3 },
+    { tag:"theme", q:"Which idea does the play keep returning to through Macbeth\u2019s choices?", opts:["Unchecked ambition destroys the one who pursues it","Loyalty is always rewarded","Fate can be escaped through courage","Kings are chosen by the people"], ans:0 },
+    { tag:"theme", q:"What does the recurring image of blood on the hands suggest?", opts:["Victory in battle","Royal inheritance","Guilt that cannot be washed away","Loyalty between soldiers"], ans:2 },
+    { tag:"theme", q:"How does the play treat the witches\u2019 prophecies?", opts:["They are false and never come true","They tempt Macbeth, but his own choices bring his downfall","They are the only cause of his crimes","Every character ignores them"], ans:1 }
+  ];
+})();
 </script>
 <script>
 /* ACADEMIC BATTLE CARDS — engine + UI (v2: title, deck pick, full bookmarks, defense, discard piles) */
@@ -4331,7 +4442,7 @@ function defaultDeck(k){
   // plain slice takes every ATTACK before it reaches a single BLOCK. Draw an
   // even split across both types and spread it over the power bands instead.
   const def={ d:k, ch:poolCh(k).slice(0,c.ch), ab:abStarter(k, c.ab), bm:[], cr:poolCr().slice(0,c.cr), fe:feFor(k) };
-  return fillGaps(def, c);
+  return actStarter(fillGaps(def, c));
 }
 function pickN(arr,n){ const p=arr.slice(), o=[]; while(o.length<n && p.length) o.push(p.splice(rnd(p.length),1)[0]); return o; }
 function randomBookmarks(){
@@ -4396,6 +4507,9 @@ function clampDeck(def){
   const _chOk=new Set(_bks.reduce(function(a,b){
     return a.concat((DATA.characters[b]||[]).map(function(c){ return c.id; })); },[]));
   def.ch=(def.ch||[]).filter(id=>_chOk.has(id)).slice(0,_CAP.ch);
+  /* Act cards: own book only, a legal line only, and inside the character limit */
+  def.act=actLegal((def.act||[]).filter(function(id){ const a=actById(id); return a && _bks.indexOf(a.deck)>=0; }), def.ch);
+  if(def.ch.length+def.act.length>_CAP.ch) def.act=actLegal(def.act.slice(0,Math.max(0,_CAP.ch-def.ch.length)), def.ch);
   /* an ab entry is a plain index into def.d, or {d,i} naming its own book */
   def.ab=(def.ab||[]).filter(function(r){
     if(r&&typeof r==='object') return _bks.indexOf(r.d)>=0 && r.i>=0 && r.i<((DATA.abcs[r.d]||[]).length);
@@ -4497,12 +4611,13 @@ function makeDeck(def){
   def.cr.forEach((i,n)=>{ const c=DATA.crits[i]; if(c) deck.push({cat:'crit',...clone(c),cid:'c'+i+'_'+n+Math.random().toString(36).slice(2,5)}); });
   (def.edab||[]).forEach((cid,n)=>{ const a=edAbcByCid(def.d,cid); if(a) deck.push({cat:'abc',...clone(a),cid:'ea'+n+Math.random().toString(36).slice(2,5)}); });
   Object.keys(def.edbm||{}).forEach((cid)=>{ const ct=def.edbm[cid]; const b=edBmByCid(def.d,cid); if(b){ for(let n=0;n<ct;n++) deck.push({cat:'bookmark',...clone(b),cid:'eb'+n+Math.random().toString(36).slice(2,5)}); } });
+  (def.act||[]).forEach(function(id,n){ const a=actById(id); if(a) deck.push({cat:'act', actId:id, name:a.name, act:a.act, deck:a.deck, cid:'act'+n+'_'+Math.random().toString(36).slice(2,6)}); });
   return shuffle(deck);
 }
 function newPlayer(name,def,st,drawn){
   const ids=def.ch.length?def.ch:DATA.characters[def.d].map(c=>c.id);
   const defs=ids.map(id=>edResolveChar(def,id)).filter(Boolean);
-  const pool=shuffle(clone(defs));
+  const pool=actFrontLoad(shuffle(clone(defs)),def);
   const team=pool.slice(0,1+st.benchSize).map(d=>makeChar(d,st.hpScale));
   (def.fe||[]).slice(0,LIMITS.fe).forEach(id=>{ const fd=firstedById(id); if(fd) team.push(makeChar(fd,st.hpScale)); });
   const deck=makeDeck(def);
@@ -4549,7 +4664,7 @@ function newGame(st,youDef,oppDef){
 function pmEncodeDeck(def){
   try{
     const j=JSON.stringify({ d:def.d, books:def.books||[], pm:true,
-      ch:def.ch, ab:def.ab, bm:def.bm, cr:def.cr, fe:def.fe||[] });
+      ch:def.ch, ab:def.ab, bm:def.bm, cr:def.cr, fe:def.fe||[], act:def.act||[] });
     return 'ABC-PM-'+window.btoa(unescape(encodeURIComponent(j))).replace(/=+$/,'');
   }catch(e){ return ''; }
 }
@@ -4563,13 +4678,13 @@ function pmDecodeDeck(code){
     if(!o||!o.pm||!o.books||!o.books.length) return null;
     if(!o.books.every(function(k){ return DATA.characters[k]; })) return null;
     return { d:o.d||o.books[0], books:o.books, pm:true,
-             ch:o.ch||[], ab:o.ab||[], bm:o.bm||[], cr:o.cr||[], fe:o.fe||[],
+             ch:o.ch||[], ab:o.ab||[], bm:o.bm||[], cr:o.cr||[], fe:o.fe||[], act:o.act||[],
              ed:{}, edab:[], edbm:{} };
   }catch(e){ return null; }
 }
 function isPmCode(code){ return String(code||'').trim().indexOf('ABC-PM-')===0; }
 function encodeDeck(def){
-  try{ const j=JSON.stringify({d:def.d,ch:def.ch,ab:def.ab,bm:def.bm,cr:def.cr,fe:def.fe||[]});
+  try{ const j=JSON.stringify({d:def.d,ch:def.ch,ab:def.ab,bm:def.bm,cr:def.cr,fe:def.fe||[],act:def.act||[]});
     return 'ABC-'+window.btoa(unescape(encodeURIComponent(j))).replace(/=+$/,''); }
   catch(e){ return ''; }
 }
@@ -4579,7 +4694,7 @@ function decodeDeck(code){
     s=s.replace(/\s+/g,''); while(s.length%4) s+='=';
     const o=JSON.parse(decodeURIComponent(escape(window.atob(s))));
     if(!o||!o.d||!DATA.characters[o.d]) return null;
-    return clampDeck({d:o.d,ch:o.ch||[],ab:o.ab||[],bm:o.bm||[],cr:o.cr||[],fe:o.fe||[]});
+    return clampDeck({d:o.d,ch:o.ch||[],ab:o.ab||[],bm:o.bm||[],cr:o.cr||[],fe:o.fe||[],act:o.act||[]});
   }catch(e){ return null; }
 }
 function dealOne(side){ const p=S[side]; if(p.deck.length){ const c=p.deck.shift(); c._new=true; p.hand.push(c); p._lastDrawn=c; } }
@@ -4802,6 +4917,7 @@ function zoomHtmlFor(card){
       const b = (typeof card.i==='number' && DATA.bookmarks[card.i]) ? DATA.bookmarks[card.i] : card;
       return buildBmPreview(b);
     }
+    if(card.cat==='act'){ const _a=actById(card.actId); return _a?buildCharPreview(_a,_a.deck):''; }
     if(card.fe) return buildFePreview(card);
     if(card.cat==='char' || card.atk) return buildCharPreview(card, card.deck||card.d||'');
     if(card.cat==='abc') return buildAbcPreview(card);
@@ -4966,6 +5082,7 @@ function applyDmg(c, amt, opts){
   let d=Math.min(amt, c.hp);
   if((S._cliffhanger||0)>0 && isActiveAny(c) && d>=c.hp){ d=Math.max(0,c.hp-1); if(!opts.quiet && typeof pushLog==='function') pushLog(`\u{1F4D6} Cliffhanger: ${c.name} holds on at 1 HP.`); }
   c.hp=Math.max(0,c.hp-d);
+  if(d>0) c._tookHit=true;
   return d;
 }
 
@@ -5009,7 +5126,7 @@ function adaptInherit(p, side, fallen, succ){
   if(side==='you' && pool.length>1) askPick('Adaptation — inherit which charge?', pool.map((c,i)=>({label:nameOf(c),val:i})), i=>take(pool[i]));
   else take(pool[0]);
 }
-function healChar(c, amt){ if(c && c.hp<=0) escClear(c); if(!c||amt<=0) return 0; if(c.fe && c.passive && c.passive.noHeal){ if(typeof pushLog==='function') pushLog(`${c.name} is too far gone to be healed.`); return 0; } const b0=c.hp; c.hp=Math.min(c.maxHp, c.hp+amt); return c.hp-b0; }
+function healChar(c, amt){ if(c && c.hp<=0) escClear(c); if(!c||amt<=0) return 0; if((c.fe||c.act>1) && c.passive && c.passive.noHeal){ if(typeof pushLog==='function') pushLog(`${c.name} is too far gone to be healed.`); return 0; } const b0=c.hp; c.hp=Math.min(c.maxHp, c.hp+amt); return c.hp-b0; }
 function drawN(side,n){ const P=S[side]; const foe=S[side==='you'?'opp':'you']; const spy=foe&&foe.team&&foe.team[foe.activeIdx]; const canPeek=spy&&spy.hp>0&&spy.fe&&spy.passive&&spy.passive.peekFoeDraw; for(let i=0;i<n;i++){ if(!P.deck.length && P.discard.length) P.deck=shuffle(P.discard.splice(0)); if(P.deck.length){ const c=P.deck.shift(); c._new=true; P.hand.push(c); if(canPeek){ var nm=(c.name||(c.word?('“'+c.word+'” '+(c.type||'')):(c.type||'a card'))); pushLog(`${spy.name} spies through the silk screen — ${who(P)} drew ${nm}.`); } } } }
 
 
@@ -5031,8 +5148,18 @@ function tickTurnTimer(){
   if(S._timeLeft<=0){ stopTurnTimer(); if(S.scrim && S.scrim.ruleShift==='sicsoc'){ const a=active(S.you); if(a&&a.hp>0){ a.hp=Math.max(0,a.hp-20); pushLog('Doomscroll Clock — 20 distraction damage!'); checkKO(S.you,'you'); } } pushLog('⏱ Time! Your turn ends automatically.'); toast('Time up — turn passed.','bad'); if(S&&!S.over) endTurn(); }
 }
 function paintTimer(){
+  /* paintTimer runs every second WITHOUT a full render, so it must not rebuild
+     the element -- it sets the fill width and the label in place. */
   const el=document.getElementById('turnclock'); if(!el||!S) return;
-  const t=Math.max(0,S._timeLeft|0); el.textContent='⏱ '+t+'s'; el.classList.toggle('low', t<=5);
+  const tot=+(S.settings.turnTimer||60)||60;
+  const t=Math.max(0,S._timeLeft|0);
+  const fill=document.getElementById('turnbarfill');
+  const txt=document.getElementById('turnbartext');
+  if(fill) fill.style.width=Math.max(0,Math.min(100,(t/tot)*100))+'%';
+  if(txt) txt.textContent=t+'s';
+  el.setAttribute('aria-label', t+' seconds left');
+  el.classList.toggle('low', t<=5);
+  el.classList.toggle('warn', t>5 && t<=Math.max(8, tot*0.34));
 }
 function startTurn(){
   if(!S) return;
@@ -5129,7 +5256,7 @@ function startTurn(){
     if(c._tag!=='saga' || !c.stages) return;
     if((c._stage||0)>=c.stages.length) return;
     const key=c.stages[c._stage||0]; c._stage=(c._stage||0)+1;
-    pushLog(`\u2726 ${c.name} \u2014 Act ${roman(c._stage)}.`);
+    pushLog(`\u2726 ${c.name} \u2014 Chapter ${roman(c._stage)}.`);
     try{ sagaAct(p,c,key); }catch(e){}
   });
   if(p._teamShield) p._teamShield=0;
@@ -5233,6 +5360,7 @@ function tryPlayHandCard(idx,targetUid){
   if(card.cat==='hex'){ const bmi=p.hand.findIndex(c=>c.cat==='bookmark'); if(bmi>=0){ p.discard.push(p.hand.splice(bmi,1)[0]); const hi=p.hand.indexOf(card); if(hi>=0) p.discard.push(p.hand.splice(hi,1)[0]); pushLog('You purge the Hex, spending a Bookmark.'); try{SFX.card('card_place',0.6);}catch(e){} render(); } else toast('Need a Bookmark in hand to purge the Hex.'); return; }
   if(card.cat==='char'){ drawnPlayChar(idx); return; }
   if(drawnLocked()){ toast('Place a character as your Active first.'); return; }
+  if(card.cat==='act'){ actPlay('you',idx); return; }
   if(card.cat==='bookmark'){ playBookmark('you',idx); return; }
   if(card.cat==='crit'){ playCrit('you',idx); return; }
   if(p.attachesLeft<=0){ toast('No attaches left this turn.'); return; }
@@ -5658,7 +5786,7 @@ function playBookmark(side,idx){
       if(live){ if(isYou) toast(`${live.name} is already running — one Saga at a time.`); return; }
       if(!card.stages||!card.stages.length){ if(isYou) toast('This Saga has no acts.'); return; }
       card._stage=0;
-      pushLog(`${who(P)} opens ${card.name} — Act I begins at the start of your next turn.`);
+      pushLog(`${who(P)} opens ${card.name} — Chapter I begins at the start of your next turn.`);
       hold('saga'); commit(); render&&render(); return;
     }
     case 'supercharge': P.flags.supercharge=true; pushLog(`${who(P)} used Supercharger — next attack doubled.`); hold('supercharge'); break;
@@ -5819,6 +5947,155 @@ function calcBlock(ch,ab,incoming){
 }
 function spend(charge,n){ const out=[]; for(let i=0;i<n&&charge.length;i++) out.push(charge.shift()); return out; }
 
+/* ---------------- THREE-ACT EVOLUTION (Act cards) ----------------
+   An Act card is a character card by the rules (it counts against the
+   character limit) but carries cat:'act' in code, so every Drawn Mode path
+   keyed on cat:'char' (seeding, mulligan counts, can-still-field) ignores it
+   without needing a guard. Evolving rewrites the character object IN PLACE:
+   id stays the Act I id, so anything keyed on identity still sees Macbeth. */
+const ACT_ALLOW_1E=false;
+function actById(id){ return (DATA.acts||[]).find(function(a){ return a.id===id; })||null; }
+function actsForDeck(k){ return (DATA.acts||[]).filter(function(a){ return a.deck===k; }); }
+function actStageId(c){ return c ? (c._actId||c.id) : null; }
+function actStageName(id){ const a=actById(id); if(a) return a.name;
+  for(const k in DATA.characters){ const c=(DATA.characters[k]||[]).find(function(x){ return x.id===id; }); if(c) return c.name; } return id; }
+function actBaseOk(c){ return !!c && !c.cid && !c._boss && !c._pmCmd && (ACT_ALLOW_1E || !c.fe); }
+function actTurnKey(){ return (S&&S._turnNo)||0; }
+function actCanEvolve(c,a){
+  if(!c||c.hp<=0) return {ok:false,why:'That character is knocked out.'};
+  if(actStageId(c)!==a.from) return {ok:false,why:a.name+' evolves from '+actStageName(a.from)+'.'};
+  if((c.turnsInPlay||0)<1) return {ok:false,why:c.name+' entered play this turn \u2014 evolve next turn.'};
+  if(a.plot==='hit' && !c._tookHit) return {ok:false,why:'Plot Point 1 not met \u2014 '+c.name+' hasn\u2019t taken damage yet.'};
+  if(a.plot==='climaxQ' && c._gateSpent===actTurnKey()) return {ok:false,why:'The climax attempt is spent for this turn.'};
+  return {ok:true};
+}
+function actTargets(p,a){ return (p.team||[]).filter(function(c){ return c.hp>0 && actBaseOk(c) && actStageId(c)===a.from; }); }
+function actPick(p,card){
+  const a=actById(card&&card.actId); if(!a) return {a:null,t:null,why:'Unknown Act card.'};
+  const tg=actTargets(p,a);
+  if(!tg.length) return {a,t:null,why:a.name+' evolves from '+actStageName(a.from)+' \u2014 none on your field.'};
+  const ok=tg.filter(function(c){ return actCanEvolve(c,a).ok; });
+  if(!ok.length) return {a,t:null,why:actCanEvolve(tg[0],a).why};
+  const act=active(p);
+  return {a,t:(ok.indexOf(act)>=0?act:ok[0]),why:''};
+}
+function actPlayable(p,card){ return !!actPick(p,card).t; }
+function actEvolve(side,handIdx,c){
+  const p=S[side], card=p.hand[handIdx], a=actById(card&&card.actId); if(!a||!c) return false;
+  const taken=Math.max(0,c.maxHp-c.hp), from=c.name;
+  if(!c._actBase) c._actBase={ name:c.name, maxHp:c.maxHp, atk:clone(c.atk), blk:clone(c.blk), atk2:c.atk2?clone(c.atk2):null,
+    img:c.img||'', imgpos:c.imgpos||'', accent:c.accent, archetype:c.archetype, tags:c.tags?clone(c.tags):null, passive:c.passive?clone(c.passive):null };
+  p.hand.splice(handIdx,1);
+  (c._actCards=c._actCards||[]).push(card);
+  const scale=(S.settings&&S.settings.hpScale)||1;
+  const mx=Math.max(10, Math.round(a.hp*scale/10)*10);
+  c.name=a.name; c.maxHp=mx; c.hp=Math.max(1, mx-taken);
+  c.atk=clone(a.atk); c.blk=clone(a.blk); delete c.atk2; if(a.atk2) c.atk2=clone(a.atk2);
+  if(a.img){ c.img=a.img; c.imgpos=a.imgpos||'50% 18%'; }
+  if(a.accent) c.accent=a.accent; if(a.archetype) c.archetype=a.archetype; if(a.tags) c.tags=clone(a.tags);
+  if(a.passive) c.passive=clone(a.passive); else delete c.passive;
+  c.act=a.act; c._actId=a.id; c.resolution=a.resolution||null;
+  clearAllStatus(c);
+  c.turnsInPlay=0; c._tookHit=false; c._evoFx=true;
+  pushLog(`\u2605 ${from} evolves into ${a.name} (Act ${roman(a.act)}) \u2014 ${taken} damage and ${c.atkCharge.length+c.blkCharge.length} charge${(c.atkCharge.length+c.blkCharge.length)===1?'':'s'} carried over.`);
+  try{ SFX.card('book_flip',0.7); }catch(e){}
+  return true;
+}
+function actGatePick(deck){
+  S._actGateUsed=S._actGateUsed||[];
+  let pool=((DATA.actGate&&DATA.actGate[deck])||[]).map(function(q){ return {tag:q.tag||'theme',q:q.q,opts:q.opts,ans:q.ans}; });
+  if(!pool.length) pool=(DATA.abcs[deck]||[]).map(function(q){ return {tag:'story',q:q.q,opts:q.opts,ans:q.ans}; });
+  let fresh=pool.filter(function(q){ return S._actGateUsed.indexOf(q.q)<0; });
+  if(!fresh.length){ S._actGateUsed=[]; fresh=pool; }
+  const q=fresh.length?fresh[rnd(fresh.length)]:null; if(q) S._actGateUsed.push(q.q); return q;
+}
+function actPlay(side,idx){
+  const p=S[side], card=p.hand[idx]; if(!card||card.cat!=='act') return false;
+  const pk=actPick(p,card);
+  if(!pk.t){ if(side==='you') toast(pk.why,'bad'); return false; }
+  if(pk.a.plot==='climaxQ'){
+    const q=actGatePick(pk.a.deck);
+    if(q){
+      if(side==='you'){ busy=true; S._actGate={cid:card.cid, uid:pk.t.uid, q:q, picked:null}; try{ SFX.card('book_flip',0.7); }catch(e){} render(); return true; }
+      if(Math.random()>=((S.settings&&S.settings.aiAccuracy!=null)?S.settings.aiAccuracy:0.8)){
+        pk.t._gateSpent=actTurnKey(); pushLog(`Opponent misses the climax question \u2014 ${pk.a.name} stays in hand.`); return false; }
+    }
+  }
+  actEvolve(side,idx,pk.t); render(); return true;
+}
+function actAnswer(i){
+  const g=S&&S._actGate; if(!g||g.picked!=null) return;
+  g.picked=i;
+  const p=S.you, idx=p.hand.findIndex(function(c){ return c.cid===g.cid; }), t=p.team.find(function(c){ return c.uid===g.uid; });
+  if(i===g.q.ans && idx>=0 && t){ const nm=(actById(p.hand[idx].actId)||{}).name||'Act III';
+    actEvolve('you',idx,t); S._actGate=null; busy=false; toast('Climax reached \u2014 '+nm,'good'); render(); return; }
+  if(t) t._gateSpent=actTurnKey();
+  pushLog('Climax question missed \u2014 the Act card returns to hand. No further attempt this turn.');
+  render();
+}
+function actGateClose(){ if(!S) return; S._actGate=null; busy=false; render(); }
+function actGateModal(){
+  const g=S._actGate; if(!g||!g.q) return '';
+  const q=g.q, wrong=g.picked!=null && g.picked!==q.ans;
+  const opts=q.opts.map(function(o,i){ const cls=g.picked==null?'':(i===q.ans?' gate-right':(i===g.picked?' gate-wrong':''));
+    return `<button class="tri-opt${cls}" data-do="actans:${i}"${g.picked!=null?' disabled':''}><b>${'ABCD'[i]}</b> ${o}</button>`; }).join('');
+  return `<div class="modal-bg"><div class="trivia climax">
+    <div class="tri-head">\u2726 ACT III \u00b7 THE CLIMAX</div>
+    <div class="tri-sub${wrong?' tri-retry':''}">${wrong?'Not this time \u2014 the card returns to hand.':'Answer correctly to reach Act III. No retry.'}<span class="gate-tag ${q.tag}">${String(q.tag).toUpperCase()}</span></div>
+    <div class="tri-q">${q.q}</div>
+    <div class="tri-opts">${opts}</div>
+    ${wrong?'<div class="gate-foot"><button class="tri-opt" data-do="actclose">Return card to hand</button></div>':''}</div></div>`;
+}
+/* KO: the whole stack goes to the discard and the Act I card rests in the
+   grave, so every revive path (Deus Ex Machina, Adaptation, Defibrillator)
+   brings back Act I without needing its own guard. */
+function actOnKO(p,c){
+  if(!c||!c._actBase) return;
+  const b=c._actBase, top=c.name;
+  (c._actCards||[]).forEach(function(x){ p.discard.push(x); }); c._actCards=[];
+  c.name=b.name; c.maxHp=b.maxHp; c.atk=b.atk; c.blk=b.blk; if(b.atk2) c.atk2=b.atk2; else delete c.atk2;
+  c.img=b.img; c.imgpos=b.imgpos; c.accent=b.accent; c.archetype=b.archetype;
+  if(b.tags) c.tags=b.tags; else delete c.tags;
+  if(b.passive) c.passive=b.passive; else delete c.passive;
+  delete c.act; delete c._actId; delete c.resolution; delete c._actBase; delete c._evoFx; delete c._gateSpent;
+  pushLog(`${top}\u2019s Act cards go to the discard; ${c.name} rests with the fallen.`);
+}
+/* deck building: the Act I base of every line in the deck is guaranteed a
+   place on the Classic team, or its Act cards would sit dead in the deck */
+function actLegal(acts,ch){
+  let out=(acts||[]).slice(), changed=true;
+  while(changed){ changed=false;
+    out=out.filter(function(id){ const a=actById(id); if(!a) { changed=true; return false; }
+      const ok = a.act===2 ? (ch||[]).indexOf(a.from)>=0 : out.indexOf(a.from)>=0;
+      if(!ok) changed=true; return ok; }); }
+  return out;
+}
+function actStarter(def){
+  if(!def||!def.d) return def;
+  const acts=actsForDeck(def.d).filter(function(a){ return (def.ch||[]).indexOf(a.base[1])>=0; }).map(function(a){ return a.id; });
+  const legal=actLegal(acts,def.ch); if(!legal.length) return def;
+  const cap=(typeof compFor==='function'?(compFor(def.d)||{}).ch:null)||LIMITS.ch;
+  const keep=new Set(legal.map(function(id){ return actById(id).base[1]; }));
+  while(def.ch.length+legal.length>cap){ let i=def.ch.length-1; while(i>=0 && keep.has(def.ch[i])) i--; if(i<0) break; def.ch.splice(i,1); }
+  def.act=legal; return def;
+}
+function actFrontLoad(pool,def){
+  const bases=new Set((def.act||[]).map(function(id){ const a=actById(id); return a?a.base[1]:null; }).filter(Boolean));
+  if(!bases.size) return pool;
+  pool.sort(function(x,y){ return (bases.has(y.id)?1:0)-(bases.has(x.id)?1:0); });
+  return pool;
+}
+function actAiTurn(p){
+  let guard=0;
+  for(;;){ if(guard++>4||!S||S.over) return;
+    const i=p.hand.findIndex(function(c){ return c.cat==='act' && actPlayable(p,c); });
+    if(i<0) return;
+    const card=p.hand[i];
+    if(actPlay('opp',i)){ try{ zoomCard('opp', zoomHtmlFor(card), 2200); }catch(e){} }
+  }
+}
+if(typeof window!=='undefined') window.ABC_ACT={ actById, actsForDeck, actCanEvolve, actPick, actPlayable, actEvolve, actPlay, actAnswer, actGateClose, actOnKO, actLegal, actStarter, actAiTurn, actGatePick };
+
 /* ---------------- 1st Edition (Commander) passive engine ---------------- */
 function feOnField(p){ return p?p.team.filter(c=>c.fe&&c.hp>0):[]; }
 function pHasPassive(p,flag){ return feOnField(p).some(c=>c.passive&&c.passive[flag]); }
@@ -5873,6 +6150,7 @@ function performAttack(side,abilKey){           // == beginAttack
   if(ab.koScale){ const n=(S[side].grave||[]).length; if(n){ dmg+=ab.koScale*n; pushLog(`${att.name}: +${ab.koScale*n} damage from ${n} fallen.`); } }
   if(ab.cond){ ab.cond.forEach(r=>{ if(condMatch(r,A,D,def)){ const t=r.then||{}; if(t.dmgSet!=null)dmg=t.dmgSet; if(t.dmgAdd)dmg+=t.dmgAdd; if(t.dmgMult)dmg=Math.round(dmg*t.dmgMult); if(t.pierce||(t.flags&&String(t.flags).toLowerCase().includes('pierce')))condPierce=true; if(t.inflict)condInflict=t.inflict; if(t.grant){ grant(att,t.grant); pushLog(`${att.name} gains ${statusName(t.grant)}.`); } if(t.foeDiscard)condFoeDiscard+=t.foeDiscard; if(r.log)pushLog(r.log); } }); }
   // 1E passive & ability damage
+  if(att.act>1&&att.passive&&att.passive.lowHpAtkAdd&&att.hp>0&&att.hp<att.maxHp/2){ dmg+=att.passive.lowHpAtkAdd; pushLog(`${att.passive.name||att.name}: +${att.passive.lowHpAtkAdd} damage below half health.`); }
   if(att.fe&&att.passive&&att.passive.soloBonus&&isSoloAlive(A)){ dmg+=att.passive.soloBonus; pushLog(`${att.name} stands alone — +${att.passive.soloBonus} damage.`); }
   if(att.fe&&att.passive&&att.passive.statusDmgBonus&&STATUS_NEG.some(x=>def.status[x])){ dmg+=att.passive.statusDmgBonus; pushLog(`${att.name}: +${att.passive.statusDmgBonus} against an afflicted target.`); }
   if(ab.bmDiscardBonus){ const n=(A.discard||[]).filter(c=>c.cat==='bookmark').length; const add=Math.min(ab.bmDiscardCap||9999, ab.bmDiscardBonus*n); if(add>0){ dmg+=add; pushLog(`${ab.n}: +${add} from ${n} Bookmark(s) in the discard.`); } }
@@ -6136,6 +6414,7 @@ function checkKO(p,side){
     const next=p.team.findIndex(c=>c.hp>0);
     if(next>=0){ const _fallen=a; doSwitch(p,next); const _succ=p.team[next]; pushLog(`${_succ.name} steps up.`);
       if(hasCrit(side,'adapt') && _succ && _succ.hp>0){ try{ adaptInherit(p,side,_fallen,_succ); }catch(e){} } }
+    actOnKO(p,a);
   }
   if(!p.team.some(c=>c.hp>0)){
     /* DRAWN MODE: an empty board is only a loss if no character remains to field. */
@@ -6263,6 +6542,7 @@ function aiTurn(){
     if(!p.crit){ const ci=p.hand.findIndex(c=>c.cat==='crit'); if(ci>=0) playCrit('opp',ci); }
     // bring a 1st Edition anchor Active when it makes sense (once/turn)
     if(!p.flags.swapped && !active(p).status.glue){ const a=active(p); const feIdx=p.team.findIndex((c,i)=>i!==p.activeIdx && c.fe && c.hp>0 && !c.status.rip && !(c.passive&&c.passive.benchCostAura)); if(feIdx>=0 && (!a.fe) && (a.hp<=a.maxHp*0.5)){ doSwitch(p,feIdx); p.flags.swapped=true; pushLog(`Opponent brings ${p.team[feIdx].name} (1st Edition) to the front.`); } }
+    try{ actAiTurn(p); }catch(e){}
     const prof=aiProfile();
     // DEFENSIVE RETREAT: a Ripped active cannot attack at all — swap it out (Rip clears on leaving)
     if(prof.retreat && !p.flags.swapped){
@@ -7092,6 +7372,47 @@ function critChip(p,side){
     </div>
     <button class="lc-toggle" data-do="lens:${side}" title="${open?'Collapse':'Details'}">${open?'&#9662;':'&#9656;'}</button></div>`;
 }
+/* ---- Three-Act Evolution: card-face pieces (badge, frame dressing, passive tag) ---- */
+function actArt(ch){
+  if(!ch||!(ch.act>1)) return '';
+  ch._evoFx=false;
+  const live=!!(ch.passive&&ch.passive.lowHpAtkAdd&&ch.hp>0&&ch.hp<ch.maxHp/2);
+  const dress = ch.act===3
+    ? '<span class="act-curtain l"></span><span class="act-curtain r"></span><span class="act-valance"></span>'
+    : '<svg class="act-crack" viewBox="0 0 200 120" preserveAspectRatio="none" aria-hidden="true"><path d="M1 18 L9 24 L6 33 L15 39"/><path d="M199 8 L190 14 L193 22"/><path d="M40 1 L44 7 L40 12"/><path d="M1 104 L8 99 L7 91"/><path d="M199 112 L191 117"/></svg>';
+  const pas = ch.passive ? `<span class="act-pass${live?' live':''}" title="${(ch.passive.name+' \u2014 '+(ch.passive.text||'')).replace(/"/g,'&quot;')}">\u2726 ${ch.passive.name}${live?' \u00b7 ACTIVE':''}</span>` : '';
+  return dress+`<span class="act-badge a${ch.act}" title="Act ${roman(ch.act)} \u2014 evolved from ${actStageName(ch.act===3?(actById(ch._actId)||{}).from:ch.id)}">ACT ${roman(ch.act)}</span>`
+    +(ch.resolution==='tragic'?'<span class="act-res">TRAGIC</span>':(ch.resolution==='comic'?'<span class="act-res comic">COMIC</span>':''))+pas;
+}
+function actHandCard(c,idx,straty,deal,_lk){
+  const you=S.you, a=actById(c.actId)||{name:c.name||'Act card',act:c.act||2};
+  const pk=actPick(you,c), ok=straty && !drawnLocked() && !!pk.t;
+  const img=a.img?`<img class="hcc-img" src="${a.img}" alt="${a.name}" style="object-position:${a.hpos||'50% 22%'}">`
+                 :`<span class="hcc-mono" style="background:${a.accent||'#444'}">${initials(a.name)}</span>`;
+  const onField=actTargets(you,a).length>0;
+  let met=false, cond='';
+  if(a.plot==='hit'){ met=actTargets(you,a).some(function(t){ return t._tookHit; }); cond='Plot Point 1 \u00b7 took damage '+(met?'\u2713':'\u2717'); }
+  else { met=onField; cond='Plot Point 2 \u00b7 climax or theme question'; }
+  return `<div class="hc crit act-hc ${ok?'playable':'spent'}${deal}${_lk}" data-idx="${idx}" title="${(ok?'Tap to evolve':pk.why).replace(/"/g,'&quot;')}">
+      <div class="hc-top crt act${a.act}t">\u2605 ACT ${roman(a.act)}</div>
+      <div class="hcc-port">${img}</div>
+      <div class="hcc-nm">${a.name}</div>
+      <div class="hcc-foot">Evolves from ${actStageName(a.from)}</div>
+      <div class="act-cond ${met?'met':'unmet'}">${cond}</div></div>`;
+}
+function actHandInfo(c){
+  const a=actById(c.actId); if(!a) return '';
+  const pk=actPick(S.you,c); let out='';
+  out+='<div class="hvi-row th"><b>\u2605 Act '+roman(a.act)+' \u2014 evolves from '+actStageName(a.from)+'</b><p>'
+     +(a.plot==='hit'?'Plot Point 1: the character must have taken damage.':'Plot Point 2: answer a climax or theme question correctly (one try per turn).')
+     +' Not on the turn it entered play. Damage and charges carry over; statuses clear.'+(pk.t?'':' <i>'+pk.why+'</i>')+'</p></div>';
+  out+='<div class="hvi-row"><b>\u2764 Health</b><p>'+a.hp+' HP</p></div>';
+  if(a.atk) out+='<div class="hvi-row"><b>\u2694 '+a.atk.n+' \u2014 '+(a.atk.label||'')+'</b><p>'+(a.atk.t||'')+'</p></div>';
+  if(a.blk) out+='<div class="hvi-row"><b>\u26ca '+a.blk.n+' \u2014 '+(a.blk.label||'')+'</b><p>'+(a.blk.t||'')+'</p></div>';
+  if(a.passive) out+='<div class="hvi-row th"><b>\u2726 '+a.passive.name+'</b><p>'+(a.passive.text||'')+'</p></div>';
+  return '<div class="hv-info">'+out+'</div>';
+}
+
 function charTile(p,side){
   const ch=active(p); if(!ch) return '';
   const sbub=statusBubbles(ch);
@@ -7103,10 +7424,10 @@ function charTile(p,side){
   const port = ch.img
     ? `<img class="port-img" src="${ch.img}" alt="${ch.name}" style="object-position:${ch.imgpos||'50% 20%'}">`
     : `<span class="mono">${initials(ch.name)}</span>`;
-  return `<div class="char ${side} ${dead?'dead':''}${ch.fe?' fe':''}${ch._boss?' boss':''}${ch._big?' sol-big':''}${side==='you'&&ch.hp>0?' drop-zone':''}" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"${side==='you'?` data-drop="1" data-charuid="${ch.uid}"`:''}>
+  return `<div class="char ${side} ${dead?'dead':''}${ch.fe?' fe':''}${ch.act>1?' act'+ch.act:''}${ch._evoFx?' evo-in':''}${ch._boss?' boss':''}${ch._big?' sol-big':''}${side==='you'&&ch.hp>0?' drop-zone':''}" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"${side==='you'?` data-drop="1" data-charuid="${ch.uid}"`:''}>
     ${sbub}
     <div class="pc-plate"><span class="pc-name">${ch._boss?'\u26a0 ALGORITHM CORE':ch.name}</span><span class="pc-hp"><u style="width:${_op}%"></u><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
-    <div class="pc-art">${port}${ch.fe?`<span class="fe-badge" title="1st Edition \u2014 ${((ch.passive&&ch.passive.name)||'').replace(/"/g,'&quot;')}">1ST ED</span>`:''}<button class="pc-flip" data-benchinfo="${side}:${ch.uid}" title="Ability details">i</button></div>
+    <div class="pc-art">${actArt(ch)}${port}${ch.fe?`<span class="fe-badge" title="1st Edition \u2014 ${((ch.passive&&ch.passive.name)||'').replace(/"/g,'&quot;')}">1ST ED</span>`:''}<button class="pc-flip" data-benchinfo="${side}:${ch.uid}" title="Ability details">i</button></div>
     <div class="pips">${chargePips(ch)}</div>
     <div class="pc-moves">
       <button class="pc-move atk ${canAct&&atkReady?'ready':''}" data-act="attack" ${canAct&&atkReady?'':'disabled'}>
@@ -7231,7 +7552,7 @@ function pilesFor(p,sideKey){
 const ABM_TAGTXT={plotarmor:'immune to all damage',cliffhanger:'nobody drops below 1 HP',censorship:'no Bookmarks',extracredit:'KO this turn → draw 2',antiq:'+30 atk / +10 blk',supercharge:'next attack ×2',dogear:'keeps Attack ABC',cliffnotes:'next ABC: no trivia',truce:"foe's next attack skipped",highlight:'+20 next attack',marginNotes:'draw on next attach',ironcurtain:'blocks next attack',hardcover:'−10 incoming',laminate:'immune to T/R/G/S'};
 function activeBmZone(p){
   if(!p.activeBm||!p.activeBm.length) return '';
-  const chips=p.activeBm.map(c=>`<div class="abm-card" title="${(c.name+' — '+(c.text||'')).replace(/"/g,'&quot;')}"><span class="abm-nm">✦ ${c.name}</span><span class="abm-tag">${c._tag==='saga'?('Act '+roman(c._stage||0)+' / '+((c.stages||[]).length)):(ABM_TAGTXT[c._tag]||'in play')}</span></div>`).join('');
+  const chips=p.activeBm.map(c=>`<div class="abm-card" title="${(c.name+' — '+(c.text||'')).replace(/"/g,'&quot;')}"><span class="abm-nm">✦ ${c.name}</span><span class="abm-tag">${c._tag==='saga'?('Ch. '+roman(c._stage||0)+' / '+((c.stages||[]).length)):(ABM_TAGTXT[c._tag]||'in play')}</span></div>`).join('');
   return `<div class="abm-zone" title="Active bookmarks — effects in play, awaiting their trigger"><div class="abm-label">Active ✦ ${p.activeBm.length}</div>${chips}</div>`;
 }
 function sweepActiveBm(p){
@@ -7313,6 +7634,7 @@ function handCard(c,idx){
       <div class="hcc-nm">${c.name}</div>
       ${foot}</div>`;
   }
+  if(c.cat==='act') return actHandCard(c,idx,straty,deal,_lk);
   const playable=straty && (you.flags.bmCount||0)<2 && !drawnLocked();
   return `<div class="hc bm ${c.kind.toLowerCase()} ${playable?'playable':'spent'}${deal}${_lk}" data-idx="${idx}">
     <div class="hc-top bmk">✦ ${c.kind}${c.rarity?` · ${({C:'⚪ C',U:'🟢 U',R:'🔵 R',E:'🟣 E',L:'👑 L'})[c.rarity]||c.rarity}`:''}</div>${c.img?`<div class="bmb-wrap"><img class="bmb-bg" src="${c.img}" alt=""><div class="bmb-fg"><div class="hc-name">${c.name}</div><div class="hc-text">${c.text}</div></div></div>`:`<div class="hc-name">${c.name}</div><div class="hc-text">${c.text}</div>`}</div>`;
@@ -7777,7 +8099,15 @@ function renderGame(root){
        <div class="row"><div class="bench">${benchTiles(opp,false)}</div>${charTile(opp,'opp')}${pilesFor(opp,'opp')}</div>
        ${critChip(opp,'opp')}
      </div>
-     <div class="midline"><div class="phasehud">${phaseHud}</div>${S.turn==='you'&&!S.over?`<span id="turnclock" class="turnclock${(S._timeLeft<=5)?' low':''}">⏱ ${Math.max(0,(S._timeLeft!=null?S._timeLeft:(S.settings.turnTimer||60)))}s</span>`:''}<div class="actions">${actionBtn}</div></div>
+     <div class="midline"><div class="phasehud">${phaseHud}</div>${S.turn==='you'&&!S.over?(function(){
+      const _tot=+(S.settings.turnTimer||60)||60;
+      const _left=Math.max(0,(S._timeLeft!=null?S._timeLeft:_tot));
+      const _pct=Math.max(0,Math.min(100,(_left/_tot)*100));
+      const _st=_left<=5?' low':(_left<=Math.max(8,_tot*0.34)?' warn':'');
+      return `<div id="turnclock" class="turnbar${_st}" role="timer" aria-label="${_left} seconds left">`
+           + `<div id="turnbarfill" class="tb-fill" style="width:${_pct}%"></div>`
+           + `<span id="turnbartext" class="tb-text">${_left}s</span></div>`;
+    })():''}<div class="actions">${actionBtn}</div></div>
      <div class="side you-side" data-arena="${you.setKey}">
        ${critChip(you,'you')}
        <div class="row"><div class="bench">${benchTiles(you,true)}</div>${charTile(you,'you')}${pilesFor(you,'you')}</div>
@@ -7790,7 +8120,7 @@ function renderGame(root){
   ${flashFeed()}
   <button class="logtoggle" data-do="log">☰ Log</button>
    <div class="log ${S._logopen?'open':''}">${S.log.map(l=>`<div>${l}</div>`).join('')}</div>
-   ${S.pending?triviaModal():''}${S._af?afModal():''}${S._ip?ipModal():''}
+   ${S.pending?triviaModal():''}${S._actGate?actGateModal():''}${S._af?afModal():''}${S._ip?ipModal():''}
    ${S.defend?defendModal():''}
    ${S.picker?pickerModal():''}
    ${S.viewPile?pileModal():''}
@@ -7851,6 +8181,7 @@ function handViewInfo(c){
     if(d.tags&&d.tags.length) out+='<div class="hvi-row"><b>\u2691 Tags</b><p>'+d.tags.join(' \u00b7 ')+'</p></div>';
     return out?'<div class="hv-info">'+out+'</div>':'';
   }
+  if(c.cat==='act') return actHandInfo(c);
   if(c.cat==='bookmark'){
     var t=c.text||c.desc||'';
     return t?'<div class="hv-info"><div class="hvi-row"><b>\u2726 Effect</b><p>'+t+'</p></div></div>':'';
@@ -8629,6 +8960,8 @@ document.addEventListener('click',e=>{
     else if(d==='menu'){ stopTurnTimer(); APP.screen='menu'; S=null; render(); }
     else if(d.startsWith('dminfo:')){ S._handView=+d.split(':')[1]; render(); }
     else if(d.startsWith('dmflip:')){ drawnFlip(+d.split(':')[1]); }
+    else if(d.indexOf('actans:')===0){ actAnswer(+d.slice(7)); }
+    else if(d==='actclose'){ actGateClose(); }
     else if(d==='dmflipall') drawnFlipAll();
     else if(d==='dmmull') drawnMulligan();
     else if(d==='dmkeep') drawnKeepHand();
@@ -10540,6 +10873,7 @@ window.ABC_DEBUG = {
   symbolsOff, calcBlock, doBlock, critFx, sideOfChar,
   afOffer, afAccept, afDecline, afAnswer, afModal,
   atkPoolOf,
+  paintTimer, startTurnTimer, stopTurnTimer,
   seedOpeningHand, seedOpeningFe, dealOne, drawnMulligan, drawnPlace,
   builderScreen, bdIdentity, bdColumn, bdTab, deckCounts,
   deckIsPm, capsFor, booksOf, feOf, pmBuildStatus, pmPerBook, pmBuildBooks,

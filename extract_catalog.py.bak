@@ -108,19 +108,6 @@ def main():
             if name not in sh: sys.exit("workbook has no sheet %r (has: %s)"%(name,', '.join(sh)))
             hdr,rows=table(grid(z,sh[name],shared,ds,warn),warn,name)
             rows=[r for r in rows if r.get('deck') in decks]
-            # Act cards and gate questions sync separately (see fix_extract_catalog_acts.py)
-            side=None
-            if name=='Characters':
-                side=('acts',[r for r in rows if r.get('act','').strip() not in ('','1')])
-            elif name=='Trivia_ABC':
-                side=('gate',[r for r in rows if r.get('type','').strip().upper()=='GATE'])
-            if side is not None:
-                held=set(id(r) for r in side[1]); rows=[r for r in rows if id(r) not in held]
-                with io.open('sync/%s.tsv'%side[0],'w',encoding='utf-8') as f:
-                    f.write('\t'.join(hdr)+'\n')
-                    for d in side[1]:
-                        f.write('\t'.join(d.get(k,'').replace('\t',' ').replace('\n',' ') for k in hdr)+'\n')
-                print("  sync/%-14s %4d rows" % (side[0]+'.tsv', len(side[1])))
             with io.open('sync/%s.tsv'%out,'w',encoding='utf-8') as f:
                 f.write('\t'.join(hdr)+'\n')
                 for d in rows:
