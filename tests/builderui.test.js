@@ -304,7 +304,12 @@ setTimeout(() => {
   const boardCss = (HTML.match(/<style[^>]*>([\s\S]*?)<\/style>/) || [])[1] || '';
   // slice from the comment's OPENING, or the strip below cannot match it --
   // this has now bitten five guards in this project
-  const spread = boardCss.slice(boardCss.indexOf('/* ===== the board as one spread'))
+  // ...and stop at the next section: the slice used to run to the end of the
+  // stylesheet, so styles appended later (Act-card badges, z-index:6 inside a
+  // card) tripped the "nothing above the cards" guard
+  const spreadAt = boardCss.indexOf('/* ===== the board as one spread');
+  const spreadEnd = boardCss.indexOf('/* =====', spreadAt + 1);
+  const spread = boardCss.slice(spreadAt, spreadEnd < 0 ? undefined : spreadEnd)
                          .replace(/\/\*[\s\S]*?\*\//g, '');
   ok('the board carries both decks as attributes',
      /<div class="board" data-opp=/.test(HTML));
@@ -393,7 +398,8 @@ setTimeout(() => {
   const wrong = decks.filter(k => {
     const dd = D.defaultDeck(k);
     const feShort = 2 - (dd.fe || []).length;
-    return dd.ch.length + dd.ab.length + dd.bm.length + dd.cr.length + dd.fe.length !== 62 - feShort;
+    // Act cards count as characters (clampDeck caps ch + act together)
+    return dd.ch.length + (dd.act || []).length + dd.ab.length + dd.bm.length + dd.cr.length + dd.fe.length !== 62 - feShort;
   });
   ok('starter decks still total 62', wrong.length === 0, wrong.join(', '));
 

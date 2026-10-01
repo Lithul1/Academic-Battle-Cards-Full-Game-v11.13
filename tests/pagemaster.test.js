@@ -1,6 +1,6 @@
 // pagemaster.test.js — the two-commander format's rules, against the live engine.
 const {JSDOM} = require('jsdom'), fs = require('fs');
-const w = new JSDOM(fs.readFileSync('/tmp/pm_stub.html','utf8'),
+const w = new JSDOM(fs.readFileSync(require('path').join(__dirname,'..','dist','stub.html'),'utf8'),
   {runScripts:'dangerously', pretendToBeVisual:true, url:'https://example.org/'}).window;
 
 setTimeout(() => {

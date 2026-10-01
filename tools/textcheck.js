@@ -1,4 +1,6 @@
 const {JSDOM}=require('jsdom'),fs=require('fs');
+// a floor, not a total: raise it when characters are added, so a lost card still fails
+const ROSTER_MIN=163;
 const w=new JSDOM(fs.readFileSync(require('path').join(__dirname,'..','dist','stub.html'),'utf8'),{runScripts:'dangerously',pretendToBeVisual:true,url:'https://example.org/'}).window;
 setTimeout(()=>{
  const T=w.DATA.characters,R=[],ok=(n,c,x='')=>R.push((c?'  PASS  ':'  FAIL  ')+n+(x?'   '+x:''));
@@ -20,7 +22,7 @@ setTimeout(()=>{
  let empty=[],n=0;
  for(const k in T)for(const c of T[k]){n++;for(const s of ['atk','blk'])if(!c[s].t||!c[s].t.trim())empty.push(k+'/'+c.id+'.'+s);}
  ok('no empty ability text', empty.length===0, empty.join(', '));
- ok('roster intact', n===134, n+' characters');
+ ok('roster intact', n>=ROSTER_MIN, n+' characters (floor '+ROSTER_MIN+')');
  // labels still consistent
  let bad=0;
  for(const k in T)for(const c of T[k])for(const s of ['atk','blk']){const m=c[s];if(!m.label)continue;
