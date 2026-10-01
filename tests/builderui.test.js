@@ -403,6 +403,29 @@ setTimeout(() => {
   });
   ok('starter decks still total 62', wrong.length === 0, wrong.join(', '));
 
+  // the builder's counter agrees with that total -- it used to skip Act cards
+  const miscount = decks.filter(k => {
+    const dd = D.defaultDeck(k);
+    return D.deckCounts(dd).total !== 62 - (2 - (dd.fe || []).length);
+  });
+  ok('deckCounts totals match the starter decks', miscount.length === 0,
+     miscount.map(k => k + '=' + D.deckCounts(D.defaultDeck(k)).total).join(', '));
+
+  // Act cards share the character cap, so the builder stops adding characters
+  // before clampDeck would have to throw the Acts away
+  const mb = JSON.parse(JSON.stringify(D.defaultDeck('macbeth')));
+  const acts = (mb.act || []).length;
+  const allMb = win.DATA.characters.macbeth.map(c => c.id);
+  const cap = D.capsFor(mb).ch;
+  mb.ch = allMb.slice(0, cap - acts);
+  APP.builder = D.makeBuilderState(null, mb, 'cu');
+  const spare = allMb.find(id => !mb.ch.includes(id));
+  D.handleBuilder('ch:' + spare);
+  ok('Macbeth starter carries Act cards', acts > 0, acts + ' acts');
+  ok('a full roster (characters + Acts) refuses another character',
+     !APP.builder.def.ch.includes(spare) && D.deckCounts(APP.builder.def).ch === cap,
+     D.deckCounts(APP.builder.def).ch + '/' + cap);
+
   console.log(R.join('\n'));
   console.log('\n' + pass + ' passed / ' + fail + ' failed');
   process.exit(fail ? 1 : 0);
