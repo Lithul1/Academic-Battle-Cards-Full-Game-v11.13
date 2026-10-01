@@ -48,7 +48,12 @@ setTimeout(()=>{
       D.APP.screen='menu'; D.render();
       let sErr=false; try{ D.scrimOpen(); D.handleScrim('new'); D.handleScrim('kit:gothic'); }catch(e){ sErr=true; console.log('   scrim:',e.message); }
       ok(!sErr && D.SCRIM.view==='map', 'scrimmage map renders');
-      ok(game().includes('MAP GUIDE') && (game().match(/class="glg"/g)||[]).length===6, 'notebook legend (6 entries)');
+      // the legend draws one entry per SCRIM_NODE type, so count those rather
+      // than a fixed 6 -- the map has grown node types since this was written
+      const nodeKeys=((html.match(/const SCRIM_NODE = \{([^\n]*)\};/)||[])[1]||'').match(/\w+:\{ic:/g)||[];
+      const legendN=(game().match(/class="glg"/g)||[]).length;
+      ok(game().includes('MAP GUIDE') && nodeKeys.length>0 && legendN===nodeKeys.length,
+         `notebook legend (${legendN}/${nodeKeys.length} node types)`);
     }
   } catch(e){ fail++; console.log('  FAIL  boot threw:', e.message); }
   finish();
