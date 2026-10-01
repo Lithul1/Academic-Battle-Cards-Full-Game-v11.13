@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# node (tests only)
+node_modules/
+
+# build output that is regenerated on every test run
+dist/stub.html
+
+# editor / script backups -- git history is the backup
+*.bak
+*.BACKUP-*
