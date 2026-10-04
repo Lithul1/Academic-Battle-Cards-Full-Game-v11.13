@@ -1,4 +1,6 @@
 const {JSDOM}=require('jsdom'),fs=require('fs');
+// floors, not totals: raise them when cards are added, so a lost one still fails
+const COND_MIN=38, ROSTER_MIN=163;
 const w=new JSDOM(fs.readFileSync(require('path').join(__dirname,'..','dist','stub.html'),'utf8'),{runScripts:'dangerously',pretendToBeVisual:true,url:'https://example.org/'}).window;
 setTimeout(()=>{
  const T=w.DATA.characters,R=[],ok=(n,c,x='')=>R.push((c?'  PASS  ':'  FAIL  ')+n+(x?'   '+x:''));
@@ -11,7 +13,7 @@ setTimeout(()=>{
    if(!/\b(while|once|against|if|when)\b/i.test(t)) noExplain.push(`${k}/${c.id}.${s}`);
  }
  ok('every conditional card explains its condition', noExplain.length===0, noExplain.join(', '));
- ok(`${n} conditional fields checked`, n===36, n+' (Montano lost his when it became inflictAtt)');
+ ok(`${n} conditional fields checked`, n>=COND_MIN, n+' (floor '+COND_MIN+')');
  // no dead targets left
  let dead=[];
  for(const k in T)for(const c of T[k])for(const s of ['atk','blk'])
@@ -23,7 +25,7 @@ setTimeout(()=>{
  for(const k in T)for(const c of T[k])for(const s of ['atk','blk'])
    if(/stapleton/i.test(c[s].t||'')) ghost.push(c.id);
  ok('no ghost names in card text', ghost.length===0, ghost.join(', '));
- ok('roster intact', Object.values(T).reduce((a,d)=>a+d.length,0)===134);
+ ok('roster intact', Object.values(T).reduce((a,d)=>a+d.length,0)>=ROSTER_MIN);
  const f=R.filter(x=>x.includes('FAIL')).length;
  console.log(R.join('\n')); console.log(`\n${R.length-f} passed, ${f} failed`);
 },2600);

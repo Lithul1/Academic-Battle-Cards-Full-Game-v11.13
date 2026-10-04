@@ -1,0 +1,11 @@
+{
+  "name": "academic-battle-cards",
+  "private": true,
+  "description": "Dev tooling for the Academic Battle Cards single-file game (tests only; the game itself has no dependencies).",
+  "scripts": {
+    "test": "bash tools/run_tests.sh"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.1"
+  }
+}

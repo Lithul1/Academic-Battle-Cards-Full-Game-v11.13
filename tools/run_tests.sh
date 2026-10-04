@@ -3,7 +3,7 @@
 #     ./tools/run_tests.sh
 #
 # Builds a stub (no assets needed), compiles every script block, then runs the
-# static card-text checks and the battle suites. Needs: npm i jsdom
+# static card-text checks, the battle suites and tests/. Needs: npm install
 set -u
 cd "$(dirname "$0")/.."          # repo root
 SRC="src/game.src.html"
@@ -15,37 +15,32 @@ if ! command -v node >/dev/null 2>&1; then
   cat <<'MSG'
 node is not installed, so the checks cannot run.
 
-  You do not need it for the normal loop — python3 build.py works without it,
-  and these suites are run for you before each delivery.
+  You do not need it for the normal loop — python3 build.py works without it.
 
-  If you want them locally:
-      brew install node        (or the installer at nodejs.org, v18+)
-      npm i jsdom              (from the repo root, once)
+  If you want the checks locally:
+      install Node v18+        (brew install node, or nodejs.org)
+      npm install              (from the repo root, once)
 MSG
   exit 127
 fi
 
 if [ ! -d node_modules/jsdom ]; then
-  echo "jsdom is missing — run:  npm i jsdom"
+  echo "jsdom is missing — run:  npm install"
   exit 127
 fi
 
-mkdir -p dist
+# python3 on macOS/Linux, python on Windows
+PY=$(command -v python3 || command -v python) || { echo "python is not installed"; exit 127; }
 
-python3 - "$SRC" "$STUB" <<'PY'
-import re, sys
-src, out = sys.argv[1], sys.argv[2]
-s = open(src, encoding='utf-8').read()
-STUB = ('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNg'
-        'YGBgAAAABQABpfZFQAAAAABJRU5ErkJggg==')
-open(out, 'w', encoding='utf-8').write(re.sub(r'__ABCASSET_\d+__', STUB, s))
-print(f'  stub built: {out}')
-PY
+mkdir -p dist
+"$PY" build.py --stub --out "$STUB" >/dev/null || { echo "stub build FAILED"; exit 1; }
+echo "  stub built: $STUB"
 
 fail=0
 printf '%-26s ' "compile"
-if node tools/compile.js "$SRC" | grep -q "17/17"; then echo "17/17 script blocks OK"
-else echo "FAILED"; fail=1; fi
+out=$(node tools/compile.js "$SRC" 2>&1)
+if [ $? -eq 0 ]; then echo "$(echo "$out" | tail -1)"
+else echo "$out"; fail=1; fi
 
 echo "-- card text (static) --"
 for t in textcheck glyphcheck condtxt codecheck; do
@@ -61,6 +56,16 @@ for t in mechanics conditionals lenses gekokujo coverage; do
   printf '%-26s ' "$t"
   out=$(timeout 120 node "tools/$t.test.js" 2>&1)
   line=$(echo "$out" | grep -E "passed,|fulfillable" | tail -1)
+  if echo "$out" | grep -qE "  FAIL|ERROR"; then echo "${line:-no result}   <-- FAILURES"; fail=1
+  else echo "${line:-no result}"; fi
+done
+
+echo "-- UI + regression (tests/) --"
+for f in tests/*.test.js; do
+  t=$(basename "$f" .test.js)
+  printf '%-26s ' "$t"
+  out=$(timeout 120 node "$f" 2>&1)
+  line=$(echo "$out" | grep -E "passed" | tail -1)
   if echo "$out" | grep -qE "  FAIL|ERROR"; then echo "${line:-no result}   <-- FAILURES"; fail=1
   else echo "${line:-no result}"; fi
 done

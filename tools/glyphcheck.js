@@ -1,4 +1,6 @@
 const {JSDOM}=require('jsdom'),fs=require('fs');
+// a floor, not a total: two texts (atk + blk) per character
+const TEXTS_MIN=326;
 const w=new JSDOM(fs.readFileSync(require('path').join(__dirname,'..','dist','stub.html'),'utf8'),{runScripts:'dangerously',pretendToBeVisual:true,url:'https://example.org/'}).window;
 setTimeout(()=>{
  const T=w.DATA.characters,R=[],ok=(n,c,x='')=>R.push((c?'  PASS  ':'  FAIL  ')+n+(x?'   '+x:''));
@@ -11,7 +13,7 @@ setTimeout(()=>{
  }
  ok('no broken escape sequences in card text', broken.length===0, broken.join(', '));
  ok('no missing-space typos', jam.length===0, jam.join(', '));
- ok(`${n} ability texts scanned`, n===268, n+'');
+ ok(`${n} ability texts scanned`, n>=TEXTS_MIN, n+' (floor '+TEXTS_MIN+')');
  // every mechanic-bearing card must say something mechanical
  const MECH=/(Inflict|Grant|Gain|Clear|Prevent|Heal|Draw|Block|Negat|Discard|Deal|\+\d|Strikes|Ignores|Takes|Caps|Force|Remove|Return|Switch|Cannot|Costs|Riposte|Siphon|Halves|Leaves|All allies|reduce)/i;
  let silent=[];

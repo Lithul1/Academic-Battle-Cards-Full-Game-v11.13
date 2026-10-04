@@ -9,9 +9,10 @@ boot().then(async ({w, D, S, ok, results, done}) => {
   biographical:p=>p.critTurn.bm=true, ecocrit:p=>p.critEver.survivedAt10=true, marxist:p=>p.critTurn.koCost1=true,
   formalism:p=>p.critTurn.koPlain=true, russian:p=>p.critTurn.koLowAtk=true, feminist:p=>p.critEver.blockedToZero=true,
   archetypal:p=>p.critEver.atkEqBlk=true, psycho:p=>p.critEver.oppWrongBlk=true,
-  affective:p=>p.critEver.oppWrong2=true, deconstruct:p=>p.critEver.oppBmBlocked=true};
+  affective:p=>p.critEver.oppWrong2=true, deconstruct:p=>p.critEver.oppBmBlocked=true,
+  mise:p=>{p.critEver.bmStreak=3; p.critTurn.bm=true}, adapt:p=>p.critEver.adaptSpent=true};
  let pass=0,fail=[];
- console.log('ALL 15 LENSES — can the thesis be met at all?');
+ console.log(`ALL ${CR.length} LENSES — can the thesis be met at all?`);
  for(const c of CR){
    P.crit=c; P.critTurn={}; P.critEver={};
    const before=D.thesisMet('you').ok;
@@ -23,6 +24,8 @@ boot().then(async ({w, D, S, ok, results, done}) => {
    okRow?pass++:fail.push(c.fx);
    if(c.fx==='newhist'){ P.team[P.activeIdx].atkCharge=[]; }
  }
- console.log(`\n${pass}/15 lenses fulfillable` + (fail.length?`   still broken: ${fail.join(', ')}`:''));
+ // FAIL goes in the summary too: run_tests.sh greps for it, and "15/15" used
+ // to read as a pass while two lenses had no case here at all
+ console.log(`\n${pass}/${CR.length} lenses fulfillable` + (fail.length?`   FAIL still broken: ${fail.join(', ')}`:''));
 
 }).catch(e => { console.error('HARNESS ERROR:', e.message); process.exit(1); });

@@ -1,4 +1,6 @@
 const {JSDOM}=require('jsdom'),fs=require('fs');
+// a floor, not a total: raise it when characters are added, so a lost card still fails
+const ROSTER_MIN=163;
 const w=new JSDOM(fs.readFileSync(require('path').join(__dirname,'..','dist','stub.html'),'utf8'),{runScripts:'dangerously',pretendToBeVisual:true,url:'https://example.org/'}).window;
 setTimeout(()=>{
  const H=w.STATUS_HELP, R=[], ok=(n,c,x='')=>R.push((c?'  PASS  ':'  FAIL  ')+n+(x?'   '+x:''));
@@ -18,13 +20,13 @@ setTimeout(()=>{
  ok('siphon badge reads SI', /data-statushelp="siphon"[^>]*>SI</.test(html));
  // glyphs on cards
  const T=w.DATA.characters;
- let sg=0,rg=0;
+ let sg=0,rg=0,sn=0,rn=0;
  for(const k in T)for(const c of T[k]){
-   if(c.atk&&c.atk.siphon&&/\uD83E\uDE78/.test(c.atk.t))sg++;
-   if(c.blk&&c.blk.riposte&&/\uD83E\uDE83/.test(c.blk.t))rg++;}
- ok('10 cards show the blood glyph', sg===10, sg+'/10');
- ok('10 cards show the boomerang',   rg===10, rg+'/10');
- ok('roster intact', Object.values(T).reduce((n,d)=>n+d.length,0)===134);
+   if(c.atk&&c.atk.siphon){ sn++; if(/\uD83E\uDE78/.test(c.atk.t))sg++; }
+   if(c.blk&&c.blk.riposte){ rn++; if(/\uD83E\uDE83/.test(c.blk.t))rg++; }}
+ ok('every Siphon card shows the blood glyph', sn>0&&sg===sn, sg+'/'+sn);
+ ok('every Riposte card shows the boomerang',  rn>0&&rg===rn, rg+'/'+rn);
+ ok('roster intact', Object.values(T).reduce((n,d)=>n+d.length,0)>=ROSTER_MIN);
  const f=R.filter(x=>x.includes('FAIL')).length;
  console.log('\n'+R.join('\n')); console.log(`\n${R.length-f} passed, ${f} failed`);
 },2600);
