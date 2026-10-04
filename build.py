@@ -5,7 +5,7 @@
   python3 build.py --stub          # tiny stub build (NO assets needed): every
                                    # image becomes a 1x1 pixel. Boots + plays
                                    # identically — use this to develop/validate
-                                   # when the 4.7MB bundle isn't on hand.
+                                   # when the ~14 MB bundle isn't on hand.
 
 Deterministic, no third-party deps.
 """

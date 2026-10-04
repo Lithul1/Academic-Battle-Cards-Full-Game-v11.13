@@ -86,28 +86,13 @@ node tools/validate.js --full dist/academic_battle_cards.html
 
 Never hand-edit the base64 in `src` — that's the whole point of the split.
 
-## Working with Claude (token-saving)
+## Working with Claude
 
-Claude can't hold your GitHub token, so it won't clone or push this **private**
-repo — and `assets/assets.json` (4.7 MB) is too big for the project folder.
-Neither matters, because **Claude never needs the real assets**:
-
-- Put only the small files into the Claude **project files** (they persist, no
-  re-uploading): **`src/game.src.html`, `build.py`, `tools/validate.js`**
-  (`manifest.json` optional). `assets/assets.json` stays in your repo only.
-- Each session Claude edits `src`, runs **`build.py --stub`** (1×1-pixel images,
-  no assets needed), validates the stub, and returns the updated `src` + a
-  `git`-ready patch. The 4.7 MB never enters Claude's context.
-- You `git push` the patch, then run the **real** `python3 build.py` locally
-  (your checkout has `assets.json`) to get the deployable, and refresh `src` in
-  the project folder.
-
-So: Claude owns game logic (validated on the stub); your local build owns final
-asset integrity (`build.py` errors on any missing/unresolved asset, and the
-output sha is printed for a milestone checksum).
-
-*(If you ever make the repo public, Claude can `git pull` it directly each
-session and skip the manual `src` hand-off.)*
+Claude validates game logic on the stub build and never needs `assets.json` (~14 MB).
+With this folder connected in the Claude desktop app, Claude reads the repo directly,
+tests on a scratch copy, and hands back small `fix_*.py` scripts plus the exact
+terminal commands to run. You review, run, commit and push (GitHub Desktop).
+Your local `python3 build.py` remains the check on final asset integrity.
 
 ## Deploy (GitHub Pages)
 
@@ -118,5 +103,8 @@ straight from the repo; only the throwaway `dist/stub.html` is git-ignored.
 
 ## Provenance
 
-`src` + `assets.json` in this commit rebuild **demo_11_13** exactly:
-`sha256 = 9965f0747feda783fb6a3504b75d119b4fbaa94062dbe6337df5f367135e9ae2`
+`build.py` is deterministic: the same `src` + `assets.json` always give the same
+file. It prints the output's sha256 -- paste that line into the release commit
+message to record exactly what shipped.
+
+<!-- fix_readme applied -->
