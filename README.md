@@ -56,6 +56,16 @@ This builds the stub, compiles every script block, then runs the static
 card-text checks, the battle suites in `tools/`, and every `tests/*.test.js`.
 It ends with `ALL GREEN` or lists what failed.
 
+### Browser tests (Playwright)
+
+For behaviour only a real browser shows -- layout, dragging a slider, which
+DOM nodes survive an update -- there are Playwright tests in `tests/e2e/`:
+
+```bash
+npx playwright install chromium   # once
+npm run test:e2e                  # builds the stub, then runs tests/e2e in Chromium
+```
+
 Content counts in the static checks (`ROSTER_MIN`, `TEXTS_MIN`, `COND_MIN`)
 are **floors**: adding characters never breaks them, losing one does. Raise
 them when you add a deck so they keep guarding the new cards.
