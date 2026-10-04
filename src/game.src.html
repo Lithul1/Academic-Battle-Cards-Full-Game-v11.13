@@ -5201,6 +5201,7 @@ function turnBarHtml(){
        + `<div id="turnbarfill" class="tb-fill" style="width:${_pct}%"></div>`
        + `<span id="turnbartext" class="tb-text">${_left}s</span></div>`;
 }
+function turnBarFloatHtml(where){ return `<div class="turnbar-float pos-${where}">${turnBarHtml()}</div>`; }
 function paintTimer(){
   /* paintTimer runs every second WITHOUT a full render, so it must not rebuild
      the element -- it sets the fill width and the label in place. */
@@ -8177,7 +8178,7 @@ function renderGame(root){
    ${S._benchView?benchInfoModal():''}
    ${S._handView!=null?handViewModal():''}
    ${S.drawn&&S._mullPop?drawnMullModal():''}
-   ${_tbWhere&&_tbWhere!=='board'?`<div class="turnbar-float pos-${_tbWhere}">${turnBarHtml()}</div>`:''}`;
+   ${_tbWhere&&_tbWhere!=='board'?turnBarFloatHtml(_tbWhere):''}`;
   fitNames();
   fitBoard();
   placeTurnBar();
@@ -8635,17 +8636,32 @@ function overModal(){
     ${qip?`<div class="over-ip">🧠 +${qip} Intellect Points <small>(Quickplay bonus — Literary Scrimmage pays far more)</small></div>`:''}
     <div class="set-actions"><button class="bigbtn" data-do="rematch">Rematch</button><button data-do="title" class="vw-close">Change deck</button></div></div></div>`;
 }
+/* Labels that carry their value. One source for both the first paint
+   (settingsRows) and the in-place update (applySettingInPlace), so moving a
+   slider rewrites a label rather than redrawing the screen. */
+const SET_LABEL={
+  hpScale:     s=>'HP scale ×'+s.hpScale,
+  koTarget:    s=>'KOs needed to win: '+s.koTarget,
+  maxAttaches: s=>'Attaches per turn: '+s.maxAttaches,
+  handMin:     s=>'Min hand on draw: '+s.handMin,
+  benchSize:   s=>'Bench size: '+s.benchSize,
+  handSize:    s=>'Opening hand: '+s.handSize,
+  aiAccuracy:  s=>'AI trivia accuracy: '+Math.round(s.aiAccuracy*100)+'%',
+  turnTimer:   s=>'Turn timer: '+(s.turnTimer||60)+'s',
+  musicvol:    ()=>'Music volume: '+Math.round(SFX.getMusicVol()*100)+'%',
+  sfxvol:      ()=>'Sound FX volume: '+Math.round(SFX.getSfxVol()*100)+'%',
+};
 function settingsRows(s){
   const row=(l,i)=>`<label class="set-row"><span>${l}</span>${i}</label>`;
   return `
-    ${row('HP scale ×'+s.hpScale,`<input type="range" min="0.5" max="2" step="0.1" value="${s.hpScale}" data-set="hpScale">`)}
-    ${row('KOs needed to win: '+s.koTarget,`<input type="range" min="1" max="6" step="1" value="${s.koTarget}" data-set="koTarget">`)}
-    ${row('Attaches per turn: '+s.maxAttaches,`<input type="range" min="1" max="6" step="1" value="${s.maxAttaches}" data-set="maxAttaches">`)}
-    ${row('Min hand on draw: '+s.handMin,`<input type="range" min="1" max="8" step="1" value="${s.handMin}" data-set="handMin">`)}
-    ${row('Bench size: '+s.benchSize,`<input type="range" min="1" max="4" step="1" value="${s.benchSize}" data-set="benchSize">`)}
-    ${row('Opening hand: '+s.handSize,`<input type="range" min="3" max="8" step="1" value="${s.handSize}" data-set="handSize">`)}
-    ${row('AI trivia accuracy: '+Math.round(s.aiAccuracy*100)+'%',`<input type="range" min="0" max="1" step="0.05" value="${s.aiAccuracy}" data-set="aiAccuracy">`)}
-    ${row('Turn timer: '+(s.turnTimer||60)+'s',`<input type="range" min="10" max="60" step="5" value="${s.turnTimer||60}" data-set="turnTimer">`)}
+    ${row(SET_LABEL.hpScale(s),`<input type="range" min="0.5" max="2" step="0.1" value="${s.hpScale}" data-set="hpScale">`)}
+    ${row(SET_LABEL.koTarget(s),`<input type="range" min="1" max="6" step="1" value="${s.koTarget}" data-set="koTarget">`)}
+    ${row(SET_LABEL.maxAttaches(s),`<input type="range" min="1" max="6" step="1" value="${s.maxAttaches}" data-set="maxAttaches">`)}
+    ${row(SET_LABEL.handMin(s),`<input type="range" min="1" max="8" step="1" value="${s.handMin}" data-set="handMin">`)}
+    ${row(SET_LABEL.benchSize(s),`<input type="range" min="1" max="4" step="1" value="${s.benchSize}" data-set="benchSize">`)}
+    ${row(SET_LABEL.handSize(s),`<input type="range" min="3" max="8" step="1" value="${s.handSize}" data-set="handSize">`)}
+    ${row(SET_LABEL.aiAccuracy(s),`<input type="range" min="0" max="1" step="0.05" value="${s.aiAccuracy}" data-set="aiAccuracy">`)}
+    ${row(SET_LABEL.turnTimer(s),`<input type="range" min="10" max="60" step="5" value="${s.turnTimer||60}" data-set="turnTimer">`)}
     ${row('Timer position',`<select data-set="timerPos">${[['middle','Middle'],['topleft','Top left'],['topright','Top right']].map(([v,l])=>`<option value="${v}"${(s.timerPos||'middle')===v?' selected':''}>${l}</option>`).join('')}</select>`)}
     ${row('ABC power adds to damage',`<input type="checkbox" data-set="powerAdds" ${s.powerAdds?'checked':''}>`)}
     ${row('Require trivia to attach',`<input type="checkbox" data-set="triviaOn" ${s.triviaOn?'checked':''}>`)}
@@ -8659,8 +8675,39 @@ function settingsRows(s){
       <button type="button" class="trk-opt ${SFX.getTrack()==='hiphop9'?'on':''}" data-audio="track:hiphop9">Hip-Hop</button>
       <button type="button" class="trk-opt ${SFX.getTrack()==='thereturn'?'on':''}" data-audio="track:thereturn">The Return</button>
     </span></div>
-    ${row('Music volume: '+Math.round(SFX.getMusicVol()*100)+'%',`<input type="range" min="0" max="100" step="5" value="${Math.round(SFX.getMusicVol()*100)}" data-audio="musicvol">`)}
-    ${row('Sound FX volume: '+Math.round(SFX.getSfxVol()*100)+'%',`<input type="range" min="0" max="100" step="5" value="${Math.round(SFX.getSfxVol()*100)}" data-audio="sfxvol">`)}`;
+    ${row(SET_LABEL.musicvol(),`<input type="range" min="0" max="100" step="5" value="${Math.round(SFX.getMusicVol()*100)}" data-audio="musicvol">`)}
+    ${row(SET_LABEL.sfxvol(),`<input type="range" min="0" max="100" step="5" value="${Math.round(SFX.getSfxVol()*100)}" data-audio="sfxvol">`)}`;
+}
+/* A setting changed: patch only what shows it, instead of render(). render()
+   rebuilt the whole screen on every input event -- a dragged slider fires
+   dozens -- destroying the very control under the player's finger. */
+function relabelSetting(el,text){
+  const sp=el && el.closest('.set-row') && el.closest('.set-row').querySelector('span');
+  if(sp) sp.textContent=text;
+}
+function applySettingInPlace(el,k,target){
+  if(SET_LABEL[k]) relabelSetting(el, SET_LABEL[k](target));
+  if(!S || APP.screen!=='play') return;          /* the Tune screen shows nothing else that reads settings */
+  if(k==='turnTimer') paintTimer();
+  else if(k==='timerPos') refreshTurnBar();
+  else if(k==='koTarget'){
+    const o=document.querySelector('.score .kos.opp'), y=document.querySelector('.score .kos.you');
+    if(o) o.textContent=`Opp: ${S.opp.kos}/${S.settings.koTarget}`;
+    if(y) y.textContent=`You: ${S.you.kos}/${S.settings.koTarget}`;
+  }
+}
+/* Move the turn bar to wherever turnBarWhere() now says, touching nothing else. */
+function refreshTurnBar(){
+  const old=document.getElementById('turnclock');
+  if(old){ const fl=old.closest('.turnbar-float'); (fl||old).remove(); }
+  const where=turnBarWhere(); if(!where) return;
+  if(where==='board'){
+    const acts=document.querySelector('.midline .actions');
+    if(acts) acts.insertAdjacentHTML('beforebegin', turnBarHtml());
+  } else {
+    const root=$('#game'); if(root) root.insertAdjacentHTML('beforeend', turnBarFloatHtml(where));
+    placeTurnBar();
+  }
 }
 function settingsModal(){
   return `<div class="modal-bg"><div class="settings">
@@ -8975,7 +9022,8 @@ document.addEventListener('click',e=>{
   if(t.dataset.benchinfo){ const [side,uid]=t.dataset.benchinfo.split(':'); S._benchView={side,uid}; render(); return; }
   if(t.dataset.audio){
     const parts=t.dataset.audio.split(':');
-    if(parts[0]==='track'){ SFX.unlock(); SFX.setTrack(parts[1]); if(!SFX.isMusicOn()) SFX.toggleMusic(); paintAudioCtl(); render(); }
+    if(parts[0]==='track'){ SFX.unlock(); SFX.setTrack(parts[1]); if(!SFX.isMusicOn()) SFX.toggleMusic(); paintAudioCtl();
+      document.querySelectorAll('.trk-opt').forEach(b=>b.classList.toggle('on', b.dataset.audio===t.dataset.audio)); }
     return;
   }
   if(t.dataset.scrim){ handleScrim(t.dataset.scrim); return; }
@@ -9164,14 +9212,15 @@ document.addEventListener('input',e=>{
     const v=parseFloat(t.value)/100;
     if(t.dataset.audio==='musicvol') SFX.setMusicVol(v);
     else if(t.dataset.audio==='sfxvol') SFX.setSfxVol(v);
-    render(); return;
+    if(SET_LABEL[t.dataset.audio]) relabelSetting(t, SET_LABEL[t.dataset.audio]());
+    return;
   }
   if(t.dataset.calm!=null){ META.calmFx=!!t.checked; metaSave(); applyCalmFx(); return; }
   if(t.dataset.set==null) return;
   const k=t.dataset.set; let v;
   if(t.type==='checkbox') v=t.checked; else if(t.type==='range') v=parseFloat(t.value); else v=t.value;
   const target = S ? S.settings : APP.settings;
-  target[k]=v; render();
+  target[k]=v; applySettingInPlace(t,k,target);
 });
 
 /* ---------------- boot ---------------- */

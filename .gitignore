@@ -10,3 +10,7 @@ dist/stub.html
 # editor / script backups -- git history is the backup
 *.bak
 *.BACKUP-*
+
+# Playwright output
+test-results/
+playwright-report/
