@@ -52,7 +52,7 @@ for t in textcheck glyphcheck condtxt codecheck; do
 done
 
 echo "-- engine (boots a real battle) --"
-for t in mechanics conditionals lenses gekokujo coverage; do
+for t in mechanics conditionals lenses gekokujo coverage timer; do
   printf '%-26s ' "$t"
   out=$(timeout 120 node "tools/$t.test.js" 2>&1)
   line=$(echo "$out" | grep -E "passed,|fulfillable" | tail -1)
