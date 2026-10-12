@@ -3719,6 +3719,19 @@ const DATA = {
     { id:'serialnovel', name:'Serialized Novel', kind:'SUPPORT', rarity:'R', saga:true, stages:['draw1','draw1','draw1'], text:'Chapter I–III: draw 1 card at the start of each of your turns.', effect:'saga' },
     { id:'threeact', name:'Three-Act Structure', kind:'UTILITY', rarity:'E', saga:true, stages:['draw1','tearfoe','atkboost30'], text:"Chapter I: draw 1. Chapter II: inflict 🪢 Tear on the enemy Active. Chapter III: your Active's next attack deals +30.", effect:'saga' },
     { id:'deusex', name:'Deus Ex Machina', kind:'RESET', rarity:'L', saga:true, stages:['hardcover','heal30','revive'], text:'Chapter I: your Active gains 📕 Hardcover. Chapter II: heal your Active 30. Chapter III: return one knocked-out character to your bench at half HP.', effect:'saga' },
+    { id:"nurseerrand", name:"The Nurse's Errand", kind:"UTILITY", rarity:"U", pool:false, text:"Return any 1 card from your discard pile to your hand. You cannot attack this turn.", effect:"bookreturn" },
+    { id:"bothhouses", name:"A Plague on Both Your Houses", kind:"SUPPORT", rarity:"U", pool:false, text:"If you knock out an enemy character this turn, draw 2 cards.", effect:"extracredit" },
+    { id:"fortytwohours", name:"Forty-Two Hours", kind:"SUPPORT", rarity:"E", pool:false, text:"Until the start of your next turn, neither Active character can drop below 1 HP.", effect:"cliffhanger" },
+    { id:"incitingincident", name:"Inciting Incident", kind:"SUPPORT", rarity:"C", pool:false, text:"Your Active takes 20 damage. Its Plot Point 1 counts as met this turn. Only one evolution-speeding Bookmark per turn.", effect:"incite" },
+    { id:"inmediasres", name:"In Medias Res", kind:"UTILITY", rarity:"R", pool:false, text:"Play one Act II card this turn without meeting Plot Point 1. Its climax question, if it has one, must still be answered. Only one evolution-speeding Bookmark per turn.", effect:"inmedias" },
+    { id:"characterstudy", name:"Character Study", kind:"BOOST", rarity:"U", pool:false, text:"If your Active has reached Act II or beyond, heal it 30 HP and draw a card.", effect:"charstudy" },
+    { id:"dramatispersonae", name:"Dramatis Personae", kind:"UTILITY", rarity:"C", pool:false, text:"Search your deck for 1 character card that is not an Act card, reveal it, and add it to your hand. Then shuffle your deck.", effect:"searchchar" },
+    { id:"plotsummary", name:"Plot Summary", kind:"UTILITY", rarity:"U", pool:false, text:"Search your deck for 1 Act card, reveal it, and add it to your hand. Then shuffle your deck.", effect:"searchact" },
+    { id:"theprologue", name:"The Prologue", kind:"UTILITY", rarity:"C", pool:false, text:"Search your deck for 1 Act card, reveal it, and add it to your hand. Then shuffle your deck.", effect:"searchact" },
+    { id:"boatsagainst", name:"Boats Against the Current", kind:"UTILITY", rarity:"C", pool:false, text:"Search your deck for 1 Act card, reveal it, and add it to your hand. Then shuffle your deck.", effect:"searchact" },
+    { id:"valleyofashes", name:"The Valley of Ashes", kind:"ITEM", rarity:"C", pool:false, text:"Both Active characters lose 20 HP at the start of the next 2 turns.", effect:"poison" },
+    { id:"greenlight", name:"The Green Light", kind:"BOOST", rarity:"U", pool:false, text:"Give one character ✨ Highlight. That character's next attack deals +20 damage.", effect:"horizonspromise" },
+    { id:"repeatthepast", name:"Repeat the Past", kind:"RESET", rarity:"E", pool:false, text:"Reattach up to 2 Attack and 2 Block ABC from your discard onto your Active, free of trivia.", effect:"restoration" }
   ],
   // -------- 1ST EDITION (Commander) CARDS --------
   firsteds: [
@@ -3736,7 +3749,7 @@ const DATA = {
         atk:{n:"Outcast's Retribution",t:"Inflicts \ud83e\udea2 Tear on the defender. The Creature then takes 20 Sacrifice recoil damage.",cost:4,dmg:70,inflict:"tear",sacrifice:20,label:"70/4"},
         blk:{n:"Nature's Sanction",t:"Grants The Creature \ud83d\udee1\ufe0f Laminate structural protection.",cost:2,block:50,grant:"laminate",label:"50/2"} },
       { id:"gatsby_1e", name:"Jay Gatsby (1E)", deck:"gatsby", hp:90, archetype:"Trickster", accent:"#1F6A6A", img:"", fe:true, base:["gatsby", "gatsby"],
-        passive:{id:"illusion", name:"The Colossal Illusion", text:"Once per turn, after you answer a trivia question correctly, attach 1 additional ABC from your hand to Gatsby free of trivia. Caveat: Gatsby carries a permanent, uncleansable 🫟 Spill (−10 HP each turn).", freeAttach:1, spillLock:true},
+        passive:{id:"illusion", name:"The Colossal Illusion", text:"Once per turn, after you answer a trivia question correctly, attach 1 additional ABC from your hand to Gatsby free of trivia. Caveat: Gatsby carries a permanent, uncleansable 🫟 Spill (−10 HP each turn).", bonusAttachOnCorrect:true, spillLock:true},
         atk:{n:"Lavish Display", t:"Deals +10 damage for every Bookmark in your discard pile (max +30).", cost:2, dmg:30, bmDiscardBonus:10, bmDiscardCap:30, label:"30+/2"},
         blk:{n:"Unfathomable Wealth", t:"Caps incoming damage at 20 for this Battle Phase. Discard 1 attached Block ABC after use.", cost:2, blockType:"capto", cap:20, postDiscardBlk:1, label:"20/2"} },
       { id:"hamlet_1e", name:"Hamlet (1E)", deck:"hamlet", hp:95, archetype:'Trickster', accent:"#6E3B73", img:"", fe:true, base:["hamlet","hamlet"],
@@ -5305,7 +5318,7 @@ function startTurn(){
   if(S._censor>0) { S._censor--; if(S._censor===0) pushLog('Censorship lifts \u2014 Bookmarks may be played again.'); }
   if(S._cliffhanger>0){ S._cliffhanger--; if(S._cliffhanger===0) pushLog('The Cliffhanger resolves \u2014 HP floors are gone.'); }
   const _feFree = feOnField(p).reduce((n,c)=>n+((c.passive&&c.passive.freeAttach)||0),0);
-  p.flags.feFree = _feFree;
+  p.flags.feFree = _feFree; p.flags.feFreeTo = null;
   p.attachesLeft = S.settings.maxAttaches + _feFree;
   p.discardsLeft = (S.settings.maxDiscards!=null ? S.settings.maxDiscards : 2);
   p.flags.attacked = false;
@@ -5502,10 +5515,12 @@ function tryPlayHandCard(idx,targetUid){
   if(card.cat==='act'){ actPlay('you',idx); return; }
   if(card.cat==='bookmark'){ playBookmark('you',idx); return; }
   if(card.cat==='crit'){ playCrit('you',idx); return; }
-  if(p.attachesLeft<=0){ toast('No attaches left this turn.'); return; }
+  const _gFree=(p.flags.feFree||0)>0 && card.cat==='abc' && !!p.flags.feFreeTo && ((targetUid||(active(p)||{}).uid)===p.flags.feFreeTo);
+  if(p.attachesLeft<=0 && !_gFree){ toast('No attaches left this turn.'); return; }
   const tgt=(targetUid && p.team.find(c=>c.uid===targetUid)) || active(p);
   if(!tgt || tgt.hp<=0){ toast('Choose a living character to charge.'); return; }
-  if((p.flags.feFree||0)>0 && card.cat==='abc'){ p.flags.feFree--; pushLog('1st Edition auto-attach — no trivia needed.'); attach('you',idx,true,tgt.uid); return; }
+  if((p.flags.feFree||0)>0 && card.cat==='abc' && p.flags.feFreeTo && tgt.uid===p.flags.feFreeTo){ p.flags.feFree--; p.flags.feFreeTo=null; p.attachesLeft++; p.flags._freeNow=true; pushLog('The Colossal Illusion \u2014 free attach.'); attach('you',idx,true,tgt.uid); p.flags._freeNow=false; return; }
+  if((p.flags.feFree||0)>0 && card.cat==='abc' && !p.flags.feFreeTo){ p.flags.feFree--; pushLog('1st Edition auto-attach — no trivia needed.'); attach('you',idx,true,tgt.uid); return; }
   if(S.settings.triviaOn && !p.flags.skipTrivia){ openTrivia(card,idx,tgt.uid); }
   else { if(p.flags.skipTrivia){ p.flags.skipTrivia=false; pushLog('Cliffnotes: trivia skipped.'); } attach('you',idx,true,tgt.uid); }
 }
@@ -5562,6 +5577,9 @@ function attach(side,handIdx,correct,targetUid){
     }
     p.attachesLeft--;
     p.critTurn.correct=(p.critTurn.correct||0)+1;
+    if(!p.flags._freeNow){ const _gb=p.team.find(c=>c.hp>0&&c.fe&&c.passive&&c.passive.bonusAttachOnCorrect);
+      if(_gb && p.flags._gbTurn!==(S._turnNo||0)){ p.flags._gbTurn=(S._turnNo||0); p.flags.feFree=(p.flags.feFree||0)+1; p.flags.feFreeTo=_gb.uid;
+        pushLog(`${_gb.passive.name}: one more ABC may attach to ${_gb.name}, free of trivia.`); } }
     if(S.scrim && p===S.you){
       S.scrim._streak=(S.scrim._streak||0)+1;
       if(scrimHas('marginalia')){ S.scrim._marg=(S.scrim._marg||0)+1; if(S.scrim._marg%3===0){ if(!p.deck.length&&p.discard.length)p.deck=shuffle(p.discard.splice(0)); if(p.deck.length){ p.hand.push(p.deck.pop()); pushLog('Marginalia \u2014 you draw a card.'); } } }
@@ -5857,6 +5875,38 @@ function playBookmark(side,idx){
       };
       step(); return;
     }
+    case 'searchchar': case 'searchact':{   /* fix_precon_bookmarks */
+      remove();
+      const _wantAct=card.effect==='searchact';
+      const _ok=_wantAct?function(c){ return c.cat==='act'; }:function(c){ return c.cat==='char'; };
+      const finish=(i)=>{ if(i!=null && i>=0){ const c=P.deck.splice(i,1)[0]; if(c){ c._new=true; P.hand.push(c); pushLog(`${who(P)} searches the deck \u2014 ${lbl(c)} to hand.`); } }
+        else pushLog(`${card.name}: nothing to find.`);
+        P.deck=shuffle(P.deck); if(!isYou) P.flags._aiEvoRetry=true; commit(); render&&render(); };
+      const hits=P.deck.map((c,i)=>({c,i})).filter(o=>_ok(o.c));
+      if(!hits.length){ finish(-1); return; }
+      if(isYou && hits.length>1) askPick(card.name+' \u2014 which card?', hits.map(o=>({label:lbl(o.c)+(o.c.cat==='act'?' (Act '+roman(o.c.act)+')':''),val:o.i})), finish);
+      else { let best=hits[0];
+        if(_wantAct){ const on=hits.find(o=>{ const z=actById(o.c.actId); return z && P.team.some(t=>t.hp>0 && actStageId(t)===z.from); }); if(on) best=on; }
+        finish(best.i); }
+      return;
+    }
+    case 'incite':{
+      if(P.flags._evoBmTurn===(S._turnNo||0)){ if(isYou) toast('Only one evolution-speeding Bookmark per turn.'); return; }
+      if(!act || act.hp<=20){ if(isYou) toast(`${act?act.name:'Your Active'} cannot take 20 damage.`); return; }
+      remove(); P.flags._evoBmTurn=(S._turnNo||0);
+      applyDmg(act,20); act._tookHit=true; if(!isYou) P.flags._aiEvoRetry=true;
+      pushLog(`${card.name}: ${act.name} takes 20 \u2014 Plot Point 1 is met.`); break;
+    }
+    case 'inmedias':{
+      if(P.flags._evoBmTurn===(S._turnNo||0)){ if(isYou) toast('Only one evolution-speeding Bookmark per turn.'); return; }
+      remove(); P.flags._evoBmTurn=(S._turnNo||0); P.flags._inMediasTurn=(S._turnNo||0); if(!isYou) P.flags._aiEvoRetry=true;
+      pushLog(`${card.name}: one Act II card may skip Plot Point 1 this turn. Climax questions still apply.`); break;
+    }
+    case 'charstudy':{
+      if(!act || !(act.act>=2)){ if(isYou) toast(`${act?act.name:'Your Active'} has not reached Act II.`); return; }
+      remove(); const _h=healChar(act,30); drawN(side,1);
+      pushLog(`${card.name}: ${act.name} heals ${_h} HP and ${who(P)} draws a card.`); break;
+    }
     case 'cardcatalog':{
       remove();
       const finish=(i)=>{ if(i!=null && i>=0){ const c=P.deck.splice(i,1)[0]; if(c){ c._new=true; P.hand.push(c); pushLog(`${who(P)} looks it up in the Card Catalog — ${lbl(c)} to hand.`); } }
@@ -6104,7 +6154,7 @@ function actCanEvolve(c,a){
   if(!c||c.hp<=0) return {ok:false,why:'That character is knocked out.'};
   if(actStageId(c)!==a.from) return {ok:false,why:a.name+' evolves from '+actStageName(a.from)+'.'};
   if((c.turnsInPlay||0)<1) return {ok:false,why:c.name+' entered play this turn \u2014 evolve next turn.'};
-  if(a.plot==='hit' && !c._tookHit) return {ok:false,why:'Plot Point 1 not met \u2014 '+c.name+' hasn\u2019t taken damage yet.'};
+  if(a.plot==='hit' && !c._tookHit && !(a.act===2 && S && ((S.you.team.indexOf(c)>=0?S.you:S.opp).flags||{})._inMediasTurn===(S._turnNo||0))) return {ok:false,why:'Plot Point 1 not met \u2014 '+c.name+' hasn\u2019t taken damage yet.'};
   if(a.plot==='climaxQ' && c._gateSpent===actTurnKey()) return {ok:false,why:'The climax attempt is spent for this turn.'};
   return {ok:true};
 }
@@ -6121,6 +6171,7 @@ function actPick(p,card){
 function actPlayable(p,card){ return !!actPick(p,card).t; }
 function actEvolve(side,handIdx,c){
   const p=S[side], card=p.hand[handIdx], a=actById(card&&card.actId); if(!a||!c) return false;
+  if(a.plot==='hit' && !c._tookHit && p.flags && p.flags._inMediasTurn===(S._turnNo||0)){ p.flags._inMediasTurn=null; pushLog('In Medias Res \u2014 the story starts mid-scene.'); }
   const taken=Math.max(0,c.maxHp-c.hp), from=c.name;
   if(!c._actBase) c._actBase={ name:c.name, maxHp:c.maxHp, atk:clone(c.atk), blk:clone(c.blk), atk2:c.atk2?clone(c.atk2):null,
     img:c.img||'', imgpos:c.imgpos||'', accent:c.accent, archetype:c.archetype, tags:c.tags?clone(c.tags):null, passive:c.passive?clone(c.passive):null };
@@ -6634,6 +6685,13 @@ function bmPlayable(p,c){
     case 'cardcatalog': case 'researchassist': return (p.deck||[]).some(x=>x.cat==='bookmark');
     case 'saga':        return !(p.activeBm||[]).some(x=>x._tag==='saga') && !!(c.stages&&c.stages.length);
     case 'defib':       return (p.grave||[]).length>0 && others.length>=3;
+    case 'searchchar': return (p.deck||[]).some(x=>x.cat==='char');
+    case 'searchact':  return (p.deck||[]).some(x=>x.cat==='act');
+    case 'incite':     return p.flags._evoBmTurn!==(S._turnNo||0) && !!(a&&a.hp>20&&!a._tookHit) &&
+                         p.hand.some(x=>{ if(x.cat!=='act') return false; const z=actById(x.actId); return z&&z.plot==='hit'&&z.from===actStageId(a); });
+    case 'inmedias':   return p.flags._evoBmTurn!==(S._turnNo||0) &&
+                         p.hand.some(x=>{ if(x.cat!=='act') return false; const z=actById(x.actId); return z&&z.act===2&&z.plot==='hit'&&p.team.some(t=>t.hp>0&&!t._tookHit&&(t.turnsInPlay||0)>=1&&actStageId(t)===z.from); });
+    case 'charstudy':  return !!(a&&a.hp>0&&a.act>=2);
     default: return true;
   }
 }
@@ -6721,6 +6779,7 @@ function aiTurn(){
       // ---- BOOKMARK BRAIN: priority-driven, uses the whole card pool (was: supercharge + heal only) ----
       const bi=aiPickBookmark(p, prof);
       if(bi>=0 && (p.flags.bmCount||0)<2){ try{ playBookmark('opp',bi); }catch(e){} }
+      if(p.flags._aiEvoRetry){ p.flags._aiEvoRetry=false; try{ actAiTurn(p); }catch(e){} }
       // ---- CHARGE PLAN ----
       // commit: build the ATTACK to lethal first, then block. (was: alternate atk/blk -> never threatened)
       const needAtk = prof.commit
@@ -6728,8 +6787,8 @@ function aiTurn(){
         : (act.atkCharge.length <= act.blkCharge.length);
       let pick=p.hand.findIndex(c=>c.cat==='abc' && (needAtk?c.type==='ATTACK':c.type==='BLOCK'));
       if(pick<0) pick=p.hand.findIndex(c=>c.cat==='abc');
-      if(p.attachesLeft>0 && pick>=0 && guard<9){ guard++;
-        const useFree=(p.flags.feFree||0)>0 && p.hand[pick] && p.hand[pick].cat==='abc'; if(useFree) p.flags.feFree--;
+      if((p.attachesLeft>0 || ((p.flags.feFree||0)>0 && p.flags.feFreeTo)) && pick>=0 && guard<9){ guard++;
+        const useFree=(p.flags.feFree||0)>0 && p.hand[pick] && p.hand[pick].cat==='abc'; const _ft=useFree?(p.flags.feFreeTo||null):null; if(useFree){ p.flags.feFree--; if(_ft){ p.flags.feFreeTo=null; p.attachesLeft++; } }
         let ok=useFree?true:(Math.random()<S.settings.aiAccuracy);
         // Iterum Probare for the AI. The ability is identical; the WILLINGNESS to
         // spend a card scales with difficulty so the four tiers stay distinct.
@@ -6744,7 +6803,7 @@ function aiTurn(){
             pushLog(ok?'\u2026 and gets it this time.':'\u2026 and misses again.');
           }
         }
-        attach('opp',pick,ok||!S.settings.triviaOn); setTimeout(step,400);
+        p.flags._freeNow=useFree; attach('opp',pick,ok||!S.settings.triviaOn,_ft||undefined); p.flags._freeNow=false; setTimeout(step,400);
       } else {
         setTimeout(aiEngage,400);
       }
@@ -7162,7 +7221,7 @@ function deckMeter(k){
   if(sbx()) return '';
   var chT=(DATA.characters[k]||[]).length, chG=(DATA.characters[k]||[]).filter(function(c){return deckOwnCh(k,c.id);}).length;
   var abT=(DATA.abcs[k]||[]).length, abG=(DATA.abcs[k]||[]).map(function(_,i){return i;}).filter(function(i){return deckOwnAb(k,i);}).length;
-  var bmT=DATA.bookmarks.length, bmG=DATA.bookmarks.filter(function(_,i){return bmOwned(i)>0;}).length;
+  var bmT=DATA.bookmarks.filter(function(b){ return b.pool!==false; }).length, bmG=DATA.bookmarks.filter(function(_,i){return bmOwned(i)>0;}).length;
   var crT=DATA.crits.length, crG=DATA.crits.filter(function(_,i){return ownCrit(i);}).length;
   var eds=editionsForDeck(k), edG=0, edT=0;
   eds.forEach(function(e){ var all=[].concat(e.battle.chars||[],e.battle.abcs||[],e.battle.bookmarks||[],e.battle.commanders||[]);
@@ -7427,6 +7486,7 @@ function builderScreen(){
       <span class="bd-ty">${a.type==='ATTACK'?'⚔':'⛊'} ${a.power} · VOCAB</span><span class="bd-q">${a.q}</span><span class="bd-pv" data-bld="edprevab:${a.cid.replace(/:/g,';')}" title="Preview card">🔍</span><span class="bd-mk">${on?'✓':'+'}</span></button>`;
   }).join('');
   const bmRow=DATA.bookmarks.map((b,i)=>{
+    if(b.pool===false && bmOwned(i)<1) return '';
     if(bmOwned(i)<1) return `<div class="bd-bm lockcard"><span class="bd-bmname">🔒 ${b.name}</span><span class="lk-hint">Common · Faculty Lounge pack</span></div>`;
     const ct=def.bm.filter(x=>x===i).length;
     return `<div class="bd-bm"><span class="bd-bmname">✦ ${b.name} <small style="opacity:.6">×${bmOwned(i)}</small></span><span class="bd-pv inline" data-bld="prevbm:${i}" title="Preview card">🔍</span>
@@ -8866,7 +8926,7 @@ const DIFFICULTY = {
 };
 const DIFF_ORDER = ['passfail','honorroll','deanslist','valedictorian'];
 function bmRarity(b){ return b.rarity||'C'; }
-function bmIdxByRarity(rs){ const o=[]; DATA.bookmarks.forEach((b,i)=>{ if(rs.includes(bmRarity(b))) o.push(i); }); return o; }
+function bmIdxByRarity(rs){ const o=[]; DATA.bookmarks.forEach((b,i)=>{ if(b.pool!==false && rs.includes(bmRarity(b))) o.push(i); }); return o; }
 function buildOppBookmarks(diff){
   const commons=bmIdxByRarity(['C']), ur=bmIdxByRarity(['U','R']), epics=bmIdxByRarity(['E']), legends=bmIdxByRarity(['L']);
   const N=LIMITS.bm, out=[], pick=a=>a[rnd(a.length)];
@@ -9482,7 +9542,7 @@ function setPool(setId){
   if(setId==='base'){
     var perks=Object.keys(SCRIM_PERKS||{});
     return {
-      C:DATA.bookmarks.map(function(b,i){return {k:'bm',id:i,name:b.name};}),
+      C:DATA.bookmarks.map(function(b,i){return {k:'bm',id:i,name:b.name,_np:b.pool===false};}).filter(function(o){ return !o._np; }),
       U:DATA.crits.map(function(c,i){return {k:'cr',id:i,name:c.name};}).filter(function(o){return (window.START_CR||[]).indexOf(o.id)<0;})
          .concat(perks.map(function(p){return {k:'so',id:p,name:(SCRIM_PERKS[p]||{}).name||p};})),
       R:(DATA.firsteds||[]).filter(function(f){return !deckLocked(f.deck);}).map(function(f){return {k:'cmd',id:f.id,name:f.name};})
@@ -10209,7 +10269,7 @@ function scrimRollDraft(n){ const out=[]; const decks=Object.keys(DATA.character
     if(roll<0.15){ const pool=scrimArtPool(['common','uncommon']).filter(id=>!out.some(o=>o.t==='art'&&o.id===id)); if(pool.length){ out.push({t:'art',id:pool[rnd(pool.length)]}); continue; } }
     const r2=Math.random();
     if(r2<0.6){ const d=decks[rnd(decks.length)]; out.push({t:'ab',d,i:rnd(DATA.abcs[d].length)}); }
-    else if(r2<0.85){ out.push({t:'bm',i:rnd(DATA.bookmarks.length)}); }
+    else if(r2<0.85){ const _bp=DATA.bookmarks.map((b,i)=>b.pool===false?-1:i).filter(i=>i>=0); out.push({t:'bm',i:_bp[rnd(_bp.length)]}); }
     else { out.push({t:'cr',i:rnd(DATA.crits.length)}); } }
   return out; }
 function scrimDraftCard(ref){ if(ref.t==='ab') return DATA.abcs[ref.d][ref.i]; if(ref.t==='bm') return DATA.bookmarks[ref.i]; return DATA.crits[ref.i]; }
