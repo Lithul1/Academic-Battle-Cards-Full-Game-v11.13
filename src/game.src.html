@@ -2500,7 +2500,7 @@ body[data-screen="play"] .board::after{
 /* ============================================================
    ACADEMIC BATTLE CARDS — demo data
    All numbers are editable. Stat string "30/2" = damage / ABC cost.
-   dmgType:  flat | perTurn | perABC      (perTurn = base + step*turnsInPlay)
+   dmgType:  flat | perTurn | perABC      (perTurn = base, +step each of your turns after it entered play)
    blockType: flat | negate | perTurn | capto   (capto = reduce incoming down to .cap)
    flags: pierce (ignores block), first (strikes first — shown, demo treats as flat)
    ============================================================ */
@@ -2511,51 +2511,51 @@ const DATA = {
   // or a full URL, or a base64 data URI. Leave img off/empty to use the monogram tile.
   characters: {
     gatsby: [
-      { id:'daisy', name:'Daisy Buchanan', hp:85, 'archetype':'Monument', accent:'#C9A24B', img:'',
-        atk:{n:'Emotional Wave', t:'+10 each turn it stays in play.', cost:3, dmgType:'perTurn', base:10, step:10, label:'X/3'},
+      { id:'daisy', name:'Daisy Buchanan', hp:85, archetype:'Monument', accent:'#C9A24B', img:'',
+        atk:{n:'Emotional Wave', t:'+10 each of your turns it stays in play.', cost:3, dmg:40, dmgType:'perTurn', base:40, step:10, label:'40+/3'},
         blk:{n:'Shifting Loyalties', t:'Leans on her allies to soak a hit.', cost:2, block:50, label:'50/2'} },
-      { id:'gatsby', name:'Jay Gatsby', hp:105, 'archetype':'Monument', accent:'#3E8E7E',
-        atk:{n:'Green Light Ambition', t:'+5 each turn it stays in play.', cost:3, dmgType:'perTurn', base:50, step:5, label:'50/3+'},
-        blk:{n:'Fading Illusions', t:'The illusion holds. Negate the attack entirely, but every use costs 1 more ABC than the last, up to 4.', cost:3, blockType:'negate', label:'X/3+', 'escalate':{step:1,cap:4}} },
-      { id:'myrtle', name:'Myrtle Wilson', hp:70, 'archetype':'Steadfast', accent:'#B0556B',
+      { id:'gatsby', name:'Jay Gatsby', hp:105, archetype:'Monument', accent:'#3E8E7E',
+        atk:{n:'Green Light Ambition', t:'+10 each of your turns it stays in play.', cost:3, dmg:40, dmgType:'perTurn', base:40, step:10, label:'40+/3'},
+        blk:{n:'Fading Illusions', t:'The illusion holds. Negate the attack entirely, but every use costs 1 more ABC than the last, up to 4.', cost:3, blockType:'negate', escalate:{step:1, cap:4}, label:'X/3+'} },
+      { id:'myrtle', name:'Myrtle Wilson', hp:70, archetype:'Urchin', accent:'#B0556B',
         atk:{n:'Ambitious Strike', t:'A sharp, social-climbing jab.', cost:1, dmg:30, label:'30/1'},
-        blk:{n:'Fragile Aspirations', t:'Absorbs one big attack at a cost.', cost:2, block:50, label:'50/2'} },
+        blk:{n:'Fragile Aspirations', t:'Absorbs one big attack.', cost:2, block:50, label:'50/2'} },
       { id:'tom', name:'Tom Buchanan', hp:95, 'archetype':'Force of Nature', accent:'#7E5A3C',
         atk:{n:'Brute Force Argument', t:'Gains 🗡️ Pierce.', cost:3, dmg:50, flags:['pierce'], label:'50/3'},
         blk:{n:'Social Shield', t:'Status and privilege blunt the blow.', cost:2, block:50, label:'50/2'} },
-      { id:'nick', name:'Nick Carraway', hp:115, 'archetype':'Monument', accent:'#5C7CA6',
-        atk:{n:'Judgment Strike', t:'+10 each turn it stays in play.', cost:2, dmgType:'perTurn', base:20, step:10, label:'20+/2'},
+      { id:'nick', name:'Nick Carraway', hp:115, archetype:'Monument', accent:'#5C7CA6',
+        atk:{n:'Judgment Strike', t:'+10 each of your turns it stays in play.', cost:2, dmg:30, dmgType:'perTurn', base:30, step:10, label:'30+/2'},
         blk:{n:'Detached Witness', t:'Steps back from the conflict to avoid harm.', cost:3, block:70, label:'70/3'} },
-      { id:'george', name:'George Wilson', hp:120, 'archetype':'Force of Nature', accent:'#8A8170', img:'',
-        atk:{n:'Vengeful Shot', t:'Costs 10 of your own HP.', cost:4, dmg:90, sacrifice:10, label:'90/4'},
-        blk:{n:'Endurance Shield', t:'+10 each turn it stays in play.', cost:3, blockType:'perTurn', base:10, step:10, label:'30+/3'} },
-      { id:'jordan', name:'Jordan Baker', hp:115, 'archetype':'Steadfast', accent:'#9AA15A', img:'',
+      { id:'george', name:'George Wilson', hp:120, archetype:'Monument', accent:'#8A8170', img:'',
+        atk:{n:'Steady, Now', t:'“You may fool me, but you can\'t fool God!” +10 each of your turns it stays in play.', cost:3, dmg:40, dmgType:'perTurn', step:10, base:40, label:'40+/3'},
+        blk:{n:'The Whole Table', t:'Clear one negative status from every ally.', cost:3, block:50, teamCleanse:true, label:'50/3'} },
+      { id:'jordan', name:'Jordan Baker', hp:115, archetype:'Trickster', accent:'#9AA15A', img:'',
         atk:{n:'Reckless Drive', t:'A careless, powerful swing that lands hard.', cost:2, dmg:50, label:'50/2'},
         blk:{n:'Bend the Rules', t:'She quietly improves her lie to dodge trouble.', cost:2, block:50, label:'50/2'} },
-      { id:'james_gatz', name:'James Gatz', hp:100, 'archetype':'Hero', accent:'#4F81BD', img:'',
+      { id:'james_gatz', name:'James Gatz', hp:100, archetype:'Hero', accent:'#4F81BD', img:'', tags:['Dreamer'],
         atk:{n:'Farm Boy\'s Resolve', t:'Grant ✨ Highlight.', cost:2, dmg:30, grant:'highlight', label:'30/2'},
         blk:{n:'Unbreakable Spirit', t:'Clear 🫆 Smudge.', cost:2, block:40, blockType:'cleanse', blkCleanse:'smudge', label:'40/2'} },
-      { id:'meyer_wolfsheim', name:'Meyer Wolfsheim', hp:105, 'archetype':'Scourge', accent:'#5B5B5B', img:'',
-        atk:{n:'Fixed the Game', t:'Bet big — especially when you know the outcome. Inflict 🫆 Smudge. +5 ⚔ per Bookmark and ⛊ card in your discard pile, to +50.', cost:3, dmg:20, inflict:'smudge', label:'20+/3', 'pileScale':{counts:["bm","blk"],step:5,cap:50}},
+      { id:'meyer_wolfsheim', name:'Meyer Wolfsheim', hp:105, archetype:'Scourge', accent:'#5B5B5B', img:'', tags:['Criminal'],
+        atk:{n:'Fixed the Game', t:'Bet big — especially when you know the outcome. Inflict 🫆 Smudge. +5 ⚔ per Bookmark and ⛊ card in your discard pile, to +40.', cost:3, dmg:30, inflict:'smudge', pileScale:{counts:['bm', 'blk'], step:5, cap:40}, label:'30+/3'},
         blk:{n:'Underworld Connections', t:'Return a Bookmark from your discard to hand.', cost:2, block:30, recoverBookmark:true, label:'30/2'} },
-      { id:'owl_eyes', name:'Owl Eyes', hp:75, 'archetype':'Trickster', accent:'#8E7CC3', img:'',
+      { id:'owl_eyes', name:'Owl Eyes', hp:75, archetype:'Trickster', accent:'#8E7CC3', img:'', tags:['Observer'],
         atk:{n:'Keen Observation', t:'Remove the target\'s ✨ Highlight.', cost:2, dmg:30, stripPos:'highlight', label:'30/2'},
         blk:{n:'Genuine Article', t:'Grant ✨ Highlight.', cost:2, block:40, grant:'highlight', label:'40/2'} },
-      { id:'klipspringer', name:'Klipspringer', hp:85, 'archetype':'Urchin', accent:'#F1C232', img:'',
+      { id:'klipspringer', name:'Klipspringer', hp:85, archetype:'Urchin', accent:'#F1C232', img:'', tags:['Opportunist'],
         atk:{n:'Borrowed Tune', t:'Draw 1.', cost:2, dmg:40, drawAfter:1, label:'40/2'},
         blk:{n:'Slip Away', t:'Clear 🩹 Glue.', cost:1, block:30, blockType:'cleanse', blkCleanse:'glue', label:'30/1'} },
-      { id:'dan_cody', name:'Dan Cody', hp:135, 'archetype':'Mentor', accent:'#B45F06', img:'',
+      { id:'dan_cody', name:'Dan Cody', hp:135, archetype:'Mentor', accent:'#B45F06', img:'', tags:['Mentor'],
         atk:{n:'Lessons at Sea', t:'Grant an ally ✨ Highlight.', cost:3, dmg:50, grantAlly:'highlight', label:'50/3'},
         blk:{n:'Veteran Sailor', t:'Grant 🛡️ Laminate.', cost:2, block:30, grant:'laminate', label:'30/2'} },
-      { id:'catherine', name:'Catherine', hp:75, 'archetype':'Shadow', accent:'#C27BA0', img:'',
-        atk:{n:'Rumor Mill', t:'The rumour spreads, and keeps spreading. Inflict 🩸 Siphon — each turn the target discards a card and Catherine draws one.', cost:2, dmg:30, label:'30/2', siphon:{amt:10,turns:2,leech:5,mode:"hand"}},
+      { id:'catherine', name:'Catherine', hp:75, archetype:'Shadow', accent:'#C27BA0', img:'', tags:['Gossip'],
+        atk:{n:'Rumor Mill', t:'The rumour spreads, and keeps spreading. Inflict 🩸 Siphon — each turn the target discards a card and Catherine draws one.', cost:2, dmg:30, siphon:{amt:10, turns:2, leech:5, mode:'hand'}, label:'30/2'},
         blk:{n:'Changing Stories', t:'Clear 🫟 Spill. Clear 🫟 Spill from an ally.', cost:2, block:40, blockType:'cleanse', blkCleanse:'spill', cleanseAlly:'spill', label:'40/2'} },
-      { id:'henry_gatz', name:'Henry Gatz', hp:80, 'archetype':'Innocent', accent:'#6AA84F', img:'',
+      { id:'henry_gatz', name:'Henry Gatz', hp:80, archetype:'Innocent', accent:'#6AA84F', img:'', tags:['Family'],
         atk:{n:'Father\'s Pride', t:'Heal 20 HP.', cost:2, dmg:40, heal:20, label:'40/2'},
-        blk:{n:'Family Keepsake', t:'Clear 🔥 Burn and 🪢 Tear.', cost:2, block:30, blockType:'cleanse', blkCleanse:['burn','tear'], label:'30/2'} },
-      { id:'pammy_buchanan', name:'Pammy Buchanan', hp:85, 'archetype':'Innocent', accent:'#F9CB9C', img:'',
+        blk:{n:'Family Keepsake', t:'Clear 🔥 Burn and 🪢 Tear.', cost:2, block:30, blockType:'cleanse', blkCleanse:['burn', 'tear'], label:'30/2'} },
+      { id:'pammy_buchanan', name:'Pammy Buchanan', hp:85, archetype:'Innocent', accent:'#F9CB9C', img:'', tags:['Child'],
         atk:{n:'Innocent Smile', t:'Clear 🔥 Burn from an ally.', cost:1, dmg:20, cleanseAlly:'burn', label:'20/1'},
-        blk:{n:'Sheltered Life', t:'Prevent the next 🫆 Smudge and 🫟 Spill.', cost:1, block:30, immuneNext:['smudge','spill'], label:'30/1'} },
+        blk:{n:'Sheltered Life', t:'Prevent the next 🫆 Smudge and 🫟 Spill.', cost:1, block:30, immuneNext:['smudge', 'spill'], label:'30/1'} },
     ],
     crucible: [
       { id:'abigail', name:'Abigail Williams', hp:165, "archetype":"Sentinel", accent:'#9C3B57',
@@ -2880,9 +2880,9 @@ const DATA = {
       { id:"romeo", name:"Romeo Montague", hp:65, "archetype":"Martyr", accent:"#3B5BA5", img:"", tags:["Montague", "Lover"],
         atk:{n:"But Soft, What Light", t:"He never counts the cost. Costs 20 of your own HP.", cost:3, dmg:70, "sacrifice": 20, label:"70/3"},
         blk:{n:"Banished", t:"Exiled from the only wall he had. Negate the attack entirely. Loses 10 HP each time it does.", cost:2, "blockType": "negate", "selfDamage": 10, label:"X/2"} },
-      { id:"juliet", name:"Juliet Capulet", hp:95, "archetype":"Monument", accent:"#C4344E", img:"", tags:["Capulet", "Lover"],
-        atk:{n:"Boundless as the Sea", t:"I am lost without thy love.  +10 each turn it stays in play.", cost:2, dmg:20, "dmgType": "perTurn", "base": 20, "step": 10, label:"20+/2"},
-        blk:{n:"The Vial", t:"Forty-two hours of nothing reaching her. Prevent the next 🔥 Burn.", cost:2, block:30, "immuneNext": ["burn"], label:"30/2"} },
+      { id:"juliet", name:"Juliet Capulet", hp:95, archetype:"Innocent", accent:"#C4344E", img:"", tags:["Capulet", "Lover"],
+        atk:{n:"Boundless as the Sea", t:"“My only love sprung from my only hate!” +10 each of your turns it stays in play.", cost:2, dmg:30, dmgType:"perTurn", base:30, step:10, label:"30+/2"},
+        blk:{n:"The Vial", t:"Forty-two hours of nothing reaching her. Prevent the next 🔥 Burn.", cost:2, block:30, immuneNext:["burn"], label:"30/2"} },
       { id:"tybalt", name:"Tybalt", hp:75, "archetype":"Outlaw", accent:"#8C1C2B", img:"", tags:["Capulet", "Duellist"],
         atk:{n:"King of Cats", t:"Silver tongue, silver blade. Gains 🗡️ Pierce.", cost:2, dmg:30, "flags": ["pierce"], label:"30/2"},
         blk:{n:"Peace? I Hate the Word", t:"Inflict 🪢 Tear on the attacker.", cost:2, block:30, "inflictAtt": "tear", label:"30/2"} },
@@ -2907,9 +2907,9 @@ const DATA = {
       { id:"rosaline", name:"Rosaline", hp:95, "archetype":"Gatekeeper", accent:"#6E5A8C", img:"", tags:["Capulet", "Vow"],
         atk:{n:"Sworn to Chastity", t:"Innocence is a burden of a chosen few. Remove the target's ✨ Highlight.", cost:2, dmg:30, "stripPos": "highlight", label:"30/2"},
         blk:{n:"She Will Not Be Hit", t:"The one refusal nobody argues with. Blocks 60 instead against attacks costing 3 or more.", cost:2, block:50, "cond": [{"test": "incomingCostGTE", "n": 3, "then": {"blockSet": 60}}], label:"50/2"} },
-      { id:"apothecary", name:"The Apothecary", hp:70, "archetype":"Shadow", accent:"#5A6B4A", img:"", tags:["Verona", "Outcast"],
-        atk:{n:"Forty Ducats", t:"His poverty consents, not his will. Inflict 🔥 Burn.", cost:2, dmg:30, "inflict": "burn", label:"30/2"},
-        blk:{n:"Mantua Backroom", t:"Come, come, there's more here.", cost:1, block:30, label:"30/1"} },
+      { id:"apothecary", name:"The Apothecary", hp:70, archetype:"Shadow", accent:"#5A6B4A", img:"", tags:["Verona", "Outcast"],
+        atk:{n:"Forty Ducats", t:"His poverty consents, not his will. Inflict 🔥 Burn.", cost:2, dmg:30, inflict:"burn", label:"30/2"},
+        blk:{n:"Mantua Backroom", t:"“Come, come, there's more here.” Draw 1.", cost:1, block:20, onBlockDraw:1, label:"20/1"} },
       { id:"benvolio", name:"Benvolio", hp:90, "archetype":"Hero", accent:"#4A7A8C", img:"", tags:["Montague", "Peacemaker"],
         atk:{n:"Part, Fools!", t:"Make way, make way! Grant ✨ Highlight.", cost:1, dmg:20, "grant": "highlight", label:"20/1"},
         blk:{n:"I Do But Keep the Peace", t:"Negate one incoming status effect.", cost:2, block:30, "blockType": "negateStatus", label:"30/2"} }
@@ -3735,10 +3735,10 @@ const DATA = {
         passive:{id:"isolation",name:"Total Isolation",text:"The Creature's attacks deal +20 while you have no living benched characters. But it can never be healed or gain positive statuses from your own Bookmarks.",soloBonus:20,immuneSelfBuff:true},
         atk:{n:"Outcast's Retribution",t:"Inflicts \ud83e\udea2 Tear on the defender. The Creature then takes 20 Sacrifice recoil damage.",cost:4,dmg:70,inflict:"tear",sacrifice:20,label:"70/4"},
         blk:{n:"Nature's Sanction",t:"Grants The Creature \ud83d\udee1\ufe0f Laminate structural protection.",cost:2,block:50,grant:"laminate",label:"50/2"} },
-      { id:"gatsby_1e", name:"Jay Gatsby (1E)", deck:"gatsby", hp:90, archetype:'Trickster', accent:"#1F6A6A", img:"", fe:true, base:["gatsby","gatsby"],
-        passive:{id:"illusion",name:"The Colossal Illusion",text:"At the start of your Main Phase, attach 1 ABC to any character free of trivia. Caveat: Gatsby carries a permanent, uncleansable 🫟 Spill (−10 HP each turn).",freeAttach:1,spillLock:true},
-        atk:{n:"Lavish Display",t:"Deals +10 damage for every Bookmark in your discard pile (max +30).",cost:2,dmg:30,bmDiscardBonus:10,bmDiscardCap:30,label:"30+/2"},
-        blk:{n:"Unfathomable Wealth",t:"Caps incoming damage at 20 for this Battle Phase. Discard 1 attached Block ABC after use.",cost:2,blockType:"capto",cap:20,postDiscardBlk:1,label:"Cap20/2"} },
+      { id:"gatsby_1e", name:"Jay Gatsby (1E)", deck:"gatsby", hp:90, archetype:"Trickster", accent:"#1F6A6A", img:"", fe:true, base:["gatsby", "gatsby"],
+        passive:{id:"illusion", name:"The Colossal Illusion", text:"Once per turn, after you answer a trivia question correctly, attach 1 additional ABC from your hand to Gatsby free of trivia. Caveat: Gatsby carries a permanent, uncleansable 🫟 Spill (−10 HP each turn).", freeAttach:1, spillLock:true},
+        atk:{n:"Lavish Display", t:"Deals +10 damage for every Bookmark in your discard pile (max +30).", cost:2, dmg:30, bmDiscardBonus:10, bmDiscardCap:30, label:"30+/2"},
+        blk:{n:"Unfathomable Wealth", t:"Caps incoming damage at 20 for this Battle Phase. Discard 1 attached Block ABC after use.", cost:2, blockType:"capto", cap:20, postDiscardBlk:1, label:"20/2"} },
       { id:"hamlet_1e", name:"Hamlet (1E)", deck:"hamlet", hp:95, archetype:'Trickster', accent:"#6E3B73", img:"", fe:true, base:["hamlet","hamlet"],
         passive:{id:"antic",name:"Anticipatory Madness",text:"See the card your opponent just drew. Caveat: if you fail a trivia check while Hamlet is on the field, you must skip your next attack declaration.",peekFoeDraw:true,failSkipAttack:true,skipFlavor:"Hamlet's hesitation"},
         atk:{n:"The Mousetrap",t:"Guess the type on top of your opponent's deck. If correct, +20 damage and inflict \ud83e\udea2 Tear.",cost:2,dmg:40,guessTopFoe:{bonus:20,inflict:"tear"},label:"40/2"},
@@ -4060,7 +4060,77 @@ window.ABC_BOSS_IMGPOS={"dyefone":"44% 40%","sandroid":"48% 40%","sinstaram":"50
       img:"data:image/webp;base64,__ABCASSET_1123__", imgpos:"50% 8%", hpos:"50% 14%",
       atk:{n:"Final Stand", t:"\u201cMy blood and my blade will cut through my enemies.\u201d Costs 20 of your own HP.", cost:3, dmg:70, sacrifice:20, label:"70/3"},
       blk:{n:"Sleep No More", t:"\u201cWhat more can I sacrifice?!\u201d Discard a random card from hand to resolve.", cost:1, block:30, selfDiscardHand:1, label:"30/1"},
-      passive:{ id:"paranoia", name:"Violent Paranoia", text:"Attacks deal +20 while this card is below half health. Caveat: it can never be healed.", lowHpAtkAdd:20, noHeal:true } }
+      passive:{ id:"paranoia", name:"Violent Paranoia", text:"Attacks deal +20 while this card is below half health. Caveat: it can never be healed.", lowHpAtkAdd:20, noHeal:true } },
+    { id:"romeo_husband_of_juliet", deck:"romeojuliet", act:2, from:"romeo", base:["romeojuliet", "romeo"], plot:"hit",
+      name:"Husband of Juliet", hp:100, archetype:"Outlaw", accent:"#3B5BA5",
+      atk:{n:"Love's Light Wings", t:"“With love's light wings did I o'erperch these walls.” Inflict 🪢 Tear.", cost:3, dmg:50, inflict:"tear", label:"50/3"},
+      blk:{n:"Stony Limits", t:"“Some consequence yet hanging in the stars.” 🪃 Riposte — while charged, attackers take 20.", cost:2, block:30, riposte:{dmg:20, mode:"hp"}, label:"30/2"} },
+    { id:"romeo_fortunes_fool", deck:"romeojuliet", act:3, from:"romeo_husband_of_juliet", base:["romeojuliet", "romeo"], plot:"climaxQ", resolution:"tragic",
+      name:"Fortune's Fool", hp:130, archetype:"Martyr", accent:"#3B5BA5",
+      atk:{n:"I Defy You, Stars", t:"“Then I defy you, stars!” Strikes first.", cost:4, dmg:70, flags:["first"], label:"70/4"},
+      blk:{n:"A Desperate Man", t:"“Tempt not a desperate man.” Negate the attack entirely, but every use costs 1 more ABC than the last, up to 4.", cost:3, blockType:"negate", escalate:{step:1, cap:4}, label:"X/3+"},
+      passive:{id:"headlong", name:"Headlong", text:"Deals +20 on the turn it evolves or enters play. Caveat: it takes 10 recoil damage with every attack.", entryAtkAdd:20, recoil:10} },
+    { id:"juliet_wife_of_romeo", deck:"romeojuliet", act:2, from:"juliet", base:["romeojuliet", "juliet"], plot:"hit",
+      name:"Wife of Romeo", hp:130, archetype:"Sentinel", accent:"#C4344E",
+      atk:{n:"Boundless as the Sea", t:"“My bounty is as boundless as the sea, my love as deep.” +10 ⚔ for every Attack ABC charged.", cost:3, dmg:40, dmgType:"perABC", step:10, label:"40+/3"},
+      blk:{n:"Serpent Heart", t:"“O serpent heart, hid with a flowering face!” Inflict 🔥 Burn on the attacker.", cost:2, block:30, inflictAtt:"burn", label:"30/2"} },
+    { id:"juliet_o_happy_dagger", deck:"romeojuliet", act:3, from:"juliet_wife_of_romeo", base:["romeojuliet", "juliet"], plot:"climaxQ", resolution:"tragic", starter:false,
+      name:"O Happy Dagger", hp:150, archetype:"Martyr", accent:"#C4344E",
+      atk:{n:"A Story of More Woe", t:"“What must be shall be.” +5 ⚔ for every ⚔ and ⛊ card in your discard pile, to +40.", cost:3, dmg:20, pileScale:{counts:["atk", "blk"], step:5, cap:40}, label:"20+/3"},
+      blk:{n:"What Must Be", t:"“O happy dagger, this is thy sheath; there rust, and let me die.” Grant 📕 Hardcover.", cost:2, block:30, grant:"hardcover", label:"30/2"},
+      passive:{id:"her_own_hand", name:"Her Own Hand", text:"Deals +20 while it carries a negative status. Caveat: it can never clear a status from itself.", statusedAtkAdd:20, noSelfCleanse:true} },
+    { id:"mercutio_worms_meat", deck:"romeojuliet", act:2, from:"mercutio", base:["romeojuliet", "mercutio"], plot:"hit", resolution:"tragic",
+      name:"Worms' Meat", hp:100, archetype:"Shadow", accent:"#D4A017",
+      atk:{n:"Scratch, a Scratch", t:"“If love be blind, love cannot hit the mark.” Inflict 🔥 Burn or 🫟 Spill — your choice.", cost:3, dmg:50, inflictChoice:["burn", "spill"], label:"50/3"},
+      blk:{n:"Ask for Me Tomorrow", t:"“If love be rough with you, be rough with love.” Clear 🔥 Burn.", cost:2, block:30, blockType:"cleanse", blkCleanse:"burn", label:"30/2"},
+      passive:{id:"grave_man", name:"Grave Man", text:"Attacks that give a bad status deal +10. Caveat: this card carries a permanent, uncleansable 🫟 Spill (−10 HP each turn).", inflictAtkAdd:10, spillLock:true} },
+    { id:"tybalt_the_prince_of_cats", deck:"romeojuliet", act:2, from:"tybalt", base:["romeojuliet", "tybalt"], plot:"climaxQ", resolution:"tragic", starter:false,
+      name:"The Prince of Cats", hp:120, archetype:"Gatekeeper", accent:"#8C1C2B",
+      atk:{n:"Have At Thee", t:"“What, drawn, and talk of peace? I hate the word.” Strikes first.", cost:3, dmg:50, flags:["first"], label:"50/3"},
+      blk:{n:"Thou Wretched Boy", t:"“Thou, wretched boy, that didst consort him here, shalt with him hence.” Grant 🛡️ Laminate.", cost:2, block:30, grant:"laminate", label:"30/2"},
+      passive:{id:"king_of_cats", name:"King of Cats", text:"This card's moves cost 1 less ABC (minimum 1). Caveat: it can never be healed above its starting health.", costMod:-1, noHealAbove:true} },
+    { id:"capulets_the_reconciled", deck:"romeojuliet", act:2, from:"capulets", base:["romeojuliet", "capulets"], plot:"hit", resolution:"comic", starter:false,
+      name:"The Reconciled", hp:160, archetype:"Sentinel", accent:"#A3202F",
+      atk:{n:"Poor Sacrifices", t:"“Some grief shows much of love, but much of grief shows still some want of wit.” The target's next attack deals 20 less.", cost:3, dmg:40, weaken:20, label:"40/3"},
+      blk:{n:"Bury Our Strife", t:"“Death lies on her like an untimely frost upon the sweetest flower of all the field.” Clear one negative status from every ally.", cost:2, block:30, teamCleanse:true, label:"30/2"},
+      passive:{id:"golden_statues", name:"Golden Statues", text:"Heals 10 HP at the start of each of your turns. Caveat: it can never deal more than 40 damage in one attack.", healTurn:10, dmgCap:40} },
+    { id:"gatsby_the_host_of_west_egg", deck:"gatsby", act:2, from:"gatsby", base:["gatsby", "gatsby"], plot:"hit",
+      name:"The Host of West Egg", hp:140, archetype:"Trickster", accent:"#3E8E7E",
+      atk:{n:"Dispensing Starlight", t:"“I tried very hard to die, but I seemed to bear an enchanted life.” Heal 20 HP.", cost:3, dmg:60, heal:20, label:"60/3"},
+      blk:{n:"That Rare Smile", t:"“He had waited five years and bought a mansion where he dispensed starlight to casual moths.” Clear 🔥 Burn and 🪢 Tear.", cost:2, block:30, blockType:"cleanse", blkCleanse:["burn", "tear"], label:"30/2"} },
+    { id:"gatsby_doomed_dreamer", deck:"gatsby", act:3, from:"gatsby_the_host_of_west_egg", base:["gatsby", "gatsby"], plot:"climaxQ", resolution:"tragic",
+      name:"Doomed Dreamer", hp:160, archetype:"Martyr", accent:"#3E8E7E",
+      atk:{n:"The Green Light", t:"“His dream must have seemed so close that he could hardly fail to grasp it.” Ignores the target's defensive buffs.", cost:3, dmg:60, ignoreDefBuffs:true, label:"60/3"},
+      blk:{n:"One Fine Morning", t:"“Can't repeat the past? Why of course you can!” Draw 1.", cost:2, block:40, onBlockDraw:1, label:"40/2"},
+      passive:{id:"platonic_conception", name:"Platonic Conception", text:"You may look at the top card of your deck at any time. Caveat: when this card is knocked out you discard a random card.", peekOwnDeck:true, koDiscardRandom:true} },
+    { id:"nick_the_reluctant_confidant", deck:"gatsby", act:2, from:"nick", base:["gatsby", "nick"], plot:"hit", starter:false,
+      name:"The Reluctant Confidant", hp:140, archetype:"Gatekeeper", accent:"#5C7CA6",
+      atk:{n:"Nothing Is Yours", t:"“I was within and without, simultaneously enchanted and repelled.” Remove the target's ✨ Highlight.", cost:2, dmg:30, stripPos:"highlight", label:"30/2"},
+      blk:{n:"Read the Room", t:"“There are only the pursued, the pursuing, the busy and the tired.” Draw 1.", cost:2, block:40, onBlockDraw:1, label:"40/2"} },
+    { id:"nick_westward_traveler", deck:"gatsby", act:3, from:"nick_the_reluctant_confidant", base:["gatsby", "nick"], plot:"climaxQ", resolution:"comic", starter:false,
+      name:"Westward Traveler", hp:170, archetype:"Inquisitor", accent:"#5C7CA6",
+      atk:{n:"Answer in Kind", t:"“Human sympathy has its limits.” +5 ⚔ per ⚔ and ⛊ card in your discard pile, to +40.", cost:3, dmg:20, pileScale:{counts:["atk", "blk"], step:5, cap:40}, label:"20+/3"},
+      blk:{n:"The Price of Touching", t:"“Reserving judgments is a matter of infinite hope.” 🪃 Riposte — while charged, attackers take 20.", cost:2, block:30, riposte:{dmg:20, mode:"hp"}, label:"30/2"},
+      passive:{id:"so_we_beat_on", name:"So We Beat On", text:"When an ally is knocked out, attach 1 ABC from your discard pile to this card free of trivia. Caveat: it cannot block on the turn it evolves.", onAllyKO:{attachFromDiscard:1}, noBlockOnEvolve:true} },
+    { id:"daisy_the_golden_girl", deck:"gatsby", act:2, from:"daisy", base:["gatsby", "daisy"], plot:"hit",
+      name:"The Golden Girl", hp:120, archetype:"Innocent", accent:"#C9A24B",
+      atk:{n:"Still Here", t:"“I hope she'll be a fool. That's the best thing a girl can be in this world.” Heal 20 HP.", cost:3, dmg:50, heal:20, label:"50/3"},
+      blk:{n:"Clean and Whole", t:"“Oh, you want too much! I love you now; isn't that enough?” Clear 🔥 Burn and 🪢 Tear.", cost:2, block:30, blockType:"cleanse", blkCleanse:["burn", "tear"], label:"30/2"} },
+    { id:"daisy_careless_fool", deck:"gatsby", act:3, from:"daisy_the_golden_girl", base:["gatsby", "daisy"], plot:"climaxQ", resolution:"tragic", starter:false,
+      name:"Careless Fool", hp:150, archetype:"Fallen", accent:"#C9A24B",
+      atk:{n:"Given Time", t:"“All the bright precious things fade so fast, and they don't come back.” +10 each turn it stays in play.", cost:3, dmg:50, dmgType:"perTurn", step:10, base:50, label:"50+/3"},
+      blk:{n:"Wipe It Clean", t:"“They're such beautiful shirts.” Clear 🫆 Smudge.", cost:2, block:30, blockType:"cleanse", blkCleanse:"smudge", label:"30/2"},
+      passive:{id:"given_time", name:"Given Time", text:"Whoever attacks this card takes 20 damage. Caveat: it loses 10 HP each time that happens.", retaliate:20, retaliateSelf:10} },
+    { id:"myrtle_fallen_ashes", deck:"gatsby", act:2, from:"myrtle", base:["gatsby", "myrtle"], plot:"climaxQ", resolution:"tragic", starter:false,
+      name:"Fallen Ashes", hp:110, archetype:"Martyr", accent:"#B0556B",
+      atk:{n:"The Reckoning", t:"Some things...you just don't see coming. +10 each turn it stays in play.", cost:4, dmg:70, dmgType:"perTurn", step:10, base:70, label:"70+/4"},
+      blk:{n:"Sealed Over", t:"\"This is a valley of ashes, where ashes grow like wheat into ridges and hills.\" Grant 🛡️ Laminate.", cost:3, block:50, blockType:"laminate", label:"50/3"},
+      passive:{id:"cursed_crown", name:"Cursed Crown", text:"Whoever knocks it out takes 40 damage. Caveat: it cannot block on the turn it attacks.", koRetaliate:40, noBlockAfterAttack:true} },
+    { id:"george_tragic_avenger", deck:"gatsby", act:2, from:"george", base:["gatsby", "george"], plot:"climaxQ", resolution:"tragic",
+      name:"Tragic Avenger", hp:160, archetype:"Force of Nature", accent:"#8A8170",
+      atk:{n:"Vengeful Shot", t:"God's Retribution is worth the price. Costs 10 of your own HP.", cost:4, dmg:90, sacrifice:10, label:"90/4"},
+      blk:{n:"Endurance Shield", t:"A man can only take but so much... +10 each of your turns it stays in play.", cost:3, block:30, blockType:"perTurn", base:30, step:10, label:"30+/3"},
+      passive:{id:"the_eyes_of_t_j_eckleburg", name:"The Eyes of T. J. Eckleburg", text:"Attacks deal +30 against the character that knocked out Myrtle Wilson. Caveat: it can never be healed.", vsKillerOf:"myrtle", dmgAdd:30, noHeal:true} }
   ];
   D.actGate = D.actGate || {};
   D.actGate.macbeth = [
@@ -4070,6 +4140,18 @@ window.ABC_BOSS_IMGPOS={"dyefone":"44% 40%","sandroid":"48% 40%","sinstaram":"50
     { tag:"theme", q:"Which idea does the play keep returning to through Macbeth\u2019s choices?", opts:["Unchecked ambition destroys the one who pursues it","Loyalty is always rewarded","Fate can be escaped through courage","Kings are chosen by the people"], ans:0 },
     { tag:"theme", q:"What does the recurring image of blood on the hands suggest?", opts:["Victory in battle","Royal inheritance","Guilt that cannot be washed away","Loyalty between soldiers"], ans:2 },
     { tag:"theme", q:"How does the play treat the witches\u2019 prophecies?", opts:["They are false and never come true","They tempt Macbeth, but his own choices bring his downfall","They are the only cause of his crimes","Every character ignores them"], ans:1 }
+  ];
+  D.actGate.romeojuliet = [
+    { tag:"climax", q:"How does Romeo's fatalism actively accelerate his tragic outcome?", opts:["He waits passively for the Prince's execution order.", "Believing he is \"fortune's fool,\" he acts recklessly without verifying facts.", "He refuses to duel Tybalt, causing Mercutio to disown him.", "He challenges the Montague family leadership directly."], ans:1 },
+    { tag:"climax", q:"How does Juliet’s agency shift over the course of the play?", opts:["From passive obedience to radical self-determination.", "From rebellious independence to relying on the Nurse.", "From romance to seeking refuge in a convent.", "From loving Romeo to agreeing to marry Paris."], ans:0 },
+    { tag:"climax", q:"Why is Tybalt's duel in Act III the turning point of the play?", opts:["It ends the feud between the two houses.", "Tybalt kills Mercutio, Romeo kills Tybalt, and Romeo is banished.", "It convinces Capulet to cancel Juliet's wedding.", "The Prince names Tybalt heir of Verona."], ans:1 }
+  ];
+  D.actGate.gatsby = [
+    { tag:"climax", q:"What primary delusion drives Gatsby's ultimate downfall?", opts:["Inability to repay debts to Meyer Wolfsheim.", "His insistence on repeating the past and recreating his ideal image of Daisy.", "Betrayal by Nick Carraway in court.", "Lack of monetary wealth compared to Tom Buchanan."], ans:1 },
+    { tag:"climax", q:"How does Nick’s stance as an \"objective narrator\" collapse by the end of the novel?", opts:["He publishes a gossip book about West Egg.", "Disgusted by the elite's moral carelessness, he judges them and moves West.", "He is arrested as an accomplice to bootlegging.", "He takes over Gatsby's mansion and fortune."], ans:1 },
+    { tag:"climax", q:"How does social privilege shape Daisy's resolution at the novel's climax?", opts:["Forces her into exile in Europe without money.", "Allows her and Tom to retreat into wealth and avoid all accountability.", "Compels her to confess publicly to the hit-and-run.", "Leads her to divorce Tom and mourn Gatsby publicly."], ans:1 },
+    { tag:"climax", q:"How does George Wilson change after Myrtle's death?", opts:["He sells the garage and moves West with Nick.", "The exhausted, passive husband becomes a vengeful man who acts on Tom's misdirection.", "He forgives Daisy and reconciles with Tom.", "He takes over Wolfsheim's business."], ans:1 },
+    { tag:"climax", q:"What does Myrtle's death reveal about class in the novel?", opts:["That wealth protects no one in West Egg.", "That George is secretly wealthy.", "The rich escape consequences while Myrtle and George pay with their lives.", "That the Valley of Ashes is being rebuilt."], ans:2 }
   ];
 })();
 </script>
@@ -4387,7 +4469,7 @@ function bdExpansionShelf(k,open){ var eds=editionsForDeck(k); if(!eds.length) r
 function feImg(f){ if(!f) return null; if(f.img) return {img:f.img,pos:f.imgpos}; if(f.base){ const bd=DATA.characters[f.base[0]]; const bc=bd&&bd.find(x=>x.id===f.base[1]); if(bc&&bc.img) return {img:bc.img,pos:bc.imgpos}; } if(f.baseChar){ var EX=window.EXPANSIONS||{}; for(var k in EX){ var E=EX[k]; var inReg=(E.battle&&(E.battle.commanders||[]).some(function(c){return c.id===f.id;}))||(E.boosterPool&&(E.boosterPool.commanders||[]).some(function(c){return c.id===f.id;})); if(inReg && E.img && E.img[f.baseChar]){ return {img:E.img[f.baseChar], pos:(E.imgpos&&E.imgpos[f.baseChar])}; } } } return null; }
 function cardTypeLabel(c){ if(!c) return '\u2014'; if(c.cat==='abc') return c.type==='ATTACK'?'\u2694 Attack':'\u26ca Block'; if(c.cat==='bookmark') return '\u2726 Bookmark'; if(c.cat==='crit') return '\u25c6 Lens'; return '?'; }
 function fePeekChips(p,sideKey){ if(sideKey!=='you'||!S) return ''; let out='';
-  if(pHasPassive(p,'peekOwnDeck') && p.deck.length){ out+=`<div class="fe-peek own" title="Cold Logic \u2014 top of your deck">\ud83d\udd0d Top: <b>${cardTypeLabel(p.deck[0])}</b></div>`; }
+  if((pHasPassive(p,'peekOwnDeck')||p.team.some(function(c){ return c.hp>0&&c.act>1&&c.passive&&c.passive.peekOwnDeck; })) && p.deck.length){ out+=`<div class="fe-peek own" title="Cold Logic \u2014 top of your deck">\ud83d\udd0d Top: <b>${cardTypeLabel(p.deck[0])}</b></div>`; }
   if(pHasPassive(p,'peekFoeDraw') && S.opp && S.opp._lastDrawn){ out+=`<div class="fe-peek foe" title="Anticipatory Madness \u2014 opponent's last draw">\ud83d\udc41 Foe drew: <b>${cardTypeLabel(S.opp._lastDrawn)}</b></div>`; }
   return out?`<div class="fe-peekwrap">${out}</div>`:''; }
 function defaultBookmarks(){ const base=DATA.bookmarks.map((_,i)=>i); return base.concat([0,1,3,5,10,9]).slice(0,LIMITS.bm); }
@@ -4800,7 +4882,7 @@ function drawnPlace(idx,where){
   else if(drawnBench(p)>=DRAWN_BENCH_MAX){ toast(`Backstage is full (${DRAWN_BENCH_MAX}).`); return; }
   const ch=makeChar(card._cdef, p._hpScale||1.0);
   if(card._pmCmd){ ch._pmCmd=true; ch._pmReturns=card._pmReturns||0; }
-  p.hand.splice(idx,1); p.team.push(ch);
+  p.hand.splice(idx,1); p.team.push(ch); ch._grow=0;
   if(where==='active'){ p.activeIdx=p.team.length-1; p._hasActive=true; }
   pushLog(`${ch.name} takes the ${where==='active'?'Active slot':'Backstage'}.`);
   try{SFX.card('card_slide',0.6);}catch(e){}
@@ -4824,7 +4906,7 @@ function drawnPlayChar(idx){
   if(liveAct && drawnBench(p)>=DRAWN_BENCH_MAX){ toast(`Backstage is full (${DRAWN_BENCH_MAX}).`); return; }
   const ch=makeChar(card._cdef, p._hpScale||1.0);
   if(card._pmCmd){ ch._pmCmd=true; ch._pmReturns=card._pmReturns||0; }
-  p.hand.splice(idx,1); p.team.push(ch);
+  p.hand.splice(idx,1); p.team.push(ch); ch._grow=0;
   if(!liveAct){ p.activeIdx=p.team.length-1; p._hasActive=true; pushLog(`${ch.name} steps up to Active.`); }
   else pushLog(`${ch.name} joins the Backstage.`);
   try{SFX.card('card_slide',0.6);}catch(e){}
@@ -4984,7 +5066,7 @@ function riposteArmed(ch){
   const b=ch&&ch.blk; if(!b||!b.riposte||ch.hp<=0) return false;
   return b.cost!=null && ch.blkCharge.length>=blockCostFor(ch,b);
 }
-function blockCostFor(ch,ab){ return ab ? escCost(ch,ab,'Blk') : 0; }
+function blockCostFor(ch,ab){ if(!ab) return 0; let k=escCost(ch,ab,'Blk'); if(ch&&ch.act>1&&ch.passive&&ch.passive.costMod) k=Math.max(1,k+ch.passive.costMod); return k; }
 function attackCostFor(side,ab,tgt){
   let cost=ab.cost||0;
   /* PAGEMASTER: striking a Backstage character costs +2 ABC — open to every
@@ -4993,7 +5075,7 @@ function attackCostFor(side,ab,tgt){
   { const P0=S&&S[side]; if(P0) cost=escCost(active(P0),ab,'Atk'); }
   if(hasCrit(side,'biographical') && S[side].grave.length>0) cost=Math.max(1,cost-1);
   const P=S[side]; if(P){ const act=active(P);
-    if(act&&act.fe&&act.passive&&act.passive.costMod) cost+=act.passive.costMod;
+    if(act&&(act.fe||act.act>1)&&act.passive&&act.passive.costMod) cost+=act.passive.costMod;
     const wiz=P.team.find((c,i)=>i!==P.activeIdx&&c.fe&&c.hp>0&&c.passive&&c.passive.benchCostAura); if(wiz) cost+=wiz.passive.benchCostAura;
     cost=Math.max(1,cost);
   }
@@ -5070,7 +5152,7 @@ function fulfillThesis(side){
     case 'adapt': { const dead=(P.grave||[]).slice();
         if(!dead.length){ pushLog('Adaptation: no fallen ally to return.'); break; }
         const go=t=>{ if(!t) return; const gi=P.grave.indexOf(t); if(gi>=0) P.grave.splice(gi,1);
-          t.hp=Math.max(10,Math.round(t.maxHp/2)); t.atkCharge=[]; t.blkCharge=[]; t.status={};
+          t.hp=Math.max(10,Math.round(t.maxHp/2)); t.atkCharge=[]; t.blkCharge=[]; t.status={}; t._grow=0;
           if(!P.team.includes(t)) P.team.push(t);
           pushLog(`Adaptation: ${t.name} returns to the bench at ${t.hp} HP.`); try{ fxRevive(side); }catch(e){} render(); };
         if(side==='you' && dead.length>1) askPick('Return which character?', dead.map(g=>({label:`${g.name}  (${Math.max(10,Math.round(g.maxHp/2))} HP)`,val:g.uid})), uid=>go(P.grave.find(g=>g.uid===uid)));
@@ -5111,7 +5193,7 @@ function sagaAct(p, card, key){
       const dead=(p.grave||[]).slice();
       if(!dead.length){ pushLog(`${card.name}: no fallen ally to return.`); break; }
       const go=t=>{ if(!t) return; const gi=p.grave.indexOf(t); if(gi>=0) p.grave.splice(gi,1);
-        t.hp=Math.max(10,Math.round(t.maxHp/2)); t.atkCharge=[]; t.blkCharge=[]; t.status={};
+        t.hp=Math.max(10,Math.round(t.maxHp/2)); t.atkCharge=[]; t.blkCharge=[]; t.status={}; t._grow=0;
         if(!p.team.includes(t)) p.team.push(t);
         pushLog(`${card.name}: ${t.name} returns to the bench at ${t.hp} HP.`); try{ fxRevive(side); }catch(e){} render&&render(); };
       if(side==='you' && dead.length>1) askPick(`${card.name} — return which character?`, dead.map(g=>({label:`${g.name}  (${Math.max(10,Math.round(g.maxHp/2))} HP)`,val:g.uid})), uid=>go(p.grave.find(g=>g.uid===uid)));
@@ -5137,7 +5219,7 @@ function adaptInherit(p, side, fallen, succ){
   if(side==='you' && pool.length>1) askPick('Adaptation — inherit which charge?', pool.map((c,i)=>({label:nameOf(c),val:i})), i=>take(pool[i]));
   else take(pool[0]);
 }
-function healChar(c, amt){ if(c && c.hp<=0) escClear(c); if(!c||amt<=0) return 0; if((c.fe||c.act>1) && c.passive && c.passive.noHeal){ if(typeof pushLog==='function') pushLog(`${c.name} is too far gone to be healed.`); return 0; } const b0=c.hp; c.hp=Math.min(c.maxHp, c.hp+amt); return c.hp-b0; }
+function healChar(c, amt){ if(c && c.hp<=0) escClear(c); if(!c||amt<=0) return 0; if((c.fe||c.act>1) && c.passive && c.passive.noHeal){ if(typeof pushLog==='function') pushLog(`${c.name} is too far gone to be healed.`); return 0; } const b0=c.hp; const _cap=(c.act>1&&c.passive&&c.passive.noHealAbove&&c._evoHp!=null)?Math.min(c.maxHp,c._evoHp):c.maxHp; c.hp=Math.max(c.hp,Math.min(_cap, c.hp+amt)); return c.hp-b0; }
 function drawN(side,n){ const P=S[side]; const foe=S[side==='you'?'opp':'you']; const spy=foe&&foe.team&&foe.team[foe.activeIdx]; const canPeek=spy&&spy.hp>0&&spy.fe&&spy.passive&&spy.passive.peekFoeDraw; for(let i=0;i<n;i++){ if(!P.deck.length && P.discard.length) P.deck=shuffle(P.discard.splice(0)); if(P.deck.length){ const c=P.deck.shift(); c._new=true; P.hand.push(c); if(canPeek){ var nm=(c.name||(c.word?('“'+c.word+'” '+(c.type||'')):(c.type||'a card'))); pushLog(`${spy.name} spies through the silk screen — ${who(P)} drew ${nm}.`); } } } }
 
 
@@ -5297,6 +5379,7 @@ function startTurn(){
   }
   p.team.forEach(c=>{ ['hardcover','laminate','glue','costUp','plotarmor','antiq'].forEach(s=>{ if(c.status[s]) delete c.status[s]; }); });
   p.team.forEach(c=>{ if(c.hp>0) c.turnsInPlay++; });
+  p.team.forEach(c=>{ if(c.hp>0&&c.act>1&&c.passive&&c.passive.healTurn){ const _h=healChar(c,c.passive.healTurn); if(_h>0) pushLog(`${c.passive.name}: ${c.name} heals ${_h} HP.`); } });
   feOnField(p).forEach(c=>{ if(c.passive&&c.passive.profileToggle && !c.status.highlight && !c.status.laminate){ grant(c,'highlight'); pushLog(`${c.name} shifts profile — Highlighted this turn.`); } });
   // crit per-turn tracking
   const foeP = (S.turn==='you')?S.opp:S.you;
@@ -5362,6 +5445,7 @@ function endTurn(){ if(S.over) return;
   if(S.scrim && S.scrim.ruleShift==='sandroid2' && S.turn==='you' && S.you.hand.length){ const ri=rnd(S.you.hand.length); const lost=S.you.hand.splice(ri,1)[0]; if(lost){ S.you.discard.push(lost); pushLog('Sandstorm \u2014 a card in your hand is buried.'); } }
   /* ---- NEW CARDS PATCH: end-of-turn upkeep ---- */
   { const _E=S[S.turn];
+    _E.team.forEach(c=>{ if(c.hp>0) c._grow=(c._grow||0)+1; else delete c._grow; });   /* perTurn: +1 step per completed turn in play */
     _E.flags.extracredit=false;                                        /* Extra Credit is a this-turn promise */
     _E.team.forEach(c=>{ if(c.status&&c.status.oop){ c._oopTurns=(c._oopTurns||1)-1;
       if(c._oopTurns<=0){ delete c.status.oop; delete c._oopTurns; pushLog(`${c.name} is back in print \u2014 its attack returns.`); } } });
@@ -5529,7 +5613,7 @@ function inflict(t,k,ignoreLam){
   t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'neg'); return true;
 }
 function grant(t,k){ if(t&&t.fe&&t.passive&&t.passive.immuneSelfBuff){ pushLog(`${t.name} is too isolated to gain ${statusName(k)}.`); return false; } if(t&&t.hp>0){ t.status[k]=true; fxStatus(sideOfChar(t),statusName(k),'pos'); return true; } return false; }
-function cleanseNeg(t){ if(!t) return; ['tear','rip','glue','burn','_smudgeHalf','costUp','siphon'].forEach(k=>{ delete t.status[k]; }); if(!t.status._spillLock){ delete t.status.spill; delete t.status.spillAmt; } if(!t.status._smudgeLock){ delete t.status.smudge; } }
+function cleanseNeg(t){ if(!t) return; if(t.act>1&&t.passive&&t.passive.noSelfCleanse){ if(typeof pushLog==='function') pushLog(`${t.passive.name}: ${t.name} cannot clear its own statuses.`); return; } ['tear','rip','glue','burn','_smudgeHalf','costUp','siphon'].forEach(k=>{ delete t.status[k]; }); if(!t.status._spillLock){ delete t.status.spill; delete t.status.spillAmt; } if(!t.status._smudgeLock){ delete t.status.smudge; } }
 function clearAllStatus(t){ if(!t) return; const _keep=t.status&&t.status.oop; t.status={}; if(_keep) t.status.oop=true; }
 function statusLabel(c){
   const order=[['burn','🔥'],['spill','💧'],['tear','✂'],['rip','⊘'],['glue','🩹'],['smudge','▒'],['laminate','◈'],['highlight','✶'],['hardcover','▣'],['marginNotes','✎'],['rip','⊘']];
@@ -5874,7 +5958,7 @@ function playBookmark(side,idx){
       const go=g=>{ remove();
         P.hand.filter(c=>c!==card).slice(0,3).forEach(c=>{ const i=P.hand.indexOf(c); if(i>=0){P.hand.splice(i,1);P.discard.push(c);} });
         const gi=P.grave.indexOf(g); if(gi>=0) P.grave.splice(gi,1);
-        g.hp=Math.max(10,Math.round(g.maxHp/2)); g.atkCharge=[];g.blkCharge=[];g.status={};
+        g.hp=Math.max(10,Math.round(g.maxHp/2)); g.atkCharge=[];g.blkCharge=[];g.status={}; g._grow=0;
         if(!P.team.includes(g)) P.team.push(g); pushLog(`${who(P)} used Defibrillator — ${g.name} returns at ${g.hp} HP.`); try{ fxRevive(P===S.you?'you':'opp'); }catch(e){} commit(); render();
       };
       if(isYou && P.grave.length>1) askPick('Revive which character?', P.grave.map(g=>({label:g.name,val:g.uid})), uid=>go(P.grave.find(g=>g.uid===uid)));
@@ -5982,7 +6066,7 @@ function teamAbcCount(ch){
 }
 function calcDamage(ch,ab){
   let d=ab.dmg||0;
-  if(ab.dmgType==='perTurn') d=(ab.base||0)+(ab.step||10)*Math.max(1,ch.turnsInPlay);
+  if(ab.dmgType==='perTurn') d=(ab.base||0)+(ab.step||10)*(ch._grow||0);   /* starts at the printed number */
   else if(ab.dmgType==='perABC') d=(ab.step||10)*ch.atkCharge.length;
   else if(ab.dmgType==='perTeamABC') d=(ab.base||0)+(ab.step||10)*teamAbcCount(ch);
   else if(ab.dmgType==='koScale'){ const _P=pileOwnerOf(ch); d=(ab.dmg||ab.base||0)+(ab.step||10)*((_P&&_P.grave)?_P.grave.length:0); }
@@ -5997,7 +6081,7 @@ function calcBlock(ch,ab,incoming){
   if(typeof symbolsOff==='function' && symbolsOff(sideOfChar(ch))) return {amt:ab.block||0};
   if(ab.blockType==='negate') return {amt:incoming,negate:true};
   if(ab.blockType==='capto') return {amt:Math.max(0,incoming-(ab.cap||10))};
-  if(ab.blockType==='perTurn') return {amt:(ab.base||0)+(ab.step||10)*Math.max(1,ch.turnsInPlay)};
+  if(ab.blockType==='perTurn') return {amt:(ab.base||0)+(ab.step||10)*(ch._grow||0)};
   return {amt:(ab.block||0) + (ab.pileScale?pileBonus(ch,ab.pileScale):0)};
 }
 function spend(charge,n){ const out=[]; for(let i=0;i<n&&charge.length;i++) out.push(charge.shift()); return out; }
@@ -6051,7 +6135,8 @@ function actEvolve(side,handIdx,c){
   if(a.passive) c.passive=clone(a.passive); else delete c.passive;
   c.act=a.act; c._actId=a.id; c.resolution=a.resolution||null;
   clearAllStatus(c);
-  c.turnsInPlay=0; c._tookHit=false; c._evoFx=true;
+  if(c.passive){ if(c.passive.spillLock){ c.status.spill=true; c.status._spillLock=true; } if(c.passive.noHealAbove) c._evoHp=c.hp; if(c.passive.noBlockOnEvolve) c._noBlockTurn=(S._turnNo||0)+1; }
+  c.turnsInPlay=0; c._grow=0; c._tookHit=false; c._evoFx=true;
   pushLog(`\u2605 ${from} evolves into ${a.name} (Act ${roman(a.act)}) \u2014 ${taken} damage and ${c.atkCharge.length+c.blkCharge.length} charge${(c.atkCharge.length+c.blkCharge.length)===1?'':'s'} carried over.`);
   try{ SFX.card('book_flip',0.7); }catch(e){}
   return true;
@@ -6092,11 +6177,12 @@ function actGateClose(){ if(!S) return; S._actGate=null; busy=false; render(); }
 function actGateModal(){
   const g=S._actGate; if(!g||!g.q) return '';
   const q=g.q, wrong=g.picked!=null && g.picked!==q.ans;
+  const _ga=actById(((S.you.hand.find(function(c){ return c.cid===g.cid; }))||{}).actId)||{}, _gr=roman(_ga.act||3);
   const opts=q.opts.map(function(o,i){ const cls=g.picked==null?'':(i===q.ans?' gate-right':(i===g.picked?' gate-wrong':''));
     return `<button class="tri-opt${cls}" data-do="actans:${i}"${g.picked!=null?' disabled':''}><b>${'ABCD'[i]}</b> ${o}</button>`; }).join('');
   return `<div class="modal-bg"><div class="trivia climax">
-    <div class="tri-head">\u2726 ACT III \u00b7 THE CLIMAX</div>
-    <div class="tri-sub${wrong?' tri-retry':''}">${wrong?'Not this time \u2014 the card returns to hand.':'Answer correctly to reach Act III. No retry.'}<span class="gate-tag ${q.tag}">${String(q.tag).toUpperCase()}</span></div>
+    <div class="tri-head">\u2726 ACT ${_gr} \u00b7 THE CLIMAX</div>
+    <div class="tri-sub${wrong?' tri-retry':''}">${wrong?'Not this time \u2014 the card returns to hand.':'Answer correctly to reach Act '+_gr+'. No retry.'}<span class="gate-tag ${q.tag}">${String(q.tag).toUpperCase()}</span></div>
     <div class="tri-q">${q.q}</div>
     <div class="tri-opts">${opts}</div>
     ${wrong?'<div class="gate-foot"><button class="tri-opt" data-do="actclose">Return card to hand</button></div>':''}</div></div>`;
@@ -6106,6 +6192,8 @@ function actGateModal(){
    brings back Act I without needing its own guard. */
 function actOnKO(p,c){
   if(!c||!c._actBase) return;
+  if(c.passive&&c.passive.koDiscardRandom&&p.hand.length){ const _lost=p.hand.splice(rnd(p.hand.length),1)[0]; p.discard.push(_lost); pushLog(`${c.passive.name}: ${who(p)} discards a random card.`); }
+  delete c._evoHp; delete c._noBlockTurn;
   const b=c._actBase, top=c.name;
   (c._actCards||[]).forEach(function(x){ p.discard.push(x); }); c._actCards=[];
   c.name=b.name; c.maxHp=b.maxHp; c.atk=b.atk; c.blk=b.blk; if(b.atk2) c.atk2=b.atk2; else delete c.atk2;
@@ -6127,7 +6215,7 @@ function actLegal(acts,ch){
 }
 function actStarter(def){
   if(!def||!def.d) return def;
-  const acts=actsForDeck(def.d).filter(function(a){ return (def.ch||[]).indexOf(a.base[1])>=0; }).map(function(a){ return a.id; });
+  const acts=actsForDeck(def.d).filter(function(a){ return a.starter!==false && (def.ch||[]).indexOf(a.base[1])>=0; }).map(function(a){ return a.id; });
   const legal=actLegal(acts,def.ch); if(!legal.length) return def;
   const cap=(typeof compFor==='function'?(compFor(def.d)||{}).ch:null)||LIMITS.ch;
   const keep=new Set(legal.map(function(id){ return actById(id).base[1]; }));
@@ -6205,6 +6293,12 @@ function performAttack(side,abilKey){           // == beginAttack
   if(ab.koScale){ const n=(S[side].grave||[]).length; if(n){ dmg+=ab.koScale*n; pushLog(`${att.name}: +${ab.koScale*n} damage from ${n} fallen.`); } }
   if(ab.cond){ ab.cond.forEach(r=>{ if(condMatch(r,A,D,def)){ const t=r.then||{}; if(t.dmgSet!=null)dmg=t.dmgSet; if(t.dmgAdd)dmg+=t.dmgAdd; if(t.dmgMult)dmg=Math.round(dmg*t.dmgMult); if(t.pierce||(t.flags&&String(t.flags).toLowerCase().includes('pierce')))condPierce=true; if(t.inflict)condInflict=t.inflict; if(t.grant){ grant(att,t.grant); pushLog(`${att.name} gains ${statusName(t.grant)}.`); } if(t.foeDiscard)condFoeDiscard+=t.foeDiscard; if(r.log)pushLog(r.log); } }); }
   // 1E passive & ability damage
+  if(att.act>1&&att.passive){ const _P=att.passive;   /* Act passives (fix_act_passives) */
+    if(_P.entryAtkAdd && (att.turnsInPlay||0)===0){ dmg+=_P.entryAtkAdd; pushLog(`${_P.name}: +${_P.entryAtkAdd} on the turn it evolves.`); }
+    if(_P.statusedAtkAdd && STATUS_NEG.some(function(x){ return att.status[x]; })){ dmg+=_P.statusedAtkAdd; pushLog(`${_P.name}: +${_P.statusedAtkAdd} while ${att.name} carries a negative status.`); }
+    if(_P.inflictAtkAdd && (ab.inflict||ab.inflictChoice||ab.siphon||ab.inflictIfHas)){ dmg+=_P.inflictAtkAdd; pushLog(`${_P.name}: +${_P.inflictAtkAdd} on an attack that afflicts.`); }
+    if(_P.vsKillerOf && def && (def._killedIds||[]).indexOf(_P.vsKillerOf)>=0){ dmg+=(_P.dmgAdd||0); pushLog(`${_P.name}: +${_P.dmgAdd||0} \u2014 ${def.name} knocked out ${actStageName(_P.vsKillerOf)}.`); }
+  }
   if(att.act>1&&att.passive&&att.passive.lowHpAtkAdd&&att.hp>0&&att.hp<att.maxHp/2){ dmg+=att.passive.lowHpAtkAdd; pushLog(`${att.passive.name||att.name}: +${att.passive.lowHpAtkAdd} damage below half health.`); }
   if(att.fe&&att.passive&&att.passive.soloBonus&&isSoloAlive(A)){ dmg+=att.passive.soloBonus; pushLog(`${att.name} stands alone — +${att.passive.soloBonus} damage.`); }
   if(att.fe&&att.passive&&att.passive.statusDmgBonus&&STATUS_NEG.some(x=>def.status[x])){ dmg+=att.passive.statusDmgBonus; pushLog(`${att.name}: +${att.passive.statusDmgBonus} against an afflicted target.`); }
@@ -6296,7 +6390,7 @@ function performAttack(side,abilKey){           // == beginAttack
     } }
   if(def.status.ecoNegate){ def.status.ecoNegate=false; pushLog(`${def.name} negates the attack (Ecocriticism)!`); return finishAttack(dmg,true); }
   if(def.status.ironcurtain && !pierce && !ab.ignoreDefBuffs){ def.status.ironcurtain=false; pushLog(`${def.name}'s Iron Curtain absorbs the blow!`); return finishAttack(dmg,true); }
-  const bb=def.blk, canBlock=(!pierce||deconOn()) && !def.status.glue && bb && bb.cost!=null && def.blkCharge.length>=blockCostFor(def,bb);
+  const bb=def.blk, canBlock=(!pierce||deconOn()) && !def.status.glue && !(def._noBlockTurn!=null && def._noBlockTurn===(S._turnNo||0)) && bb && bb.cost!=null && def.blkCharge.length>=blockCostFor(def,bb);
   if(def.status.glue && bb && def.blkCharge.length>=blockCostFor(def,bb)) pushLog(`${def.name} is Glued — cannot block.`);
   if(canBlock){
     if(dKey==='you' && !S.settings.autoBlock){ S.defend=true; busy=true; render(); return; }   // player chooses
@@ -6323,7 +6417,7 @@ function doBlock(){
     else { def.wardNext=(def.wardNext||[]).concat(['tear','rip','glue','spill','burn','smudge']);
            pushLog(`${def.name} braces against the next status effect.`); }
   }
-  if(b.blkCleanse){ [].concat(b.blkCleanse).forEach(function(_st){ if(def.status[_st]){ delete def.status[_st]; pushLog(`${def.name} shrugs off ${statusName(_st)} while blocking.`); } }); }
+  if(b.blkCleanse && !(def.act>1&&def.passive&&def.passive.noSelfCleanse)){ [].concat(b.blkCleanse).forEach(function(_st){ if(def.status[_st]){ delete def.status[_st]; pushLog(`${def.name} shrugs off ${statusName(_st)} while blocking.`); } }); }
     if(b.cleanseAlly){ const _al=D.team.find(c=>c.hp>0 && c!==def && c.status[b.cleanseAlly]); if(_al){ delete _al.status[b.cleanseAlly]; pushLog(`${def.name} clears ${statusName(b.cleanseAlly)} from ${_al.name}.`); } }
     if(b.cleanseAllyAny){ const NEG=['tear','rip','glue','spill','smudge','burn','weaken']; const _al=D.team.find(c=>c.hp>0 && NEG.some(s=>c.status[s])); if(_al){ const s=NEG.find(x=>_al.status[x]); delete _al.status[s]; pushLog(`${def.name} clears ${statusName(s)} from ${_al.name}.`); } }
     if(b.teamShield){ D._teamShield=Math.max(D._teamShield||0, b.teamShield); pushLog(`${who(D)}'s allies brace together — incoming damage reduced by ${b.teamShield} until their next turn.`); }
@@ -6382,11 +6476,15 @@ function finishAttack(blocked,negated,forceNet){
   if(D._teamShield && net>0){ const _r=Math.min(net,D._teamShield); net-=_r; pushLog(`${who(D)}'s allies stand together — ${_r} damage reduced.`); }
   if(S.scrim && scrimHas('gradecurve') && S.opp && S.opp.team.indexOf(def)>=0 && net>def.hp && att.hp>0){ const over=net-def.hp, heal=Math.round(over/2); if(heal>0){ att.hp=Math.min(att.maxHp,att.hp+heal); pushLog('Grade Curve \u2014 overkill heals '+att.name+' +'+heal+'.'); } }
   if(net>0 && blocked>0 && def.blk && def.blk.collateral){ const bench=D.team.filter((c,i)=>i!==D.activeIdx && c.hp>0); if(bench.length){ const bc=bench[rnd(bench.length)]; applyDmg(bc,net); pushLog(`Collateral Damage \u2014 ${net} overflow spills onto ${bc.name} backstage.`); net=0; if(bc.hp<=0) checkKO(D,dKey); } }
+  if(att.act>1&&att.passive&&att.passive.dmgCap&&net>att.passive.dmgCap){ net=att.passive.dmgCap; pushLog(`${att.passive.name}: ${att.name} can deal at most ${net} in one attack.`); }
   S.lastAtk={ side:side, name:ab.n, dmg:dmg, inflict:[].concat(ab.inflict||[]).filter(Boolean) };   /* Plagiarism source */
   net=applyDmg(def,net);
   pushLog(`${att.name} uses ${ab.n}: ${net} damage to ${def.name}. (${def.hp}/${def.maxHp} HP)`);
   flashLog(side,'atk',`${att.name} uses ${ab.n} \u2014 ${net} damage to ${def.name}.`);
   if(pierce) pushLog(`${ab.n} pierced the defense!`);
+  if(att.act>1&&att.passive&&att.passive.recoil&&att.hp>0){ const _rc=applyDmg(att,att.passive.recoil); if(_rc>0) pushLog(`${att.passive.name}: ${att.name} takes ${_rc} recoil.`); }
+  if(def.act>1&&def.passive&&def.passive.retaliate&&att.hp>0){ const _rt=applyDmg(att,def.passive.retaliate); pushLog(`${def.passive.name}: ${att.name} takes ${_rt} for attacking ${def.name}.`);
+    if(def.passive.retaliateSelf&&def.hp>0){ const _rs=applyDmg(def,def.passive.retaliateSelf); if(_rs>0) pushLog(`${def.name} loses ${_rs} HP.`); } }
   if(ab.sacrifice && !symbolsOff(side)){ const _sac=applyDmg(att,ab.sacrifice); if(_sac>0) pushLog(`${att.name} sacrifices ${_sac} HP.`); }
   if(ab.stripBlocks && def.blkCharge.length){ const n=def.blkCharge.length; D.discard.push(...def.blkCharge.splice(0)); pushLog(`Quick-Sand Crash buries ${def.name}'s defense — ${n} Block ABC lost.`); }
   if(!symbolsOff(side)){
@@ -6415,6 +6513,9 @@ function finishAttack(blocked,negated,forceNet){
   // ---- crit thesis auto-tracking (events observable at combat resolution) ----
   A.critTurn=A.critTurn||{}; D.critTurn=D.critTurn||{}; A.critEver=A.critEver||{}; D.critEver=D.critEver||{};
   const koed = def.hp<=0;
+  if(koed){ (att._killedIds=att._killedIds||[]).push(def.id);
+    if(def.act>1&&def.passive&&def.passive.koRetaliate&&att.hp>0){ const _kr=applyDmg(att,def.passive.koRetaliate); pushLog(`${def.passive.name}: ${att.name} takes ${_kr} for knocking out ${def.name}.`); } }
+  if(att.act>1&&att.passive&&att.passive.noBlockAfterAttack) att._noBlockTurn=(S._turnNo||0)+1;
   if(koed && ab.onKO && ab.onKO.selfStatus && att.hp>0){ att.status[ab.onKO.selfStatus]=true; pushLog(`${att.name} gains ${statusName(ab.onKO.selfStatus)}.`); }
   const noKeywords = !ab.flags && !ab.sacrifice && !ab.inflict && !ab.grant && ab.weaken==null && !pierce;
   const printedAtk = (ab.dmg!=null?ab.dmg:(ab.base!=null?ab.base:null));
@@ -6469,6 +6570,10 @@ function checkKO(p,side){
     const next=p.team.findIndex(c=>c.hp>0);
     if(next>=0){ const _fallen=a; doSwitch(p,next); const _succ=p.team[next]; pushLog(`${_succ.name} steps up.`);
       if(hasCrit(side,'adapt') && _succ && _succ.hp>0){ try{ adaptInherit(p,side,_fallen,_succ); }catch(e){} } }
+    p.team.forEach(function(c){ const _o=c.act>1&&c.passive&&c.passive.onAllyKO; if(!_o||c===a||c.hp<=0) return;
+      for(let _n=0;_n<(_o.attachFromDiscard||0);_n++){ let _i=-1; for(let _k=p.discard.length-1;_k>=0;_k--){ if(p.discard[_k]&&p.discard[_k].cat==='abc'){ _i=_k; break; } }
+        if(_i<0) break; const _ab=p.discard.splice(_i,1)[0]; (_ab.type==='BLOCK'?c.blkCharge:c.atkCharge).push(_ab);
+        pushLog(`${c.passive.name}: ${c.name} takes up a ${_ab.type==='BLOCK'?'Block':'Attack'} ABC from the discard.`); } });
     actOnKO(p,a);
   }
   if(!p.team.some(c=>c.hp>0)){
