@@ -2492,6 +2492,218 @@ body[data-screen="play"] .board::after{
 .tri-opt.gate-wrong{ background:#f2c2bc; border-color:#8C2A20; text-decoration:line-through; opacity:.8; }
 .tri-opt.gate-right{ background:#cfe8cf; border-color:#1f6a3a; }
 .gate-foot{ padding:0 16px 16px; display:flex; justify-content:flex-end; }
+
+/* fix_board_layout_v1 */
+/* ===== ARENA BOARD LAYOUT v1 -- one fixed 1280x720 stage, scaled as a whole =====
+   Every rule is scoped to body.abc-arena, so classic mode is unaffected.
+   !important is used only where an older viewport media query also uses it. */
+.abc-inspect{display:none}
+body.abc-arena[data-screen="play"]{background-color:#2b2620;background-image:radial-gradient(rgba(0,0,0,.2) 1px,transparent 1.4px);background-size:6px 6px}
+body.abc-arena[data-screen="play"] #game{max-width:none!important;margin:0!important;padding:0!important}
+body.abc-arena[data-screen="play"] .abc-stage{
+  position:fixed;left:50%;top:50%;width:1280px;height:720px;z-index:5;
+  transform:translate(-50%,-50%) scale(var(--abc-k,1));transform-origin:50% 50%;
+  display:grid;
+  grid-template-columns:16px 208px 16px 190px 420px 190px 16px 208px 16px;
+  grid-template-rows:52px 104px 150px 40px 150px 104px 120px;
+  overflow:hidden;
+  background-color:#2b2620;
+  background-image:radial-gradient(rgba(0,0,0,.2) 1px,transparent 1.4px);background-size:6px 6px;
+}
+/* wrappers dissolve so their children can be placed on the stage grid */
+body.abc-arena[data-screen="play"] .board,body.abc-arena[data-screen="play"] .board-inner,body.abc-arena[data-screen="play"] .side,body.abc-arena[data-screen="play"] .row,body.abc-arena[data-screen="play"] .topbar,body.abc-arena[data-screen="play"] .score,body.abc-arena[data-screen="play"] .midline{display:contents!important}
+body.abc-arena[data-screen="play"] .side::before,body.abc-arena[data-screen="play"] .side::after,body.abc-arena[data-screen="play"] .board-inner::before,body.abc-arena[data-screen="play"] .board-inner::after,body.abc-arena[data-screen="play"] .brand{display:none!important}
+
+/* ---- the two pages of the book (the existing per-deck arena art) ---- */
+body.abc-arena[data-screen="play"] .board::before,body.abc-arena[data-screen="play"] .board::after{
+  display:block!important;content:''!important;position:relative!important;inset:auto!important;
+  left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;height:auto!important;
+  grid-column:4/7;z-index:0;pointer-events:none;
+  -webkit-mask-image:none!important;mask-image:none!important;
+  background-color:#dcc29b;background-repeat:repeat,no-repeat;background-size:auto,cover;
+  border:3px solid #241f1b;
+}
+body.abc-arena[data-screen="play"] .board::before{grid-row:2/4;border-bottom:0;border-radius:6px 6px 0 0;background-color:#dcc29b;
+  box-shadow:0 0 0 3px #e7d8b6,0 0 0 5px #241f1b,inset 0 -26px 30px -18px rgba(36,31,27,.55)}
+body.abc-arena[data-screen="play"] .board::after{grid-row:5/7;border-top:0;border-radius:0 0 6px 6px;background-color:#d4d0b4;
+  box-shadow:0 0 0 3px #e7d8b6,0 0 0 5px #241f1b,inset 0 26px 30px -18px rgba(36,31,27,.55)}
+/* everything that sits on a page is raised above it */
+body.abc-arena[data-screen="play"] .bench,body.abc-arena[data-screen="play"] .char,body.abc-arena[data-screen="play"] .piles,body.abc-arena[data-screen="play"] .lenschip,body.abc-arena[data-screen="play"] .side-meta,body.abc-arena[data-screen="play"] .kos,body.abc-arena[data-screen="play"] .phasehud,body.abc-arena[data-screen="play"] .actions,body.abc-arena[data-screen="play"] .tb-btns,body.abc-arena[data-screen="play"] .hand-wrap,body.abc-arena[data-screen="play"] .abc-inspect{position:relative;z-index:2}
+body.abc-arena[data-screen="play"] .side[data-arena]>*{z-index:2}
+
+/* ---- spine: phase tracker (+ turn timer when it sits on the board) ---- */
+body.abc-arena[data-screen="play"] .phasehud{grid-column:4/7;grid-row:4;display:flex;justify-content:center;align-items:center;gap:4px;
+  background:#241f1b;border-top:2px solid #E3A92B;border-bottom:2px solid #E3A92B;margin:0}
+body.abc-arena[data-screen="play"] .phasehud .ph{background:none;border:0;box-shadow:none;color:#8a7e6b;font-size:12px;padding:4px 12px}
+body.abc-arena[data-screen="play"] .phasehud .ph.on{background:#E3A92B;color:#241f1b;border-radius:999px;box-shadow:none}
+body.abc-arena[data-screen="play"] .phasehud .ph-arrow{color:#5a4f40;font-size:14px}
+body.abc-arena[data-screen="play"] .turnbar{grid-column:6;grid-row:4;align-self:center;justify-self:end;width:150px;margin-right:12px;z-index:3;position:relative}
+
+/* ---- left desk: plates + Inspect ---- */
+body.abc-arena[data-screen="play"] .opp-side .side-meta{grid-column:2;grid-row:1;align-self:end}
+body.abc-arena[data-screen="play"] .kos.opp{grid-column:2;grid-row:2;align-self:start;justify-self:start;margin-top:6px}
+body.abc-arena[data-screen="play"] .kos.you{grid-column:2;grid-row:6;align-self:end;justify-self:start;margin-bottom:6px}
+body.abc-arena[data-screen="play"] .you-side .side-meta{grid-column:2;grid-row:7;align-self:start}
+body.abc-arena[data-screen="play"] .side-meta{display:block!important;font-family:var(--disp);font-size:14px!important;letter-spacing:.2px;line-height:1.2;
+  text-transform:none;color:#f3e8cd!important;opacity:1!important;text-align:left!important;text-shadow:none!important;padding:0;margin:0!important}
+body.abc-arena[data-screen="play"] .kos{font-size:12px;padding:4px 10px}
+body.abc-arena[data-screen="play"] .abc-inspect{display:flex;flex-direction:column;gap:6px;grid-column:2;grid-row:3/6;align-self:center;max-height:100%;overflow:hidden;pointer-events:none}
+body.abc-arena[data-screen="play"] .abc-inspect .ai-lbl{font-family:var(--cond);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#E3A92B}
+body.abc-arena[data-screen="play"] .abc-inspect .ai-empty{font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#8a7e6b;
+  border:2px dashed #4a4136;border-radius:10px;padding:22px 14px;text-align:center;line-height:1.5}
+body.abc-arena[data-screen="play"] .abc-inspect .ai-card{display:block}
+body.abc-arena[data-screen="play"] .abc-inspect .hc{position:relative!important;transform:none!important;margin:0!important;
+  width:200px!important;min-width:0!important;height:auto!important;min-height:0;max-height:270px;
+  padding:9px!important;font-size:12.5px!important;opacity:1!important;filter:none!important;
+  box-shadow:0 0 0 3px #E3A92B,5px 5px 0 #000!important;overflow:hidden}
+body.abc-arena[data-screen="play"] .abc-inspect .hc-q,body.abc-arena[data-screen="play"] .abc-inspect .hc-text{font-size:12px!important;line-height:1.3;-webkit-line-clamp:9!important}
+body.abc-arena[data-screen="play"] .abc-inspect .hc-name{font-size:14px!important}
+body.abc-arena[data-screen="play"] .abc-inspect .hc-top,body.abc-arena[data-screen="play"] .abc-inspect .hc-foot{font-size:10px!important}
+body.abc-arena[data-screen="play"] .abc-inspect .hv-info{width:200px;gap:5px}
+body.abc-arena[data-screen="play"] .abc-inspect .hvi-row{padding:5px 8px}
+body.abc-arena[data-screen="play"] .abc-inspect .hvi-row p{font-size:11px;line-height:1.3}
+
+/* ---- Backstage rows ---- */
+body.abc-arena[data-screen="play"] .bench{grid-column:4/7;display:flex!important;flex-direction:row!important;justify-content:center;align-items:center;
+  gap:14px!important;width:auto!important;flex:none!important;margin:0}
+body.abc-arena[data-screen="play"] .opp-side .bench{grid-row:2}
+body.abc-arena[data-screen="play"] .you-side .bench{grid-row:6}
+body.abc-arena[data-screen="play"] .bench-mini{color:var(--ink);width:66px!important;height:90px!important;padding:3px!important;display:flex;flex-direction:column;
+  border-radius:8px!important;border:3px solid #241f1b;box-shadow:3px 3px 0 #241f1b;overflow:visible}
+body.abc-arena[data-screen="play"] .bench-mini .bm-init{flex:1;height:auto!important;width:100%!important;border-radius:5px}
+body.abc-arena[data-screen="play"] .bench-mini .bm-hp{display:block!important;height:5px;margin:3px 0 2px}
+body.abc-arena[data-screen="play"] .bench-mini .bm-name{display:block!important;font-size:9px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.abc-arena[data-screen="play"] .bm-hpc{display:grid!important;position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;
+  border:2px solid var(--ink);color:#fff;font-family:var(--disp);font-size:9px;place-items:center;z-index:3}
+body.abc-arena[data-screen="play"] .bm-hpc.g{background:#3aa055} body.abc-arena[data-screen="play"] .bm-hpc.y{background:#e0a92b} body.abc-arena[data-screen="play"] .bm-hpc.r{background:#c0392b} body.abc-arena[data-screen="play"] .bm-hpc.k{background:#6b6b6b}
+body.abc-arena[data-screen="play"] .bm-stc{display:grid!important;position:absolute;bottom:18px;right:-8px;width:20px;height:20px;border-radius:50%;
+  background:#e07b28;border:2px solid var(--ink);color:#fff;font-family:var(--disp);font-size:8px;place-items:center;z-index:3;cursor:pointer}
+body.abc-arena[data-screen="play"] .bench-mini.drop-zone::after{content:"";position:absolute;inset:-8px;border-radius:12px}
+
+/* ---- Active cards + move picker beside them ---- */
+body.abc-arena[data-screen="play"] .char{grid-column:5;justify-self:center;align-self:center;width:150px!important;flex:none!important;
+  padding:5px!important;margin:0!important;border-radius:10px}
+body.abc-arena[data-screen="play"] .opp-side .char{grid-row:3}
+body.abc-arena[data-screen="play"] .you-side .char{grid-row:5}
+body.abc-arena[data-screen="play"] .char .pc-plate{margin-bottom:3px}
+body.abc-arena[data-screen="play"] .char .pc-name{font-size:11px!important;padding:1px 4px}
+body.abc-arena[data-screen="play"] .char .pc-hp{min-width:46px}
+body.abc-arena[data-screen="play"] .char .pc-hp b{font-size:10px!important;padding:1px 4px}
+body.abc-arena[data-screen="play"] .char .pc-art{height:84px!important}
+body.abc-arena[data-screen="play"] .char .pc-art .mono{font-size:30px}
+body.abc-arena[data-screen="play"] .char .pips{margin-bottom:0;min-height:16px}
+body.abc-arena[data-screen="play"] .char .pc-moves{position:absolute;left:calc(100% + 14px);top:0;width:188px;margin:0;gap:5px;
+  background:#241f1b;border:3px solid #241f1b;border-radius:10px;padding:6px;box-shadow:4px 4px 0 rgba(0,0,0,.35)}
+body.abc-arena[data-screen="play"] .char .pc-move{min-height:38px}
+body.abc-arena[data-screen="play"] .you-side .char{box-shadow:0 0 0 3px #E3A92B,4px 4px 0 #241f1b}
+body.abc-arena[data-screen="play"] .opp-side .char{box-shadow:0 0 0 3px #b5402a,4px 4px 0 #241f1b}
+body.abc-arena[data-screen="play"] .char.boss .pc-art{height:84px!important}
+
+/* ---- Lens slot, left of each Active ---- */
+body.abc-arena[data-screen="play"] .lenschip{grid-column:4;justify-self:center;align-self:center;width:170px;max-width:170px!important;margin:0;font-size:11px}
+body.abc-arena[data-screen="play"] .opp-side .lenschip{grid-row:3}
+body.abc-arena[data-screen="play"] .you-side .lenschip{grid-row:5}
+body.abc-arena[data-screen="play"] .lenschip.empty{min-height:62px;background:transparent;border:2px dashed rgba(36,31,27,.45);border-left-width:2px;opacity:1}
+body.abc-arena[data-screen="play"] .lenschip.empty .lc-none{color:rgba(36,31,27,.7);font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;font-size:10px}
+
+/* ---- right desk: menu, piles (deck left of discard), actions ---- */
+body.abc-arena[data-screen="play"] .tb-btns{grid-column:8;grid-row:1;align-self:center;justify-self:start}
+body.abc-arena[data-screen="play"] .tb-btns button{min-height:40px}
+body.abc-arena[data-screen="play"] .logtoggle{position:static!important;grid-column:8;grid-row:1;align-self:center;justify-self:end;transform:none!important;z-index:3;min-height:40px}
+body.abc-arena[data-screen="play"] .log{position:absolute!important;right:16px!important;top:56px!important;width:260px;max-height:300px;z-index:40}
+body.abc-arena[data-screen="play"] .piles{grid-column:8;display:flex!important;flex-direction:row!important;flex-wrap:wrap;justify-content:flex-end;
+  align-items:flex-end;gap:12px!important;width:auto!important;flex:none!important;margin:0}
+body.abc-arena[data-screen="play"] .opp-side .piles{grid-row:2/4;align-self:start;margin-top:16px}
+body.abc-arena[data-screen="play"] .you-side .piles{grid-row:5/7;align-self:end;margin-bottom:4px}
+body.abc-arena[data-screen="play"] .piles .deckstack{order:1;width:64px!important;height:88px!important}
+body.abc-arena[data-screen="play"] .piles .discardpile{order:2;width:64px!important;height:88px!important}
+body.abc-arena[data-screen="play"] .piles .abm-zone{order:3;flex-basis:100%}
+body.abc-arena[data-screen="play"] .piles>*:not(.deckstack):not(.discardpile):not(.abm-zone){order:4}
+body.abc-arena[data-screen="play"] .actions{grid-column:8;grid-row:7;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px;min-height:0;margin:0}
+body.abc-arena[data-screen="play"] .actions .bigbtn{width:100%;font-size:20px;padding:14px 10px;border-width:4px}
+body.abc-arena[data-screen="play"] .actions .toolbtn{width:100%}
+body.abc-arena[data-screen="play"] .actions .hint{color:#cfc3a8;font-size:10px;text-align:center;line-height:1.3}
+body.abc-arena[data-screen="play"] .actions .thinking{text-align:center}
+
+/* ---- hand: fans along the bottom, peeks off the stage edge ---- */
+body.abc-arena[data-screen="play"] .hand-wrap{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;
+  grid-column:3/8;grid-row:7;align-self:start;display:block!important;background:none!important;padding:0!important;z-index:30}
+body.abc-arena[data-screen="play"] .hand-label,body.abc-arena[data-screen="play"] .hand-toggle{display:none!important}
+body.abc-arena[data-screen="play"] .hand-wrap .hand,body.abc-arena[data-screen="play"] .hand-wrap.open .hand{display:flex!important;max-height:none;overflow:visible!important;
+  justify-content:center;align-items:flex-start;padding:8px 0 0!important;background:none;border-top:0;box-shadow:none}
+body.abc-arena[data-screen="play"] .hand{--card-h:140px;--fan-step:4deg;--fan-arc:1.6px;--fan-lift:36px;--fan-scale:1.1;--tuck-frac:0.09}
+body.abc-arena[data-screen="play"] .hand .hc{width:var(--card-w)!important;min-width:var(--card-w)!important;height:var(--card-h)!important;
+  padding:7px!important;font-size:11px!important}
+body.abc-arena[data-screen="play"] .hc-q,body.abc-arena[data-screen="play"] .hc-text{font-size:11px;line-height:1.25}
+body.abc-arena[data-screen="play"] .hc-name{font-size:12px}
+body.abc-arena[data-screen="play"] .hc-top,body.abc-arena[data-screen="play"] .hc-foot{font-size:9px}
+
+/* ---- transient overlays now live inside the stage ---- */
+body.abc-arena[data-screen="play"] .feed{position:absolute!important;left:auto!important;right:16px!important;top:330px!important;bottom:auto!important;
+  transform:none!important;width:208px!important}
+
+/* fix_board_layout_v2 */
+/* ---- Inspect: the one reading zone (hand preview, character dossier, lens) ---- */
+body.abc-arena[data-screen="play"] .abc-inspect{pointer-events:auto;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#5a4f40 transparent;padding-right:2px}
+body.abc-arena[data-screen="play"] .abc-inspect .ai-card,body.abc-arena[data-screen="play"] .abc-inspect .ai-card *{pointer-events:none}
+body.abc-arena[data-screen="play"] .abc-inspect{grid-row:2/7;margin:8px 0}
+body.abc-arena[data-screen="play"] .abc-inspect:has(.ai-dossier),body.abc-arena[data-screen="play"] .abc-inspect:has(.ai-lens){align-self:stretch}
+/* KO tally moves to the spine as a scoreboard; frees the left desk for Inspect */
+body.abc-arena[data-screen="play"] .kos{grid-column:4/6;grid-row:4;align-self:center;justify-self:start;margin:0;z-index:3;font-size:12px!important;padding:3px 10px}
+body.abc-arena[data-screen="play"] .kos.opp{grid-column:4/6;grid-row:4;align-self:center;justify-self:start;margin:0 0 0 14px}
+body.abc-arena[data-screen="play"] .kos.you{grid-column:4/6;grid-row:4;align-self:center;justify-self:start;margin:0 0 0 104px}
+body.abc-arena[data-screen="play"] .opp-side .side-meta{grid-row:1;align-self:center}
+body.abc-arena[data-screen="play"] .you-side .side-meta{grid-row:7;align-self:center}
+body.abc-arena[data-screen="play"] .ai-dossier .bench-view{width:auto!important;max-height:none!important;overflow:visible!important;margin:0;
+  padding:8px!important;border-radius:12px;display:flex;flex-direction:column;gap:6px;box-shadow:0 0 0 3px #E3A92B,5px 5px 0 #000}
+body.abc-arena[data-screen="play"] .ai-dossier .pc-plate{margin:0}
+body.abc-arena[data-screen="play"] .ai-dossier .pc-name{font-size:13px!important;white-space:normal;line-height:1.1}
+body.abc-arena[data-screen="play"] .ai-dossier .pc-hp b{font-size:11px!important}
+body.abc-arena[data-screen="play"] .ai-dossier .bv-art{height:104px!important;border-radius:8px;overflow:hidden}
+body.abc-arena[data-screen="play"] .ai-dossier .bv-art img{width:100%;height:100%;object-fit:cover}
+body.abc-arena[data-screen="play"] .ai-dossier .arch{margin:0}
+body.abc-arena[data-screen="play"] .ai-dossier .bv-passive,body.abc-arena[data-screen="play"] .ai-dossier .bv-move{padding:6px 8px;border-radius:8px}
+body.abc-arena[data-screen="play"] .ai-dossier .bv-ph,body.abc-arena[data-screen="play"] .ai-dossier .bv-h b{font-size:12px;line-height:1.15}
+body.abc-arena[data-screen="play"] .ai-dossier p{font-size:11.5px;line-height:1.35;margin:3px 0 0}
+body.abc-arena[data-screen="play"] .ai-dossier .bv-chg{font-size:11px}
+body.abc-arena[data-screen="play"] .ai-dossier .bigbtn{font-size:13px;padding:8px 10px;width:100%}
+body.abc-arena[data-screen="play"] .ai-dossier .pcb-close{align-self:center;min-height:36px;padding:4px 16px}
+body.abc-arena[data-screen="play"] .ai-lens .lenschip{width:auto!important;max-width:none!important;flex-direction:column;align-items:stretch;gap:6px;padding:9px}
+body.abc-arena[data-screen="play"] .ai-lens .lenschip .lc-port{width:100%;height:96px;flex-basis:auto}
+body.abc-arena[data-screen="play"] .ai-lens .lenschip .lc-port img{width:100%;height:100%;object-fit:cover}
+body.abc-arena[data-screen="play"] .ai-lens .lenschip .lc-nm{font-size:14px;white-space:normal}
+body.abc-arena[data-screen="play"] .ai-lens .lenschip .lc-pf,body.abc-arena[data-screen="play"] .ai-lens .lenschip .lc-th{display:block!important;font-size:11.5px;line-height:1.35}
+body.abc-arena[data-screen="play"] .ai-lens .lenschip .lc-toggle{position:absolute;top:6px;right:6px}
+
+/* ---- Lens on the board: always compact ---- */
+body.abc-arena[data-screen="play"] .lenschip{flex-direction:row;align-items:center;padding:5px 7px;gap:7px;min-height:58px}
+body.abc-arena[data-screen="play"] .lenschip .lc-pf,body.abc-arena[data-screen="play"] .lenschip .lc-th{display:none!important}
+body.abc-arena[data-screen="play"] .lenschip .lc-port{width:40px;height:40px;flex:0 0 40px}
+body.abc-arena[data-screen="play"] .lenschip .lc-body{min-width:0;display:flex;flex-direction:column;gap:4px}
+body.abc-arena[data-screen="play"] .lenschip .lc-nm{font-size:12px;line-height:1.1;white-space:normal}
+body.abc-arena[data-screen="play"] .lenschip .lc-thesis{font-size:10px;padding:3px 7px;margin:0}
+
+/* ---- Active cards: room for names and HP; move names wrap, never cut ---- */
+body.abc-arena[data-screen="play"] .char{width:168px!important}
+body.abc-arena[data-screen="play"] .char .pc-art{height:84px!important}
+body.abc-arena[data-screen="play"] .char .pc-name{font-size:12px!important}
+body.abc-arena[data-screen="play"] .char .pc-hp{min-width:56px}
+body.abc-arena[data-screen="play"] .char .pc-hp b{font-size:11px!important}
+body.abc-arena[data-screen="play"] .char .pc-moves{width:196px;left:calc(100% + 12px)}
+body.abc-arena[data-screen="play"] .char .pc-move{min-height:44px;align-items:center}
+body.abc-arena[data-screen="play"] .char .pc-mn{white-space:normal!important;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+  font-size:12.5px;line-height:1.1;text-overflow:clip}
+body.abc-arena[data-screen="play"] .char .pc-mc{font-size:10px}
+
+/* ---- minimum sizes ---- */
+body.abc-arena[data-screen="play"] .bench-mini .bm-name{font-size:10px!important;letter-spacing:.4px}
+body.abc-arena[data-screen="play"] .actions .hint{font-size:11px!important}
+
+/* ---- right desk spacing ---- */
+body.abc-arena[data-screen="play"] .opp-side .piles{grid-row:2/4;align-self:start;margin-top:34px}
+body.abc-arena[data-screen="play"] .you-side .piles{grid-row:5;align-self:start;margin:6px 0 0}
+body.abc-arena[data-screen="play"] .actions{grid-row:6/8;justify-content:flex-end;padding-bottom:14px}
+body.abc-arena[data-screen="play"] .actions .bigbtn{font-size:17px;line-height:1.15;padding:12px 10px}
 </style>
 </head>
 <body>
@@ -7782,7 +7994,7 @@ function benchTiles(p,mine){
     return `<div class="bench-mini ${dead?'dead':''}${c.fe?' fe':''}${drop?' drop-zone':''}" title="${c.name}" data-benchinfo="${mine?'you':'opp'}:${c.uid}"${drop?` data-drop="1" data-charuid="${c.uid}"`:''}>
       <span class="bm-init" style="background:${c.accent}">${c.img?`<img class="bm-img" src="${c.img}" style="object-position:${c.imgpos||'50% 20%'}">`:initials(c.name)}${c.fe?'<span class="fe-mini" title="1st Edition">\u2726</span>':''}${mine&&!dead?`<button class="bm-swap" data-do="swap:${c.uid}" title="Bring to Active (one swap per turn)">\u21c4</button>`:''}</span>
       <div class="bm-hp"><div style="width:${pct}%"></div></div>
-      <span class="bm-name">${c.name.split(' ')[0]}</span>
+      <span class="bm-name">${abcShortName(c.name)}</span>
       <span class="bm-hpc ${dead?'k':(pct>=80?'g':(pct>=50?'y':'r'))}">${dead?'✕':c.hp}</span>
       ${statusKeys(c).length?`<span class="bm-stc" data-statushelp="${statusKeys(c)[0]}">${window.STATUS_HELP[statusKeys(c)[0]].ic}</span>`:''}
       ${chargeBadges(c)}
@@ -8341,6 +8553,7 @@ function bossRevealModal(){
 }
 function renderGame(root){
   if(!S) return;
+  abcLayoutSync();   /* fix_board_layout_v1 */
   const you=S.you, opp=S.opp;
   const phases=['draw','strategize','engage'];
   const phaseHud=phases.map(ph=>`<div class="ph ${S.phase===ph&&S.turn==='you'?'on':''} ${S.turn==='opp'?'dim':''}">${ph}</div>`).join('<span class="ph-arrow">›</span>');
@@ -8354,7 +8567,7 @@ function renderGame(root){
   } else if(S.turn==='opp'&&!S.over){ actionBtn=`<span class="thinking">Opponent is thinking…</span>`; }
   const _tbWhere=turnBarWhere();
 
-  root.innerHTML=`
+  root.innerHTML=`<div class="abc-stage">${abcInspectPanel()}
    <div class="topbar">
      <div class="brand"><img class="brand-logo" src="${window.ABC_EMBLEM||''}" alt="ABC"> <small>Academic Battle Cards</small></div>
      <div class="score"><span class="kos opp">Opp: ${opp.kos}/${S.settings.koTarget}</span><span class="kos you">You: ${you.kos}/${S.settings.koTarget}</span></div>
@@ -8379,6 +8592,7 @@ function renderGame(root){
   ${flashFeed()}
   <button class="logtoggle" data-do="log">☰ Log</button>
    <div class="log ${S._logopen?'open':''}">${S.log.map(l=>`<div>${l}</div>`).join('')}</div>
+   </div>
    ${S.pending?triviaModal():''}${S._actGate?actGateModal():''}${S._af?afModal():''}${S._ip?ipModal():''}
    ${S.defend?defendModal():''}
    ${S.picker?pickerModal():''}
@@ -8386,7 +8600,7 @@ function renderGame(root){
    ${S._bossReveal?bossRevealModal():''}
    ${S.over?(S.scrim?scrimOverModal():overModal()):''}
    ${S._settings?settingsModal():''}${devModal()}
-   ${S._benchView?benchInfoModal():''}
+   ${(S._benchView&&!document.body.classList.contains('abc-arena'))?benchInfoModal():''}   
    ${S._handView!=null?handViewModal():''}
    ${S.drawn&&S._mullPop?drawnMullModal():''}
    ${_tbWhere&&_tbWhere!=='board'?turnBarFloatHtml(_tbWhere):''}`;
@@ -8411,8 +8625,77 @@ function placeTurnBar(){
   fl.style.setProperty('--tbf-left', Math.max(6, Math.round(r.left))+'px');
   fl.style.setProperty('--tbf-right', Math.max(6, Math.round(window.innerWidth-right))+'px');
 }
+/* fix_board_layout_v1: Arena layout -- one fixed 1280x720 stage, scaled as a whole */
+function abcArenaOn(){
+  try{ if(localStorage.getItem('abc_layout')==='classic') return false; }catch(e){}
+  const w=window.innerWidth, h=window.innerHeight;
+  return w>=h*1.15 && Math.min(w/1280, h/720)>=0.58;     /* landscape and big enough to read */
+}
+function abcLayoutSync(){ const on=!!(S && abcArenaOn()); document.body.classList.toggle('abc-arena', on); return on; }
+/* true = arena handled the fit; false = fall through to the classic fitBoard */
+function abcArenaFit(){
+  const want=!!(S && APP.screen==='play' && abcArenaOn()), has=document.body.classList.contains('abc-arena');
+  if(want!==has){ render(); return true; }               /* crossed the threshold (resize/rotate): rebuild once */
+  if(!has) return false;
+  const st=document.querySelector('.abc-stage');
+  if(st) st.style.setProperty('--abc-k', Math.min(window.innerWidth/1280, window.innerHeight/720).toFixed(4));
+  return true;
+}
+let abcInsp=null;                                         /* the hand card under the pointer */
+function abcInspectHtml(){
+  if(!abcInsp){ const pin=abcPinnedHtml(); if(pin) return pin; }   /* fix_board_layout_v2 */
+  const c=abcInsp, i=(c&&S)?S.you.hand.indexOf(c):-1;
+  if(i<0) return '<div class="ai-empty">Hover a card in your hand to read it here</div>';
+  const nw=c._new; let card='', info='';
+  try{ card=handCard(c,i); }catch(e){}
+  c._new=nw;                                              /* never steal the hand card's deal-in */
+  try{ info=handViewInfo(c)||''; }catch(e){}
+  return '<div class="ai-card">'+card+'</div>'+info;
+}
+function abcInspectPanel(){ return '<div class="abc-inspect" aria-live="polite"><div class="ai-lbl">Inspect</div><div class="ai-body">'+abcInspectHtml()+'</div></div>'; }
+document.addEventListener('mouseover', function(e){
+  if(!S || !document.body.classList.contains('abc-arena')) return;
+  const hc=e.target && e.target.closest && e.target.closest('.hand .hc[data-idx]'); if(!hc) return;
+  const c=S.you.hand[+hc.dataset.idx]; if(!c || c===abcInsp) return;
+  abcInsp=c; const b=document.querySelector('.abc-inspect .ai-body'); if(b) b.innerHTML=abcInspectHtml();
+});
+/* fix_board_layout_v2: details open in the Inspect column (arena layout) */
+function abcShortName(n){
+  let w=String(n||'').trim().split(/\s+/);
+  if(w.length>1 && /^(the|a|an)$/i.test(w[0])) w=w.slice(1);
+  const full=w.join(' ');
+  if(full.length<=9) return full;
+  if(w.length>1 && /^(professor|inspector|doctor|dr\.?|mr\.?|mrs\.?|miss|lady|lord|king|queen|prince|princess|sir|friar|father|general|captain|aunt|uncle|count|duke|old)$/i.test(w[0])) return w[w.length-1];
+  return w[0];
+}
+function abcPinnedHtml(){
+  if(!S) return '';
+  if(S._benchView){
+    const h=String(benchInfoModal()||'').replace(/^\s*<div class="modal-bg">/,'').replace(/<\/div>\s*$/,'');
+    if(h) return '<div class="ai-dossier">'+h+'</div>';
+  }
+  for(const side of ['you','opp']){ const P=S[side]; if(P && P._lensOpen && P.crit) return '<div class="ai-lens">'+critChip(P,side)+'</div>'; }
+  return '';
+}
+function abcInspectPaint(){ const b=document.querySelector('.abc-inspect .ai-body'); if(b) b.innerHTML=abcInspectHtml(); }
+/* one pinned subject at a time: opening a dossier closes an open lens, and vice versa */
+document.addEventListener('click', function(e){
+  if(!S || !document.body.classList.contains('abc-arena')) return;
+  const t=e.target && e.target.closest && e.target.closest('[data-benchinfo],[data-do^="lens:"]'); if(!t) return;
+  abcInsp=null;
+  if(t.dataset.benchinfo){ S.you._lensOpen=false; S.opp._lensOpen=false; }
+  else { S._benchView=null; const other=t.dataset.do==='lens:you'?S.opp:S.you; other._lensOpen=false; }
+}, true);
+/* leaving the hand drops the hover preview and brings the pinned details back */
+document.addEventListener('mouseout', function(e){
+  if(!abcInsp || !document.body.classList.contains('abc-arena')) return;
+  const from=e.target && e.target.closest && e.target.closest('.hand'); if(!from) return;
+  if(e.relatedTarget && from.contains(e.relatedTarget)) return;
+  abcInsp=null; abcInspectPaint();
+});
 // Uniformly scale the board so both sides + controls always fit the play area (no overlap, no scroll)
 function fitBoard(){
+  if(abcArenaFit()) return;   /* fix_board_layout_v1 */
   const board=document.querySelector('body[data-screen="play"] .board');
   const inner=board&&board.querySelector('.board-inner');
   if(!board||!inner) return;
@@ -11634,6 +11917,7 @@ function arenaOffstageStart(uid){ if(!S) return; const p=S.you;
     function(id){ const c=p.team.find(function(t){ return t.uid===id; }); if(c) go(c); }); }
 
 window.ABC_DEBUG = {
+  abcArenaOn, abcArenaFit, abcLayoutSync, abcInspectHtml,   /* fix_board_layout_v1 */
   defaultDeck:(k)=>defaultDeck(k), compFor:(k)=>compFor(k), poolAb:(k)=>poolAb(k),
   makeBuilderState, builderFocus, handleBuilder, edModCount, clone,
   fxChargeGlow, moveFull, chargeSnap, chargeReport, SFX,
