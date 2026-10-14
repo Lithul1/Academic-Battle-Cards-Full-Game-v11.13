@@ -2704,6 +2704,41 @@ body.abc-arena[data-screen="play"] .opp-side .piles{grid-row:2/4;align-self:star
 body.abc-arena[data-screen="play"] .you-side .piles{grid-row:5;align-self:start;margin:6px 0 0}
 body.abc-arena[data-screen="play"] .actions{grid-row:6/8;justify-content:flex-end;padding-bottom:14px}
 body.abc-arena[data-screen="play"] .actions .bigbtn{font-size:17px;line-height:1.15;padding:12px 10px}
+
+/* fix_board_layout_v3 */
+/* ===== TABLETOP TILT -- one plane, rotated about y=326 (spine centre) ===== */
+body.abc-arena.abc-tilt[data-screen="play"] .abc-stage{perspective:1500px;perspective-origin:50% 8%;--abc-tilt:22deg;
+  background-image:radial-gradient(ellipse 62% 58% at 50% 46%,rgba(255,214,150,.13),transparent 70%),
+                   radial-gradient(rgba(0,0,0,.2) 1px,transparent 1.4px)!important;
+  background-size:auto,6px 6px!important}
+body.abc-arena.abc-tilt[data-screen="play"] .board::before,body.abc-arena.abc-tilt[data-screen="play"] .board::after,body.abc-arena.abc-tilt[data-screen="play"] .bench,body.abc-arena.abc-tilt[data-screen="play"] .opp-side .char,body.abc-arena.abc-tilt[data-screen="play"] .you-side .char,body.abc-arena.abc-tilt[data-screen="play"] .lenschip,body.abc-arena.abc-tilt[data-screen="play"] .phasehud,body.abc-arena.abc-tilt[data-screen="play"] .kos.opp,body.abc-arena.abc-tilt[data-screen="play"] .kos.you,body.abc-arena.abc-tilt[data-screen="play"] .turnbar{
+  transform:rotateX(var(--abc-tilt));backface-visibility:hidden}
+/* pages (rows 2-3 top 52; rows 5-6 top 346) */
+body.abc-arena.abc-tilt[data-screen="play"] .board::before{transform-origin:50% 274px}
+body.abc-arena.abc-tilt[data-screen="play"] .board::after{transform-origin:50% -20px;
+  box-shadow:0 0 0 3px #e7d8b6,0 0 0 5px #241f1b,0 9px 0 4px #e7d8b6,0 13px 0 5px #6b4f2a,0 26px 30px rgba(0,0,0,.55),
+             inset 0 26px 30px -18px rgba(36,31,27,.55)!important}
+/* Backstage rows fill their row exactly (row 2 top 52; row 6 top 496) */
+body.abc-arena.abc-tilt[data-screen="play"] .bench{align-self:stretch}
+body.abc-arena.abc-tilt[data-screen="play"] .opp-side .bench{transform-origin:50% 274px}
+body.abc-arena.abc-tilt[data-screen="play"] .you-side .bench{transform-origin:50% -170px}
+/* Actives pinned to the top of their row (row 3 top 156; row 5 top 346) */
+body.abc-arena.abc-tilt[data-screen="play"] .opp-side .char,body.abc-arena.abc-tilt[data-screen="play"] .you-side .char{align-self:start}   /* .side scope: the Inspect dossier is also .char */
+body.abc-arena.abc-tilt[data-screen="play"] .opp-side .char{transform-origin:50% 170px}
+body.abc-arena.abc-tilt[data-screen="play"] .you-side .char{transform-origin:50% -20px}
+/* Lens: fixed 46px drop into its row so its top edge is known */
+body.abc-arena.abc-tilt[data-screen="play"] .lenschip{align-self:start;margin-top:46px}
+body.abc-arena.abc-tilt[data-screen="play"] .opp-side .lenschip{transform-origin:50% 124px}
+body.abc-arena.abc-tilt[data-screen="play"] .you-side .lenschip{transform-origin:50% -66px}
+/* spine pieces (row 4 top 306) */
+body.abc-arena.abc-tilt[data-screen="play"] .phasehud{transform-origin:50% 20px}
+body.abc-arena.abc-tilt[data-screen="play"] .kos.opp{align-self:start;margin:8px 0 0 14px;transform-origin:50% 12px}
+body.abc-arena.abc-tilt[data-screen="play"] .kos.you{align-self:start;margin:8px 0 0 104px;transform-origin:50% 12px}
+body.abc-arena.abc-tilt[data-screen="play"] .turnbar{align-self:start;margin-top:11px;transform-origin:50% 9px}
+/* cards sit ON the page: short cast shadow */
+body.abc-arena.abc-tilt[data-screen="play"] .bench-mini{box-shadow:0 4px 0 #241f1b,0 9px 12px rgba(0,0,0,.42)}
+body.abc-arena.abc-tilt[data-screen="play"] .you-side .char{box-shadow:0 0 0 3px #E3A92B,0 6px 0 #241f1b,0 13px 18px rgba(0,0,0,.5)!important}
+body.abc-arena.abc-tilt[data-screen="play"] .opp-side .char{box-shadow:0 0 0 3px #b5402a,0 6px 0 #241f1b,0 13px 18px rgba(0,0,0,.5)!important}
 </style>
 </head>
 <body>
@@ -8693,8 +8728,12 @@ document.addEventListener('mouseout', function(e){
   if(e.relatedTarget && from.contains(e.relatedTarget)) return;
   abcInsp=null; abcInspectPaint();
 });
+/* fix_board_layout_v3: tabletop tilt switch (Tune > Accessibility) */
+function abcTiltOn(){ try{ return localStorage.getItem('abc_tilt')!=='off'; }catch(e){ return true; } }
+function abcTiltSet(on){ try{ localStorage.setItem('abc_tilt', on?'on':'off'); }catch(e){} document.body.classList.toggle('abc-tilt', !!on); }
 // Uniformly scale the board so both sides + controls always fit the play area (no overlap, no scroll)
 function fitBoard(){
+  document.body.classList.toggle('abc-tilt', abcTiltOn());   /* fix_board_layout_v3 */
   if(abcArenaFit()) return;   /* fix_board_layout_v1 */
   const board=document.querySelector('body[data-screen="play"] .board');
   const inner=board&&board.querySelector('.board-inner');
@@ -9163,6 +9202,7 @@ function settingsRows(s){
     ${row('Auto-block (skip the defend prompt)',`<input type="checkbox" data-set="autoBlock" ${s.autoBlock?'checked':''}>`)}
     <div class="set-row set-head"><span>Accessibility</span><span></span></div>
     ${row('Reduce motion &amp; flashing',`<input type="checkbox" data-calm ${(META.calmFx?'checked':'')}>`)}
+    ${row('Tabletop tilt (3D board)',`<input type="checkbox" data-abctilt ${abcTiltOn()?'checked':''}>`)}
     <div class="set-row set-head"><span>Audio</span><span></span></div>
     <div class="set-row"><span>Music track</span><span class="trk-pick">
       <button type="button" class="trk-opt ${SFX.getTrack()==='lofi'?'on':''}" data-audio="track:lofi">Lofi</button>
@@ -9713,6 +9753,7 @@ document.addEventListener('input',e=>{
     if(SET_LABEL[t.dataset.audio]) relabelSetting(t, SET_LABEL[t.dataset.audio]());
     return;
   }
+  if(t.dataset.abctilt!=null){ abcTiltSet(!!t.checked); return; }   /* fix_board_layout_v3 */
   if(t.dataset.calm!=null){ META.calmFx=!!t.checked; metaSave(); applyCalmFx(); return; }
   if(t.dataset.set==null) return;
   const k=t.dataset.set; let v;
