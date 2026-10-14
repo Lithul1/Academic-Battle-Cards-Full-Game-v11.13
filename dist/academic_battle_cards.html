@@ -4411,7 +4411,8 @@ function pagemasterLegal(fe1,fe2,def){
 /* what this commander's next return costs, or null when it can never come back */
 function pmReturnCost(ch){
   const n=(ch&&ch._pmReturns)||0;
-  return n>=PM.maxReturns ? null : PM.returnCost[n];
+  const _mx=(S&&S.arena&&ARENA_RULES.cmdReturns!=null)?ARENA_RULES.cmdReturns:PM.maxReturns;   /* lever: one free return */
+  return n>=_mx ? null : PM.returnCost[n];
 }
 /* test surface — read by tools/pagemaster.test.js */
 try{ window.ABC_PM = { defaultDeck, bmOwned, get STARTER_BM(){return STARTER_BM;}, PM, pmOn, pmBooksOf, pagemasterLegal, pmReturnCost, clampDeck,
@@ -4909,7 +4910,7 @@ function drawnPlace(idx,where){
     if(_k && _on){ toast(`${_on.name} is already on the field \u2014 only one copy of a character can be in play.`); return; } }
   if(where==='active'){ if(p._hasActive){ toast('Your Active slot is already filled.'); return; } }
   else if(drawnBench(p)>=DRAWN_BENCH_MAX){ toast(`Backstage is full (${DRAWN_BENCH_MAX}).`); return; }
-  const ch=makeChar(card._cdef, p._hpScale||1.0);
+  const ch=makeChar(card._cdef, p._hpScale||1.0); if(card._offDmg) ch.hp=Math.max(10,ch.maxHp-card._offDmg);
   if(card._pmCmd){ ch._pmCmd=true; ch._pmReturns=card._pmReturns||0; }
   p.hand.splice(idx,1); p.team.push(ch); ch._grow=0;
   if(where==='active'){ p.activeIdx=p.team.length-1; p._hasActive=true; }
@@ -4925,6 +4926,7 @@ function drawnPlayChar(idx){
   if(!S||!S.drawn) return;
   const p=S.you, card=p.hand[idx];
   if(!card||card.cat!=='char') return;
+  if(card._offTurn!=null && card._offTurn===(S._turnNo||0)){ toast(`${card.name} went offstage this turn \u2014 it can come back next turn.`); return; }
   { const _k=(card.fe?((card._cdef&&card._cdef.base)||[])[1]:card.charId);   /* one copy in play (fix_commander_evolve) */
     const _on=p.team.find(function(c){ return c.hp>0 && (c.fe&&c.base?c.base[1]:c.id)===_k; });
     if(_k && _on){ toast(`${_on.name} is already on the field \u2014 only one copy of a character can be in play.`); return; } }
@@ -4937,7 +4939,7 @@ function drawnPlayChar(idx){
     p.attachesLeft-=pmCost;
     pushLog(card.name+' returns to the page for '+pmCost+' attach'+(pmCost>1?'es':'')+'.');
   }
-  const ch=makeChar(card._cdef, p._hpScale||1.0);
+  const ch=makeChar(card._cdef, p._hpScale||1.0); if(card._offDmg) ch.hp=Math.max(10,ch.maxHp-card._offDmg);
   if(card._pmCmd){ ch._pmCmd=true; ch._pmReturns=card._pmReturns||0; }
   p.hand.splice(idx,1); p.team.push(ch); ch._grow=0;
   if(!liveAct){ p.activeIdx=p.team.length-1; p._hasActive=true; pushLog(`${ch.name} steps up to Active.`); }
@@ -5541,6 +5543,7 @@ function tryPlayHandCard(idx,targetUid){
   if(p.attachesLeft<=0 && !_gFree){ toast('No attaches left this turn.'); return; }
   const tgt=(targetUid && p.team.find(c=>c.uid===targetUid)) || active(p);
   if(!tgt || tgt.hp<=0){ toast('Choose a living character to charge.'); return; }
+  if(S.arena && ARENA_RULES.firstAttachFree && p._arenaFirstFree && card.cat==='abc'){ p._arenaFirstFree=false; p.attachesLeft++; p.flags._freeNow=true; pushLog('Your first attach of the game is free \u2014 no question.'); attach('you',idx,true,tgt.uid); p.flags._freeNow=false; return; }
   if((p.flags.feFree||0)>0 && card.cat==='abc' && p.flags.feFreeTo && tgt.uid===p.flags.feFreeTo){ p.flags.feFree--; p.flags.feFreeTo=null; p.attachesLeft++; p.flags._freeNow=true; pushLog('The Colossal Illusion \u2014 free attach.'); attach('you',idx,true,tgt.uid); p.flags._freeNow=false; return; }
   if((p.flags.feFree||0)>0 && card.cat==='abc' && !p.flags.feFreeTo){ p.flags.feFree--; pushLog('1st Edition auto-attach — no trivia needed.'); attach('you',idx,true,tgt.uid); return; }
   if(S.settings.triviaOn && !p.flags.skipTrivia){ openTrivia(card,idx,tgt.uid); }
@@ -6139,7 +6142,7 @@ function teamAbcCount(ch){
 }
 function calcDamage(ch,ab){
   let d=ab.dmg||0;
-  if(ab.dmgType==='perTurn') d=(ab.base||0)+(ab.step||10)*(ch._grow||0);   /* starts at the printed number */
+  if(ab.dmgType==='perTurn') d=(ab.base||0)+arenaGrow(ch,ab);   /* starts at the printed number */
   else if(ab.dmgType==='perABC') d=(ab.step||10)*ch.atkCharge.length;
   else if(ab.dmgType==='perTeamABC') d=(ab.base||0)+(ab.step||10)*teamAbcCount(ch);
   else if(ab.dmgType==='koScale'){ const _P=pileOwnerOf(ch); d=(ab.dmg||ab.base||0)+(ab.step||10)*((_P&&_P.grave)?_P.grave.length:0); }
@@ -6154,7 +6157,7 @@ function calcBlock(ch,ab,incoming){
   if(typeof symbolsOff==='function' && symbolsOff(sideOfChar(ch))) return {amt:ab.block||0};
   if(ab.blockType==='negate') return {amt:incoming,negate:true};
   if(ab.blockType==='capto') return {amt:Math.max(0,incoming-(ab.cap||10))};
-  if(ab.blockType==='perTurn') return {amt:(ab.base||0)+(ab.step||10)*(ch._grow||0)};
+  if(ab.blockType==='perTurn') return {amt:(ab.base||0)+arenaGrow(ch,ab)};
   return {amt:(ab.block||0) + (ab.pileScale?pileBonus(ch,ab.pileScale):0)};
 }
 function spend(charge,n){ const out=[]; for(let i=0;i<n&&charge.length;i++) out.push(charge.shift()); return out; }
@@ -6266,7 +6269,7 @@ function actGateModal(){
    brings back Act I without needing its own guard. */
 function actOnKO(p,c){
   if(!c||!c._actBase) return;
-  if(c.passive&&c.passive.koDiscardRandom&&p.hand.length){ const _lost=p.hand.splice(rnd(p.hand.length),1)[0]; p.discard.push(_lost); pushLog(`${c.passive.name}: ${who(p)} discards a random card.`); }
+  if(!c._offstaging&&c.passive&&c.passive.koDiscardRandom&&p.hand.length){ const _lost=p.hand.splice(rnd(p.hand.length),1)[0]; p.discard.push(_lost); pushLog(`${c.passive.name}: ${who(p)} discards a random card.`); }
   delete c._evoHp; delete c._noBlockTurn;
   const b=c._actBase, top=c.name;
   (c._actCards||[]).forEach(function(x){ p.discard.push(x); }); c._actCards=[];
@@ -6275,7 +6278,7 @@ function actOnKO(p,c){
   if(b.tags) c.tags=b.tags; else delete c.tags;
   if(b.passive) c.passive=b.passive; else delete c.passive;
   delete c.act; delete c._actId; delete c.resolution; delete c._actBase; delete c._evoFx; delete c._gateSpent;
-  pushLog(`${top}\u2019s Act cards go to the discard; ${c.name} rests with the fallen.`);
+  pushLog(c._offstaging?`${top}\u2019s Act cards go to the discard; ${c.name} steps offstage.`:`${top}\u2019s Act cards go to the discard; ${c.name} rests with the fallen.`);
 }
 /* deck building: the Act I base of every line in the deck is guaranteed a
    place on the Classic team, or its Act cards would sit dead in the deck */
@@ -6427,6 +6430,14 @@ function performAttack(side,abilKey){           // == beginAttack
   if(def.status.exposed){ dmg=Math.round(dmg*2); pushLog(`${def.name} is Exposed — damage doubled!`); delete def.status.exposed; }
   if(att.status.costUp){ delete att.status.costUp; }
   if(A.flags.dogear){ att.atkCharge.unshift(...spentAtk.filter(c=>!c._wild)); A.flags.dogear=false; pushLog(`Dog-Eared Strategy: ${att.name}'s Attack ABC stay attached.`); }
+  else if(S.arena && ARENA_RULES.keepCharges && spentAtk.filter(c=>!c._wild).length>1){   /* lever: one ABC is spent, the rest stay attached */
+    const _k=spentAtk.filter(c=>!c._wild);
+    if(side==='you' && !S._sim){   /* the player chooses which ABC is spent once the attack resolves (arenaSpendPrompt) */
+      _k.slice().reverse().forEach(function(c){ (c.type==='BLOCK'?att.blkCharge:att.atkCharge).unshift(c); });
+      S._spendPick={ uid:att.uid, cids:_k.map(function(c){ return c.cid; }) }; }
+    else { _k.sort(function(x,y){ return (x.power||0)-(y.power||0); }); const _d=_k.shift(); A.discard.push(_d);   /* AI spends its lowest-power ABC */
+      _k.reverse().forEach(function(c){ (c.type==='BLOCK'?att.blkCharge:att.atkCharge).unshift(c); });
+      pushLog(`${att.name} spends 1 ABC \u2014 ${_k.length} stay attached.`); } }
   else A.discard.push(...spentAtk.filter(c=>!c._wild));
   if(side==='you') A.flags.attacked=true;
   let pierce=(ab.flags||[]).includes('pierce') || condPierce;
@@ -6782,6 +6793,7 @@ function aiTurn(){
     if(!S||S.over){ busy=false; return; }
     const p=S.opp; let guard=0;
     if(S.arena){ arenaAiField(p); if(!drawnHasActive(p)){ pushLog('The AI has no one to field this turn.'); endAiTurn(); return; } }
+    if(S.arena){ arenaAiOffstage(p); arenaAiField(p); }
     aiFeedPile(p);
     // deploy a Critical Lens if the AI is holding one and has none active
     if(!p.crit){ const ci=p.hand.findIndex(c=>c.cat==='crit'); if(ci>=0) playCrit('opp',ci); }
@@ -6804,7 +6816,9 @@ function aiTurn(){
       if(!S||S.over){ busy=false; return; }
       const act=active(p);
       // ---- BOOKMARK BRAIN: priority-driven, uses the whole card pool (was: supercharge + heal only) ----
-      const bi=aiPickBookmark(p, prof);
+      let bi=aiPickBookmark(p, prof);
+      if(bi<0 && S.arena && ARENA_RULES.aiBmBoost>0 && p.flags._bmBoostTurn!==(S._turnNo||0)){ p.flags._bmBoostTurn=(S._turnNo||0);   /* lever: plays a Bookmark the AI brain passed on */
+        if(Math.random()<ARENA_RULES.aiBmBoost) bi=p.hand.findIndex(function(c){ return c.cat==='bookmark' && bmRole(c) && bmPlayable(p,c); }); }
       if(bi>=0 && (p.flags.bmCount||0)<2){ try{ playBookmark('opp',bi); }catch(e){} }
       if(p.flags._aiEvoRetry){ p.flags._aiEvoRetry=false; try{ actAiTurn(p); }catch(e){} }
       // ---- CHARGE PLAN ----
@@ -6815,7 +6829,9 @@ function aiTurn(){
       let pick=p.hand.findIndex(c=>c.cat==='abc' && (needAtk?c.type==='ATTACK':c.type==='BLOCK'));
       if(pick<0) pick=p.hand.findIndex(c=>c.cat==='abc');
       if((p.attachesLeft>0 || ((p.flags.feFree||0)>0 && p.flags.feFreeTo)) && pick>=0 && guard<9){ guard++;
-        const useFree=(p.flags.feFree||0)>0 && p.hand[pick] && p.hand[pick].cat==='abc'; const _ft=useFree?(p.flags.feFreeTo||null):null; if(useFree){ p.flags.feFree--; if(_ft){ p.flags.feFreeTo=null; p.attachesLeft++; } }
+        const _af=!!(S.arena && ARENA_RULES.firstAttachFree && p._arenaFirstFree && p.hand[pick] && p.hand[pick].cat==='abc');
+        if(_af){ p._arenaFirstFree=false; p.attachesLeft++; pushLog(`${who(p)}'s first attach of the game is free.`); }
+        const useFree=_af || ((p.flags.feFree||0)>0 && p.hand[pick] && p.hand[pick].cat==='abc'); const _ft=(useFree&&!_af)?(p.flags.feFreeTo||null):null; if(useFree&&!_af){ p.flags.feFree--; if(_ft){ p.flags.feFreeTo=null; p.attachesLeft++; } }
         let ok=useFree?true:(Math.random()<S.settings.aiAccuracy);
         // Iterum Probare for the AI. The ability is identical; the WILLINGNESS to
         // spend a card scales with difficulty so the four tiers stay distinct.
@@ -8333,7 +8349,7 @@ function renderGame(root){
     if(S.phase==='reveal') actionBtn=`<span class="hint">Tap your cards to reveal them</span><button class="dm-flipall" data-do="dmflipall">Flip all</button>`;
     else if(S.phase==='place') actionBtn=`<span class="hint">Choose an Active to take the field</span>`;
     else if(S.phase==='draw') actionBtn=`<button class="bigbtn" data-do="draw">Draw a card</button>`;
-    else if(S.phase==='strategize') actionBtn=`<button class="bigbtn" data-do="engage">Done — go to Engage ›</button><span class="hint">Attaches left: ${you.attachesLeft} · Bookmarks: ${2-(you.flags.bmCount||0)} left</span>`;
+    else if(S.phase==='strategize') actionBtn=`<button class="bigbtn" data-do="engage">Done — go to Engage ›</button>${(S.arena&&ARENA_RULES.offstage&&!S._sim)?`<button class="toolbtn" data-do="offstage-start" title="Send a Backstage character back to your hand (costs 1 ABC). You can also tap a Backstage character."${you.team.some(function(c){ return arenaOffOk(you,c); })?'':' style="opacity:.45"'}>\u21e0 Offstage\u2026</button>`:''}<span class="hint">Attaches left: ${you.attachesLeft} · Bookmarks: ${2-(you.flags.bmCount||0)} left</span>`;
     else if(S.phase==='engage') actionBtn=`<button class="bigbtn end" data-do="end">End turn ›</button><span class="hint">Tap your lit attack to strike</span>`;
   } else if(S.turn==='opp'&&!S.over){ actionBtn=`<span class="thinking">Opponent is thinking…</span>`; }
   const _tbWhere=turnBarWhere();
@@ -8495,6 +8511,7 @@ function benchInfoModal(){
     <div class="bv-move atk"><div class="bv-h"><b>${ch.atk.n}</b><span class="pc-chip red sm">${ch.atk.label||''}</span></div><p>${ch.atk.t||''}</p></div>
     <div class="bv-move blk"><div class="bv-h"><b>${ch.blk.n}</b><span class="pc-chip blue sm">${ch.blk.label||''}</span></div><p>${ch.blk.t||''}</p></div>
     ${benchChargeList(ch)}
+    ${(v.side==='you'&&S.arena&&ARENA_RULES.offstage&&!S._sim&&p.team.indexOf(ch)!==p.activeIdx)?arenaOffBtn(p,ch):''}
     <button class="pcb-close" data-do="benchclose">Close &#10005;</button>
   </div></div>`;
 }
@@ -9284,6 +9301,8 @@ document.addEventListener('click',e=>{
     else if(d==='closehand'){ if(S){ S._handView=null; render(); } }
     else if(d==='playhand'){ if(S){ const i=S._handView; S._handView=null; render(); if(i!=null) tryPlayHandCard(i); } }
     else if(d==='dischand'){ if(S && S._handView!=null) tryDiscardHandCard(S._handView,false); }
+    else if(d==='offstage-start'){ arenaOffstageStart(null); }
+    else if(d.indexOf('offstage:')===0){ S._benchView=null; arenaOffstageStart(d.slice(9)); }
     else if(d==='ip-yes'){ if(S&&S._ip) ipAccept(S._ip.picks||[]); }
     else if(d==='ip-no'){ ipDecline(); }
     else if(d==='mg-go'){ mgStart(); }
@@ -11184,13 +11203,25 @@ try{ edBackfillArchetypes(); }catch(e){}
    * Telemetry is a self-contained recorder: it wraps engine functions and never
      changes what they do. Rows are keyed by deck side A/B, never you/opp.
    Precon decks come from window.PRECONS, generated by tools/sync_catalog.py. */
-const ARENA_RULES = { handSize:7, benchMax:DRAWN_BENCH_MAX, mulliganMax:3, mulliganBonus:'optional', aiBonusMinDeck:10,
+function arenaGrow(ch,ab){ const g=(ab.step||10)*(ch._grow||0); return (S&&S.arena&&ARENA_RULES.perTurnCap!=null)?Math.min(g,ARENA_RULES.perTurnCap):g; }
+/* Rule levers (fix_arena_levers): set per match from the Arena screen; all off = the baseline rules. */
+const ARENA_LEVERS = [
+  { key:'refill4',   label:'Refill hand to 4',            tag:'refill4' },
+  { key:'firstFree', label:'First ABC attach is free',    tag:'firstFree' },
+  { key:'growCap',   label:'Growing attacks cap at +50',  tag:'cap50' },
+  { key:'ai100',     label:'AI answers 100%',             tag:'ai100' },
+  { key:'bmBoost',   label:'AI plays Bookmarks +25%',     tag:'bm+25' },
+  { key:'keep1',     label:'Attacks spend only 1 ABC',    tag:'keep1' },
+  { key:'ret1',      label:'Commanders return once',      tag:'ret1' },
+  { key:'offstage',  label:'Offstage once per turn',      tag:'offstage' } ];
+const ARENA_LEVER_VAL = { refill4:{ on:4, off:0 }, growCap:{ on:50, off:null }, ai100:{ on:1.0, off:0.8 }, bmBoost:{ on:0.01, off:0 } };
+const ARENA_RULES = { handMin:0, firstAttachFree:false, perTurnCap:null, aiBmBoost:0, keepCharges:false, cmdReturns:null, offstage:false, handSize:7, benchMax:DRAWN_BENCH_MAX, mulliganMax:3, mulliganBonus:'optional', aiBonusMinDeck:10,
   firstPlayerSkipsDraw:true, seedOpening:false, commandersInDeck:true, commanderReturns:true, benchSurcharge:true,
   turnCap:60, capWinner:'koLeader', reshuffleDiscard:true, aiAccuracy:0.8 };
 const ARENA_STORE='abc_arena_log_v1';
 function arenaPrecons(){ return (window.PRECONS||[]).filter(function(p){ return p && DATA.characters[p.d]; }); }
 function arenaPre(id){ return arenaPrecons().find(function(p){ return p.id===id; })||null; }
-function arenaCfg(){ if(!APP.arena){ const L=arenaPrecons(); APP.arena={ a:(L[0]||{}).id, b:(L[1]||L[0]||{}).id, ctrlA:'human', ctrlB:'ai', first:'random' }; } return APP.arena; }
+function arenaCfg(){ if(!APP.arena){ const L=arenaPrecons(); APP.arena={ a:(L[0]||{}).id, b:(L[1]||L[0]||{}).id, ctrlA:'human', ctrlB:'ai', first:'random', levers:arenaWorkingLevers() }; } return APP.arena; }
 function arenaDef(pre){ return { d:pre.d, ch:pre.ch.slice(), act:pre.act.slice(), ab:pre.ab.slice(), bm:pre.bm.slice(), cr:pre.cr.slice(), fe:pre.fe.slice(),
   ed:{}, edab:[], edbm:{}, arena:true, preId:pre.id }; }
 function arenaLoad(){ try{ const L=JSON.parse(localStorage.getItem(ARENA_STORE)||'null'); if(L&&L.games&&L.cards) return L; }catch(e){} return {games:[],cards:[]}; }
@@ -11203,6 +11234,12 @@ function arenaStart(opt){
   if(!A||!B){ toast('Choose two precon decks.'); return; }
   const st=clone(APP.settings); st.handSize=ARENA_RULES.handSize; st.handMin=0; st.aiAccuracy=ARENA_RULES.aiAccuracy; st.youSet=A.d; st.oppSet=B.d;
   if(opt.sim){ st.autoBlock=true; st.turnTimer=0; }
+  { const lv=c.levers||{}, on=function(k){ return !!lv[k]; };   /* fix_arena_levers */
+    ARENA_RULES.handMin=on('refill4')?ARENA_LEVER_VAL.refill4.on:0; ARENA_RULES.firstAttachFree=on('firstFree');
+    ARENA_RULES.perTurnCap=on('growCap')?ARENA_LEVER_VAL.growCap.on:null; ARENA_RULES.aiAccuracy=on('ai100')?1.0:0.8;
+    ARENA_RULES.aiBmBoost=on('bmBoost')?ARENA_LEVER_VAL.bmBoost.on:0;
+    ARENA_RULES.keepCharges=on('keep1'); ARENA_RULES.cmdReturns=on('ret1')?1:null; ARENA_RULES.offstage=on('offstage');   /* fix_arena_levers2; Offstage: fix_arena_offstage */
+    st.handMin=ARENA_RULES.handMin; st.aiAccuracy=ARENA_RULES.aiAccuracy; }
   const first=c.first==='random'?(Math.random()<0.5?'A':'B'):c.first;
   APP.drawnMode=false; APP.mode='arena';
   newGame(st, arenaDef(A), arenaDef(B));
@@ -11210,6 +11247,8 @@ function arenaStart(opt){
   S._arenaFirst=(first==='A')?'you':'opp'; S._arenaSkipDraw=S._arenaFirst; S._arenaTurn=0;
   arenaTelBegin(A,B,opt.sim?{ctrlA:'ai',ctrlB:'ai'}:c,first);
   if(opt.seed){ S._tel.seed=opt.seed; S._tel.id=opt.seed; }
+  S.you._arenaFirstFree=S.opp._arenaFirstFree=ARENA_RULES.firstAttachFree;
+  S._tel.rules=ARENA_LEVERS.filter(function(L){ return (c.levers||{})[L.key]; }).map(function(L){ return L.tag; }).join('+')||'baseline';
   pushLog(opt.sim?`PreCon Arena sim ${opt.seed} \u2014 ${A.name} (A) vs ${B.name} (B), ${first} first.`:`PreCon Arena \u2014 ${A.name} (A, you) vs ${B.name} (B, AI). ${first==='A'?'You go':'The AI goes'} first.`);
 }
 function arenaHasChar(p){ return p.hand.some(function(c){ return c.cat==='char'; }); }
@@ -11255,7 +11294,7 @@ function arenaCapEnd(){
 
 /* ---- AI fielding: an Active if it has none (highest HP), then Backstage up to the limit.
        One copy per character; a returned commander only if its attach cost is affordable. ---- */
-function arenaCanField(p,card){ if(!card||card.cat!=='char') return false;
+function arenaCanField(p,card){ if(!card||card.cat!=='char') return false; if(card._offTurn!=null && card._offTurn===(S._turnNo||0)) return false;
   const k=card.fe?((card._cdef&&card._cdef.base)||[])[1]:card.charId;
   return !p.team.some(function(c){ return c.hp>0 && (c.fe&&c.base?c.base[1]:c.id)===k; }); }
 function arenaAiField(p){ let guard=0;
@@ -11267,7 +11306,7 @@ function arenaAiField(p){ let guard=0;
     if(best<0) return;
     const card=p.hand[best], cost=card._pmCmd?(card._pmCost||0):0;
     if(cost>0){ p.attachesLeft-=cost; pushLog(`${card.name} returns to the page for ${cost} attach${cost>1?'es':''}.`); }
-    const ch=makeChar(card._cdef, p._hpScale||1.0);
+    const ch=makeChar(card._cdef, p._hpScale||1.0); if(card._offDmg) ch.hp=Math.max(10,ch.maxHp-card._offDmg);
     if(card._pmCmd){ ch._pmCmd=true; ch._pmReturns=card._pmReturns||0; }
     p.hand.splice(best,1); p.team.push(ch); ch._grow=0; ch._telKey=arenaKey(card);
     if(need){ p.activeIdx=p.team.length-1; p._hasActive=true; }
@@ -11307,10 +11346,10 @@ function arenaTelEnd(){ const T=S._tel; S._telDone=true; arenaScan();
   const pt=S._arenaTurn||0;
   const firstAt=function(sd,n){ const e=T.evo[sd].filter(function(x){ return x.act===n; }).map(function(x){ return x.turn; }); return e.length?Math.min.apply(null,e):''; };
   const avgHost=function(sd){ const e=T.evo[sd]; return e.length?Math.round(10*e.reduce(function(s,x){ return s+x.host; },0)/e.length)/10:''; };
-  const g={ game_id:T.id, date:T.date, seed:T.seed, deck_a:T.deckA, deck_b:T.deckB, control_a:T.ctrlA, control_b:T.ctrlB, first_player:T.first,
+  const g={ game_id:T.id, date:T.date, seed:T.seed, deck_a:T.deckA, deck_b:T.deckB, control_a:T.ctrlA, control_b:T.ctrlB, first_player:T.first, rules:T.rules||'baseline',
     winner:S._arenaDraw?'draw':(S.winner&&S[S.winner]?S[S.winner]._arenaSide:''), end_reason:S._arenaStall?'stalled':(S._arenaCap?'turn_cap':'knockouts'),
     player_turns:pt, rounds:Math.ceil(pt/2), kos_a:arenaSide('A').kos, kos_b:arenaSide('B').kos,
-    mulligans_a:T.mull.A, mulligans_b:T.mull.B, bonus_draws_a:T.bonus.A, bonus_draws_b:T.bonus.B,
+    mulligans_a:T.mull.A, mulligans_b:T.mull.B, bonus_draws_a:T.bonus.A, bonus_draws_b:T.bonus.B, offstage_a:(T.offstage||{}).A||0, offstage_b:(T.offstage||{}).B||0,
     first_act2_turn_a:firstAt('A',2), first_act3_turn_a:firstAt('A',3), first_act2_turn_b:firstAt('B',2), first_act3_turn_b:firstAt('B',3),
     evolutions_a:T.evo.A.length, evolutions_b:T.evo.B.length, avg_host_turns_before_evolve_a:avgHost('A'), avg_host_turns_before_evolve_b:avgHost('B'),
     climax_tries_a:T.climax.A.t, climax_ok_a:T.climax.A.ok, climax_tries_b:T.climax.B.t, climax_ok_b:T.climax.B.ok };
@@ -11325,7 +11364,8 @@ function arenaTelEnd(){ const T=S._tel; S._telDone=true; arenaScan();
   const _render=render; render=function(){
     if(APP._sim&&APP._sim.running&&APP.screen==='play'){ try{ if(S&&S._tel){ arenaScan(); if(S.over&&!S._telDone) arenaTelEnd(); } }catch(e){} return; }
     const r=_render.apply(this,arguments);
-    try{ if(S&&S._tel){ arenaScan(); if(S.over&&!S._telDone) arenaTelEnd(); } }catch(e){} return r; };
+    try{ if(S&&S._tel){ arenaScan(); if(S.over&&!S._telDone) arenaTelEnd(); } }catch(e){}
+    try{ arenaSpendPrompt(); }catch(e){} return r; };
   const _pb=playBookmark; playBookmark=function(side,idx){ const p=S&&S[side], c=p&&p.hand[idx]; const r=_pb.apply(this,arguments);
     try{ if(S&&S._tel&&c&&p.hand.indexOf(c)<0){ const w=arenaRowFor(p,c); if(w){ w.plays++; if(w.drawn==null) w.drawn=S._arenaTurn||0; } } }catch(e){} return r; };
   const _pc=playCrit; playCrit=function(side,idx){ const p=S&&S[side], c=p&&p.hand[idx]; const r=_pc.apply(this,arguments);
@@ -11350,7 +11390,7 @@ function arenaTelEnd(){ const T=S._tel; S._telDone=true; arenaScan();
 })();
 
 /* ---- CSV + summary ---- */
-function arenaCsv(rows){ if(!rows.length) return ''; const cols=Object.keys(rows[0]);
+function arenaCsv(rows){ if(!rows.length) return ''; const cols=[]; rows.forEach(function(r){ Object.keys(r).forEach(function(k){ if(cols.indexOf(k)<0) cols.push(k); }); });
   const esc=function(v){ v=v==null?'':String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
   return cols.join(',')+'\n'+rows.map(function(r){ return cols.map(function(c){ return esc(r[c]); }).join(','); }).join('\n')+'\n'; }
 function arenaDownload(name,text){ try{ const b=new Blob([text],{type:'text/csv'}), u=URL.createObjectURL(b), a=document.createElement('a');
@@ -11396,6 +11436,7 @@ function arenaScreen(){
     <h3 class="sub-h" style="font-size:1.05em">Deck A \u2014 ${ai?'AI':'you'}</h3><div class="sub-actions">${opt('ctrlA','human','You play A',c.ctrlA)} ${opt('ctrlA','ai','AI plays A (batch)',c.ctrlA)}</div>
     <div class="diff-grid">${deckBtns('a',c.a)}</div>
     <h3 class="sub-h" style="font-size:1.05em">Deck B \u2014 AI</h3><div class="diff-grid">${deckBtns('b',c.b)}</div>
+    <h3 class="sub-h" style="font-size:1.05em">Rule levers <small style="font-weight:normal">(working playtest rules: Spend 1 ABC \u00b7 Commanders return once \u00b7 Offstage \u00b7 AI 100%)</small></h3><div class="sub-actions"><button class="toolbtn" data-do="arena-preset:working">Working playtest rules</button> <button class="toolbtn" data-do="arena-preset:baseline">Baseline (all off)</button></div><div class="sub-actions">${ARENA_LEVERS.map(function(L){ const on=!!(c.levers||{})[L.key]; return `<button class="toolbtn${on?' on':''}" data-do="arena-lever:${L.key}"${on?' style="outline:2px solid currentColor"':''}>${on?'\u2713 ':''}${L.label}</button>`; }).join(' ')}</div>
     <h3 class="sub-h" style="font-size:1.05em">Who goes first</h3><div class="sub-actions">${opt('first','random','Random',c.first)} ${opt('first','A','Deck A',c.first)} ${opt('first','B','Deck B',c.first)}</div>
     ${ai?`<h3 class="sub-h" style="font-size:1.05em">Batch</h3><div class="sub-actions">${[1,10,50,100,250,500].map(function(k){ return opt('n',String(k),k+(k===1?' game':' games'),String(nGames)); }).join(' ')}</div>
       <div class="sub-actions"><label>Seed <input id="arena-seed" value="${dmEsc(c.seed||'')}" placeholder="random" style="width:10em"></label>
@@ -11416,6 +11457,8 @@ function arenaClick(d){ const c=arenaCfg(), v=d.slice(d.indexOf(':')+1);
   else if(d.indexOf('arena-first:')===0) c.first=v;
   else if(d.indexOf('arena-ctrlA:')===0) c.ctrlA=v;
   else if(d.indexOf('arena-n:')===0) c.n=+v||1;
+  else if(d.indexOf('arena-lever:')===0){ c.levers=c.levers||{}; c.levers[v]=!c.levers[v]; }
+  else if(d.indexOf('arena-preset:')===0){ c.levers=(v==='working')?arenaWorkingLevers():{}; }
   else if(d==='arena-start'){ arenaStart(); return; }
   else if(d==='arena-run'){ const seed=c.seed||Math.random().toString(36).slice(2,8);
     if(c.seed && c.seed.indexOf('#')>0){ /* replay one game: "batch#n" */ const bs=c.seed.slice(0,c.seed.lastIndexOf('#')), k=+c.seed.slice(c.seed.lastIndexOf('#')+1)||1;
@@ -11505,6 +11548,90 @@ function arenaBatchReport(L){
     <table ${T}><tr><th>Deck</th><th>Most used</th><th>Least used</th></tr>${usage}</table>`;
 }
 window.ABC_ARENA.arenaSimRun=arenaSimRun; window.ABC_ARENA.arenaBatchReport=arenaBatchReport;
+
+/* ---- Offstage (fix_arena_offstage): once per turn, a Backstage character leaves play ----
+   Cost: discard 1 ABC from that character or from your hand. The character goes back to hand with its
+   other ABCs. It re-enters later with the damage it left with (min 10 HP) and can't be replayed the same
+   turn. An evolved character returns as its base card (Act cards to the discard). A commander's Offstage
+   counts as one of its returns; with none left it can't go offstage. */
+function arenaOffOk(p,c){ if(!(S&&S.arena&&ARENA_RULES.offstage&&p&&c)) return false;
+  if(p.flags._offTurn===(S._turnNo||0)) return false;
+  const i=p.team.indexOf(c); if(i<0||i===p.activeIdx||c.hp<=0) return false;
+  if(c._pmCmd && pmReturnCost(c)===null) return false;
+  return (c.atkCharge.length+c.blkCharge.length)>0 || p.hand.some(function(h){ return h.cat==='abc'; }); }
+function arenaOffstage(side,uid,pay){ const p=S&&S[side], c=p&&p.team.find(function(t){ return t.uid===uid; });
+  if(!arenaOffOk(p,c)) return false;
+  let paid=null;
+  if(pay && pay!=='char' && pay!=='hand'){   /* the player named the exact ABC (its cid) */
+    const take=function(arr){ const k=arr.findIndex(function(a){ return a.cid===pay; }); return k>=0?arr.splice(k,1)[0]:null; };
+    paid=take(c.atkCharge)||take(c.blkCharge)||take(p.hand); if(!paid) return false; }
+  else if(pay!=='hand' && (c.blkCharge.length||c.atkCharge.length)) paid=(c.blkCharge.length?c.blkCharge:c.atkCharge).pop();
+  else { let k=p.hand.findIndex(function(h){ return h.cat==='abc'&&h.type==='BLOCK'; }); if(k<0) k=p.hand.findIndex(function(h){ return h.cat==='abc'; }); if(k>=0) paid=p.hand.splice(k,1)[0]; }
+  if(!paid) return false; p.discard.push(paid);
+  const dmg=Math.max(0,c.maxHp-c.hp), cost=c._pmCmd?pmReturnCost(c):0;
+  if(c._actBase){ c._offstaging=true; actOnKO(p,c); delete c._offstaging; }
+  const back=c.atkCharge.splice(0).concat(c.blkCharge.splice(0)); back.forEach(function(x){ x._new=true; p.hand.push(x); });
+  const def=c.fe?firstedById(c.id):((DATA.characters[p.setKey]||[]).find(function(x){ return x.id===c.id; })||c);
+  const card={ cat:'char', charId:c.id, name:def.name, accent:def.accent||'#444', hp:def.hp, fe:!!c.fe, _cdef:def,
+    cid:'os'+c.id+'_'+Math.random().toString(36).slice(2,6), _offDmg:dmg, _offTurn:(S._turnNo||0), _new:true };
+  if(c._pmCmd){ card._pmCmd=true; card._pmReturns=(c._pmReturns||0)+1; card._pmCost=cost; }
+  const i=p.team.indexOf(c); p.team.splice(i,1); if(i<p.activeIdx) p.activeIdx--;
+  p.hand.push(card); p.flags._offTurn=(S._turnNo||0);
+  if(S._tel){ S._tel.offstage=S._tel.offstage||{A:0,B:0}; S._tel.offstage[p._arenaSide]=(S._tel.offstage[p._arenaSide]||0)+1; }
+  pushLog(`${card.name} steps offstage (1 ${paid.type==='BLOCK'?'Block':'Attack'} ABC discarded)`+(back.length?` \u2014 ${back.length} ABC back to hand`:'')+(dmg?` \u2014 carries ${dmg} damage`:'')+'.');
+  render(); return true; }
+/* AI: when Backstage is full and a host for an Act card in hand is waiting in hand,
+   clear the weakest Backstage character that isn't itself a host (commanders kept). */
+function arenaAiOffstage(p){ if(!(S.arena&&ARENA_RULES.offstage)||p.flags._offTurn===(S._turnNo||0)) return;
+  if(drawnBench(p)<ARENA_RULES.benchMax) return;
+  const from=p.hand.filter(function(h){ return h.cat==='act'; }).map(function(h){ const a=actById(h.actId); return a&&a.from; }).filter(Boolean);
+  if(!from.length) return;
+  if(!p.hand.some(function(h){ return h.cat==='char' && from.indexOf(h.charId)>=0 && h._offTurn==null; })) return;
+  const bench=p.team.filter(function(c){ return !c._pmCmd && from.indexOf(actStageId(c))<0 && arenaOffOk(p,c); });
+  if(!bench.length) return;
+  const pick=bench.sort(function(x,y){ return x.hp-y.hp; })[0];
+  arenaOffstage(S.you===p?'you':'opp', pick.uid, (pick.atkCharge.length+pick.blkCharge.length)>0?'char':'hand'); }
+
+/* ---- Working playtest rules (fix_arena_working_rules) ---- */
+function arenaWorkingLevers(){ return { keep1:true, ret1:true, offstage:true, ai100:true }; }
+/* Spend 1 ABC: after the player's attack resolves, they pick which spent ABC goes to the discard. */
+function arenaSpendPrompt(){ const P=S&&S._spendPick; if(!P||busy||S.picker||S.over) return;
+  S._spendPick=null; const p=S.you, att=p.team.find(function(c){ return c.uid===P.uid; });
+  const pool=att?att.atkCharge.concat(att.blkCharge).filter(function(c){ return P.cids.indexOf(c.cid)>=0; }):[];
+  if(!att||att.hp<=0||!pool.length) return;
+  const spend=function(cid){ const take=function(arr){ const k=arr.findIndex(function(a){ return a.cid===cid; }); return k>=0?arr.splice(k,1)[0]:null; };
+    const x=take(att.atkCharge)||take(att.blkCharge);
+    if(x){ p.discard.push(x); pushLog(`${att.name} spends 1 ${x.type==='BLOCK'?'Block':'Attack'} ABC (power ${x.power||1}) \u2014 ${pool.length-1} stay attached.`); } };
+  if(pool.length===1){ spend(pool[0].cid); render(); return; }
+  askPick(`${att.name} attacked \u2014 which ABC does it spend? The rest stay attached.`,
+    pool.map(function(c){ return {label:`${c.type==='BLOCK'?'Block':'Attack'} ABC \u00b7 power ${c.power||1}`, val:c.cid}; }), function(cid){ spend(cid); });
+}
+
+/* ---- Offstage entry points (fix_arena_offstage_ui): tap a Backstage character, or the action-bar button ---- */
+function arenaOffWhy(p,c){ if(!(S&&S.arena&&ARENA_RULES.offstage)) return 'Offstage is off in this match\u2019s rules.';
+  if(S.turn!=='you'||S.phase!=='strategize') return 'Offstage happens during your Strategize phase.';
+  if(p.flags._offTurn===(S._turnNo||0)) return 'You have already used Offstage this turn.';
+  if(c){ const i=p.team.indexOf(c); if(i===p.activeIdx) return 'Your Active can\u2019t go offstage \u2014 only Backstage characters.';
+    if(c._pmCmd && pmReturnCost(c)===null) return `${c.name} has no returns left.`;
+    if(!(c.atkCharge.length+c.blkCharge.length) && !p.hand.some(function(h){ return h.cat==='abc'; })) return 'You need 1 ABC to pay \u2014 on this character or in your hand.'; }
+  return ''; }
+function arenaOffBtn(p,c){ const why=arenaOffOk(p,c)?'':arenaOffWhy(p,c);
+  return why?`<div class="bv-ph" style="opacity:.75;margin:.4em 0">\u21e0 Offstage: ${why}</div>`
+            :`<button class="bigbtn" data-do="offstage:${c.uid}" style="margin:.4em 0">\u21e0 Send offstage (costs 1 ABC)</button>`; }
+function arenaOffstageStart(uid){ if(!S) return; const p=S.you;
+  const go=function(c){ const why=arenaOffOk(p,c)?'':arenaOffWhy(p,c); if(why){ toast(why); render(); return; }
+    const lab=function(a,where){ return `${a.type==='BLOCK'?'Block':'Attack'} ABC \u00b7 power ${a.power||1} \u2014 ${where}`; };
+    const opts=c.atkCharge.concat(c.blkCharge).map(function(a){ return {label:lab(a,'on '+c.name), val:a.cid}; })
+      .concat(p.hand.filter(function(h){ return h.cat==='abc'; }).map(function(a){ return {label:lab(a,'from your hand'), val:a.cid}; }));
+    if(opts.length===1) arenaOffstage('you',c.uid,opts[0].val);
+    else askPick(`Which ABC does ${c.name} discard to go offstage?`, opts, function(cid){ arenaOffstage('you',c.uid,cid); }); };
+  if(uid){ const c=p.team.find(function(t){ return t.uid===uid; }); if(c) go(c); return; }
+  const gen=arenaOffWhy(p,null); if(gen){ toast(gen); return; }
+  const el=p.team.filter(function(c){ return arenaOffOk(p,c); });
+  if(!el.length){ toast('No Backstage character can go offstage \u2014 each needs 1 ABC to pay, on it or in your hand.'); return; }
+  if(el.length===1){ go(el[0]); return; }
+  askPick('Offstage \u2014 which Backstage character?', el.map(function(c){ return {label:`${c.name} (${c.hp}/${c.maxHp} HP, ${c.atkCharge.length+c.blkCharge.length} ABC)`, val:c.uid}; }),
+    function(id){ const c=p.team.find(function(t){ return t.uid===id; }); if(c) go(c); }); }
 
 window.ABC_DEBUG = {
   defaultDeck:(k)=>defaultDeck(k), compFor:(k)=>compFor(k), poolAb:(k)=>poolAb(k),
