@@ -8924,6 +8924,7 @@ function abcFlyTarget(card){
   return q('.discardpile[data-pile="you"]') || q('.char.you');
 }
 /* after the board is rebuilt: fly each copy to its new home */
+const ABC_FLY_MS=1300;   /* fix_card_play_anim2 -- card-play animation length (ms); every phase scales with it */
 function abcFlyRun(snap){
   abcLastHand=S?S.you.hand.slice():null; abcLastS=S;
   if(!snap) return;
@@ -8938,14 +8939,20 @@ function abcFlyRun(snap){
     const wrap=document.createElement('div'); wrap.className='hand abc-fly-hand';
     wrap.style.width=f.w+'px'; wrap.style.height=f.h+'px'; wrap.appendChild(f.node); host.appendChild(wrap);
     const T=function(x,y){ return 'translate('+(x-f.w/2).toFixed(1)+'px,'+(y-f.h/2).toFixed(1)+'px)'; };
-    const sc=Math.max(.35, Math.min(.8, b.h/f.h)), mx=(a.x+b.x)/2, my=Math.min(a.y,b.y)-70;
+    const sc=Math.max(.35, Math.min(.8, b.h/f.h));
     if(!wrap.animate){ wrap.remove(); return; }
+    /* fix_card_play_anim2 */ /* rise -> present (hold) -> fly -> land */
+    const PS=1.35, sw=st?st.offsetWidth:window.innerWidth, sh=st?st.offsetHeight:window.innerHeight;
+    const half=f.w*PS/2+8, halfh=f.h*PS/2+8;
+    const px=Math.max(half, Math.min(sw-half, a.x+(b.x-a.x)*.35));
+    const py=Math.max(halfh, Math.min(sh-halfh, Math.min(a.y,b.y)-f.h*.25));
     const an=wrap.animate([
-      {transform:T(a.x,a.y)+' scale(1) rotate(0deg)', opacity:1},
-      {transform:T(mx,my)+' scale(1.1) rotate(-6deg)', opacity:1, offset:.4},
-      {transform:T(b.x,b.y)+' scale('+sc+') rotate(0deg)', opacity:.95, offset:.85},
+      {transform:T(a.x,a.y)+' scale(1) rotate(0deg)', opacity:1, easing:'cubic-bezier(.2,.8,.3,1)'},
+      {transform:T(px,py)+' scale('+PS+') rotate(-2deg)', opacity:1, offset:.23},
+      {transform:T(px,py-4)+' scale('+PS+') rotate(0deg)', opacity:1, offset:.54, easing:'cubic-bezier(.55,0,.25,1)'},
+      {transform:T(b.x,b.y)+' scale('+sc+') rotate(0deg)', opacity:.95, offset:.89},
       {transform:T(b.x,b.y)+' scale('+(sc*.9)+') rotate(0deg)', opacity:0}
-    ], {duration:560, delay:i*70, easing:'cubic-bezier(.3,.7,.25,1)', fill:'both'});
+    ], {duration:ABC_FLY_MS, delay:i*Math.round(ABC_FLY_MS*.4), fill:'both'});
     an.onfinish=function(){ wrap.remove();
       const t2=abcFlyTarget(f.card); if(t2){ t2.classList.remove('abc-land'); void t2.offsetWidth; t2.classList.add('abc-land');
         setTimeout(function(){ t2.classList.remove('abc-land'); }, 450); } };
