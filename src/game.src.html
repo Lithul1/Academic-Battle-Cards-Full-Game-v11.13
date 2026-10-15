@@ -2739,6 +2739,83 @@ body.abc-arena.abc-tilt[data-screen="play"] .turnbar{align-self:start;margin-top
 body.abc-arena.abc-tilt[data-screen="play"] .bench-mini{box-shadow:0 4px 0 #241f1b,0 9px 12px rgba(0,0,0,.42)}
 body.abc-arena.abc-tilt[data-screen="play"] .you-side .char{box-shadow:0 0 0 3px #E3A92B,0 6px 0 #241f1b,0 13px 18px rgba(0,0,0,.5)!important}
 body.abc-arena.abc-tilt[data-screen="play"] .opp-side .char{box-shadow:0 0 0 3px #b5402a,0 6px 0 #241f1b,0 13px 18px rgba(0,0,0,.5)!important}
+
+/* fix_board_layout_v4 */
+/* ===== PHONE PORTRAIT STAGE -- 390x844, same parts, different grid ===== */
+body.abc-arena.abc-phone[data-screen="play"] .abc-stage{width:390px;height:844px;
+  grid-template-columns:8px 110px 140px 124px 8px;
+  grid-template-rows:52px 98px 170px 36px 170px 98px 60px 160px}
+body.abc-arena.abc-phone[data-screen="play"] .board::before{grid-column:2/5;grid-row:2/4}
+body.abc-arena.abc-phone[data-screen="play"] .board::after{grid-column:2/5;grid-row:5/7}
+/* top strip */
+body.abc-arena.abc-phone[data-screen="play"] .opp-side .side-meta{grid-column:2;grid-row:1;align-self:center;font-size:11px!important;line-height:1.15}
+body.abc-arena.abc-phone[data-screen="play"] .tb-btns{grid-column:3/5;grid-row:1;justify-self:end;align-self:center;margin-right:58px;gap:4px}
+body.abc-arena.abc-phone[data-screen="play"] .tb-btns button{min-height:38px;padding:4px 8px;font-size:11px}
+body.abc-arena.abc-phone[data-screen="play"] .logtoggle{grid-column:4;grid-row:1;justify-self:end;align-self:center;min-height:38px;padding:4px 8px;font-size:11px}
+/* Backstage rows + piles share a row: bench left, deck/discard right */
+body.abc-arena.abc-phone[data-screen="play"] .bench{grid-column:2/5;justify-content:flex-start;padding-left:5px;gap:5px!important}
+body.abc-arena.abc-phone[data-screen="play"] .bench-mini{width:56px!important;height:82px!important}
+body.abc-arena.abc-phone[data-screen="play"] .bench-mini .bm-name{font-size:9.5px!important}
+body.abc-arena.abc-phone[data-screen="play"] .piles{grid-column:4;justify-self:end;align-self:center!important;margin:0 6px 0 0!important;flex-wrap:nowrap;gap:6px!important}
+body.abc-arena.abc-phone[data-screen="play"] .opp-side .piles{grid-row:2}
+body.abc-arena.abc-phone[data-screen="play"] .you-side .piles{grid-row:6}
+body.abc-arena.abc-phone[data-screen="play"] .piles .deckstack,body.abc-arena.abc-phone[data-screen="play"] .piles .discardpile{width:40px!important;height:56px!important}
+body.abc-arena.abc-phone[data-screen="play"] .piles .abm-zone,body.abc-arena.abc-phone[data-screen="play"] .piles>*:not(.deckstack):not(.discardpile){display:none!important}
+/* Actives + move picker (.side scope: the Inspect dossier is also .char) */
+body.abc-arena.abc-phone[data-screen="play"] .side .char{grid-column:3;width:136px!important;padding:4px!important}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-name{font-size:10px!important}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-hp{min-width:40px}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-hp b{font-size:8.5px!important;padding:1px 3px}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-art{height:86px!important}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-moves{width:118px;left:calc(100% + 6px);padding:4px;gap:4px;border-width:2px}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-move{min-height:44px;padding:3px 4px;gap:3px}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-mc{display:none}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-mn{font-size:10.5px}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-chip{font-size:11px;min-width:0;padding:3px 4px}
+/* Lens badge, left of each Active */
+body.abc-arena.abc-phone[data-screen="play"] .lenschip{grid-column:2;width:104px!important;max-width:104px!important;min-height:0;padding:5px;
+  flex-direction:column;align-items:center;text-align:center;gap:4px;font-size:10px}
+body.abc-arena.abc-phone[data-screen="play"] .lenschip .lc-port{width:32px;height:32px;flex:0 0 32px}
+body.abc-arena.abc-phone[data-screen="play"] .lenschip .lc-nm{font-size:10px}
+body.abc-arena.abc-phone[data-screen="play"] .lenschip .lc-thesis{font-size:9.5px;padding:2px 5px}
+body.abc-arena.abc-phone[data-screen="play"] .lenschip .lc-toggle{position:absolute;top:2px;right:2px}
+body.abc-arena.abc-phone[data-screen="play"] .lenschip.empty{min-height:46px}
+/* spine: scoreboard left, phases right, timer as a thin bar on its lower edge */
+body.abc-arena.abc-phone[data-screen="play"] .phasehud{grid-column:2/5;grid-row:4;justify-content:flex-end;padding-right:4px;gap:0}
+body.abc-arena.abc-phone[data-screen="play"] .phasehud .ph{font-size:10px;padding:3px 5px;letter-spacing:.6px}
+body.abc-arena.abc-phone[data-screen="play"] .phasehud .ph-arrow{font-size:10px}
+body.abc-arena.abc-phone[data-screen="play"] .kos.opp{grid-column:2/4;grid-row:4;align-self:center;margin:0 0 0 6px!important;font-size:10px!important;padding:2px 6px}
+body.abc-arena.abc-phone[data-screen="play"] .kos.you{grid-column:2/4;grid-row:4;align-self:center;margin:0 0 0 64px!important;font-size:10px!important;padding:2px 6px}
+body.abc-arena.abc-phone[data-screen="play"] .turnbar{grid-column:2/5;grid-row:4;align-self:end;justify-self:stretch;width:auto!important;height:4px!important;
+  margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.abc-arena.abc-phone[data-screen="play"] .turnbar .tb-text{display:none}
+/* action row */
+body.abc-arena.abc-phone[data-screen="play"] .you-side .side-meta{grid-column:2;grid-row:7;align-self:center;font-size:11px!important;line-height:1.15}
+body.abc-arena.abc-phone[data-screen="play"] .actions{grid-column:3/5;grid-row:7;flex-direction:row;align-items:center;justify-content:flex-end;padding:0 4px 0 0!important;gap:6px}
+body.abc-arena.abc-phone[data-screen="play"] .actions .bigbtn{width:auto;font-size:13px;line-height:1.1;padding:9px 12px;border-width:3px;white-space:nowrap}
+body.abc-arena.abc-phone[data-screen="play"] .actions .toolbtn{width:auto;font-size:11px;padding:6px 8px}
+body.abc-arena.abc-phone[data-screen="play"] .actions .hint{display:none}
+/* hand */
+body.abc-arena.abc-phone[data-screen="play"] .hand-wrap{grid-column:1/6;grid-row:8}
+body.abc-arena.abc-phone[data-screen="play"] .hand{--card-h:124px;--fan-step:5deg;--fan-arc:2px;--fan-lift:30px;--fan-scale:1.08;--tuck-frac:0.14}
+/* Inspect: a sheet over the board, only while something is pinned */
+body.abc-arena.abc-phone[data-screen="play"] .abc-inspect{display:none!important}
+body.abc-arena.abc-phone[data-screen="play"] .abc-inspect:has(.ai-dossier),body.abc-arena.abc-phone[data-screen="play"] .abc-inspect:has(.ai-lens){display:flex!important;position:absolute;grid-row:auto!important;grid-column:auto!important;left:12px;right:12px;top:58px;bottom:168px;
+  z-index:50;margin:0;background:rgba(29,25,21,.97);border:3px solid #E3A92B;border-radius:14px;padding:10px;
+  box-shadow:0 20px 40px rgba(0,0,0,.6)}
+body.abc-arena.abc-phone[data-screen="play"] .ai-dossier .bv-art{height:170px!important}
+body.abc-arena.abc-phone[data-screen="play"] .ai-dossier .bench-view{width:auto!important}
+/* Backstage swap button moves to the top-left corner (all arena sizes): it sat
+   just right of centre, so a tap meant to read a card swapped it in instead */
+body.abc-arena[data-screen="play"] .bench-mini .bm-swap{top:4px;left:4px;bottom:auto;right:auto;width:20px;height:20px;line-height:17px}
+/* names too long to fit even at the smallest size wrap to two lines instead of clipping */
+.pc-name.pc-wrap{white-space:normal!important;font-size:9px!important;line-height:1.05;text-overflow:clip;
+  display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2;text-align:center}
+/* sound buttons: covered the hand on phones -- volume lives in Tune > Audio */
+body.abc-arena.abc-phone[data-screen="play"] #audioCtl{display:none}
+/* overlays */
+body.abc-arena.abc-phone[data-screen="play"] .feed{top:60px!important;left:12px!important;right:12px!important;width:auto!important}
+body.abc-arena.abc-phone[data-screen="play"] .log{right:8px!important;top:52px!important;width:calc(100% - 16px)!important}
 </style>
 </head>
 <body>
@@ -8664,6 +8741,7 @@ function placeTurnBar(){
 function abcArenaOn(){
   try{ if(localStorage.getItem('abc_layout')==='classic') return false; }catch(e){}
   const w=window.innerWidth, h=window.innerHeight;
+  if(abcPhoneOn()) return true;   /* fix_board_layout_v4 */
   return w>=h*1.15 && Math.min(w/1280, h/720)>=0.58;     /* landscape and big enough to read */
 }
 function abcLayoutSync(){ const on=!!(S && abcArenaOn()); document.body.classList.toggle('abc-arena', on); return on; }
@@ -8674,6 +8752,7 @@ function abcArenaFit(){
   if(!has) return false;
   const st=document.querySelector('.abc-stage');
   if(st) st.style.setProperty('--abc-k', Math.min(window.innerWidth/1280, window.innerHeight/720).toFixed(4));
+  if(st && abcPhoneOn()) st.style.setProperty('--abc-k', Math.min(window.innerWidth/390, window.innerHeight/844).toFixed(4));   /* fix_board_layout_v4 */
   return true;
 }
 let abcInsp=null;                                         /* the hand card under the pointer */
@@ -8729,11 +8808,17 @@ document.addEventListener('mouseout', function(e){
   abcInsp=null; abcInspectPaint();
 });
 /* fix_board_layout_v3: tabletop tilt switch (Tune > Accessibility) */
+/* fix_board_layout_v4: portrait screens use the 390x844 phone stage */
+function abcPhoneOn(){
+  try{ if(localStorage.getItem('abc_layout')==='classic') return false; }catch(e){}
+  return window.innerHeight>=window.innerWidth*1.15;
+}
 function abcTiltOn(){ try{ return localStorage.getItem('abc_tilt')!=='off'; }catch(e){ return true; } }
 function abcTiltSet(on){ try{ localStorage.setItem('abc_tilt', on?'on':'off'); }catch(e){} document.body.classList.toggle('abc-tilt', !!on); }
 // Uniformly scale the board so both sides + controls always fit the play area (no overlap, no scroll)
 function fitBoard(){
   document.body.classList.toggle('abc-tilt', abcTiltOn());   /* fix_board_layout_v3 */
+  { const ph=abcPhoneOn(); if(document.body.classList.contains('abc-phone')!==ph){ document.body.classList.toggle('abc-phone', ph); fitNames(); } if(ph) document.body.classList.remove('abc-tilt'); }   /* fix_board_layout_v4: refit names after a stage switch */
   if(abcArenaFit()) return;   /* fix_board_layout_v1 */
   const board=document.querySelector('body[data-screen="play"] .board');
   const inner=board&&board.querySelector('.board-inner');
@@ -8755,9 +8840,11 @@ window.addEventListener('resize',()=>{ if(S&&APP.screen==='play'){ fitNames(); f
 // Auto-shrink long character names so they never clip the plate (priority: full name visible)
 function fitNames(){
   document.querySelectorAll('.pc-name').forEach(el=>{
+    el.classList.remove('pc-wrap');   /* fix_board_layout_v4 */
     el.style.fontSize='';
     let size=parseFloat(getComputedStyle(el).fontSize)||15, guard=48;
-    while(el.scrollWidth>el.clientWidth+1 && size>8.5 && guard-->0){ size-=0.5; el.style.fontSize=size+'px'; }
+    while(el.scrollWidth>el.clientWidth+1 && size>8.5 && guard-->0){ size-=0.5; el.style.setProperty('font-size',size+'px','important'); }
+    if(el.scrollWidth>el.clientWidth+1){ el.style.removeProperty('font-size'); el.classList.add('pc-wrap'); }   /* fix_board_layout_v4: too long even at the floor -> two lines */
   });
 }
 
