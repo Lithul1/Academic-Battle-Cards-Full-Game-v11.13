@@ -2816,6 +2816,23 @@ body.abc-arena.abc-phone[data-screen="play"] #audioCtl{display:none}
 /* overlays */
 body.abc-arena.abc-phone[data-screen="play"] .feed{top:60px!important;left:12px!important;right:12px!important;width:auto!important}
 body.abc-arena.abc-phone[data-screen="play"] .log{right:8px!important;top:52px!important;width:calc(100% - 16px)!important}
+
+/* fix_board_layout_v5 */
+/* ---- shield the fixed stage from the old viewport media queries ---- */
+/* max-width:560px restyled .board::after as a fixed 'swipe' hint (translateX(-50%), 70% opacity) */
+body.abc-arena[data-screen="play"] .board::before,body.abc-arena[data-screen="play"] .board::after{transform:none;opacity:1;font-size:0;letter-spacing:0;color:transparent}
+/* max-height:560px hid the empty Lens slot */
+body.abc-arena[data-screen="play"] .lenschip.empty{display:flex!important}
+/* ---- move names: break between words, hyphenate long ones ---- */
+body.abc-arena[data-screen="play"] .side .char .pc-mn{word-break:normal!important;overflow-wrap:normal!important;-webkit-hyphens:auto;hyphens:auto}
+/* ---- phone: the whole hand fits inside the 390px stage ---- */
+body.abc-arena.abc-phone[data-screen="play"] .hand{--card-h:118px;--fan-step:3deg;--fan-lift:6px;--fan-scale:1.04}
+/* a lifted (touched) hand card must never cover the action buttons */
+body.abc-arena.abc-phone[data-screen="play"] .actions{z-index:31}
+body.abc-arena.abc-phone[data-screen="play"] .hand .hc{margin-left:calc(min(0px, (330px - var(--n,1) * var(--card-w)) / max(1, var(--n,1) - 1)))!important}
+body.abc-arena.abc-phone[data-screen="play"] .hand .hc:first-child{margin-left:0!important}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-mn{font-size:10px}
+body.abc-arena.abc-phone[data-screen="play"] .side .char .pc-hp{min-width:46px;flex-shrink:0}
 </style>
 </head>
 <body>
