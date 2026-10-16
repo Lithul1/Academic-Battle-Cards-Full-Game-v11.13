@@ -2871,6 +2871,26 @@ body:not(.abc-arena) .abc-fly-hand{position:fixed!important;z-index:9000}
   box-shadow:0 0 0 3px #E3A92B,0 6px 0 #241f1b!important}
 @keyframes abcLand{0%{filter:brightness(1.55) drop-shadow(0 0 10px rgba(227,169,43,.95))}100%{filter:none}}
 .abc-land{animation:abcLand .42s ease-out}
+
+/* fix_table_lighting_v2 */
+/* lamp: warm amber pool, soft-light blend = warmer + brighter midtones, never greyer */
+body.abc-arena.abc-light[data-screen="play"] .abc-stage::before{z-index:1;mix-blend-mode:soft-light;
+  background:radial-gradient(ellipse 52% 48% at 50% 44%,rgba(255,176,84,.75),rgba(255,160,70,.32) 48%,rgba(255,150,60,0) 78%)}
+/* falloff: faint warm-brown toward the desk corners only -- and UNDER everything clickable */
+body.abc-arena.abc-light[data-screen="play"] .abc-stage::after{z-index:1;opacity:1;mix-blend-mode:multiply;
+  background:radial-gradient(ellipse 80% 78% at 50% 46%,rgba(255,236,200,0) 62%,rgba(150,96,48,.30) 88%,rgba(120,72,34,.45) 100%)!important;
+  background-size:auto!important}
+body.abc-arena.abc-phone.abc-light[data-screen="play"] .abc-stage::before{
+  background:radial-gradient(ellipse 70% 40% at 50% 46%,rgba(255,176,84,.7),rgba(255,160,70,0) 78%)}
+/* clickable things catch the light */
+body.abc-arena.abc-light[data-screen="play"] .actions .bigbtn,body.abc-arena.abc-light[data-screen="play"] .tb-btns button,body.abc-arena.abc-light[data-screen="play"] .logtoggle{box-shadow:0 0 0 2px rgba(255,214,150,.55),0 0 18px rgba(255,186,90,.55),0 4px 0 #241f1b}
+body.abc-arena.abc-light[data-screen="play"] .hand .hc.playable{box-shadow:0 0 0 2px rgba(255,214,150,.85),0 0 16px rgba(255,186,90,.6)!important}
+body.abc-arena.abc-light[data-screen="play"] .pc-move.atk.ready{box-shadow:0 0 0 3px #E3A92B,0 0 18px rgba(255,186,90,.75)}
+body.abc-arena.abc-light[data-screen="play"] .bench-mini .bm-swap,body.abc-arena.abc-light[data-screen="play"] .pc-flip{box-shadow:0 0 10px rgba(255,200,110,.7)}
+
+/* fix_card_play_anim3 */
+#abcFlyLayer{position:fixed;left:50%;top:50%;transform-origin:50% 50%;pointer-events:none;z-index:40}
+body:not(.abc-arena) #abcFlyLayer{display:none}
 </style>
 </head>
 <body>
@@ -8874,7 +8894,7 @@ function abcPhoneOn(){
 function abcTiltOn(){ try{ return localStorage.getItem('abc_tilt')!=='off'; }catch(e){ return true; } }
 function abcTiltSet(on){ try{ localStorage.setItem('abc_tilt', on?'on':'off'); }catch(e){} document.body.classList.toggle('abc-tilt', !!on); }
 /* fix_board_layout_v6: table lighting switch + Active Bookmarks in Inspect */
-function abcLightOn(){ try{ return localStorage.getItem('abc_light')!=='off'; }catch(e){ return true; } }
+function abcLightOn(){ try{ return localStorage.getItem('abc_light')==='on'; }catch(e){ return false; } }   /* fix_table_lighting_v2: off unless switched on */
 function abcLightSet(on){ try{ localStorage.setItem('abc_light', on?'on':'off'); }catch(e){} document.body.classList.toggle('abc-light', !!on); }
 function abcAbmHtml(side){
   const P=S&&S[side]; if(!P||!P.activeBm||!P.activeBm.length) return '';
@@ -8920,6 +8940,10 @@ function abcFlyTarget(card){
   if(p.crit===card) return q('.you-side .lenschip');
   if((p.activeBm||[]).indexOf(card)>=0) return q('.you-side .abm-zone') || q('.discardpile[data-pile="you"]');
   if((p.deck||[]).indexOf(card)>=0) return q('.deckstack.you');
+  if(card.cat==='act'){   /* evolution: the character that evolved, wherever it sits */
+    const ev=p.team.find(function(ch){ return (ch._actCards||[]).indexOf(card)>=0; });
+    if(ev) return ev===active(p) ? q('.char.you') : (q('.bench-mini[data-charuid="'+ev.uid+'"]') || q('.char.you'));
+  }
   if(card.cat==='char' || card.cat==='act') return q('.char.you');
   return q('.discardpile[data-pile="you"]') || q('.char.you');
 }
@@ -8929,7 +8953,15 @@ function abcFlyRun(snap){
   abcLastHand=S?S.you.hand.slice():null; abcLastS=S;
   if(!snap) return;
   const arena=document.body.classList.contains('abc-arena'), st=arena?document.querySelector('.abc-stage'):null;
-  const host=st||document.body, k=st?(parseFloat(st.style.getPropertyValue('--abc-k'))||1):1;
+  /* fix_card_play_anim3 */ /* flights live in a layer OUTSIDE the board, so a repaint mid-flight cannot delete them */
+  let host=document.body, k=1;
+  if(st){
+    k=parseFloat(st.style.getPropertyValue('--abc-k'))||1;
+    host=document.getElementById('abcFlyLayer');
+    if(!host){ host=document.createElement('div'); host.id='abcFlyLayer'; document.body.appendChild(host); }
+    host.style.width=st.offsetWidth+'px'; host.style.height=st.offsetHeight+'px';
+    host.style.transform='translate(-50%,-50%) scale('+k+')';
+  }
   const o=st?st.getBoundingClientRect():{left:0,top:0};
   const loc=function(r){ return {x:(r.left+r.width/2-o.left)/k, y:(r.top+r.height/2-o.top)/k, h:r.height/k}; };
   snap.forEach(function(f,i){
@@ -9434,7 +9466,7 @@ function settingsRows(s){
     <div class="set-row set-head"><span>Accessibility</span><span></span></div>
     ${row('Reduce motion &amp; flashing',`<input type="checkbox" data-calm ${(META.calmFx?'checked':'')}>`)}
     ${row('Tabletop tilt (3D board)',`<input type="checkbox" data-abctilt ${abcTiltOn()?'checked':''}>`)}
-    ${row('Table lighting (vignette &amp; grain)',`<input type="checkbox" data-abclight ${abcLightOn()?'checked':''}>`)}
+    ${row('Warm table lighting',`<input type="checkbox" data-abclight ${abcLightOn()?'checked':''}>`)}
     <div class="set-row set-head"><span>Audio</span><span></span></div>
     <div class="set-row"><span>Music track</span><span class="trk-pick">
       <button type="button" class="trk-opt ${SFX.getTrack()==='lofi'?'on':''}" data-audio="track:lofi">Lofi</button>
