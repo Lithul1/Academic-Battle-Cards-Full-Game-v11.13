@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ABC Card Catalog</title>
+<style>
+:root{
+  --accent:#0064D2; --accent-soft:rgba(0,100,210,.12);
+  --bg:#F2F2F5; --win:#FFFFFF; --side:rgba(236,236,241,.92); --bar:rgba(255,255,255,.82);
+  --fg:#1D1D1F; --fg2:#62626A; --sep:rgba(60,60,67,.16); --fill:rgba(118,118,128,.12);
+  --group:#F7F7F9; --seg-on:#FFFFFF; --menu:rgba(250,250,252,.96);
+  --ok:#1E7B3A; --ok-soft:rgba(30,123,58,.12); --bad:#B3261E; --bad-soft:rgba(179,38,30,.1); --warn:#8A5A00; --warn-soft:rgba(200,140,0,.14);
+  --atk:#B83A26; --blk:#1D64B5; --shadow:rgba(20,20,30,.16);
+  --t-ch:#6A4C0C; --t-fe:#7A2534; --t-ab:#1D64B5; --t-bm:#3B6B2E; --t-cr:#5B3F8F;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --accent:#0A6FE0; --accent-soft:rgba(10,132,255,.22);
+  --bg:#161618; --win:#1C1C1E; --side:rgba(38,38,41,.94); --bar:rgba(28,28,30,.84);
+  --fg:#F5F5F7; --fg2:#A6A6AD; --sep:rgba(235,235,245,.12); --fill:rgba(118,118,128,.24);
+  --group:#242427; --seg-on:#5A5A5F; --menu:rgba(44,44,47,.97);
+  --ok:#5FD07F; --ok-soft:rgba(95,208,127,.16); --bad:#FF8A80; --bad-soft:rgba(255,138,128,.14); --warn:#F2C14E; --warn-soft:rgba(242,193,78,.16);
+  --shadow:rgba(0,0,0,.5);
+  --t-ch:#EBCB7A; --t-fe:#F4B3C0; --t-ab:#8DBBFF; --t-bm:#9FD48A; --t-cr:#C9B2F2;
+}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--win);color:var(--fg);letter-spacing:-.005em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:252px;flex:none;background:var(--side);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);border-right:1px solid var(--sep);overflow-y:auto;padding:18px 12px;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:var(--fg);color:var(--win);display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:.04em;flex:none}
+.ng{display:flex;flex-direction:column;gap:2px}
+.ngt{font-size:11px;font-weight:600;color:var(--fg2);padding:0 10px 4px;display:flex;align-items:center;gap:6px}
+.ngt button{border:0;background:none;color:var(--fg2);padding:0;font-size:11px;font-weight:600;display:flex;align-items:center;gap:4px}
+.nb>span:not(.ct):not(.soon){overflow:hidden;text-overflow:ellipsis}
+.nb{display:flex;align-items:center;gap:10px;min-height:32px;padding:6px 10px;border-radius:8px;border:0;background:transparent;font-size:14px;text-align:left;transition:background .15s;white-space:nowrap}
+.nb svg{color:var(--accent);flex:none}
+.nb:hover{background:var(--fill)}
+.nb.on{background:var(--accent);color:#fff}.nb.on svg{color:#fff}
+.nb .ct{margin-left:auto;color:var(--fg2);font-size:12px;font-variant-numeric:tabular-nums}
+.nb.on .ct{color:rgba(255,255,255,.9)}
+.nb.sub{padding-left:30px;font-size:13px;min-height:28px}
+.soon{font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--fill);color:var(--fg2);margin-left:auto}
+.nb.on .soon{background:rgba(255,255,255,.25);color:#fff}
+.main{flex:1 1 auto;min-width:0;overflow-y:auto;scroll-behavior:smooth;position:relative}
+.toolbar{position:sticky;top:0;z-index:6;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding:14px 24px;background:var(--bar);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border-bottom:1px solid var(--sep)}
+.tt{flex:1 1 220px;min-width:0}.tt h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em}.tsub{font-size:12px;color:var(--fg2);margin-top:1px}
+.search{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;border-radius:9px;background:var(--fill);flex:0 1 240px;min-width:150px;color:var(--fg2)}
+.search input{border:0;background:transparent;color:var(--fg);font-size:14px;outline:none;width:100%;min-width:0}
+.search:focus-within{box-shadow:0 0 0 3px var(--accent-soft)}
+.seg{display:flex;padding:2px;background:var(--fill);border-radius:9px;gap:2px;flex-wrap:wrap}
+.seg button{min-height:28px;padding:0 11px;border:0;border-radius:7px;background:transparent;font-size:13px;font-weight:500;white-space:nowrap}
+.seg button.on{background:var(--seg-on);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.btn{height:32px;padding:0 12px;border-radius:9px;border:0;background:var(--fill);font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:background .15s}
+.btn:hover{background:var(--accent-soft)}
+.btn.pri{background:var(--accent);color:#fff}.btn.pri:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:default}
+.sel{height:32px;border-radius:9px;border:0;background:var(--fill);padding:0 10px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr));gap:22px 18px;padding:22px 24px 48px}
+.tile{position:relative;border:0;background:transparent;padding:0;text-align:left;display:flex;flex-direction:column;gap:8px}
+.tile .face{transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s}
+.tile:hover .face{transform:translateY(-4px);box-shadow:0 18px 36px var(--shadow)}
+.tm{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px}
+.pv{color:var(--accent);cursor:pointer;font-weight:700}
+.tile .tn{font-size:13px;font-weight:600;line-height:1.25}
+.tile .tm{font-size:11px;color:var(--fg2);display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.badge{position:absolute;top:-7px;right:-7px;min-width:26px;height:26px;padding:0 7px;border-radius:13px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:2}
+.badge.add{background:rgba(20,20,24,.78)}
+.tile.indeck .face{outline:3px solid var(--accent);outline-offset:2px}
+.tile.dis{opacity:.42}
+.pill{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;background:var(--fill);color:var(--fg2);white-space:nowrap}
+.k-ch{color:var(--t-ch)}.k-fe{color:var(--t-fe)}.k-ab{color:var(--t-ab)}.k-bm{color:var(--t-bm)}.k-cr{color:var(--t-cr)}
+/* card faces */
+.face{width:100%;aspect-ratio:5/7;border-radius:10px;overflow:hidden;background:var(--group);box-shadow:0 2px 6px rgba(0,0,0,.1),0 8px 22px var(--shadow);position:relative}
+.face img{width:100%;height:100%;object-fit:cover;display:block}
+.mf{position:absolute;inset:0;display:flex;flex-direction:column;padding:8% 8% 6%;gap:5%;border:2px solid currentColor;border-radius:10px;background:var(--win);container-type:inline-size}
+.mf .mt{font-size:7cqw;font-weight:800;letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;gap:4px}
+.mf .mn{font-size:10.5cqw;font-weight:800;line-height:1.08;color:var(--fg);text-wrap:balance}
+.mf .mx{font-size:7.2cqw;line-height:1.3;color:var(--fg2);overflow:hidden;display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical}
+.mf .mo{display:flex;flex-direction:column;gap:2.5cqw;font-size:6.6cqw;color:var(--fg2)}
+.mf .mo span{padding:1.5cqw 3cqw;border-radius:2.5cqw;background:var(--fill)}
+.mf .mv{margin-top:auto;display:flex;flex-direction:column;gap:3cqw;font-size:6.8cqw;color:var(--fg)}
+.mf .mv b{display:inline-block;min-width:13cqw;text-align:center;border-radius:2cqw;color:#fff;margin-right:2cqw;padding:.5cqw 1.5cqw}
+.mf .noscan{position:absolute;right:6%;bottom:4%;font-size:5.5cqw;font-weight:700;color:var(--fg2);letter-spacing:.04em}
+/* builder */
+.bwrap{display:grid;grid-template-columns:minmax(0,1fr) 380px;min-height:100%}
+.pool{min-width:0;border-right:1px solid var(--sep)}
+.deckp>*{flex:none}
+.deckp{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;background:var(--group);padding:16px 16px 40px;display:flex;flex-direction:column;gap:14px}
+.dname{width:100%;border:0;background:transparent;font-size:20px;font-weight:700;letter-spacing:-.02em;padding:4px 6px;border-radius:8px}
+.dname:focus{outline:none;background:var(--fill)}
+.meter{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.mtr{background:var(--win);border:1px solid var(--sep);border-radius:10px;padding:7px 8px}
+.mtr .k{font-size:10px;font-weight:700;color:var(--fg2);text-transform:uppercase;letter-spacing:.04em}
+.mtr .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.mtr .bar{height:4px;border-radius:2px;background:var(--fill);margin-top:5px;overflow:hidden}.mtr .bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.mtr.full .bar i{background:var(--ok)}.mtr.over .bar i{background:var(--bad)}.mtr.over .v{color:var(--bad)}
+.status{border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.45}
+.status.ok{background:var(--ok-soft);color:var(--ok)}.status.bad{background:var(--bad-soft);color:var(--bad)}
+.status ul{margin:4px 0 0;padding-left:18px}
+.warns{border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.45;background:var(--warn-soft);color:var(--warn)}
+.warns ul{margin:4px 0 0;padding-left:18px}
+.sec{background:var(--win);border:1px solid var(--sep);border-radius:12px;overflow:hidden}
+.sech{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;font-size:12px;font-weight:700;color:var(--fg2);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--sep)}
+.row{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 10px;border-bottom:1px solid var(--sep);font-size:13px}
+.row:last-child{border-bottom:0}
+.row .th{width:28px;flex:none}.row .th .face{border-radius:4px;box-shadow:none}.row .th .mf{border-width:1px;border-radius:4px;padding:2px}
+.row .rn{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .rm{font-size:11px;color:var(--fg2);white-space:nowrap}
+.row .x{width:28px;height:28px;border-radius:14px;border:0;background:transparent;color:var(--fg2);display:grid;place-items:center;flex:none}
+.row .x:hover{background:var(--bad-soft);color:var(--bad)}
+.empty{padding:14px 12px;font-size:12.5px;color:var(--fg2)}
+.acts{display:flex;flex-wrap:wrap;gap:6px}
+.fbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 24px;border-bottom:1px solid var(--sep)}
+/* decks list */
+.page{padding:24px;max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:16px}
+.dcard{background:var(--group);border:1px solid var(--sep);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;text-align:left;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+.dcard:hover{transform:translateY(-3px);box-shadow:0 14px 34px var(--shadow)}
+.dfan{display:flex;height:96px;align-items:flex-end}
+.dfan .face{width:62px;flex:none;margin-right:-26px;border-radius:6px}
+.dcard h3{margin:0;font-size:17px;font-weight:700}
+.dmeta{font-size:12px;color:var(--fg2);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ok-dot{width:8px;height:8px;border-radius:4px;background:var(--ok);display:inline-block}.bad-dot{width:8px;height:8px;border-radius:4px;background:var(--bad);display:inline-block}
+.dacts{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:40;display:grid;place-items:center;padding:16px;animation:fade .2s both}
+.modal{background:var(--win);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.4);width:min(760px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:22px;display:flex;flex-direction:column;gap:14px;animation:pop .25s cubic-bezier(.2,.8,.2,1) both}
+.modal h2{margin:0;font-size:20px}
+.mrow{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px}
+textarea{width:100%;min-height:150px;border-radius:10px;border:1px solid var(--sep);background:var(--group);padding:10px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.hand{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:12px}
+.chart{display:flex;align-items:flex-end;gap:6px;height:90px;padding-top:6px}
+.chart div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--fg2);height:100%;justify-content:flex-end}
+.chart i{display:block;width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:rgba(20,20,24,.92);color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;z-index:60;animation:pop .2s both}
+.hint{font-size:12px;color:var(--fg2)}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.view-in{animation:pop .35s cubic-bezier(.2,.8,.2,1) both}
+@media (max-width:980px){.bwrap{grid-template-columns:minmax(0,1fr)}.deckp{position:static;max-height:none;border-top:1px solid var(--sep)}.pool{border-right:0}}
+@media (max-width:760px){
+  .app{display:block;height:auto;overflow:visible}
+  .sidebar{width:auto;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--sep);padding:10px 12px;gap:6px;align-items:center}
+  .ngt,.brand-text,.nb.sub{display:none}.ng{flex-direction:row;gap:6px}.nb{background:var(--fill);min-height:40px}
+  .main{overflow:visible}.toolbar,.fbar{padding:12px 16px}.grid{padding:16px;grid-template-columns:repeat(auto-fill,minmax(min(120px,100%),1fr))}
+  .mrow{grid-template-columns:1fr}.hand{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+.dbar{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bar);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border-bottom:1px solid var(--sep)}
+.back{height:36px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--accent);font-size:15px}.back:hover{background:var(--accent-soft)}
+.dbt{flex:1;text-align:center;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pager{display:flex;align-items:center;gap:6px}.pc2{font-size:12px;color:var(--fg2);min-width:58px;text-align:center;font-variant-numeric:tabular-nums}
+.round{width:36px;height:36px;border-radius:18px;border:0;background:var(--fill);font-size:20px;line-height:1;transition:transform .15s}.round:active{transform:scale(.92)}
+.dbody{display:grid;grid-template-columns:minmax(220px,360px) minmax(0,1fr);gap:40px;padding:28px 32px 64px;max-width:1160px;margin:0 auto}
+.stage{position:sticky;top:80px;align-self:start;display:flex;flex-direction:column;gap:12px}
+.big .face{border-radius:16px;transition:transform .6s cubic-bezier(.2,.8,.2,1)}.stage:hover .big .face{transform:perspective(1000px) rotateY(-6deg) rotateX(3deg)}
+.big .mf{border-radius:16px}
+.info{display:flex;flex-direction:column;gap:16px;min-width:0}
+.dn{margin:4px 0 2px;font-size:34px;letter-spacing:-.025em;line-height:1.1}
+.group{background:var(--group);border:1px solid var(--sep);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.ghead{font-size:12px;font-weight:600;color:var(--fg2);text-transform:uppercase;letter-spacing:.05em}
+.gtt{font-size:18px;font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.gt{margin:0;font-size:15px;line-height:1.55}.gt2{margin:0;font-size:14px;line-height:1.55;color:var(--fg2)}
+.gt2 a{color:var(--accent)}
+.role{font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--accent-soft);color:var(--accent)}
+.move{display:flex;gap:14px;padding:10px 0;border-top:1px solid var(--sep)}.move:first-of-type{border-top:0}
+.mvb{width:56px;height:56px;border-radius:12px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none}.mvb.atk{background:var(--atk)}.mvb.blk{background:var(--blk)}
+.mvv{font-size:19px;font-weight:800}.mvc{font-size:10px;font-weight:700;margin-top:4px}
+.mvk{font-size:11px;font-weight:600;color:var(--fg2);text-transform:uppercase;letter-spacing:.05em}.mvn{font-size:16px;font-weight:700}
+.cav{font-size:13px;padding:9px 12px;border-radius:10px;background:var(--fill)}
+.evo{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.arr{color:var(--fg2)}
+.evb{border:0;background:transparent;border-radius:10px;padding:4px;width:96px;display:flex;flex-direction:column;align-items:center;gap:4px}.evb:hover{background:var(--fill)}
+.evf{width:70px;display:block}.evb.cur .face{outline:3px solid var(--accent);outline-offset:2px}.evl{font-size:11px;font-weight:600;text-align:center;line-height:1.2}.evs{font-size:10px;color:var(--fg2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.opts{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:15px}.opts .right{font-weight:700}
+.uses{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:1.5}
+.term{display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr);gap:4px 18px;padding:12px 16px;border-top:1px solid var(--sep)}.term:first-child{border-top:0}
+.tk{font-size:14px;font-weight:600}.tv{font-size:14px;line-height:1.5;color:var(--fg2)}
+.inRa{animation:inRa .4s cubic-bezier(.2,.8,.2,1) both}.inRb{animation:inRb .4s cubic-bezier(.2,.8,.2,1) both}.inLa{animation:inLa .4s cubic-bezier(.2,.8,.2,1) both}.inLb{animation:inLb .4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes inRa{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}@keyframes inRb{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes inLa{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}@keyframes inLb{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.inRa,.inRb,.inLa,.inLb,.view-in,.modal,.scrim{animation:none}.main{scroll-behavior:auto}}
+@media (max-width:860px){.dbody{grid-template-columns:minmax(0,1fr);padding:18px 16px 48px;gap:20px}.stage{position:static;max-width:320px;width:100%;margin:0 auto}.dn{font-size:28px}.term{grid-template-columns:1fr}.pc2{display:none}}
+
+/* ---------- print ---------- */
+#print{display:none}
+@media print{
+  @page{size:letter;margin:0}
+  body{background:#fff}
+  .app,.scrim,.toast{display:none!important}
+  #print{display:block}
+  .sheet{width:8.5in;height:11in;position:relative;page-break-after:always;break-after:page;overflow:hidden}
+  .sgrid{position:absolute;left:.5in;top:.25in;width:7.5in;height:10.5in;display:grid;grid-template-columns:repeat(3,2.5in);grid-template-rows:repeat(3,3.5in)}
+  .pc{width:2.5in;height:3.5in;position:relative;overflow:hidden}
+  .pc img{width:100%;height:100%;object-fit:cover;display:block}
+  .pc.cut{box-shadow:inset 0 0 0 .25pt #999}
+  .crop{position:absolute;background:#000}
+  .ph{position:absolute;inset:.08in;border:1.5pt dashed #888;border-radius:.1in;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:.15in;gap:.08in;font-family:-apple-system,Helvetica,sans-serif;color:#333}
+  .ph b{font-size:11pt}.ph small{font-size:8pt;color:#666}
+  .cback{position:absolute;inset:0;background:#1b1712;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.1in;color:#E3C27A;font-family:Georgia,serif}
+  .cback .bm{width:1.1in;height:1.1in;border-radius:50%;border:3pt solid #E3C27A;display:grid;place-items:center;font-size:26pt;font-weight:700;letter-spacing:.04em}
+  .cback .bt{font-size:8pt;letter-spacing:.2em;text-transform:uppercase}
+  .cback .bf{position:absolute;inset:.12in;border:1pt solid rgba(227,194,122,.6);border-radius:.08in}
+  .cback.light{background:#fff;color:#3a3024}
+  .cback.light .bm{border-color:#3a3024}
+  .cback.light .bf{border:1.2pt solid #222;border-radius:.1in}
+  .cback .bem{width:1.7in;height:1.7in;object-fit:contain}
+  .dl{padding:.6in;font-family:-apple-system,Helvetica,sans-serif;color:#111;font-size:10pt;columns:2;column-gap:.4in}
+  .dl h1{column-span:all;font-size:18pt;margin:0 0 .05in}.dl .sub{column-span:all;color:#555;margin-bottom:.2in}
+  .dl h3{font-size:10pt;margin:.15in 0 .04in;break-after:avoid;text-transform:uppercase;letter-spacing:.06em}
+  .dl div{break-inside:avoid;padding:1px 0}
+  .dl .bx{display:inline-block;width:9pt;height:9pt;border:.75pt solid #333;margin-right:6pt;vertical-align:-1pt}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar" id="side" aria-label="Catalog sections"></nav>
+  <main class="main" id="main"></main>
+</div>
+<div id="print"></div>
+<script>/*@ABC_DATA@*/</script>
+<script>/*@ABC_SCANS@*/</script>
+<script>
+(function(){
+'use strict';
+var D=window.ABC_DATA, SC=window.ABC_SCANS||{}, BACK=window.ABC_BACK||{};
+var BOOKS=D.books, BN={}; BOOKS.forEach(function(b){BN[b.id]=b.n;});
+var CARDS=D.cards, BY={}; CARDS.forEach(function(c){c.key=c.t+':'+c.id; BY[c.key]=c;});
+var TYPES=[{t:'fe',n:'Commanders',one:'Commander',sh:'Cmdr'},{t:'ch',n:'Characters',one:'Character',sh:'Chars'},{t:'ab',n:'Trivia',one:'Trivia',sh:'Trivia'},{t:'bm',n:'Bookmarks',one:'Bookmark',sh:'Bkmk'},{t:'cr',n:'Lenses',one:'Lens',sh:'Lens'}];
+var TN={}; TYPES.forEach(function(x){TN[x.t]=x;});
+/* Rules mirror the game: PM = exact 2+12+30+14+4 = 62; Classic = LIMITS ceilings. */
+/* Format caps are read from the game's PM and LIMITS constants at build time (tools/build_catalog.py). */
+var R=D.rules;
+var FMT={pm:{n:'Precon',caps:{fe:R.pm.fe,ch:R.pm.ch,ab:R.pm.ab,bm:R.pm.bm,cr:R.pm.cr},total:R.pm.total,exact:true,minPerBook:R.pm.minChPerBook},
+         classic:{n:'Classic',caps:{fe:R.classic.fe,ch:R.classic.ch,ab:R.classic.ab,bm:R.classic.bm,cr:R.classic.cr},total:R.classic.total,exact:false}};
+var CT=D.content||{archetypes:{},triggers:{},books:{},glossary:[],cards:{}};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});};
+function store(k,v){try{if(v===undefined){var x=localStorage.getItem(k);return x?JSON.parse(x):null;}localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+function uid(){return 'd'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function toast(m){var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},2200);}
+
+/* ---------- state ---------- */
+var S={sort:'book',arch:null,card:null,seq:[],back:'browse',tick:0,view:'browse',book:'all',type:'ch',q:'',exp:null,deckId:null,precon:0,
+  pool:{type:'ch',q:'',act:'all'},modal:null,undo:[],redo:[]};
+var DECKS=store('abc_catalog_decks')||[];
+var PREF=store('abc_catalog_prefs')||{lightBack:false};
+function save(){store('abc_catalog_decks',DECKS);}
+function curDeck(){return DECKS.filter(function(d){return d.id===S.deckId;})[0]||null;}
+function blank(fmt,books){return {id:uid(),name:'Untitled Deck',fmt:fmt||'pm',books:books||['gatsby'],fe:[],ch:[],ab:[],bm:[],cr:[],upd:Date.now()};}
+function fromPrecon(p){var d=blank('pm',(p.books||[p.b]).slice());d.name=p.name+' (copy)';['fe','ch','ab','bm','cr'].forEach(function(s){d[s]=p[s].slice();});return d;}
+
+/* ---------- card face ---------- */
+function bookOf(c){return c.b?BN[c.b]:'All books';}
+function face(c){
+  var sc=SC[c.key];
+  if(sc) return '<div class="face"><img src="'+sc+'" alt="" loading="lazy"></div>';
+  var h='<div class="face"><div class="mf k-'+c.t+'"><div class="mt"><span>'+TN[c.t].one+'</span><span>';
+  if(c.t==='ch'||c.t==='fe') h+=esc(c.hp)+' HP';
+  else if(c.t==='ab') h+=esc(c.kind)+' · '+esc(c.pw);
+  else if(c.t==='bm') h+=esc(c.r||'');
+  h+='</span></div><div class="mn">'+esc(c.t==='ab'?'':c.n)+'</div>';
+  if(c.t==='ch'||c.t==='fe'){
+    h+='<div class="mx">'+esc(c.ar||'')+(c.t==='ch'?' · Act '+['','I','II','III'][c.act||1]:' · Commander')+'</div><div class="mv">';
+    h+='<span><b style="background:var(--atk)">'+esc(c.a[3]||'')+'</b>'+esc(c.a[0]||'')+'</span><span><b style="background:var(--blk)">'+esc(c.k[3]||'')+'</b>'+esc(c.k[0]||'')+'</span></div>';
+  } else if(c.t==='ab'){
+    h+='<div class="mn" style="font-size:8.6cqw;margin-top:-6%">'+esc(c.n)+'</div><div class="mo">'+c.o.map(function(o,i){return '<span'+(i===c.c-1?' style="font-weight:700;color:var(--fg)"':'')+'>'+'ABCD'[i]+'. '+esc(o)+'</span>';}).join('')+'</div>';
+  } else if(c.t==='bm'){ h+='<div class="mx">'+esc(c.x)+'</div>'; }
+  else { h+='<div class="mx">'+esc(c.ps)+'</div>'; }
+  h+='</div></div>';
+  return h;
+}
+function meta(c){
+  if(c.t==='ch') return 'Act '+['','I','II','III'][c.act||1]+' · '+esc(c.ar);
+  if(c.t==='fe') return 'Commander · '+esc(c.ar);
+  if(c.t==='ab') return (c.kind==='ATTACK'?'Attack':'Block')+' · power '+esc(c.pw);
+  if(c.t==='bm') return esc(c.kind||'')+' · '+esc(c.r||'');
+  return 'Critical Lens';
+}
+function label(c){return c.t==='ab'?c.n:c.n;}
+
+/* ---------- deck logic ---------- */
+function inPool(d,c){ if(c.t==='bm'||c.t==='cr') return true; return d.books.indexOf(c.b)>=0; }
+function count(d){var n={fe:d.fe.length,ch:d.ch.length,ab:d.ab.length,bm:d.bm.length,cr:d.cr.length};n.total=n.fe+n.ch+n.ab+n.bm+n.cr;return n;}
+function check(d){
+  var f=FMT[d.fmt], n=count(d), errs=[], warns=[];
+  TYPES.forEach(function(T){var cap=f.caps[T.t];
+    if(n[T.t]>cap) errs.push(T.n+': '+n[T.t]+' of '+cap+' (remove '+(n[T.t]-cap)+')');
+    else if(f.exact&&n[T.t]<cap) errs.push(T.n+': '+n[T.t]+' of '+cap+' (add '+(cap-n[T.t])+')');
+  });
+  if(n.total>f.total) errs.push('Deck is '+n.total+' cards; the maximum is '+f.total+'.');
+  if(!f.exact && n.total===0) errs.push('The deck is empty.');
+  if(d.fmt==='pm' && d.books.length===2){ d.books.forEach(function(b){var k=d.ch.filter(function(id){return (BY['ch:'+id]||{}).b===b;}).length; if(k<f.minPerBook) errs.push(BN[b]+': '+k+' characters; a two-book deck needs at least '+f.minPerBook+' from each book.');}); }
+  /* Act lines: an Act card needs the stage it evolves from (or a commander of the same character) */
+  var feBase=d.fe.map(function(id){return (BY['fe:'+id]||{}).base;});
+  d.ch.forEach(function(id){var c=BY['ch:'+id]; if(!c||c.act<2||!c.ef) return;
+    var prev=BY['ch:'+c.ef];
+    if(d.ch.indexOf(c.ef)<0 && !(c.act===2 && feBase.indexOf(c.base)>=0)) warns.push(c.n+' evolves from '+(prev?prev.n:c.ef)+', which isn’t in the deck.');
+  });
+  return {n:n,errs:errs,warns:warns,ok:errs.length===0};
+}
+function snapshot(){var d=curDeck(); if(!d) return; S.undo.push(JSON.stringify(d)); if(S.undo.length>60) S.undo.shift(); S.redo=[];}
+function mutate(fn){var d=curDeck(); if(!d) return; snapshot(); fn(d); d.upd=Date.now(); save(); render();}
+function toggle(c){
+  var d=curDeck(); if(!d) return;
+  var arr=d[c.t], i=arr.indexOf(c.id);
+  if(i>=0){ mutate(function(d){d[c.t].splice(d[c.t].indexOf(c.id),1);}); return; }
+  var f=FMT[d.fmt]; if(arr.length>=f.caps[c.t]){ toast(TN[c.t].n+' are full ('+f.caps[c.t]+').'); return; }
+  if(!inPool(d,c)){ toast(c.n+' is from '+BN[c.b]+', which isn’t one of this deck’s books.'); return; }
+  mutate(function(d){d[c.t].push(c.id);});
+}
+function undo(){var d=curDeck(); if(!d||!S.undo.length) return; S.redo.push(JSON.stringify(d)); var o=JSON.parse(S.undo.pop()); Object.assign(d,o); save(); render();}
+function redo(){var d=curDeck(); if(!d||!S.redo.length) return; S.undo.push(JSON.stringify(d)); var o=JSON.parse(S.redo.pop()); Object.assign(d,o); save(); render();}
+
+/* ---------- codes, lists, csv ---------- */
+function encode(d){var j=JSON.stringify({v:2,f:d.fmt,b:d.books,n:d.name,fe:d.fe,ch:d.ch,ab:d.ab,bm:d.bm,cr:d.cr});
+  return (d.fmt==='pm'?'ABC2-PM-':'ABC2-')+btoa(unescape(encodeURIComponent(j))).replace(/=+$/,'');}
+function decode(code){try{var s=String(code).trim(); var m=s.match(/^ABC2-(PM-)?(.+)$/); if(!m) return null; s=m[2].replace(/\s+/g,''); while(s.length%4) s+='=';
+  var o=JSON.parse(decodeURIComponent(escape(atob(s)))); var d=blank(o.f==='pm'?'pm':'classic',o.b||['gatsby']); d.name=o.n||'Imported Deck';
+  ['fe','ch','ab','bm','cr'].forEach(function(t){d[t]=(o[t]||[]).filter(function(id){return BY[t+':'+id];});}); return d;}catch(e){return null;}}
+function cardsOf(d){var out=[];TYPES.forEach(function(T){d[T.t].forEach(function(id){var c=BY[T.t+':'+id]; if(c) out.push(c);});});return out;}
+function textList(d){var L=[d.name,FMT[d.fmt].n+' · '+d.books.map(function(b){return BN[b];}).join(' + '),''];
+  TYPES.forEach(function(T){ if(!d[T.t].length) return; L.push(T.n+' ('+d[T.t].length+')'); d[T.t].forEach(function(id){var c=BY[T.t+':'+id]; L.push('1 '+(T.t==='ab'?'['+id+'] ':'')+c.n);}); L.push(''); });
+  L.push('Code: '+encode(d)); return L.join('\n');}
+function csv(d){var q=function(s){s=String(s==null?'':s);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  var R=[['section','id','name','book','detail','scan']];
+  cardsOf(d).forEach(function(c){R.push([TN[c.t].one,c.id,c.n,c.b?BN[c.b]:'',meta(c).replace(/&amp;/g,'&'),SC[c.key]?'yes':'no']);});
+  return R.map(function(r){return r.map(q).join(',');}).join('\n');}
+function download(name,text,type){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type||'text/plain'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);}
+function copy(text){ if(navigator.clipboard) navigator.clipboard.writeText(text).then(function(){toast('Copied');},function(){toast('Copy failed: select and copy the text instead.');}); }
+function parseList(txt){
+  var code=(txt.match(/ABC2-(PM-)?[A-Za-z0-9+/=\s]+/)||[])[0]; if(code){var d=decode(code); if(d) return {deck:d,miss:[]};}
+  var d=blank('classic',[]), miss=[], idx={};
+  CARDS.forEach(function(c){idx[(c.n||'').toLowerCase()]=idx[(c.n||'').toLowerCase()]||c; idx[c.id.toLowerCase()]=idx[c.id.toLowerCase()]||c;});
+  txt.split(/\n/).forEach(function(line){ var s=line.trim(); if(!s||/^(code:|commanders|characters|trivia|bookmarks|lenses)/i.test(s)) return;
+    s=s.replace(/^\d+\s*x?\s+/i,''); var m=s.match(/^\[([^\]]+)\]/); var c=m?BY['ab:'+m[1]]:idx[s.toLowerCase()];
+    if(!c){miss.push(line.trim());return;} if(d[c.t].indexOf(c.id)<0) d[c.t].push(c.id); if(c.b&&d.books.indexOf(c.b)<0) d.books.push(c.b); });
+  if(!d.books.length) d.books=['gatsby']; if(d.books.length>2) d.books=d.books.slice(0,2);
+  var n=count(d); if(n.fe===2&&n.ch===12&&n.ab===30&&n.bm===14&&n.cr===4) d.fmt='pm';
+  return {deck:d,miss:miss};
+}
+
+/* ---------- print ---------- */
+function printCards(d,opts){
+  opts=opts||{backs:true,cut:true};
+  var cards=cardsOf(d), light=!!PREF.lightBack;
+  var P=document.getElementById('print'), html='';
+  for(var i=0;i<cards.length;i+=9){
+    var page=cards.slice(i,i+9);
+    html+='<div class="sheet"><div class="sgrid">'+page.map(function(c){
+      var sc=SC[c.key];
+      return '<div class="pc'+(opts.cut?' cut':'')+'">'+(sc?'<img src="'+sc+'" alt="">':'<div class="ph"><small>'+esc(TN[c.t].one)+(c.b?' · '+esc(BN[c.b]):'')+'</small><b>'+esc(c.n)+'</b><small>No scan yet · '+esc(c.id)+'</small></div>')+'</div>';
+    }).join('')+'</div>'+(opts.cut?cropMarks():'')+'</div>';
+    if(opts.backs){ /* long-edge duplex: mirror each row left-to-right */
+      var slots=[]; for(var r=0;r<3;r++) for(var col=0;col<3;col++){ var idx=r*3+(2-col); slots.push(page[idx]?backHtml(light):'<div class="pc"></div>'); }
+      html+='<div class="sheet"><div class="sgrid">'+slots.join('')+'</div></div>';
+    }
+  }
+  html+=listHtml(d); /* checklist always prints last */
+  P.innerHTML=html; setTimeout(function(){window.print();},120);
+}
+function backHtml(light){
+  if(!light&&BACK.full) return '<div class="pc"><img src="'+BACK.full+'" alt=""></div>';
+  if(light&&BACK.emblem) return '<div class="pc"><div class="cback light"><div class="bf"></div><img class="bem" src="'+BACK.emblem+'" alt=""></div></div>';
+  return '<div class="pc"><div class="cback'+(light?' light':'')+'"><div class="bf"></div><div class="bm">ABC</div><div class="bt">Academic Battle Cards</div></div></div>';
+}
+function cropMarks(){var h='',L=.5,T=.25,len=.18;
+  [0,2.5,5,7.5].forEach(function(x){ h+='<i class="crop" style="left:'+(L+x)+'in;top:0;width:.5pt;height:'+len+'in"></i><i class="crop" style="left:'+(L+x)+'in;bottom:0;width:.5pt;height:'+len+'in"></i>'; });
+  [0,3.5,7,10.5].forEach(function(y){ h+='<i class="crop" style="top:'+(T+y)+'in;left:0;height:.5pt;width:'+(L-.1)+'in"></i><i class="crop" style="top:'+(T+y)+'in;right:0;height:.5pt;width:'+(L-.1)+'in"></i>'; });
+  return h;}
+function printList(d){ document.getElementById('print').innerHTML=listHtml(d); setTimeout(function(){window.print();},120); }
+function listHtml(d){
+  var h='<div class="sheet"><div class="dl"><h1>'+esc(d.name)+'</h1><div class="sub">'+FMT[d.fmt].n+' · '+d.books.map(function(b){return esc(BN[b]);}).join(' + ')+' · '+count(d).total+' cards</div>';
+  TYPES.forEach(function(T){ if(!d[T.t].length) return; h+='<h3>'+T.n+' ('+d[T.t].length+')</h3>'+d[T.t].map(function(id){var c=BY[T.t+':'+id];return '<div><span class="bx"></span>'+esc(c.n)+'</div>';}).join(''); });
+  return h+'</div></div>';
+}
+
+/* ---------- views ---------- */
+var IC={grid:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="9" rx="1.5"/><rect x="3" y="15" width="7" height="6" rx="1.5"/><rect x="14" y="15" width="7" height="6" rx="1.5"/></svg>',
+ build:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="11" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v13"/><path d="M9.5 12.5h4M11.5 10.5v4"/></svg>',
+ decks:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="7" width="13" height="14" rx="2"/><path d="M7 4h11a3 3 0 0 1 3 3v11"/></svg>',
+ box:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
+ book:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>',
+ star:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>',
+ x:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 12h12"/></svg>',
+ info:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>',
+ chev:'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>'};
+function nb(on,act,icon,label,ct,cls){return '<button class="nb '+(cls||'')+(on?' on':'')+'" data-a="'+act+'">'+(icon||'')+'<span>'+label+'</span>'+(ct!=null?'<span class="ct">'+ct+'</span>':'')+'</button>';}
+var expOpen=true;
+function side(){
+  var nCh={}; CARDS.forEach(function(c){ if(c.b) nCh[c.b]=(nCh[c.b]||0)+1; });
+  var h='<div class="brand"><div class="brand-mark">ABC</div><div class="brand-text"><div style="font-size:15px;font-weight:700">Card Catalog</div><div style="font-size:12px;color:var(--fg2)">Academic Battle Cards</div></div></div>';
+  h+='<div class="ng"><div class="ngt">Library</div>'+nb(S.view==='browse'&&S.book==='all','nav:browse:all',IC.grid,'All Cards',CARDS.length)+'</div>';
+  h+='<div class="ng"><div class="ngt">Decks</div>'+nb(S.view==='builder','nav:builder',IC.build,'Deck Builder')+nb(S.view==='mydecks','nav:mydecks',IC.decks,'My Decks',DECKS.length)+nb(S.view==='precons'||S.view==='precon','nav:precons',IC.box,'Precon Decks',D.precons.length)+'</div>';
+  h+='<div class="ng"><div class="ngt">Reference</div>'+nb(S.view==='arch','nav:arch',IC.star,'Archetypes',Object.keys(archCounts()).length)+nb(S.view==='gloss','nav:gloss',IC.info,'How to Read a Card')+'</div>';
+  h+='<div class="ng"><div class="ngt">Set 1 · Core</div>'+BOOKS.map(function(b){return nb(S.view==='browse'&&S.book===b.id,'nav:browse:'+b.id,IC.book,esc(b.n),nCh[b.id]);}).join('')+'</div>';
+  h+='<div class="ng"><div class="ngt"><button data-a="toggleexp" aria-expanded="'+expOpen+'"><span style="display:inline-block;transform:rotate('+(expOpen?90:0)+'deg);transition:transform .2s">'+IC.chev+'</span>Expansions</button></div>';
+  if(expOpen) h+=D.exp.map(function(e){return nb(S.view==='exp'&&S.exp===e.id,'nav:exp:'+e.id,IC.star,esc(e.n),null,'')+'';}).join('').replace(/<\/span><\/button>/g,'</span><span class="soon">Soon</span></button>');
+  h+='</div>';
+  document.getElementById('side').innerHTML=h;
+}
+var SORTS=[{k:'book',n:'Book order'},{k:'name',n:'Name (A–Z)'},{k:'hpd',n:'HP (high–low)',only:['ch','fe']},{k:'hpa',n:'HP (low–high)',only:['ch','fe']},{k:'act',n:'Act',only:['ch']},{k:'arch',n:'Archetype',only:['ch','fe']},{k:'pw',n:'Power',only:['ab']},{k:'rar',n:'Rarity',only:['bm']}];
+var RAR={C:0,U:1,R:2,E:3,L:4};
+function sortCards(list,k){var by={name:function(a,b){return a.n.localeCompare(b.n);},hpd:function(a,b){return (b.hp||0)-(a.hp||0);},hpa:function(a,b){return (a.hp||0)-(b.hp||0);},act:function(a,b){return (a.act||1)-(b.act||1);},arch:function(a,b){return (a.ar||'').localeCompare(b.ar||'');},pw:function(a,b){return (a.pw||0)-(b.pw||0);},rar:function(a,b){return (RAR[a.r]||0)-(RAR[b.r]||0);}}[k];
+  if(!by) return list; return list.map(function(c,i){return [c,i];}).sort(function(x,y){return by(x[0],y[0])||x[1]-y[1];}).map(function(x){return x[0];});}
+function archCounts(){var o={};CARDS.forEach(function(c){if(c.t==='ch'||c.t==='fe') o[c.ar]=(o[c.ar]||0)+1;});return o;}
+function filterCards(list,q){ q=(q||'').trim().toLowerCase(); if(!q) return list;
+  return list.filter(function(c){return [c.n,c.ar,c.id,c.kind,c.x,c.ps,(c.o||[]).join(' ')].join(' ').toLowerCase().indexOf(q)>=0;}); }
+function typeSeg(cur,act,list){return '<div class="seg" role="group" aria-label="Card type">'+TYPES.map(function(T){var n=list.filter(function(c){return c.t===T.t;}).length;return '<button class="'+(cur===T.t?'on':'')+'" data-a="'+act+':'+T.t+'">'+T.n+' <span style="color:var(--fg2);font-weight:400">'+n+'</span></button>';}).join('')+'</div>';}
+function vBrowse(){
+  var base=CARDS.filter(function(c){return S.book==='all'||c.b===S.book||((c.t==='bm'||c.t==='cr')&&S.book==='all');});
+  if(S.book!=='all') base=CARDS.filter(function(c){return c.b===S.book;});
+  var list=filterCards(base.filter(function(c){return c.t===S.type&&(!S.arch||c.ar===S.arch);}),S.q);
+  list=sortCards(list,S.sort);
+  S.seq=list.map(function(c){return c.key;});
+  var title=S.arch?S.arch:(S.book==='all'?'All Cards':BN[S.book]);
+  var d=curDeck();
+  var h='<div class="toolbar"><div class="tt"><h1>'+esc(title)+'</h1><div class="tsub">'+list.length+' shown · Set 1'+(d?' · adding to “'+esc(d.name)+'”':'')+'</div></div>'+
+    '<label class="search"><input type="search" placeholder="Search cards" aria-label="Search cards" value="'+esc(S.q)+'" data-in="q"></label></div>';
+  h+='<div class="fbar">'+typeSeg(S.type,'type',base)+'<select class="sel" data-in="sort" aria-label="Sort">'+SORTS.filter(function(o){return !o.only||o.only.indexOf(S.type)>=0;}).map(function(o){return '<option value="'+o.k+'"'+(S.sort===o.k?' selected':'')+'>Sort: '+o.n+'</option>';}).join('')+'</select>'+(S.arch?'<button class="btn" data-a="clrarch">'+esc(S.arch)+' ✕</button>':'')+'</div>';
+  h+='<div class="grid view-in">'+list.slice(0,240).map(function(c){return tile(c,d);}).join('')+'</div>';
+  if(list.length>240) h+='<p class="hint" style="padding:0 24px 32px">Showing the first 240. Search or pick a book to narrow it down.</p>';
+  if(!list.length) h+='<p class="hint" style="padding:40px 24px;text-align:center">No cards match.</p>';
+  return h;
+}
+function tile(c,d,poolMode){
+  var on=d&&d[c.t].indexOf(c.id)>=0, dis=poolMode&&d&&!on&&!inPool(d,c);
+  return '<button class="tile'+(on?' indeck':'')+(dis?' dis':'')+'" data-a="'+(poolMode?'add':'peek')+':'+c.key+'" title="'+(poolMode?(on?'Remove from deck':'Add to deck'):'View card')+'">'+(poolMode?'<span class="badge'+(on?'':' add')+'">'+(on?'✓':'+')+'</span>':'')+face(c)+
+    '<div><div class="tn">'+(poolMode?'<span class="pv" data-a="peek:'+c.key+'" title="Card details" role="button" aria-label="Details for '+esc(c.n)+'">ⓘ</span> ':'')+esc(c.n)+'</div><div class="tm"><span class="pill k-'+c.t+'">'+TN[c.t].one+'</span>'+(SC[c.key]?'':'<span class="pill" title="No Dextrous scan yet">No scan</span>')+'<span>'+(c.t==='ab'?meta(c):(c.b?esc(BN[c.b]):meta(c)))+'</span></div></div></button>';
+}
+function vBuilder(){
+  var d=curDeck();
+  if(!d) return '<div class="page view-in"><div class="toolbar" style="position:static;padding:0;background:none;border:0"><div class="tt"><h1>Deck Builder</h1><div class="tsub">Start a new deck, or open a precon as a starting point.</div></div></div>'+newDeckForm()+'</div>';
+  var f=FMT[d.fmt], chk=check(d), n=chk.n;
+  var pool=CARDS.filter(function(c){return c.t===S.pool.type && (inPool(d,c));});
+  if(S.pool.type==='ch'&&S.pool.act!=='all') pool=pool.filter(function(c){return String(c.act)===S.pool.act;});
+  pool=filterCards(pool,S.pool.q);
+  var all=CARDS.filter(function(c){return inPool(d,c);});
+  var h='<div class="bwrap"><section class="pool"><div class="toolbar"><div class="tt"><h1>Card Pool</h1><div class="tsub">'+d.books.map(function(b){return esc(BN[b]);}).join(' + ')+' · click a card to add or remove it</div></div>'+
+    '<label class="search"><input type="search" placeholder="Search pool" aria-label="Search pool" value="'+esc(S.pool.q)+'" data-in="pq"></label></div>';
+  h+='<div class="fbar">'+typeSeg(S.pool.type,'ptype',all)+(S.pool.type==='ch'?'<div class="seg" role="group" aria-label="Act">'+['all','1','2','3'].map(function(a){return '<button class="'+(S.pool.act===a?'on':'')+'" data-a="pact:'+a+'">'+(a==='all'?'All Acts':'Act '+['','I','II','III'][a])+'</button>';}).join('')+'</div>':'')+'</div>';
+  h+='<div class="grid">'+pool.map(function(c){return tile(c,d,true);}).join('')+'</div>'+(pool.length?'':'<p class="hint" style="padding:40px 24px;text-align:center">No cards match.</p>')+'</section>';
+  /* deck panel */
+  h+='<aside class="deckp" aria-label="Deck"><input class="dname" value="'+esc(d.name)+'" aria-label="Deck name" data-in="dname">';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="seg" role="group" aria-label="Format">'+['pm','classic'].map(function(k){return '<button class="'+(d.fmt===k?'on':'')+'" data-a="fmt:'+k+'">'+FMT[k].n+'</button>';}).join('')+'</div>'+
+     '<select class="sel" data-in="book0" aria-label="Book">'+BOOKS.map(function(b){return '<option value="'+b.id+'"'+(d.books[0]===b.id?' selected':'')+'>'+esc(b.n)+'</option>';}).join('')+'</select>'+
+     '<select class="sel" data-in="book1" aria-label="Second book"><option value="">+ second book</option>'+BOOKS.filter(function(b){return b.id!==d.books[0];}).map(function(b){return '<option value="'+b.id+'"'+(d.books[1]===b.id?' selected':'')+'>'+esc(b.n)+'</option>';}).join('')+'</select></div>';
+  h+='<div class="meter">'+TYPES.map(function(T){var cap=f.caps[T.t],v=n[T.t];var cls=v>cap?'over':(v===cap?'full':'');return '<div class="mtr '+cls+'"><div class="k">'+T.sh+'</div><div class="v">'+v+'<span style="font-size:11px;color:var(--fg2);font-weight:500">/'+cap+'</span></div><div class="bar"><i style="width:'+Math.min(100,v/cap*100)+'%"></i></div></div>';}).join('')+'</div>';
+  h+='<div class="status '+(chk.ok?'ok':'bad')+'"><b>'+n.total+' / '+f.total+' cards · '+(chk.ok?(f.exact?'Legal precon deck':'Legal Classic deck'):'Not legal yet')+'</b>'+(chk.errs.length?'<ul>'+chk.errs.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+'</ul>':'')+'</div>';
+  if(chk.warns.length) h+='<div class="warns"><b>Act lines</b><ul>'+chk.warns.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+'</ul></div>';
+  h+='<div class="acts"><button class="btn" data-a="undo" '+(S.undo.length?'':'disabled')+'>Undo</button><button class="btn" data-a="redo" '+(S.redo.length?'':'disabled')+'>Redo</button><button class="btn" data-a="hand">Sample hand</button><button class="btn" data-a="stats">Stats</button><button class="btn" data-a="export">Export</button><button class="btn" data-a="print">Print</button><button class="btn" data-a="clear">Clear</button></div>';
+  TYPES.forEach(function(T){ var ids=d[T.t];
+    h+='<div class="sec"><div class="sech"><span>'+T.n+'</span><span>'+ids.length+' / '+f.caps[T.t]+'</span></div>'+(ids.length?ids.map(function(id){var c=BY[T.t+':'+id];if(!c)return '';return '<div class="row"><div class="th">'+face(c)+'</div><div style="min-width:0;flex:1"><div class="rn">'+esc(c.n)+'</div><div class="rm">'+meta(c)+'</div></div><button class="x" data-a="rm:'+c.key+'" aria-label="Remove '+esc(c.n)+'">'+IC.x+'</button></div>';}).join(''):'<div class="empty">None yet.</div>')+'</div>';
+  });
+  h+='</aside></div>';
+  return h;
+}
+function newDeckForm(){
+  return '<div class="dgrid"><div class="dcard"><h3>New deck</h3><div class="hint">Pick a format and a book. You can add a second book later.</div>'+
+  '<div class="seg" role="group" aria-label="Format"><button class="'+(S.nf!=='classic'?'on':'')+'" data-a="nf:pm">Precon (62)</button><button class="'+(S.nf==='classic'?'on':'')+'" data-a="nf:classic">Classic</button></div>'+
+  '<select class="sel" data-in="nfbook" aria-label="Book">'+BOOKS.map(function(b){return '<option value="'+b.id+'"'+(S.nfb===b.id?' selected':'')+'>'+esc(b.n)+'</option>';}).join('')+'</select>'+
+  '<div class="dacts"><button class="btn pri" data-a="create">Create deck</button><button class="btn" data-a="import">Import…</button></div></div>'+
+  D.precons.map(function(p,i){return '<div class="dcard"><h3>'+esc(p.name)+' precon</h3><div class="hint">Start from the 62-card precon and make it your own.</div><div class="dacts"><button class="btn" data-a="clone:'+i+'">Start from this precon</button></div></div>';}).join('')+'</div>';
+}
+function fan(cards){return '<div class="dfan">'+cards.slice(0,6).map(function(c){return face(c);}).join('')+'</div>';}
+function vMyDecks(){
+  var h='<div class="toolbar"><div class="tt"><h1>My Decks</h1><div class="tsub">Saved in this browser · '+DECKS.length+' deck'+(DECKS.length===1?'':'s')+'</div></div><button class="btn pri" data-a="nav:builder:new">New deck</button><button class="btn" data-a="import">Import…</button></div><div class="page view-in">';
+  if(!DECKS.length) h+='<p class="hint">No decks yet. Create one in the Deck Builder, or start from a precon.</p>';
+  h+='<div class="dgrid">'+DECKS.slice().sort(function(a,b){return b.upd-a.upd;}).map(function(d){var c=check(d);var cs=cardsOf(d).filter(function(x){return x.t==='fe'||x.t==='ch';});
+    return '<div class="dcard">'+fan(cs)+'<h3>'+esc(d.name)+'</h3><div class="dmeta"><span class="'+(c.ok?'ok-dot':'bad-dot')+'"></span>'+(c.ok?'Legal':'Not legal')+' · '+FMT[d.fmt].n+' · '+c.n.total+' cards</div><div class="dmeta">'+d.books.map(function(b){return esc(BN[b]);}).join(' + ')+'</div>'+
+    '<div class="dacts"><button class="btn pri" data-a="open:'+d.id+'">Open</button><button class="btn" data-a="dup:'+d.id+'">Duplicate</button><button class="btn" data-a="del:'+d.id+'">Delete</button></div></div>';}).join('')+'</div></div>';
+  return h;
+}
+function preconDeck(p){var d=blank('pm',(p.books||[p.b]).slice());d.name=p.name+' Precon';['fe','ch','ab','bm','cr'].forEach(function(s){d[s]=p[s].slice();});return d;}
+function vPrecons(){
+  var h='<div class="toolbar"><div class="tt"><h1>Precon Decks</h1><div class="tsub">Read from the ABC_precon_decklists tab · 62 cards each</div></div></div><div class="page view-in"><div class="dgrid">';
+  h+=D.precons.map(function(p,i){var d=preconDeck(p),c=check(d);return '<button class="dcard" data-a="precon:'+i+'" style="cursor:pointer">'+fan(cardsOf(d).filter(function(x){return x.t==='fe'||x.t==='ch';}))+'<h3>'+esc(p.name)+'</h3><div class="dmeta"><span class="'+(c.ok?'ok-dot':'bad-dot')+'"></span>'+(c.ok?'Legal':'Not legal')+' · 62 cards · '+esc(BN[p.b])+'</div><div class="dmeta">Commanders: '+p.fe.map(function(id){return esc((BY['fe:'+id]||{}).n||id);}).join(', ')+'</div></button>';}).join('');
+  return h+'</div></div>';
+}
+function vPrecon(){
+  var p=D.precons[S.precon], d=preconDeck(p), c=check(d);
+  var sc=cardsOf(d).filter(function(x){return SC[x.key];}).length;
+  var h='<div class="toolbar"><button class="btn" data-a="nav:precons">‹ Precons</button><div class="tt"><h1>'+esc(p.name)+' Precon</h1><div class="tsub">'+c.n.total+' cards · '+(c.ok?'legal':'not legal')+' · '+sc+' of '+c.n.total+' cards have scans</div></div>'+
+    '<button class="btn pri" data-a="clone:'+S.precon+'">Open copy in builder</button><button class="btn" data-a="pprint">Print cards</button><button class="btn" data-a="plist">Print decklist</button><button class="btn" data-a="pexport">Export</button></div><div class="page view-in">';
+  S.seq=cardsOf(d).map(function(c){return c.key;});
+  TYPES.forEach(function(T){ h+='<section><h2 style="font-size:15px;margin:0 0 10px">'+T.n+' <span style="color:var(--fg2);font-weight:500">'+d[T.t].length+'</span></h2><div class="grid" style="padding:0">'+d[T.t].map(function(id){var x=BY[T.t+':'+id];return x?tile(x,null):'';}).join('')+'</div></section>'; });
+  return h+'</div>';
+}
+function lineOf(c){
+  if(c.t!=='ch') return [];
+  return CARDS.filter(function(x){return x.t==='ch'&&x.b===c.b&&x.base===c.base;}).sort(function(a,b){return (a.act||1)-(b.act||1);});
+}
+function feFor(c){ return CARDS.filter(function(x){return x.t==='fe'&&x.b===c.b&&x.base&&x.base===c.base;}); }
+function sect(title,body){return '<section class="group"><div class="ghead">'+title+'</div>'+body+'</section>';}
+function move(kind,m,explain){
+  return '<div class="move"><div class="mvb '+kind+'"><span class="mvv">'+esc(String(m[3]||'').split('/')[0])+'</span><span class="mvc">'+esc(m[2])+' ABC</span></div><div style="min-width:0"><div class="mvk">'+(kind==='atk'?'Attack':'Block')+'</div><div class="mvn">'+esc(m[0])+'</div><p class="gt">'+esc(m[1])+'</p>'+(explain?'<p class="gt2">'+esc(explain)+'</p>':'')+'</div></div>';
+}
+var RARN={C:'Common',U:'Uncommon',R:'Rare',E:'Epic',L:'Legendary'};
+function vCard(){
+  var c=BY[S.card]; if(!c){S.view='browse';return vBrowse();}
+  var x=(c.t==='ch'?CT.cards[c.id]:null)||{}, d=curDeck(), sq=S.seq&&S.seq.indexOf(c.key)>=0?S.seq:[c.key], pos=sq.indexOf(c.key)+1;
+  var same=function(a,b){return a&&b&&a.replace(/\W/g,'').toLowerCase()===b.replace(/\W/g,'').toLowerCase();};
+  var h='<div class="dbar"><button class="back" data-a="goback">‹ Back</button><div class="dbt">'+esc(c.n)+'</div><div class="pager"><button class="round" data-a="step:-1" aria-label="Previous card">‹</button><span class="pc2">'+pos+' of '+sq.length+'</span><button class="round" data-a="step:1" aria-label="Next card">›</button></div></div>';
+  h+='<div class="dbody '+(S.dir==='p'?'inL':'inR')+(S.tick%2?'a':'b')+'"><div class="stage"><div class="big">'+face(c)+'</div>'+(d?'<button class="btn pri" data-a="add:'+c.key+'">'+(d[c.t].indexOf(c.id)>=0?'Remove from “':'Add to “')+esc(d.name)+'”</button>':'')+'</div><div class="info">';
+  var rar=x.rarity||(c.r?RARN[c.r]||c.r:'');
+  h+='<div><div class="tm"><span class="pill k-'+c.t+'">'+TN[c.t].one+'</span>'+(c.b?'<span class="hint">'+esc(BN[c.b])+'</span>':'')+(x.no?'<span class="hint">No. '+x.no+'</span>':'')+'<span class="hint">Set 1</span>'+(rar?'<span class="hint">'+esc(rar)+'</span>':'')+'</div><h2 class="dn">'+esc(c.n)+'</h2>';
+  if(c.t==='ch'||c.t==='fe') h+='<div class="hint" style="font-size:15px">'+meta(c)+' · '+esc(c.hp)+' HP</div>';
+  h+='</div>';
+  if(c.t==='ch'||c.t==='fe'){
+    var A=CT.archetypes[c.ar];
+    h+=sect('Archetype','<div class="gtt">'+esc(c.ar)+(A?' <span class="role">'+esc(A.role)+'</span>':'')+'</div><p class="gt">'+esc(A?A.text:'Description coming.')+'</p><button class="btn" data-a="archgo:'+esc(c.ar)+'" style="align-self:flex-start">All '+esc(c.ar)+' cards</button>');
+    h+=sect('Moves',move('atk',c.a,same(x.atkName,c.a[0])?x.atkExplain:'')+move('blk',c.k,same(x.blkName,c.k[0])?x.blkExplain:''));
+    if(c.p){ var pp=String(c.p[1]||'').split(/\s*Caveat:\s*/i), px=x.passive&&same(x.passive.name,c.p[0])?x.passive.explain:'';
+      h+=sect('Passive','<div class="gtt">'+esc(c.p[0])+'</div><p class="gt">'+esc(pp[0])+'</p>'+(pp[1]?'<div class="cav"><b>Caveat:</b> '+esc(pp[1])+'</div>':'')+(px?'<p class="gt2">'+esc(px)+'</p>':'')); }
+    if(c.t==='ch'){
+      var L=lineOf(c), F=feFor(c), nx=L.filter(function(y){return y.ef===c.id;})[0];
+      var body='<div class="gtt">'+(nx?'Evolves into '+esc(nx.n):(L.length>1?'Final stage'+(c.res?' · '+esc(c.res)+' resolution':''):'Single card'))+'</div>';
+      if(x.trigger) body+='<p class="gt"><b>Trigger:</b> '+esc(x.trigger)+'</p>'+(CT.triggers[x.trig]?'<p class="gt2">'+esc(CT.triggers[x.trig])+'</p>':'');
+      if(L.length>1) body+='<div class="evo">'+L.map(function(y,i){return (i?'<span class="arr">→</span>':'')+'<button class="evb'+(y.id===c.id?' cur':'')+'" data-a="peek:'+y.key+'"><span class="evf">'+face(y)+'</span><span class="evl">'+esc(y.n)+'</span><span class="evs">Act '+['','I','II','III'][y.act||1]+'</span></button>';}).join('')+'</div>';
+      if(F.length) body+='<p class="gt2">Commander version'+(F.length>1?'s':'')+': '+F.map(function(f){return '<a href="#" data-a="peek:'+f.key+'">'+esc(f.n)+'</a>';}).join(', ')+'</p>';
+      h+=sect('Evolution',body);
+    }
+  } else if(c.t==='ab'){
+    h+=sect('Question','<div class="gtt">'+esc(c.n)+'</div><ol type="A" class="opts">'+c.o.map(function(o,i){return '<li'+(i===c.c-1?' class="right"':'')+'>'+esc(o)+(i===c.c-1?' <span class="pill" style="color:var(--ok)">Answer</span>':'')+'</li>';}).join('')+'</ol>');
+    h+=sect('In Play','<p class="gt">'+(c.kind==='ATTACK'?'An <b>Attack</b>':'A <b>Block</b>')+' ABC card with power <b>'+esc(c.pw)+'</b>. Answer the question correctly to attach it to a character.</p>'+((c.pool||c.act)?'<p class="gt2">'+[c.act?'Covers: '+esc(c.act):'',c.pool?'Pool: '+esc(c.pool):''].filter(Boolean).join(' · ')+'</p>':''));
+  } else if(c.t==='bm'){
+    h+=sect('Effect','<div class="gtt">'+esc(c.kind||'Bookmark')+'</div><p class="gt">'+esc(c.x)+'</p>');
+  } else {
+    h+=sect('Passive','<p class="gt">'+esc(c.ps)+'</p>')+sect('Thesis','<p class="gt">'+esc(c.th)+'</p>')+sect('Reward','<p class="gt">'+esc(c.rw)+'</p>');
+  }
+  if(x.story) h+=sect('In the Story','<p class="gt">'+esc(x.story)+'</p>');
+  var B=c.b&&CT.books[c.b];
+  if(B) h+=sect('About the Work','<div class="gtt">'+esc(BN[c.b])+' <span class="hint">'+esc(B.author)+', '+esc(B.year)+'</span></div><p class="gt">'+esc(B.blurb)+'</p><div class="chips">'+B.themes.map(function(t){return '<span class="pill">'+esc(t)+'</span>';}).join('')+'</div>');
+  if(x.uses) h+=sect('Best Uses in Play','<ol class="uses">'+x.uses.map(function(u){return '<li>'+esc(u)+'</li>';}).join('')+'</ol>');
+  return h+'</div></div>';
+}
+function vArch(){
+  var cnt=archCounts();
+  return '<div class="toolbar"><div class="tt"><h1>Archetypes</h1><div class="tsub">'+Object.keys(cnt).length+' roles across Set 1</div></div></div><div class="page view-in"><div class="dgrid">'+Object.keys(cnt).sort().map(function(k){
+    var A=CT.archetypes[k]||{}, th=CARDS.filter(function(c){return c.t==='ch'&&c.ar===k&&SC[c.key];}).slice(0,4);
+    return '<button class="dcard" data-a="archgo:'+esc(k)+'" style="cursor:pointer"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>'+esc(k)+'</h3>'+(A.role?'<span class="role">'+esc(A.role)+'</span>':'')+'</div><p class="hint" style="margin:0;font-size:13.5px;line-height:1.5">'+esc(A.text||'Description coming.')+'</p>'+(th.length?'<div class="dfan" style="height:70px">'+th.map(face).join('')+'</div>':'')+'<div class="dmeta">'+cnt[k]+' cards ›</div></button>';
+  }).join('')+'</div></div>';
+}
+function vGloss(){
+  return '<div class="toolbar"><div class="tt"><h1>How to Read a Card</h1><div class="tsub">Every part of an ABC card, explained</div></div></div><div class="page view-in">'+CT.glossary.map(function(g){
+    return '<section><div class="ghead" style="padding:0 4px 8px">'+esc(g.title)+'</div><div class="sec">'+g.items.map(function(it){return '<div class="term"><div class="tk">'+esc(it.k)+'</div><div class="tv">'+esc(it.v)+'</div></div>';}).join('')+'</div></section>';
+  }).join('')+'</div>';
+}
+
+function vExp(){
+  var e=D.exp.filter(function(x){return x.id===S.exp;})[0];
+  return '<div class="toolbar"><div class="tt"><h1>'+esc(e.n)+'</h1><div class="tsub">Expansion · builds on '+esc(BN[e.b])+'</div></div></div><div class="page view-in"><div class="dcard" style="max-width:560px"><h3>Coming in a later set</h3><p class="hint" style="margin:0">'+esc(e.n)+' is already in the digital game. Its physical cards will appear here, with their own book filter and deck-builder pool, once they are scanned and added to the catalog.</p></div></div>';
+}
+function render(){
+  side(); var m=document.getElementById('main'), h='';
+  if(S.view==='browse') h=vBrowse(); else if(S.view==='builder') h=vBuilder(); else if(S.view==='mydecks') h=vMyDecks();
+  else if(S.view==='card') h=vCard(); else if(S.view==='arch') h=vArch(); else if(S.view==='gloss') h=vGloss();
+  else if(S.view==='precons') h=vPrecons(); else if(S.view==='precon') h=vPrecon(); else if(S.view==='exp') h=vExp();
+  var fx=document.activeElement&&document.activeElement.getAttribute('data-in'), pos=fx&&document.activeElement.selectionStart;
+  m.innerHTML=h; renderModal();
+  if(fx){var el=m.querySelector('[data-in="'+fx+'"]'); if(el){el.focus(); try{el.setSelectionRange(pos,pos);}catch(e){}}}
+}
+/* ---------- modals ---------- */
+function renderModal(){
+  var old=document.querySelector('.scrim'); if(old) old.remove(); if(!S.modal) return;
+  var M=S.modal, d=curDeck(), h='';
+  if(M.k==='peek'){ var c=BY[M.key];
+    h='<div class="mrow"><div>'+face(c)+'</div><div style="display:flex;flex-direction:column;gap:10px"><div class="tm"><span class="pill k-'+c.t+'">'+TN[c.t].one+'</span>'+(c.b?'<span class="hint">'+esc(BN[c.b])+'</span>':'')+'</div><h2>'+esc(c.n)+'</h2>';
+    if(c.t==='ch'||c.t==='fe') h+='<div class="hint">'+meta(c)+' · '+esc(c.hp)+' HP</div><div><b style="color:var(--atk)">'+esc(c.a[3])+'</b> <b>'+esc(c.a[0])+'</b><div class="hint">'+esc(c.a[1])+'</div></div><div><b style="color:var(--blk)">'+esc(c.k[3])+'</b> <b>'+esc(c.k[0])+'</b><div class="hint">'+esc(c.k[1])+'</div></div>'+(c.p?'<div><b>'+esc(c.p[0])+'</b><div class="hint">'+esc(c.p[1])+'</div></div>':'');
+    else if(c.t==='ab') h+='<div class="hint">'+meta(c)+'</div><ol type="A" style="margin:0;padding-left:20px">'+c.o.map(function(o,i){return '<li'+(i===c.c-1?' style="font-weight:700"':'')+'>'+esc(o)+'</li>';}).join('')+'</ol>';
+    else if(c.t==='bm') h+='<div class="hint">'+meta(c)+'</div><p style="margin:0">'+esc(c.x)+'</p>';
+    else h+='<div><b>Passive</b><div class="hint">'+esc(c.ps)+'</div></div><div><b>Thesis</b><div class="hint">'+esc(c.th)+'</div></div><div><b>Reward</b><div class="hint">'+esc(c.rw)+'</div></div>';
+    h+='<div class="dacts">'+(d?'<button class="btn pri" data-a="add:'+c.key+'">'+(d[c.t].indexOf(c.id)>=0?'Remove from':'Add to')+' “'+esc(d.name)+'”</button>':'')+'<button class="btn" data-a="close">Close</button></div></div></div>';
+  } else if(M.k==='hand'){
+    h='<h2>Sample opening hand</h2><p class="hint" style="margin:0">7 cards from a shuffled deck. Commanders are drawn normally in physical play.</p><div class="hand">'+M.hand.map(function(c){return face(c);}).join('')+'</div><div class="hint">'+M.left+' cards left in the deck · mulligans this hand: '+M.mull+'</div><div class="dacts"><button class="btn pri" data-a="hand">New hand</button><button class="btn" data-a="mull">Mulligan</button><button class="btn" data-a="draw">Draw 1</button><button class="btn" data-a="close">Close</button></div>';
+  } else if(M.k==='stats'){
+    var cs=cardsOf(d), chars=cs.filter(function(c){return c.t==='ch'||c.t==='fe';}), tr=cs.filter(function(c){return c.t==='ab';});
+    var bars=function(obj,keys){var mx=Math.max.apply(null,keys.map(function(k){return obj[k]||0;}).concat([1]));return '<div class="chart">'+keys.map(function(k){var v=obj[k]||0;return '<div><span>'+v+'</span><i style="height:'+(v/mx*70)+'px"></i><span>'+k+'</span></div>';}).join('')+'</div>';};
+    var cost={},pw={},arch={},hp=0; chars.forEach(function(c){cost[c.a[2]]=(cost[c.a[2]]||0)+1;arch[c.ar]=(arch[c.ar]||0)+1;hp+=c.hp||0;});
+    var atk=tr.filter(function(c){return c.kind==='ATTACK';}).length; tr.forEach(function(c){pw[c.pw]=(pw[c.pw]||0)+1;});
+    h='<h2>Deck stats</h2><div class="stat-grid"><div class="sec" style="padding:12px"><b>Attack cost (characters)</b>'+bars(cost,['1','2','3','4','5'])+'</div><div class="sec" style="padding:12px"><b>Trivia power</b>'+bars(pw,['1','2','3','4'])+'<div class="hint">'+atk+' Attack · '+(tr.length-atk)+' Block</div></div><div class="sec" style="padding:12px"><b>Characters</b><div class="hint" style="margin-top:6px">Average HP '+(chars.length?Math.round(hp/chars.length):0)+'</div><div class="chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">'+Object.keys(arch).sort().map(function(a){return '<span class="pill">'+esc(a)+' '+arch[a]+'</span>';}).join('')+'</div></div></div><div class="dacts"><button class="btn" data-a="close">Close</button></div>';
+  } else if(M.k==='export'){
+    var src=M.deck||d;
+    h='<h2>Export “'+esc(src.name)+'”</h2><p class="hint" style="margin:0">Deck code (proposed id-based <b>ABC2</b> format; the game will read it once the engineer’s id switch lands):</p><textarea readonly style="min-height:70px">'+esc(encode(src))+'</textarea>'+
+      '<div class="dacts"><button class="btn pri" data-a="cpcode">Copy code</button><button class="btn" data-a="cplist">Copy text list</button><button class="btn" data-a="dltxt">Download .txt</button><button class="btn" data-a="dlcsv">Download .csv</button><button class="btn" data-a="close">Close</button></div>';
+  } else if(M.k==='import'){
+    h='<h2>Import a deck</h2><p class="hint" style="margin:0">Paste an ABC2 deck code, or a decklist with one card per line (“1 Romeo Montague” or just the name). Trivia lines exported from here keep their [id].</p><textarea id="imp" placeholder="ABC2-PM-… or a list of card names"></textarea>'+(M.miss&&M.miss.length?'<div class="warns"><b>Not found</b><ul>'+M.miss.slice(0,12).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>':'')+'<div class="dacts"><button class="btn pri" data-a="doimport">Import</button><button class="btn" data-a="close">Cancel</button></div>';
+  } else if(M.k==='print'){
+    var src2=M.deck||d, n2=cardsOf(src2).length, pages=Math.ceil(n2/9);
+    h='<h2>Print “'+esc(src2.name)+'”</h2><p class="hint" style="margin:0">'+n2+' cards on '+pages+' front page'+(pages===1?'':'s')+', 9 per US Letter page at 2.5 × 3.5 in, each followed by its back page. Print at <b>100% / Actual size</b>, two-sided, <b>flip on long edge</b>. Cards without a Dextrous scan print as a labeled placeholder; A checklist page prints at the end.</p>'+
+      '<label style="display:flex;align-items:center;gap:10px;font-size:14px"><input type="checkbox" data-a="lightback"'+(PREF.lightBack?' checked':'')+' style="width:18px;height:18px"> Light card backs <span class="hint">(saves ink on classroom printers)</span></label>'+
+      '<div class="dacts"><button class="btn pri" data-a="doprint">Print cards with backs</button><button class="btn" data-a="doprintfront">Fronts only</button><button class="btn" data-a="doprintlist">Print decklist</button><button class="btn" data-a="close">Cancel</button></div>';
+  }
+  var s=document.createElement('div'); s.className='scrim'; s.setAttribute('data-a','scrim'); s.innerHTML='<div class="modal" role="dialog" aria-modal="true">'+h+'</div>'; document.body.appendChild(s);
+}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function newHand(mull){var d=curDeck(), deck=shuffle(cardsOf(d)); S.modal={k:'hand',hand:deck.slice(0,7),rest:deck.slice(7),left:deck.length-7,mull:mull||0};}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-a]'); if(!t) return;
+  var a=t.getAttribute('data-a'), p=a.split(':'), d=curDeck();
+  if(a==='scrim'){ if(e.target===t){S.modal=null;renderModal();} return; }
+  switch(p[0]){
+    case 'nav': S.modal=null;
+      if(p[1]==='browse'){S.view='browse';S.book=p[2];S.q='';S.arch=null;}
+      else if(p[1]==='builder'){S.view='builder'; if(p[2]==='new') S.deckId=null; else if(!curDeck()&&DECKS.length) S.deckId=DECKS.slice().sort(function(a,b){return b.upd-a.upd;})[0].id;}
+      else if(p[1]==='exp'){S.view='exp';S.exp=p[2];}
+      else S.view=p[1];
+      document.getElementById('main').scrollTop=0; render(); break;
+    case 'toggleexp': expOpen=!expOpen; side(); break;
+    case 'type': S.type=p[1]; render(); break;
+    case 'ptype': S.pool.type=p[1]; render(); break;
+    case 'pact': S.pool.act=p[1]; render(); break;
+    case 'peek': e.preventDefault(); S.card=p[1]+':'+p.slice(2).join(':'); if(S.view!=='card') S.back=S.view; S.dir='n'; S.tick=(S.tick||0)+1; S.view='card'; S.modal=null; document.getElementById('main').scrollTop=0; render(); break;
+    case 'step': var sq=S.seq&&S.seq.length?S.seq:[S.card], ci=sq.indexOf(S.card), dlt=+p[1]; S.card=sq[(ci+dlt+sq.length)%sq.length]; S.dir=dlt>0?'n':'p'; S.tick=(S.tick||0)+1; document.getElementById('main').scrollTop=0; render(); break;
+    case 'goback': S.view=S.back||'browse'; render(); break;
+    case 'clrarch': S.arch=null; render(); break;
+    case 'archgo': S.arch=p.slice(1).join(':'); S.view='browse'; S.book='all'; S.type='ch'; S.q=''; render(); break;
+    case 'add': toggle(BY[p[1]+':'+p.slice(2).join(':')]); break;
+    case 'rm': toggle(BY[p[1]+':'+p.slice(2).join(':')]); break;
+    case 'fmt': mutate(function(d){d.fmt=p[1];}); break;
+    case 'nf': S.nf=p[1]; render(); break;
+    case 'create': var nd=blank(S.nf==='classic'?'classic':'pm',[S.nfb||'gatsby']); DECKS.push(nd); save(); S.deckId=nd.id; S.undo=[];S.redo=[]; render(); break;
+    case 'clone': var cd=fromPrecon(D.precons[+p[1]]); DECKS.push(cd); save(); S.deckId=cd.id; S.view='builder'; S.undo=[];S.redo=[]; render(); toast('Copied the precon into My Decks.'); break;
+    case 'open': S.deckId=p[1]; S.view='builder'; S.undo=[];S.redo=[]; render(); break;
+    case 'dup': var o=DECKS.filter(function(x){return x.id===p[1];})[0]; var c2=JSON.parse(JSON.stringify(o)); c2.id=uid(); c2.name=o.name+' (copy)'; c2.upd=Date.now(); DECKS.push(c2); save(); render(); break;
+    case 'del': var od=DECKS.filter(function(x){return x.id===p[1];})[0]; if(od&&window.confirm('Delete “'+od.name+'”? This can’t be undone.')){ DECKS=DECKS.filter(function(x){return x.id!==p[1];}); if(S.deckId===p[1]) S.deckId=null; save(); render(); } break;
+    case 'undo': undo(); break; case 'redo': redo(); break;
+    case 'clear': if(window.confirm('Remove every card from this deck?')) mutate(function(d){TYPES.forEach(function(T){d[T.t]=[];});}); break;
+    case 'hand': newHand(0); renderModal(); break;
+    case 'mull': var mm=(S.modal&&S.modal.mull||0)+1; newHand(mm); renderModal(); break;
+    case 'draw': if(S.modal&&S.modal.rest.length){S.modal.hand.push(S.modal.rest.shift());S.modal.left--;} renderModal(); break;
+    case 'stats': S.modal={k:'stats'}; renderModal(); break;
+    case 'export': S.modal={k:'export'}; renderModal(); break;
+    case 'pexport': S.modal={k:'export',deck:preconDeck(D.precons[S.precon])}; renderModal(); break;
+    case 'import': S.modal={k:'import'}; renderModal(); break;
+    case 'doimport': var r=parseList(document.getElementById('imp').value||''); if(!r||!cardsOf(r.deck).length){S.modal={k:'import',miss:r?r.miss:['Nothing recognised.']};renderModal();break;}
+      DECKS.push(r.deck); save(); S.deckId=r.deck.id; S.view='builder'; S.modal=null; S.undo=[];S.redo=[]; render(); toast('Imported '+cardsOf(r.deck).length+' cards'+(r.miss.length?' · '+r.miss.length+' not found':'')+'.'); break;
+    case 'cpcode': copy(encode(S.modal.deck||d)); break;
+    case 'cplist': copy(textList(S.modal.deck||d)); break;
+    case 'dltxt': var x1=S.modal.deck||d; download(x1.name.replace(/[^\w\- ]+/g,'')+'.txt',textList(x1)); break;
+    case 'dlcsv': var x2=S.modal.deck||d; download(x2.name.replace(/[^\w\- ]+/g,'')+'.csv',csv(x2),'text/csv'); break;
+    case 'print': S.modal={k:'print'}; renderModal(); break;
+    case 'pprint': S.modal={k:'print',deck:preconDeck(D.precons[S.precon])}; renderModal(); break;
+    case 'plist': printList(preconDeck(D.precons[S.precon])); break;
+    case 'doprint': var _pd=S.modal.deck||d; S.modal=null; renderModal(); printCards(_pd,{backs:true,cut:true}); break;
+    case 'xdoprint': printCards(cardsOf(S.modal.deck||d),{backs:true,cut:true}); break;
+    case 'doprintfront': var _pf=S.modal.deck||d; S.modal=null; renderModal(); printCards(_pf,{backs:false,cut:true}); break;
+    case 'doprintlist': var _pl=S.modal.deck||d; S.modal=null; renderModal(); printList(_pl); break;
+    case 'precon': S.precon=+p[1]; S.view='precon'; document.getElementById('main').scrollTop=0; render(); break;
+    case 'lightback': PREF.lightBack=!PREF.lightBack; store('abc_catalog_prefs',PREF); renderModal(); break;
+    case 'close': S.modal=null; renderModal(); break;
+  }
+});
+document.addEventListener('input',function(e){
+  var k=e.target.getAttribute('data-in'); if(!k) return; var v=e.target.value, d=curDeck();
+  if(k==='q'){S.q=v;render();}
+  else if(k==='pq'){S.pool.q=v;render();}
+  else if(k==='dname'&&d){d.name=v||'Untitled Deck';d.upd=Date.now();save();side();}
+});
+document.addEventListener('change',function(e){
+  var k=e.target.getAttribute('data-in'); if(!k) return; var v=e.target.value;
+  if(k==='nfbook'){S.nfb=v;}
+  else if(k==='sort'){S.sort=v;render();}
+  else if(k==='book0') mutate(function(d){d.books[0]=v; if(d.books[1]===v) d.books.splice(1,1);});
+  else if(k==='book1') mutate(function(d){ if(v) d.books[1]=v; else d.books.splice(1,1); });
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&S.modal){S.modal=null;renderModal();}
+  if(S.view==='card'&&!S.modal&&!/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||'')){ var st=null; if(e.key==='ArrowRight') st=document.querySelector('[data-a="step:1"]'); if(e.key==='ArrowLeft') st=document.querySelector('[data-a="step:-1"]'); if(st) st.click(); }
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&S.view==='builder'&&!/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'')){e.preventDefault(); e.shiftKey?redo():undo();}
+});
+window.addEventListener('afterprint',function(){document.getElementById('print').innerHTML='';});
+render();
+})();
+</script>
+</body>
+</html>

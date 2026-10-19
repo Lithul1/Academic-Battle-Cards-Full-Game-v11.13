@@ -1,0 +1,954 @@
+{
+ "_note": "Hand-written catalog content. Card keys are Characters-sheet ids. Edit freely; build_catalog.py merges it over the sheet data.",
+ "archetypes": {
+  "Monument": {
+   "role": "Foundation",
+   "text": "The character an arc is built on. Monuments open in Act I with modest HP but moves that grow the longer they stay in play. Protect them early and they pay you back late."
+  },
+  "Innocent": {
+   "role": "Restorer",
+   "text": "Hope before the fall. Innocents keep a team standing: their attacks heal and their blocks cleanse status effects like Burn and Tear."
+  },
+  "Fallen": {
+   "role": "Tragic Endgame",
+   "text": "The price of the arc. Fallen cards arrive at the end of a story with heavy HP and a passive that punishes the opponent, always at a cost to themselves."
+  },
+  "Trickster": {
+   "role": "Disruption",
+   "text": "Rule-benders. Tricksters slip past defensive buffs, draw extra cards and see what is coming before anyone else does."
+  },
+  "Steadfast": {
+   "role": "Early Wall",
+   "text": "Cheap and sturdy. Steadfast cards hold the line early with low-cost attacks and a block worth more than their HP suggests."
+  },
+  "Gatekeeper": {
+   "role": "Deterrent",
+   "text": "Make the opponent pay to get through. Gatekeepers shield themselves and punish whoever finally knocks them out."
+  },
+  "Sentinel": {
+   "role": "Counter-Guard",
+   "text": "Watchful defenders with deep HP that strike back at attackers with Riposte and hit harder as the battle turns grim."
+  },
+  "Inquisitor": {
+   "role": "Status Pressure",
+   "text": "Accusers. Inquisitors mark targets with lingering status effects while daring the opponent to swing back into a Riposte."
+  },
+  "Paragon": {
+   "role": "Moral Anchor",
+   "text": "The conscience of the story. Paragons start modestly and grow stronger as the game wears on, and they make the opponent pay for every false move against them."
+  },
+  "Urchin": {
+   "role": "Scrappy Survivor",
+   "text": "Cheap, slippery and hard to pin down. Urchins draw cards, shake off Glue with low-cost blocks and keep giving back to the team even when they fall."
+  },
+  "Martyr": {
+   "role": "Self-Sacrifice",
+   "text": "All heart, no armor. Martyrs hit far above their HP but pay for it in their own health. Big swings, short lives."
+  },
+  "Outlaw": {
+   "role": "Rule-Breaker",
+   "text": "Reckless and fast. Outlaws strike first and hit hard, trading their own safety for tempo."
+  },
+  "Hero": {
+   "role": "Champion",
+   "text": "Bold front-liners with strong, balanced moves. Heroes win fights, but in these stories every victory leaves a mark."
+  },
+  "Shadow": {
+   "role": "Lingering Harm",
+   "text": "Shadows do their worst after the hit. They spread Burn and Spill and profit from the damage that keeps ticking."
+  },
+  "Scourge": {
+   "role": "Finisher",
+   "text": "Endgame threats built for tempo: discounted moves and card draw that snowball once they land. They cannot be patched up, so they must win fast."
+  },
+  "Force of Nature": {
+   "role": "Overwhelming Force",
+   "text": "Big, blunt pressure. Forces of Nature bring heavy HP and heavy hits, and they bend the board around themselves. [Draft: review]"
+  },
+  "Mentor": {
+   "role": "Support",
+   "text": "Teachers and guides. Mentors make the cards around them better: healing, extra resources and protection for the team. [Draft: review]"
+  },
+  "Corrupter": {
+   "role": "Saboteur",
+   "text": "Poison in the well. Corrupters weaken the opponent over time with harmful statuses and disruption. [Draft: review]"
+  },
+  "Elder": {
+   "role": "Steady Hand",
+   "text": "Experienced and durable. Elders trade raw power for reliability and long-game value. [Draft: review]"
+  },
+  "Zealot": {
+   "role": "All-In",
+   "text": "True believers. Zealots commit fully: high reward, high risk, and little room to back down. [Draft: review]"
+  },
+  "Warden": {
+   "role": "Protector",
+   "text": "Keepers of the line. Wardens shield allies and control what the opponent can reach. [Draft: review]"
+  }
+ },
+ "triggers": {
+  "d2": "Once this card has been in play for one full turn, discard two ⚔ Attack cards to evolve it.",
+  "dmg": "After its first full turn in play, the next time it takes damage from any source, it evolves.",
+  "climax": "Answer the story’s climax question correctly to evolve this card into its next Act.",
+  "bm": "Once this card has been in play for one full turn, discard two Bookmark cards to evolve it.",
+  "coinT": "Flip a coin. On tails, this card evolves into its Act II form.",
+  "coinH": "Flip a coin. On heads, this card evolves into its Act II form.",
+  "end": "This is the final stage of the arc. It does not evolve further."
+ },
+ "books": {
+  "gatsby": {
+   "author": "F. Scott Fitzgerald",
+   "year": 1925,
+   "blurb": "Long Island, summer 1922. Narrator Nick Carraway moves in next door to Jay Gatsby, a self-made millionaire who throws lavish parties hoping to win back Daisy Buchanan, the woman he lost five years earlier. Beneath the glitter, Fitzgerald exposes the hollowness of new money, the hard walls of class, and the limits of the American Dream.",
+   "themes": [
+    "The American Dream",
+    "Class and wealth",
+    "Illusion vs. reality",
+    "Carelessness"
+   ]
+  },
+  "crucible": {
+   "author": "Arthur Miller",
+   "year": 1953,
+   "blurb": "Salem, Massachusetts, 1692. After a group of girls is caught dancing in the woods, accusations of witchcraft spiral into mass hysteria, and John Proctor must choose between his life and his good name. Miller wrote the play as an allegory for the McCarthy-era hunt for communists.",
+   "themes": [
+    "Mass hysteria",
+    "Reputation",
+    "Power and authority",
+    "Integrity"
+   ]
+  },
+  "romeojuliet": {
+   "author": "William Shakespeare",
+   "year": "c. 1595",
+   "blurb": "Verona. Two teenagers from feuding families, the Montagues and the Capulets, fall in love at a feast and marry in secret the next day. Within the week a street brawl, a banishment and a message that never arrives drive them both to their deaths, and only then do their families make peace.",
+   "themes": [
+    "Love and haste",
+    "Fate",
+    "Feuds and violence",
+    "Youth vs. age"
+   ]
+  },
+  "macbeth": {
+   "author": "William Shakespeare",
+   "year": "c. 1606",
+   "blurb": "Scotland. Three witches tell the war hero Macbeth that he will be king. Spurred on by his wife, he murders King Duncan and takes the throne, then kills again and again to keep it, until guilt destroys Lady Macbeth and Macduff’s army destroys him.",
+   "themes": [
+    "Ambition",
+    "Guilt",
+    "Fate vs. free will",
+    "Appearance vs. reality"
+   ]
+  }
+ },
+ "glossary": [
+  {
+   "title": "Reading a Card",
+   "items": [
+    {
+     "k": "HP",
+     "v": "Hit points, shown top right. When a card reaches 0 HP it is knocked out."
+    },
+    {
+     "k": "Archetype",
+     "v": "The vertical banner. It names the character’s role on the table. See Archetypes for every role."
+    },
+    {
+     "k": "Act tab",
+     "v": "Act I, II or III, top left. Cards in the same line evolve from one Act to the next, following the story’s plot structure."
+    },
+    {
+     "k": "Attack (red)",
+     "v": "The red banner. The big number is damage; the small number underneath is its ABC cost."
+    },
+    {
+     "k": "Block (blue)",
+     "v": "The blue shield. The big number is how much damage it stops; the small number is its ABC cost."
+    },
+    {
+     "k": "ABC",
+     "v": "The resource you spend to use moves."
+    },
+    {
+     "k": "X and +",
+     "v": "X means the value is variable and set by the move’s text. A plus sign (50+) means the value grows over time."
+    },
+    {
+     "k": "Trigger",
+     "v": "The condition that evolves the card into its next Act: taking damage, discarding cards, a coin flip or answering the climax question. Final-stage cards read “None - this is the endgame.” Some arcs are short and end at Act II."
+    },
+    {
+     "k": "Resolution",
+     "v": "Shown on final-stage cards: whether the character’s arc ends as a tragedy or a comedy."
+    },
+    {
+     "k": "Passive",
+     "v": "An always-on ability printed at the bottom of final-stage cards, always paired with a caveat that balances it."
+    },
+    {
+     "k": "Rarity",
+     "v": "The icon at bottom right. The scale runs Common (white circle), Uncommon (green diamond), Rare (blue star), Epic (purple crest) and Legendary (gold crown). Rarity is set per card: most Act I cards are Common, most Act II cards Uncommon and final-stage cards Legendary, but some (like Mercutio and Tybalt) break the pattern."
+    },
+    {
+     "k": "⚔ and ⛊",
+     "v": "The Attack and Block symbols. Card text like “+5 per ⚔ card” counts Attack cards; ⛊ counts Block cards."
+    },
+    {
+     "k": "Set and No.",
+     "v": "The novel and collector number along the bottom strip. Every card here belongs to Set 1."
+    }
+   ]
+  },
+  {
+   "title": "Harmful Status Effects",
+   "items": [
+    {
+     "k": "Tear",
+     "v": "The character is weakened: it usually takes +10 damage, or its attacks cost +1 ABC."
+    },
+    {
+     "k": "Rip",
+     "v": "Destroys or disables attached resources or abilities until the character leaves play."
+    },
+    {
+     "k": "Glue",
+     "v": "Restricts actions such as attacking, blocking, switching or attaching ABC cards."
+    },
+    {
+     "k": "Spill",
+     "v": "Ongoing damage or disruption every turn until it is removed."
+    },
+    {
+     "k": "Burn",
+     "v": "Lose 10 HP at the end of each turn. Healing does not remove Burn."
+    },
+    {
+     "k": "Smudge",
+     "v": "Makes trivia or ABC attachment harder (for example, two correct answers instead of one)."
+    },
+    {
+     "k": "Siphon",
+     "v": "Damage over time that is partly returned to the attacker as healing."
+    }
+   ]
+  },
+  {
+   "title": "Helpful Effects and Keywords",
+   "items": [
+    {
+     "k": "Laminate",
+     "v": "Immunity to Tear, Rip, Glue and Spill while it lasts."
+    },
+    {
+     "k": "Hardcover",
+     "v": "Reduce all incoming damage by 10 until your next turn."
+    },
+    {
+     "k": "Highlight",
+     "v": "Temporarily powers up attacks or successful trivia."
+    },
+    {
+     "k": "Riposte",
+     "v": "A charged counter. While it is up, attackers are punished: most cards deal 20 damage back; some, like John Proctor, take away a Bookmark play instead."
+    },
+    {
+     "k": "Pierce",
+     "v": "The attack ignores up to 30 blocked damage."
+    },
+    {
+     "k": "Costs HP",
+     "v": "Moves that cost “20 of your own HP” damage the user every time they are used."
+    },
+    {
+     "k": "Strikes first",
+     "v": "The attack resolves before the opponent’s."
+    },
+    {
+     "k": "Clear",
+     "v": "Removes the named status effect from this character."
+    },
+    {
+     "k": "Climax question",
+     "v": "A story question about the book or play. Answering it correctly evolves an Act II card into Act III."
+    },
+    {
+     "k": "Bookmarks",
+     "v": "Support cards in your deck. Some triggers ask you to discard them to evolve."
+    }
+   ]
+  }
+ ],
+ "cards": {
+  "daisy": {
+   "no": 1,
+   "rarity": "Common",
+   "trigger": "Discard 2 ⚔ cards after 1 turn.",
+   "trig": "d2",
+   "story": "Nick’s cousin and Tom Buchanan’s wife, Daisy is the bright, elusive center of East Egg and the dream Gatsby has spent five years building toward. Her charm is real, but so is her habit of drifting toward whatever is easiest.",
+   "uses": [
+    "Play her early: Emotional Wave grows +10 every turn she survives, so she rewards patience.",
+    "At 85 HP she is fragile. Pair her with a sturdier front-liner while her damage ramps up.",
+    "Plan the evolve: discarding two sword cards after her first turn moves her into Act II."
+   ],
+   "atkExplain": "X means the damage is variable. Here it climbs by 10 for every turn Daisy stays on the table, so the wave gets heavier the longer she survives.",
+   "blkExplain": "A solid 50-point block for 2 ABC. Good insurance while Emotional Wave builds up.",
+   "atkText": "“Oh you want too much!” Add +10 each turn it stays in play.",
+   "blkText": "“I love you now, isn’t that enough?” Leans on her allies to soak a hit.",
+   "atkName": "Emotional Wave",
+   "blkName": "Shifting Loyalties",
+   "passive": null,
+   "name": "Daisy Buchanan",
+   "hp": 85,
+   "archetype": "Monument",
+   "resolution": null
+  },
+  "daisy_the_golden_girl": {
+   "no": 2,
+   "rarity": "Uncommon",
+   "trigger": "Climax question answered correctly.",
+   "trig": "climax",
+   "story": "Act II Daisy: reunited with Gatsby at Nick’s cottage and swept into his world, she is dazzling and adored, until the confrontation at the Plaza Hotel forces a choice between Gatsby and Tom that she cannot make.",
+   "uses": [
+    "A sustain piece: Still Here hits for 40 and heals 20 at once.",
+    "Clean and Whole is your answer to Burn and Tear decks. Hold it until the statuses pile up.",
+    "Answer the climax question correctly to push her into Act III."
+   ],
+   "atkExplain": "Deals 40 and heals Daisy for 20 in the same action, which makes her very hard to wear down in a trade.",
+   "blkExplain": "Blocks 30 and wipes both Burn and Tear off her. Save it for when statuses have stacked up.",
+   "atkText": "“I hope she’ll be a fool. That’s the best thing a girl can be in this world.” Heal 20 HP.",
+   "blkText": "“Oh, you want too much! I love you now; isn’t that enough?” Clear Burn and Tear.",
+   "atkName": "Still Here",
+   "blkName": "Clean and Whole",
+   "passive": null,
+   "name": "The Golden Girl",
+   "hp": 120,
+   "archetype": "Innocent",
+   "resolution": null
+  },
+  "daisy_careless_fool": {
+   "no": 3,
+   "rarity": "Legendary",
+   "trigger": "None - this is the endgame.",
+   "trig": "end",
+   "story": "The aftermath. Driving Gatsby’s car home from the city, Daisy strikes and kills Myrtle Wilson, then lets Gatsby take the blame and retreats with Tom into their money. Nick’s verdict on them both: they were careless people.",
+   "uses": [
+    "Her passive punishes every attacker for 20, so the opponent pays to touch her.",
+    "Watch her HP: each retaliation costs her 10. Heal her or swap her before she burns down.",
+    "Given Time also scales +10 a turn, so she gets scarier the longer she is ignored."
+   ],
+   "atkExplain": "Starts at 40 and adds 10 every turn she stays in play. The longer the opponent waits to deal with her, the worse it gets.",
+   "blkExplain": "Blocks 30 and removes Smudge.",
+   "atkText": "“All the bright precious things fade so fast, and they don’t come back.” +10 each turn it stays in play.",
+   "blkText": "“They’re such beautiful shirts.” Clear Smudge.",
+   "atkName": "Given Time",
+   "blkName": "Wipe It Clean",
+   "passive": {
+    "name": "Given Time",
+    "effect": "Whoever attacks this card takes 20 damage.",
+    "caveat": "It loses 10 HP each time that happens.",
+    "explain": "A thorn that stings every attacker, but each sting wears her down too. Heal her or plan to trade her out before it burns through her HP."
+   },
+   "name": "Careless Fool",
+   "hp": 150,
+   "archetype": "Fallen",
+   "resolution": "Tragic"
+  },
+  "gatsby": {
+   "no": 4,
+   "rarity": "Common",
+   "trigger": "Take damage from any source after 1 turn.",
+   "trig": "dmg",
+   "story": "The mysterious millionaire of West Egg, reaching across the bay toward the green light at the end of Daisy’s dock. No one is sure where his money came from, only that every party is thrown for one guest who never seems to arrive.",
+   "uses": [
+    "Green Light Ambition starts at 50 and adds +5 each turn: a reliable early hitter that keeps improving.",
+    "Fading Illusions erases an attack outright. Spend it on the opponent’s biggest swing, not the first one.",
+    "He evolves when he takes damage after his first turn, so letting a small hit through can be part of the plan."
+   ],
+   "atkExplain": "A dependable 50 that grows by 5 every turn he stays in play. The plus sign means the number only goes up.",
+   "blkExplain": "Cancels an incoming attack completely. The first use costs 3 ABC, then 4, and it stays capped at 4.",
+   "atkText": "“I love her, and that is the beginning and end of everything.” Add +5 each turn it stays in play.",
+   "blkText": "The illusion holds. Negate the attack entirely, but every use costs 1 more ABC than the last, up to 4.",
+   "atkName": "Green Light Ambition",
+   "blkName": "Fading Illusions",
+   "passive": null,
+   "name": "Jay Gatsby",
+   "hp": 105,
+   "archetype": "Monument",
+   "resolution": null
+  },
+  "gatsby_the_host_of_west_egg": {
+   "no": 5,
+   "rarity": "Uncommon",
+   "trigger": "Climax question answered correctly.",
+   "trig": "climax",
+   "story": "Act II Gatsby at the height of the illusion: the glittering parties, the Oxford story, the reunion with Daisy he staged for five years. He dispensed starlight to casual moths, and all of it was aimed at one person.",
+   "uses": [
+    "Dispensing Starlight is 60 damage plus a 20 HP heal: excellent trading power.",
+    "That Rare Smile cleanses Burn and Tear. Pair him with The Golden Girl so two cleansers cover each other.",
+    "140 HP lets him hold the board while you work toward the climax question."
+   ],
+   "atkExplain": "Hits for 60 and heals 20, which makes Gatsby a strong trader in the middle of a match.",
+   "blkExplain": "Blocks 30 and removes Burn and Tear from him.",
+   "atkText": "“I tried very hard to die, but I seemed to bear an enchanted life.” Heal 20 HP.",
+   "blkText": "“He had waited five years and bought a mansion where he dispensed starlight to casual moths.” Clear Burn and Tear.",
+   "atkName": "Dispensing Starlight",
+   "blkName": "That Rare Smile",
+   "passive": null,
+   "name": "The Host of West Egg",
+   "hp": 140,
+   "archetype": "Innocent",
+   "resolution": null
+  },
+  "gatsby_doomed_dreamer": {
+   "no": 6,
+   "rarity": "Legendary",
+   "trigger": "None - this is the endgame.",
+   "trig": "end",
+   "story": "The dream collapses. After the Plaza, Gatsby keeps watch over Daisy and waits for a call that never comes, still believing the past can be repeated, until George Wilson finds him in the pool.",
+   "uses": [
+    "The Green Light ignores defensive buffs. It is your answer to Laminate and other shields.",
+    "One Fine Morning draws a card while blocking, which keeps your hand full.",
+    "Use Platonic Conception to plan draws, but play key cards before he falls, since losing him costs a random discard."
+   ],
+   "atkExplain": "Deals 60 straight through shields and other defensive buffs on the target.",
+   "blkExplain": "Blocks 40 and draws a card, so defending still builds your hand.",
+   "atkText": "“His dream must have seemed so close that he could hardly fail to grasp it.” Ignores the target’s defensive buffs.",
+   "blkText": "“Can’t repeat the past? Why of course you can!” Draw 1.",
+   "atkName": "The Green Light",
+   "blkName": "One Fine Morning",
+   "passive": {
+    "name": "Platonic Conception",
+    "effect": "You may look at the top card of your deck at any time.",
+    "caveat": "When this card is knocked out, you discard a random card.",
+    "explain": "Constant information about your next draw lets you plan every turn. The cost lands when he falls, so keep him alive or play your key cards first."
+   },
+   "name": "Doomed Dreamer",
+   "hp": 180,
+   "archetype": "Trickster",
+   "resolution": "Tragic"
+  },
+  "myrtle": {
+   "no": 7,
+   "rarity": "Common",
+   "trigger": "Take damage from any source after 1 turn.",
+   "trig": "dmg",
+   "story": "Tom Buchanan’s mistress and George Wilson’s wife, Myrtle lives above a garage in the valley of ashes and longs to escape it. With Tom she plays at wealth in a New York apartment, until her ambition collides with the Buchanans’ world.",
+   "uses": [
+    "Ambitious Strike costs just 1 ABC: chip damage while you save ABC for bigger plays.",
+    "Fragile Aspirations blocks 50, almost her whole HP bar, for 2 ABC.",
+    "Let her take a hit after her first turn to evolve. Her arc is short and fast."
+   ],
+   "atkExplain": "30 damage for only 1 ABC, the cheapest pressure in the set so far.",
+   "blkExplain": "Blocks 50 for 2 ABC, a strong wall for a 70 HP card.",
+   "atkText": "A woman not limited by her station. Delivers a sharp, social-climbing jab.",
+   "blkText": "“All I kept thinking about was, you can’t live forever.” Absorbs one big attack at a cost.",
+   "atkName": "Ambitious Strike",
+   "blkName": "Fragile Aspirations",
+   "passive": null,
+   "name": "Myrtle Wilson",
+   "hp": 70,
+   "archetype": "Steadfast",
+   "resolution": null
+  },
+  "myrtle_fallen_ashes": {
+   "no": 8,
+   "rarity": "Legendary",
+   "trigger": "None - this is the endgame.",
+   "trig": "end",
+   "story": "Myrtle runs into the road toward the car she believes is Tom’s and is struck and killed outside Wilson’s garage. Her death sets the novel’s final tragedy in motion.",
+   "uses": [
+    "Cursed Crown punishes the knockout: whoever takes her out eats 40 damage.",
+    "The Reckoning is a 4-ABC hammer, but she cannot block that turn. Attack when the opponent is low on ABC.",
+    "Sealed Over grants Laminate, buying time while The Reckoning climbs."
+   ],
+   "atkExplain": "A heavy 4-ABC hit that starts at 60 and gains 10 every turn she stays in play.",
+   "blkExplain": "Blocks 50 and grants Laminate, a protective layer that keeps her standing while The Reckoning grows.",
+   "atkText": "Some things… you just don’t see coming. +10 each turn it stays in play.",
+   "blkText": "“This is a valley of ashes, where ashes grow like wheat into ridges and hills.” Grant Laminate.",
+   "atkName": "The Reckoning",
+   "blkName": "Sealed Over",
+   "passive": {
+    "name": "Cursed Crown",
+    "effect": "Whoever knocks this card out takes 40 damage.",
+    "caveat": "It cannot block on the turn it attacks.",
+    "explain": "Taking her down always costs the opponent 40. Choose her attacking turns carefully, because she is open on those turns."
+   },
+   "name": "Fallen Ashes",
+   "hp": 110,
+   "archetype": "Gatekeeper",
+   "resolution": "Tragic"
+  },
+  "abigail": {
+   "no": 24,
+   "rarity": "Common",
+   "trigger": "Discard 2 bookmarks after 1 turn.",
+   "trig": "bm",
+   "story": "Seventeen, sharp and unrepentant, Abigail was dismissed from the Proctors’ household after her affair with John. Caught dancing in the woods, she turns Salem’s fear of witchcraft into a weapon.",
+   "uses": [
+    "Rapier of Revenge starts at 20 but climbs with your discard pile and fallen allies, up to +40.",
+    "Alliance of Death blocks 50 and charges Riposte: attackers take 20 while it is up.",
+    "165 HP makes her a durable Act I anchor. Discard two Bookmarks after her first turn to evolve."
+   ],
+   "atkExplain": "Starts small at 20 but grows with your discard pile and your knocked-out allies, up to 60 total.",
+   "blkExplain": "Blocks 50 and charges Riposte, so anyone who attacks her while it is up takes 20 back.",
+   "atkText": "A vengeful thrust that builds on chaos. +5 per sword card in your discard pile and +10 for every fallen ally, up to +40.",
+   "blkText": "A grim pact wards off the blow and marks whoever threw it. Riposte: while charged, attackers take 20.",
+   "atkName": "Rapier of Revenge",
+   "blkName": "Alliance of Death",
+   "passive": null,
+   "name": "Abigail Williams",
+   "hp": 165,
+   "archetype": "Sentinel",
+   "resolution": null
+  },
+  "abigail_voice_of_the_court": {
+   "no": 25,
+   "rarity": "Uncommon",
+   "trigger": "Climax question answered correctly.",
+   "trig": "climax",
+   "story": "Act II Abigail commands the courtroom. With the girls behind her she names names, faints on cue and even threatens Deputy Governor Danforth. The court now depends on her word.",
+   "uses": [
+    "Mark Them inflicts Tear for just 2 ABC. Spread status early and often.",
+    "Come and Try is a cheap Riposte block: every attack costs the attacker 20.",
+    "200 HP lets her absorb pressure while you set up the climax question."
+   ],
+   "atkExplain": "Deals 30 and inflicts Tear on the target for just 2 ABC.",
+   "blkExplain": "Blocks 30 and charges Riposte, so attackers take 20 while it is up.",
+   "atkText": "“Think you to be so mighty that the power of Hell may not turn your wits?” Inflict Tear.",
+   "blkText": "To go against the court would be a mistake. Riposte: while charged, attackers take 20.",
+   "atkName": "Mark Them",
+   "blkName": "Come and Try",
+   "passive": null,
+   "name": "Voice of The Court",
+   "hp": 200,
+   "archetype": "Inquisitor",
+   "resolution": null
+  },
+  "abigail_the_absent_adjudicat": {
+   "no": 26,
+   "rarity": "Legendary",
+   "trigger": "None - this is the endgame.",
+   "trig": "end",
+   "story": "When the tide turns against the court, Abigail vanishes, slipping out of Salem at night with her uncle’s savings and leaving the accused to hang.",
+   "uses": [
+    "Before They See makes In and Out a 2-ABC, 60-damage draw. Swing every turn you can.",
+    "Duck Away costs 1 ABC and clears Glue, so she is never pinned in place.",
+    "She can never heal above 230, so spend healing elsewhere and keep her on offense."
+   ],
+   "atkExplain": "Deals 60 and draws a card.",
+   "blkExplain": "Blocks 30 for 1 ABC and clears Glue.",
+   "atkText": "“…and I will bring a pointy reckoning that will shudder you.” Draw 1.",
+   "blkText": "Cowardly but effective. Clear Glue.",
+   "atkName": "In and Out",
+   "blkName": "Duck Away",
+   "passive": {
+    "name": "Before They See",
+    "effect": "This card’s moves cost 1 less ABC (minimum 1).",
+    "caveat": "It can never be healed above its starting health.",
+    "explain": "In and Out drops to 2 ABC and Duck Away stays at 1, so she can act almost every turn. Healing is capped, so keep her attacking instead."
+   },
+   "name": "The Absent Adjudicator",
+   "hp": 230,
+   "archetype": "Scourge",
+   "resolution": "Tragic"
+  },
+  "jproctor": {
+   "no": 27,
+   "rarity": "Common",
+   "trigger": "Take damage from any source after 1 turn.",
+   "trig": "dmg",
+   "story": "A Salem farmer with a fierce sense of honesty and a private guilt: his affair with Abigail. Contemptuous of Reverend Parris and the growing panic, Proctor knows the truth that could stop the trials, if he is willing to confess his own sin to tell it.",
+   "uses": [
+    "Late Jab of Truth grows with your discard pile. He hits hardest in the mid-game, once the pile has filled up.",
+    "Leave Me My Name slows Bookmark-heavy decks: attackers lose a Bookmark play on their next turn.",
+    "He evolves when he takes damage after his first turn, so letting a light hit through moves him into Act II."
+   ],
+   "atkExplain": "Starts at 20 and adds 5 for every Attack (⚔) and Block (⛊) card in your discard pile, up to +50 (70 total). A slow starter that gets dangerous later in the game.",
+   "blkExplain": "Blocks 30 and charges a different kind of Riposte: instead of taking damage, whoever attacks him while it is up plays one fewer Bookmark on their next turn.",
+   "atkText": "The truth can wait no longer. +5 ⚔ per ⚔ and ⛊ card in your discard pile, to +50.",
+   "blkText": "He defends his name, and the accusation costs the accuser. Riposte: while charged, attackers play one fewer Bookmark next turn.",
+   "atkName": "Late Jab of Truth",
+   "blkName": "Leave Me My Name",
+   "passive": null,
+   "name": "John Proctor",
+   "hp": 105,
+   "archetype": "Paragon",
+   "resolution": null
+  },
+  "jproctor_the_accused_husband": {
+   "no": 28,
+   "rarity": "Uncommon",
+   "trigger": "Climax question answered correctly.",
+   "trig": "climax",
+   "story": "Act II Proctor takes on the court. To save Elizabeth he brings Mary Warren to testify and even confesses his adultery to expose Abigail, only to be accused of witchcraft himself when Mary turns on him.",
+   "uses": [
+    "Duty, Not Anger hits 50 for 2 ABC. Use it on any turn you can.",
+    "Hold the Line caps any hit at 10. Save it for the opponent’s biggest attack.",
+    "Answer the climax question correctly to evolve him into Act III."
+   ],
+   "atkExplain": "50 damage for only 2 ABC, one of the most efficient attacks in the set.",
+   "blkExplain": "The 10 is a ceiling, not a block amount: however hard the attack, he takes at most 10 damage from it.",
+   "atkText": "“What work you do! It’s strange work for a Christian girl to hang old women!”",
+   "blkText": "“In the proper place where my beasts are bedded.” Caps incoming damage at 10.",
+   "atkName": "Duty, Not Anger",
+   "blkName": "Hold the Line",
+   "passive": null,
+   "name": "The Accused Husband",
+   "hp": 140,
+   "archetype": "Sentinel",
+   "resolution": null
+  },
+  "jproctor_his_good_name": {
+   "no": 29,
+   "rarity": "Legendary",
+   "trigger": "None - this is the endgame.",
+   "trig": "end",
+   "story": "In jail, Proctor signs a false confession to save his life, then tears it up rather than let the court nail his name to the church door. He goes to the gallows with his integrity restored, which is why his arc resolves as Comic: he dies, but he dies redeemed.",
+   "uses": [
+    "In and Out deals 60 and draws a card: steady pressure that keeps your hand full.",
+    "Duck Away clears Glue for 1 ABC, so he cannot be locked down.",
+    "Homecoming heals your whole team 20 when he falls, so trading him away late still pays off."
+   ],
+   "atkExplain": "Deals 60 and draws a card.",
+   "blkExplain": "Blocks 30 for 1 ABC and clears Glue.",
+   "atkText": "“Oh, Elizabeth, your justice would freeze beer!” Draw 1.",
+   "blkText": "“Were I stone I would have cracked for shame this seven month.” Clear Glue.",
+   "atkName": "In and Out",
+   "blkName": "Duck Away",
+   "passive": {
+    "name": "Homecoming",
+    "effect": "When it is knocked out, heal your team 20 HP.",
+    "caveat": "Its blocks never stop more than 30.",
+    "explain": "Even his fall helps the team. The cap only matters when another effect would push his block above 30."
+   },
+   "name": "His Good Name",
+   "hp": 160,
+   "archetype": "Urchin",
+   "resolution": "Comic"
+  },
+  "romeo": {
+   "no": 44,
+   "rarity": "Common",
+   "trigger": "Take damage from any source after 1 turn.",
+   "trig": "dmg",
+   "story": "A lovesick young Montague pining for Rosaline, Romeo slips into the Capulet feast and falls for Juliet at first sight. Impulsive and all-in, he swears his love beneath her balcony that same night.",
+   "uses": [
+    "But Soft, What Light is a 70-damage opener for 3 ABC. Plan around the 20 HP it costs him.",
+    "Banished negates any attack for 2 ABC. Mix it in so he survives long enough to evolve.",
+    "He evolves the next time he takes damage after his first turn in play."
+   ],
+   "atkExplain": "A huge 70 from a 65 HP card, but every use costs Romeo 20 HP. Three swings and he is nearly gone.",
+   "blkExplain": "Here X means the block cancels the attack completely, but each negate still costs him 10 HP.",
+   "atkText": "He never counts the cost. Costs 20 of your own HP.",
+   "blkText": "Exiled from the only wall he had. Negate the attack entirely. Loses 10 HP each time it does.",
+   "atkName": "But Soft, What Light",
+   "blkName": "Banished",
+   "passive": null,
+   "name": "Romeo Montague",
+   "hp": 65,
+   "archetype": "Martyr",
+   "resolution": null
+  },
+  "romeo_husband_of_juliet": {
+   "no": 45,
+   "rarity": "Uncommon",
+   "trigger": "Climax question answered correctly.",
+   "trig": "climax",
+   "story": "Act II Romeo marries Juliet in secret with Friar Laurence’s help. Hours later, trying to stop a street fight, he watches Tybalt kill Mercutio, kills Tybalt in revenge and is banished from Verona.",
+   "uses": [
+    "Love’s Light Wings inflicts Tear. Follow up with your biggest hitters while it lasts.",
+    "Stony Limits charges Riposte: attackers take 20 while it is up.",
+    "Answer the climax question correctly to evolve him into Act III."
+   ],
+   "atkExplain": "Deals 50 and inflicts Tear, leaving the target weakened (it takes extra damage or pays more ABC to attack).",
+   "blkExplain": "Blocks 30 and charges Riposte, so attackers take 20 while it is up.",
+   "atkText": "“With love’s light wings did I o’erperch these walls.” Inflict Tear.",
+   "blkText": "“Some consequence yet hanging in the stars.” Riposte: while charged, attackers take 20.",
+   "atkName": "Love’s Light Wings",
+   "blkName": "Stony Limits",
+   "passive": null,
+   "name": "Husband of Juliet",
+   "hp": 100,
+   "archetype": "Inquisitor",
+   "resolution": null
+  },
+  "romeo_fortunes_fool": {
+   "no": 46,
+   "rarity": "Legendary",
+   "trigger": "None - this is the endgame.",
+   "trig": "end",
+   "story": "Banished and told that Juliet is dead, Romeo buys poison from the Apothecary and rides back to Verona. He kills Paris at the tomb and drinks the poison beside Juliet moments before she wakes.",
+   "uses": [
+    "Evolve and attack on the same turn: Headlong pushes I Defy You, Stars to 110.",
+    "Striking first lets him knock out an attacker before it can hit back.",
+    "Budget his HP. Every attack costs 10, so use A Desperate Man to buy safe turns."
+   ],
+   "atkExplain": "The biggest hit in the catalog so far: 90 damage that lands before the opponent’s attack.",
+   "blkExplain": "Cancels an incoming attack completely.",
+   "atkText": "“Then I defy you, stars!” Strikes first.",
+   "blkText": "“Tempt not a desperate man.” Negate the attack entirely.",
+   "atkName": "I Defy You, Stars",
+   "blkName": "A Desperate Man",
+   "passive": {
+    "name": "Headlong",
+    "effect": "Deals +20 on the turn it evolves or enters play.",
+    "caveat": "It takes 10 recoil damage with every attack.",
+    "explain": "Evolve him and swing right away: I Defy You, Stars hits for 110 on that first turn. Every attack after that costs him 10 HP."
+   },
+   "name": "Fortune’s Fool",
+   "hp": 130,
+   "archetype": "Outlaw",
+   "resolution": "Tragic"
+  },
+  "mercutio": {
+   "no": 50,
+   "rarity": "Uncommon",
+   "trigger": "Flip a coin, if TAILS, trigger ACT II.",
+   "trig": "coinT",
+   "story": "Romeo’s quick-witted friend and the Prince’s kinsman, Mercutio mocks love, spins the dazzling Queen Mab speech and refuses to back down from a fight, even one that is not his.",
+   "uses": [
+    "A Plague on Both Your Houses is a 90-damage finisher. Fire it when it will knock something out, because each use costs him a third of his HP.",
+    "Queen Mab is one of the cheapest blocks in the game. Use it when your hand has a card you can spare.",
+    "His evolution is a coin flip on tails, so have a backup plan if luck runs the other way."
+   ],
+   "atkExplain": "90 damage from a 60 HP card, at the price of 20 of his own HP each time. Two uses and he is nearly spent.",
+   "blkExplain": "A 30-point block for just 1 ABC, paid for by discarding a random card from your hand.",
+   "atkText": "The curse costs him everything, and lands on everyone. Costs 20 of your own HP.",
+   "blkText": "Discard a random card from hand to resolve.",
+   "atkName": "A Plague on Both Your Houses",
+   "blkName": "Queen Mab",
+   "passive": null,
+   "name": "Mercutio",
+   "hp": 60,
+   "archetype": "Martyr",
+   "resolution": null
+  },
+  "mercutio_worms_meat": {
+   "no": 51,
+   "rarity": "Legendary",
+   "trigger": "None - this is the endgame.",
+   "trig": "end",
+   "story": "Stabbed under Romeo’s arm as Romeo tries to break up his duel with Tybalt, Mercutio jokes that his wound is “a scratch, a scratch” and dies cursing both houses. His death is the turning point that sends the play toward tragedy.",
+   "uses": [
+    "Pick the status to suit the target: Burn cannot be healed away, while Spill keeps ticking until it is cleared.",
+    "His own Spill costs him 10 HP a turn, so play him aggressively. He will not last long.",
+    "Ask for Me Tomorrow clears Burn, which protects him from opponents who return fire."
+   ],
+   "atkExplain": "Deals 50 and inflicts your choice of Burn or Spill. With Grave Man it hits for 60.",
+   "blkExplain": "Blocks 30 and clears Burn.",
+   "atkText": "“If love be blind, love cannot hit the mark.” Inflict Burn or Spill, your choice.",
+   "blkText": "“If love be rough with you, be rough with love.” Clear Burn.",
+   "atkName": "Scratch, a Scratch",
+   "blkName": "Ask for Me Tomorrow",
+   "passive": {
+    "name": "Grave Man",
+    "effect": "Attacks that give a bad status deal +10.",
+    "caveat": "This card carries a permanent, uncleansable Spill (−10 HP each turn).",
+    "explain": "Every Scratch, a Scratch lands for 60. The built-in Spill takes 10 HP a turn, so he is on a clock from the moment he arrives."
+   },
+   "name": "Worms’ Meat",
+   "hp": 100,
+   "archetype": "Shadow",
+   "resolution": "Tragic"
+  },
+  "tybalt": {
+   "no": 52,
+   "rarity": "Uncommon",
+   "trigger": "Flip a coin, if HEADS, trigger ACT II.",
+   "trig": "coinH",
+   "story": "Juliet’s hot-tempered cousin and the Capulets’ best swordsman. Mercutio mocks him as the “Prince of Cats,” and Tybalt spends the play looking for any excuse to fight a Montague.",
+   "uses": [
+    "King of Cats pierces blocks, making it reliable damage against defensive decks.",
+    "Peace? I Hate the Word turns every block into a Tear on the attacker.",
+    "His evolution is a coin flip on heads."
+   ],
+   "atkExplain": "Deals 30 and gains Pierce, ignoring up to 30 blocked damage.",
+   "blkExplain": "Blocks 30 and punishes the attacker with Tear.",
+   "atkText": "Silver tongue, silver blade. Gains Pierce.",
+   "blkText": "Inflict Tear on the attacker.",
+   "atkName": "King of Cats",
+   "blkName": "Peace? I Hate the Word",
+   "passive": null,
+   "name": "Tybalt",
+   "hp": 75,
+   "archetype": "Outlaw",
+   "resolution": null
+  },
+  "tybalt_the_prince_of_cats": {
+   "no": 53,
+   "rarity": "Legendary",
+   "trigger": "None - this is the endgame.",
+   "trig": "end",
+   "story": "Tybalt kills Mercutio in the street brawl, then dies on Romeo’s sword moments later. His death gets Romeo banished and sets the lovers’ final days in motion.",
+   "uses": [
+    "With King of Cats, Have At Thee costs 2 ABC: a 70-damage first strike almost every turn.",
+    "I Hate the Word costs 1 ABC and Tears the attacker, so blocking is cheap and punishing.",
+    "He cannot heal above 120, so spend healing on someone else."
+   ],
+   "atkExplain": "Deals 70 before the opponent’s attack lands. With King of Cats it costs only 2 ABC.",
+   "blkExplain": "Blocks 30 and inflicts Tear on the attacker. With King of Cats it costs only 1 ABC.",
+   "atkText": "“What, drawn, and talk of peace? I hate the word.” Strikes first.",
+   "blkText": "Inflict Tear on the attacker.",
+   "atkName": "Have At Thee",
+   "blkName": "I Hate the Word",
+   "passive": {
+    "name": "King of Cats",
+    "effect": "This card’s moves cost 1 less ABC (minimum 1).",
+    "caveat": "It can never be healed above its starting health.",
+    "explain": "Have At Thee becomes a 2-ABC, 70-damage first strike, and I Hate the Word drops to 1 ABC. Healing stops at 120."
+   },
+   "name": "The Prince of Cats",
+   "hp": 120,
+   "archetype": "Gatekeeper",
+   "resolution": "Tragic"
+  },
+  "macbeth": {
+   "no": 63,
+   "rarity": "Common",
+   "trigger": "Take damage from any source after 1 turn.",
+   "trig": "dmg",
+   "story": "A brave Scottish general fresh from victory, Macbeth meets three witches who prophesy that he will be king. Urged on by his wife, he begins to wonder what he would do to make it come true.",
+   "uses": [
+    "Vaulting Ambition hits hard, but knockouts Burn him. Keep a cleanse ready, or save it for the final blow of a game.",
+    "False Courage blocks 40 and clears Tear for 2 ABC.",
+    "He evolves the next time he takes damage after his first turn in play."
+   ],
+   "atkExplain": "Deals 50, but if it knocks a character out, Macbeth Burns himself. Every victory leaves a mark.",
+   "blkExplain": "Blocks 40 and clears Tear.",
+   "atkText": "“None can stand in the way of my destiny.” If this attack knocks a character out, it inflicts Burn on itself.",
+   "blkText": "A breastplate that shimmers like steel but weak as tin. Clear Tear.",
+   "atkName": "Vaulting Ambition",
+   "blkName": "False Courage",
+   "passive": null,
+   "name": "Macbeth",
+   "hp": 125,
+   "archetype": "Hero",
+   "resolution": null
+  },
+  "macbeth_thane_of_cawdor": {
+   "no": 64,
+   "rarity": "Uncommon",
+   "trigger": "Climax question answered correctly.",
+   "trig": "climax",
+   "story": "Act II Macbeth murders King Duncan in his sleep and takes the crown. To keep it, he has his friend Banquo killed, then sees Banquo’s ghost at his own feast.",
+   "uses": [
+    "No Armour There pierces blocks, so it still lands against walls.",
+    "Slip the Knot keeps him free to move against Glue decks.",
+    "Answer the climax question correctly to evolve him into Act III."
+   ],
+   "atkExplain": "Deals 50 and gains Pierce, ignoring up to 30 blocked damage.",
+   "blkExplain": "Blocks 30 and makes him immune to the next Glue.",
+   "atkText": "“Nothing can stop me…” Gains Pierce.",
+   "blkText": "Macbeth eludes punishment. Prevent the next Glue.",
+   "atkName": "No Armour There",
+   "blkName": "Slip the Knot",
+   "passive": null,
+   "name": "Thane of Cawdor",
+   "hp": 160,
+   "archetype": "Outlaw",
+   "resolution": null
+  },
+  "macbeth_tyrant_of_dunsinane": {
+   "no": 65,
+   "rarity": "Legendary",
+   "trigger": "None - this is the endgame.",
+   "trig": "end",
+   "story": "The tyrant. After ordering the murder of Macduff’s family, Macbeth shuts himself inside Dunsinane, trusting the witches’ promises, until Birnam Wood comes to the castle and Macduff kills him.",
+   "uses": [
+    "Final Stand pushes him under half health fast, where Violent Paranoia adds +20.",
+    "He can never be healed, so plan how many turns you need from him before spending HP.",
+    "Sleep No More is a 1-ABC block paid for with a random discard."
+   ],
+   "atkExplain": "Deals 70 for 20 of his own HP, which also drags him toward the half-health line where Violent Paranoia kicks in.",
+   "blkExplain": "A 30-point block for 1 ABC, paid for with a random card from your hand.",
+   "atkText": "“My blood and my blade will cut through my enemies.” Costs 20 of your own HP.",
+   "blkText": "“What more can I sacrifice?!” Discard a random card from hand to resolve.",
+   "atkName": "Final Stand",
+   "blkName": "Sleep No More",
+   "passive": {
+    "name": "Violent Paranoia",
+    "effect": "Attacks deal +20 while this card is below half health.",
+    "caveat": "It can never be healed.",
+    "explain": "Below 95 HP, Final Stand hits for 90. He can never heal, so every HP he spends is gone for good."
+   },
+   "name": "Tyrant of Dunsinane",
+   "hp": 190,
+   "archetype": "Fallen",
+   "resolution": "Tragic"
+  },
+  "lady_macbeth": {
+   "no": 66,
+   "rarity": "Common",
+   "trigger": "Flip a coin, if tails, trigger ACT II.",
+   "trig": "coinT",
+   "story": "Macbeth’s ruthless wife. When she reads his letter about the witches, she calls on dark spirits to fill her with cruelty, plans Duncan’s murder and shames her husband into carrying it out.",
+   "uses": [
+    "Ambitions Blade pierces blocks for only 2 ABC.",
+    "Shield of Greed blocks 40 and clears both Burn and Spill, a strong answer to damage-over-time decks.",
+    "Her evolution is a coin flip on tails."
+   ],
+   "atkExplain": "Deals 30 and gains Pierce, ignoring up to 30 blocked damage.",
+   "blkExplain": "Blocks 40 and clears both Burn and Spill.",
+   "atkText": "“Take my milk for gall.” Gains Pierce.",
+   "blkText": "“Infirm of purpose! Give me daggers.” Clear Burn and Spill.",
+   "atkName": "Ambitions Blade",
+   "blkName": "Shield of Greed",
+   "passive": null,
+   "name": "Lady Macbeth",
+   "hp": 115,
+   "archetype": "Outlaw",
+   "resolution": null
+  },
+  "lady_macbeth_the_haunted_que": {
+   "no": 67,
+   "rarity": "Uncommon",
+   "trigger": "Climax question answered correctly.",
+   "trig": "climax",
+   "story": "Lady Macbeth is queen, but the crown brings no peace. She covers for her husband when he raves at Banquo’s ghost in front of their guests, while her own guilt begins to surface.",
+   "uses": [
+    "Pour My Spirits adds 20 damage over two turns and heals her 10 in total.",
+    "A Little Water caps any hit at 20. Save it for the opponent’s biggest attack.",
+    "Answer the climax question correctly to evolve her into Act III."
+   ],
+   "atkExplain": "Deals 50 and inflicts Siphon: the target loses 10 HP a turn for 2 turns, and half of it (5 a turn) heals her.",
+   "blkExplain": "The 20 is a ceiling, not a block amount: however hard the attack, she takes at most 20 damage from it.",
+   "atkText": "“Come, you spirits that tend on mortal thoughts, unsex me here.” Inflict Siphon: 10 HP a turn for 2 turns, half returned.",
+   "blkText": "“A little water clears us of this deed.” Caps incoming damage at 20.",
+   "atkName": "Pour My Spirits",
+   "blkName": "A Little Water",
+   "passive": null,
+   "name": "The Haunted Queen",
+   "hp": 150,
+   "archetype": "Fallen",
+   "resolution": null
+  },
+  "lady_macbeth_the_undone": {
+   "no": 68,
+   "rarity": "Legendary",
+   "trigger": "None - this is the endgame.",
+   "trig": "end",
+   "story": "Lady Macbeth sleepwalks through the castle, trying to scrub invisible blood from her hands. Consumed by guilt, she dies offstage before the final battle.",
+   "uses": [
+    "Free Highlight every turn adds +20 to each attack, on top of The Long Look’s +10 per turn.",
+    "Her permanent Smudge means every ABC needs two correct trivia answers. She rewards players who know the text well.",
+    "Keep her in play: both her attack and her Highlight make every turn count more."
+   ],
+   "atkExplain": "Starts at 40 and adds 10 every turn she stays in play.",
+   "blkExplain": "Blocks 30 and clears Smudge from her (but not the permanent Smudge from her passive).",
+   "atkText": "“Screw your courage to the sticking place.” +10 each turn it stays in play.",
+   "blkText": "“My hands are of your colour, but I shame to wear a heart so white.” Clear Smudge.",
+   "atkName": "The Long Look",
+   "blkName": "Start Again",
+   "passive": {
+    "name": "Given Time",
+    "effect": "At the start of each of your turns this card gains Highlight if it has none.",
+    "caveat": "It is permanently Smudged: its ABCs need two correct answers.",
+    "explain": "A fresh Highlight every turn means +20 on each attack. The price is trivia: every ABC attached to her needs two correct answers."
+   },
+   "name": "The Undone",
+   "hp": 180,
+   "archetype": "Fallen",
+   "resolution": "Tragic"
+  }
+ }
+}
