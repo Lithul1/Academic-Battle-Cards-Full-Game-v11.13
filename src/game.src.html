@@ -3058,6 +3058,148 @@ body.abc-arena[data-screen="play"] .side .char.pf .act-badge,body.abc-arena[data
 body.abc-arena[data-screen="play"] .side .char.pf .act-pass{z-index:3}
 body.abc-arena[data-screen="play"] .abc-inspect .hc.pf-hc,.hand-view .hc.pf-hc{height:auto!important;min-height:0!important;aspect-ratio:130/154;padding:0!important}
 body.abc-arena[data-screen="play"] .abc-inspect .hc.pf-hc .hcc-nm{font-size:max(12px,8cqw)!important}
+
+/* fix_print_cards */
+:root{--pf-lens:url("data:image/webp;base64,__ABCASSET_1161__");}
+/* ===== printed character card (Inspect) — every number is frame px / 7.5 (cqw) ===== */
+.pcz{position:relative;width:100%;aspect-ratio:5/7;container-type:inline-size;border-radius:3cqw;background:#efe4c8;overflow:hidden}
+.pcz::before{content:"";position:absolute;inset:0;background:var(--pf) no-repeat center top/100% auto;pointer-events:none;z-index:2}
+.pcz-art{position:absolute;left:5.6cqw;width:74.6cqw;top:10.6cqw;height:51.8cqw;z-index:1;overflow:hidden;background:linear-gradient(160deg,var(--accent,#556),#1b1714);display:grid;place-items:center}
+.pcz.pf-fe .pcz-art{left:19.2cqw;width:60cqw}
+.pcz-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pcz-art .mono{font-family:var(--disp);font-size:14cqw;color:rgba(255,255,255,.9)}
+.pcz-name{position:absolute;left:29.6cqw;width:49.5cqw;top:3.4cqw;height:7cqw;z-index:3;display:flex;align-items:center;overflow:hidden}
+.pcz.pf-fe .pcz-name{left:31.5cqw;width:47.5cqw}
+.pcz-name span{font-family:var(--disp);font-size:var(--nfs,5.4cqw);line-height:1;color:#1b1410;white-space:nowrap;
+  text-shadow:0 0 .5cqw #fff,0 0 .5cqw #fff,.3cqw .4cqw 0 rgba(255,255,255,.75)}
+.pcz-hp{position:absolute;left:80.7cqw;width:18.3cqw;top:2.2cqw;z-index:3;display:flex;align-items:baseline;justify-content:center;gap:1cqw;font-family:var(--cond);color:#111;line-height:1}
+.pcz-hp b{font-weight:400;font-size:var(--hfs,8.2cqw)}.pcz-hp small{font-size:3.9cqw}
+.pcz.pf-fe .pcz-hp{color:#fff;text-shadow:0 .3cqw 1cqw #000}
+.pcz-arch{position:absolute;left:80.7cqw;width:18.3cqw;top:18.5cqw;height:40.5cqw;z-index:3;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pcz-arch span{writing-mode:vertical-rl;font-family:var(--cond);font-size:var(--afs,10cqw);line-height:1;color:#111;white-space:nowrap;letter-spacing:.02em}
+.pcz.pf-fe .pcz-arch span{color:#fff;text-shadow:0 .3cqw 1cqw #000}
+.pcz-trig{position:absolute;left:24.4cqw;width:52cqw;top:65.3cqw;height:3.8cqw;z-index:3;display:flex;align-items:center;font:2.95cqw/1 Arial,Helvetica,sans-serif;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcz-prev{position:absolute;right:22.4cqw;top:59.6cqw;max-width:24cqw;z-index:3;text-align:right;font:600 1.75cqw/1.05 var(--body);letter-spacing:.28em;color:#fff;text-shadow:0 0 .6cqw #000}
+.pcz-res{position:absolute;left:6.2cqw;top:10.2cqw;z-index:3;display:flex;align-items:center;gap:2.2cqw;font:600 1.65cqw/1 var(--body);letter-spacing:.32em;color:#fff;text-transform:uppercase}
+.pcz-res i{font-style:normal;font-size:3.4cqw;line-height:1;filter:saturate(1.3)}
+.pcz-moves{position:absolute;left:0;right:0;top:70.2cqw;z-index:3;display:flex;flex-direction:column;gap:0}
+.pcz-m{position:relative;padding:0 6.7cqw 0 18.7cqw;margin-bottom:.6cqw}
+.pcz-m h4{margin:0 0 0 .7cqw;font:400 4.15cqw/1.15 var(--disp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:-.25cqw -.25cqw 0 #fff,.25cqw -.25cqw 0 #fff,-.25cqw .25cqw 0 #fff,.25cqw .25cqw 0 #fff}
+.pcz-m.atk h4{color:#cf341d}.pcz-m.blk h4{color:#3a8ee6}
+.pcz-m p{margin:0;min-height:var(--mh,15.4cqw);background:rgba(255,255,255,.55);border-radius:1.3cqw;padding:2cqw 2.2cqw 1.4cqw;
+  font:700 var(--mfs,3.9cqw)/1.08 'Courier New',Courier,monospace;color:#111}
+.pcz-bdg{position:absolute;left:4.5cqw;top:1.6cqw;width:12.2cqw;height:13.6cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:var(--cond);line-height:1}
+.pcz-m.atk .pcz-bdg{background:#c8352a;clip-path:polygon(50% 0,64% 9%,100% 9%,100% 100%,0 100%,0 9%,36% 9%);padding-top:2cqw;left:4.4cqw}
+.pcz-m.blk .pcz-bdg{background:#3a86e0;clip-path:polygon(0 0,100% 0,100% 80%,50% 100%,0 80%);padding-bottom:2.4cqw;left:6cqw;width:9.4cqw;height:13cqw}
+.pcz-bdg b{font-weight:400;font-size:var(--bfs,5.8cqw)}
+.pcz-bdg i{font-style:normal;font-size:2.6cqw;border-top:.4cqw solid #fff;margin-top:.6cqw;padding:.4cqw 1.8cqw 0}
+.pcz-pas{position:absolute;left:12.6cqw;right:8cqw;top:121cqw;z-index:3}
+.pcz-pas h4{margin:0 0 .4cqw;font:400 3cqw/1.1 var(--disp);color:#f2a51f;text-shadow:0 .2cqw .6cqw rgba(0,0,0,.7)}
+.pcz-pas p{margin:0;font:700 2.55cqw/1.25 'Courier New',Courier,monospace;color:#fff;text-shadow:0 .2cqw .5cqw #000}
+.pcz:not(.act3) .pcz-pas{top:auto;bottom:6.4cqw;background:rgba(20,15,11,.82);border-radius:1.4cqw;padding:1.2cqw 2cqw}
+.pcz-deck{position:absolute;left:9cqw;top:133.6cqw;z-index:3;font:700 2.4cqw/1 Arial,sans-serif;letter-spacing:.06em;color:#1b1410}
+/* narrow Inspect column (desktop): crop the card under the trigger bar; moves and passive continue below in
+   the same printed style at a readable size -- one copy of every line, nothing repeated */
+.pcz-wrap{container-type:inline-size}
+@container (max-width:299px){
+  .pcz{aspect-ratio:auto;padding:69.8cqw 0 2.4cqw;background:#efe4c8 linear-gradient(#e7dcc0,#efe4c8)}
+  .pcz::before{bottom:auto;height:69.8cqw}
+  .pcz-moves,.pcz-pas{position:relative;z-index:3;top:auto!important;left:auto;right:auto}
+  .pcz-moves{padding-top:.6cqw}
+  .pcz-m{padding:0 3cqw 0 18cqw;margin-bottom:2cqw}
+  .pcz-m h4{font-size:max(11.5px,4.15cqw);margin-left:0}
+  .pcz-m p{min-height:0;background:rgba(255,255,255,.88);font-size:max(10.5px,3cqw)!important;line-height:1.3;padding:5px 6px}
+  .pcz-bdg{left:3cqw!important;top:.4cqw;transform:scale(.92);transform-origin:top left}
+  .pcz-pas,.pcz:not(.act3) .pcz-pas{margin:1cqw 3cqw 0;background:rgba(20,15,11,.9);border-radius:6px;padding:6px 8px;bottom:auto}
+  .pcz-pas h4{font-size:max(11.5px,3cqw)}.pcz-pas p{font-size:max(10.5px,2.55cqw)}
+  .pcz-deck{display:none}
+}
+.pcz-live{display:flex;align-items:center;gap:6px;margin:6px 0;font:700 10px/1 Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#5a4a2a}
+
+/* ===== Bookmarks (hand + Inspect): the physical layout, colour by kind ===== */
+.pfb{position:relative;container-type:inline-size;overflow:hidden;border-radius:9px;background:#f3e8cd;--k:#2d2523;--k2:#4a3c34}
+.pfb.k-boost{--k:#2f5f1c;--k2:#4f8a2c}.pfb.k-item{--k:#22344a;--k2:#3b5677}.pfb.k-status{--k:#0f3a22;--k2:#1f5a37}
+.pfb.k-utility{--k:#7a4c1d;--k2:#a8742f}.pfb.k-reset{--k:#5f1224;--k2:#8a2537}.pfb.k-support{--k:#2d2523;--k2:#4d4038}
+.pfb.r-L{--k:#0b0a09;--k2:#2a2723}
+.pfb-in{position:absolute;inset:3.5cqw;border-radius:5cqw;overflow:hidden;
+  background:radial-gradient(120% 80% at 50% 40%,var(--k2),var(--k) 70%),var(--k);}
+.pfb-in::after{content:"";position:absolute;inset:0;opacity:.16;pointer-events:none;
+  background:repeating-linear-gradient(60deg,transparent 0 6cqw,rgba(255,220,150,.5) 6cqw 6.5cqw),repeating-linear-gradient(-60deg,transparent 0 6cqw,rgba(255,220,150,.5) 6cqw 6.5cqw)}
+.pfb-name{position:absolute;left:17%;right:3%;top:0;height:var(--nh,14%);z-index:2;display:flex;align-items:center;justify-content:safe center;
+  font:700 var(--tfs,10cqw)/1 'Spectral',Georgia,serif;color:#f4a62a;white-space:nowrap;overflow:hidden;text-shadow:0 .4cqw 0 rgba(0,0,0,.45)}
+.pfb-side{position:absolute;left:0;width:17%;top:0;bottom:var(--fh,28%);z-index:2;display:flex;align-items:center;justify-content:center}
+.pfb-side span{writing-mode:vertical-rl;transform:rotate(180deg);font:700 var(--sfs,12.5cqw)/1 'Spectral',Georgia,serif;color:#f4a62a;letter-spacing:.02em;text-shadow:0 .4cqw 0 rgba(0,0,0,.45)}
+.pfb-art{position:absolute;left:17%;right:3%;top:var(--nh,14%);bottom:var(--fh,28%);z-index:2;border:1.6cqw solid #1b1714;background:#ddd5c2;overflow:hidden}
+.pfb-art img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(.15) contrast(1.05)}
+.pfb-art .ph{display:grid;place-items:center;height:100%;font:700 6cqw Georgia,serif;color:#8a806c}
+.pfb-foot{position:absolute;left:4%;right:4%;bottom:2%;height:calc(var(--fh,28%) - 3%);z-index:2;display:flex;flex-direction:column;gap:1cqw;padding-top:1.6cqw;overflow:hidden}
+.pfb-foot b{font:700 var(--kfs,6.6cqw)/1 Arial,Helvetica,sans-serif;letter-spacing:.06em;color:#f4a62a}
+.pfb-foot p{margin:0;font:700 var(--xfs,6.4cqw)/1.25 Arial,Helvetica,sans-serif;color:#f6efe0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:var(--cl,3)}
+.pfb-rar{position:absolute;right:2.5%;bottom:2.5%;z-index:3;width:var(--rs,8cqw);height:var(--rs,8cqw)}
+.pfb-rar svg{width:100%;height:100%;display:block;filter:drop-shadow(0 .3cqw .3cqw rgba(0,0,0,.6))}
+/* the hand card is squarer than the print: a shorter name band, tighter footer */
+.pfb{--fh:31%;--xfs:5.9cqw;--cl:5;--kfs:6cqw}
+.hand .hc.pfb,.pfb.hand{--nh:15%;--fh:33%;--sfs:10cqw;--kfs:6.4cqw;--xfs:6.2cqw;--cl:3}
+
+/* ===== Critical Lens -- frame 1524x2180 (height = 143cqw); name sits right of the CRITICAL LENS tab ===== */
+.pfl{position:relative;width:100%;aspect-ratio:1524/2180;container-type:inline-size;overflow:hidden;background:#f7f1e3;border-radius:2.5cqw}
+.pfl::before{content:"";position:absolute;inset:0;background:var(--pf-lens) no-repeat center top/100% auto;pointer-events:none;z-index:2}
+.pfl-art{position:absolute;left:3.3cqw;right:3.3cqw;top:17.6cqw;height:68cqw;z-index:1;overflow:hidden;background:linear-gradient(160deg,var(--accent,#6a5a3a),#1b1714);display:grid;place-items:center}
+.pfl-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pfl-mono{font-family:var(--disp);font-size:14cqw;color:rgba(255,255,255,.85)}
+.pfl-name{position:absolute;left:31cqw;right:5cqw;top:3cqw;height:14.6cqw;z-index:3;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pfl-name span{font:400 var(--lfs,6.2cqw)/1.05 var(--disp);color:#fbe7b5;white-space:nowrap;
+  text-shadow:-.35cqw -.35cqw 0 #14100c,.35cqw -.35cqw 0 #14100c,-.35cqw .35cqw 0 #14100c,.35cqw .35cqw 0 #14100c,0 .6cqw 1.2cqw rgba(0,0,0,.6)}
+.pfl-pan{position:absolute;left:11cqw;right:11cqw;z-index:3;display:flex;align-items:center;justify-content:center;text-align:center;
+  font:600 var(--pfs,3.4cqw)/1.28 var(--body);color:#f3e6c8}
+.pfl-pan b{display:none}
+.pfl-pan.p1{top:93cqw;height:9.4cqw}.pfl-pan.p2{top:109.6cqw;height:10.4cqw}.pfl-pan.p3{top:127.4cqw;height:10.4cqw}
+.pfl-foot{position:absolute;left:0;right:0;bottom:0;z-index:3;background:rgba(251,246,234,.95);border-top:1.5px solid #1b1410;text-align:center;
+  font:600 max(8px,6.4cqw)/1.55 Arial,sans-serif;color:#5a4a2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pfl.hand{aspect-ratio:auto;height:100%;border-radius:0}
+.pfl.hand .pfl-name span{font-size:max(9px,var(--lfs,6.2cqw))}
+.pfl-wrap{container-type:inline-size}
+/* narrow Inspect: crop under the art, the three panels continue below at a readable size */
+@container (max-width:299px){
+  .pfl.full{aspect-ratio:auto;padding:86.6cqw 0 1px;background:#f7f1e3}
+  .pfl.full::before{bottom:auto;height:86.6cqw}
+  .pfl.full .pfl-pan{position:relative;z-index:3;top:auto;left:auto;right:auto;height:auto;display:block;margin:0 3cqw 2.4cqw;padding:5px 8px 6px;border-radius:5px;text-align:left;
+    background:#2b2520 radial-gradient(120% 140% at 30% 20%,#3d342c,#221d19);box-shadow:inset 0 0 0 1px rgba(0,0,0,.5);font:600 11.5px/1.35 var(--body);color:#f3e6c8}
+  .pfl.full .pfl-pan b{display:block;font:700 11px/1.2 var(--body);letter-spacing:.08em;text-transform:uppercase;color:#e8a52a;margin-bottom:2px;text-align:center}
+}
+.pc-lensinsp{display:flex;flex-direction:column;gap:7px;background:#f3e8cd;border:3px solid #241f1b;border-radius:12px;padding:8px;color:#241f1b}
+.pc-lensinsp .lc-thesis{width:100%}
+.pc-lensinsp .pcb-close{align-self:center;min-height:34px;padding:4px 16px}
+.pc-decl{font:700 11px/1 Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#5a4a2a;text-align:center}
+/* ===== Inspect dossier: paper behind everything (fixes dark text on dark deck art) ===== */
+.bench-view.pc-dossier,body.abc-arena[data-screen="play"] .ai-dossier .bench-view.pc-dossier{background:#f3e8cd!important;color:#241f1b}
+.pc-dossier .bv-chg,.pc-dossier .bv-chg.none{color:#5a4a2a}
+.pcz-live .pc-hp{flex:1;min-width:0}
+/* ===== hand-card sizing in game ===== */
+.hc.pfb,.hc.pc-lens{padding:0!important;overflow:hidden}
+.hc.pc-lens>.pfl{height:100%}
+body.abc-arena[data-screen="play"] .abc-inspect .hc.pfb{height:270px!important;max-height:none!important;padding:0!important}
+body.abc-arena[data-screen="play"] .abc-inspect .hc.pc-lens{height:240px!important;max-height:none!important;padding:0!important}
+.hand-view .hc.pfb,.hand-view .hc.pc-lens{height:auto!important;aspect-ratio:5/7;padding:0!important}
+.hc.pfb.dm-lock::after{z-index:6}
+.pfb-ph{display:grid;place-items:center;height:100%;font-size:14cqw;color:#8a806c}
+/* Arena hand character: reuses the fix_print_frames Act-card frame, plus its buttons */
+.hc.pc-char .hc-info{position:absolute;right:3px;top:3px;z-index:5}
+.hc.pc-char.pf-fe .pfh-art{left:19.2%;width:60%}
+.hc.pc-char .pfh-sub{padding:1px 0 0;color:#5a4a2a}
+.hc.pc-char .pfh-foot{position:absolute;left:0;right:0;bottom:0;z-index:3;background:rgba(251,246,234,.95);border-top:1.5px solid #1b1410;padding:2px 3px;
+  font-size:max(7.5px,6.2cqw);text-align:center;color:#1f6a3a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc.pc-char .pfh-pb{position:absolute;left:4%;right:4%;bottom:4px;z-index:4;display:flex;gap:4px;margin:0}
+.hc.pc-char .pfh-pb button{flex:1;min-width:0}
+/* the Inspect column styles every <p> -- keep the card's own sizes */
+.bench-view.pc-dossier .pcz p{margin:0!important}
+.bench-view.pc-dossier .pcz .pcz-m p{font-size:var(--mfs,3.9cqw)!important;line-height:1.08!important}
+.bench-view.pc-dossier .pcz .pcz-pas p{font-size:2.55cqw!important;line-height:1.25!important}
+@container (max-width:299px){
+  .bench-view.pc-dossier .pcz .pcz-m p{font-size:max(10.5px,3cqw)!important;line-height:1.3!important}
+  .bench-view.pc-dossier .pcz .pcz-pas p{font-size:max(10.5px,2.55cqw)!important;line-height:1.3!important}
+}
 </style>
 </head>
 <body>
@@ -7871,6 +8013,128 @@ function abcPfActHand(c,idx,straty,deal,_lk){
       <div class="act-cond ${met?'met':'unmet'}">${cond}</div></div>`;
 }
 
+/* fix_print_cards */
+/* fix_print_cards: printed-card look for Inspect, Arena hand characters, Bookmarks and Critical Lenses.
+   Character text is set to the Dextrous scans (frame px / 7.5 = cqw). Uses the frames from fix_print_frames,
+   and its Tune switch ("Printed card frames") turns all of this off too. */
+const PC_BM_RAR={
+  C:'<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="#f3efe6" stroke="#222" stroke-width="1.5"/></svg>',
+  U:'<svg viewBox="0 0 20 20"><path d="M10 2 L18.5 17 H1.5Z" fill="#4fae5a" stroke="#123" stroke-width="1.3"/></svg>',
+  R:'<svg viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L1.3 7.8l6.1-.7z" fill="#5b9be0" stroke="#123" stroke-width="1.1"/></svg>',
+  E:'<svg viewBox="0 0 20 20"><path d="M10 1.5 L17.5 7 L14.6 17.5 H5.4 L2.5 7Z" fill="#9a4fc4" stroke="#1a0d22" stroke-width="1.2"/><path d="M2.5 7H17.5M10 1.5L7 7l3 10.5L13 7z" fill="none" stroke="#e3c4f3" stroke-width=".8"/></svg>',
+  L:'<svg viewBox="0 0 20 20"><path d="M2 15 L3 5 L7.5 9.5 L10 3 L12.5 9.5 L17 5 L18 15Z" fill="#f2c13a" stroke="#3a2a06" stroke-width="1.2"/><rect x="2" y="15" width="16" height="2.5" fill="#d9a62a" stroke="#3a2a06" stroke-width="1"/></svg>'
+};
+function abcPcFit(txt,w,max,k){ return Math.min(max, w/(k*Math.max(1,String(txt||'').length))); }
+/* how this card evolves NEXT -- the print's trigger line */
+function abcPcPlotText(a){ return a.plot==='hit'?'Takes damage.':'Climax question answered correctly.'; }
+function abcPcTrigger(c){
+  const act=c.act||1, d=abcPfDeck(c);
+  if(act>=3) return 'None - this is the endgame.';
+  let nx=null;
+  if(act===2) nx=(DATA.acts||[]).find(function(a){ return a.act===3 && a.from===c._actId; });
+  else { const bid=(c.fe&&c.base)?c.base[1]:c.id; nx=(DATA.acts||[]).find(function(a){ return a.act===2 && a.from===bid && a.deck===d; }); }
+  return nx?abcPcPlotText(nx):'';
+}
+function abcPcPrev(c){
+  if(!((c.act||1)>1)) return '';
+  const a=actById(c._actId); if(!a) return '';
+  return (a.act===2?'Act I: ':'Act II: ')+actStageName(a.from);
+}
+function abcPcMoveFs(t){
+  const n=String(t||'').replace(/<[^>]*>/g,'').length;
+  for(let f=3.9; f>=2.55; f-=.05){ if(Math.ceil(n*.6*f*1.12/70.2)*f*1.08<=12.6) return f; }
+  return 2.55;
+}
+function abcPcMove(m,cls){
+  if(!m) return '';
+  const lab=String(m.label||''), v=lab.indexOf('/')>=0?lab.split('/')[0]:(m.dmg!=null?m.dmg:(m.block!=null?m.block:'')), cost=m.cost!=null?m.cost:(lab.split('/')[1]||'');
+  return `<div class="pcz-m ${cls}"><div class="pcz-bdg" style="--bfs:${String(v).length<3?5.8:4.6}cqw"><b>${abcPfEsc(v)}</b><i>${abcPfEsc(cost)}</i></div><h4>${abcPfEsc(m.n)}</h4><p style="--mfs:${abcPcMoveFs(m.t).toFixed(2)}cqw">${m.t||''}</p></div>`;
+}
+/* the printed character card (Inspect). Wide containers (phone) carry all the text on the card; the narrow
+   desktop Inspect crops the card under the trigger bar and lets the moves continue below it. */
+function abcPcCard(ch,k){
+  const d=abcPfDeck(ch), act=ch.act||1, nm=String(ch.name||'').replace(/\s*\(1E\)\s*$/,'');
+  const port=ch.img?`<img src="${ch.img}" alt="" style="object-position:${ch.imgpos||'50% 20%'}">`:`<span class="mono">${initials(nm)}</span>`;
+  const hp=ch.maxHp||ch.hp, arch=ch.archetype||'', prev=abcPcPrev(ch), a=act===3?actById(ch._actId):null;
+  let deckName=''; try{ deckName=setName(d)||''; }catch(e){}
+  return `<div class="pcz act${act}${k==='fe'?' pf-fe':''}" style="--pf:var(--pf-${k});--accent:${ch.accent||'#556'}">
+    <div class="pcz-art">${port}</div>
+    ${prev?`<div class="pcz-prev">${abcPfEsc(prev)}</div>`:''}
+    ${(a&&a.resolution)?`<div class="pcz-res"><i>🎭</i>Resolution: ${a.resolution==='tragic'?'Tragic':'Comic'}</div>`:''}
+    <div class="pcz-name"><span style="--nfs:${abcPcFit(nm,48,5.4,.6).toFixed(2)}cqw">${abcPfEsc(nm)}</span></div>
+    <div class="pcz-hp"><b style="--hfs:${String(hp).length<3?8.2:7.4}cqw">${hp}</b><small>HP</small></div>
+    <div class="pcz-arch"><span style="--afs:${abcPcFit(arch,36,9.2,.52).toFixed(2)}cqw">${abcPfEsc(arch)}</span></div>
+    <div class="pcz-trig">${abcPfEsc(abcPcTrigger(ch))}</div>
+    <div class="pcz-moves">${abcPcMove(ch.atk,'atk')}${abcPcMove(ch.atk2,'atk')}${abcPcMove(ch.blk,'blk')}</div>
+    ${(ch.passive&&ch.passive.text)?`<div class="pcz-pas"><h4>${abcPfEsc(ch.passive.name||(ch._boss?'Behaviour':'Passive'))}</h4><p>${ch.passive.text}</p></div>`:''}
+    ${k==='fe'&&deckName?`<div class="pcz-deck">${abcPfEsc(deckName.toUpperCase())}</div>`:''}
+  </div>`;
+}
+function abcPcDossier(ch,p,v){
+  const k=abcPfKey(ch); if(!k) return '';
+  const pct=Math.max(0,ch.hp/ch.maxHp*100);
+  return `<div class="modal-bg"><div class="bench-view char pf-dossier pc-dossier" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"><div class="pcz-wrap">
+    ${abcPcCard(ch,k)}
+    <div class="pcz-live"><span>Health</span><span class="pc-hp"><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div></div>
+    ${benchChargeList(ch)}
+    ${(v.side==='you'&&S.arena&&ARENA_RULES.offstage&&!S._sim&&p.team.indexOf(ch)!==p.activeIdx)?arenaOffBtn(p,ch):''}
+    <button class="pcb-close" data-do="benchclose">Close &#10005;</button>
+  </div></div>`;
+}
+/* PreCon Arena: a character in your hand, framed like its printed card (same buttons and data hooks) */
+function abcPcCharHand(c,idx,straty,deal){
+  if(!abcPfOn()) return '';
+  const d=c._cdef||{}, k=abcPfKey(d); if(!k) return '';
+  const you=S.you, bench=drawnBench(you);
+  const liveAct=!!(you._hasActive && you.team[you.activeIdx] && you.team[you.activeIdx].hp>0);
+  const placing=S.phase==='place';
+  const cp=(straty||placing) && (bench<DRAWN_BENCH_MAX || !liveAct);
+  const _pi=(typeof feImg==='function'?feImg(d):null)||(d.img?{img:d.img,pos:d.imgpos}:null);
+  const img=_pi&&_pi.img?`<img class="hcc-img" src="${_pi.img}" alt="${abcPfEsc(c.name)}"${_pi.pos?` style="object-position:${_pi.pos}"`:''}>`:`<span class="hcc-mono" style="background:${c.accent||'#444'}">${initials(c.name)}</span>`;
+  const foot = placing
+    ? `<div class="dm-pb pfh-pb"><button data-do="dmplace:${idx}:active" ${liveAct?'disabled':''}>★ Active</button><button data-do="dmplace:${idx}:bench" ${bench>=DRAWN_BENCH_MAX?'disabled':''}>▼ Bench</button></div>`
+    : `<div class="hcc-foot pfh-foot">${!liveAct?'Tap — step up to Active':(bench<DRAWN_BENCH_MAX?`Tap — send to Backstage (${bench}/${DRAWN_BENCH_MAX})`:`Backstage is full (${DRAWN_BENCH_MAX})`)}</div>`;
+  const nm=String(c.name||d.name||'').replace(/\s*\(1E\)\s*$/,'');
+  return `<div class="hc crit pf-hc pc-char${k==='fe'?' pf-fe':''} ${cp?'playable':'spent'}${deal}" ${placing?'':`data-idx="${idx}"`} style="--pf:var(--pf-${k})">
+      <button class="hc-info" data-do="dminfo:${idx}" title="Card details">ⓘ</button>
+      <div class="pfh-art">${img}</div>
+      <div class="pfh-plate"><div class="hcc-nm">${abcPfEsc(nm)}</div><div class="hcc-foot pfh-sub">${d.hp||''} HP · ${abcPfEsc(d.archetype||'')}</div></div>
+      ${foot}</div>`;
+}
+/* Bookmarks: the printed layout, coloured by kind (Legendary is always black) */
+function abcPcBm(c,idx,playable,deal,_lk){
+  if(!abcPfOn()||!c||!c.name) return '';
+  const kind=String(c.kind||'SUPPORT').toLowerCase(), r=c.rarity||'';
+  const art=c.img?`<img src="${c.img}" alt="">`:'<span class="pfb-ph">✦</span>';
+  return `<div class="hc bm ${kind} pfb k-${kind}${r?' r-'+r:''} ${playable?'playable':'spent'}${deal}${_lk}" data-idx="${idx}" style="--tfs:${abcPcFit(c.name,72,9.6,.62).toFixed(2)}cqw">
+    <div class="pfb-in"><div class="pfb-name">${abcPfEsc(c.name)}</div><div class="pfb-side"><span>BOOKMARK</span></div><div class="pfb-art">${art}</div>
+    <div class="pfb-foot"><b>${abcPfEsc(c.kind||'')}</b><p>${c.text||''}</p></div>${PC_BM_RAR[r]?`<i class="pfb-rar" title="${r}">${PC_BM_RAR[r]}</i>`:''}</div></div>`;
+}
+/* Critical Lens: the frame, name to the right of the CRITICAL LENS tab, art in the window */
+function abcPcLensFace(c,cls,inner){
+  const img=c.img?`<img src="${c.img}" alt="">`:`<span class="pfl-mono">${initials(c.name)}</span>`;
+  return `<div class="pfl ${cls||''}" style="--accent:${c.accent||'#6a5a3a'}"><div class="pfl-name"><span style="--lfs:${abcPcFit(c.name,62,6.2,.6).toFixed(2)}cqw">${abcPfEsc(c.name)}</span></div><div class="pfl-art">${img}</div>${inner||''}</div>`;
+}
+function abcPcLensPanels(c){
+  return `<div class="pfl-pan p1"><b>Passive</b><span>${c.passive||''}</span></div><div class="pfl-pan p2"><b>Thesis</b><span>${c.thesis||''}</span></div><div class="pfl-pan p3"><b>Reward</b><span>${c.reward||''}</span></div>`;
+}
+function abcPcLensHand(c,idx,straty,deal){
+  if(!abcPfOn()) return '';
+  const you=S.you, cp=straty && !you.crit;
+  return `<div class="hc crit pc-lens ${cp?'playable':'spent'}${deal}" data-idx="${idx}">${abcPcLensFace(c,'hand','<div class="pfl-foot">'+(you.crit?'A Lens is already active':'Tap to deploy')+'</div>')}</div>`;
+}
+/* the Lens in the Inspect column: same card, plus the thesis button and a close */
+function abcPcLensInsp(P,side){
+  if(!abcPfOn()||!P||!P.crit) return '';
+  const c=P.crit;
+  const canFulfill = side==='you' && S.turn==='you' && !S.over && !busy && (S.phase==='strategize'||S.phase==='engage');
+  const met = side==='you' ? thesisMet(side).ok : false;
+  const btn = side==='you' ? `<button class="lc-thesis ${canFulfill?'':'off'} ${met?'met':'unmet'}" data-do="thesis" ${canFulfill?'':'disabled'}>${met?'Fulfil thesis ▸':'Thesis not met yet'}</button>` : '';
+  return `<div class="pc-lensinsp"><div class="pfl-wrap">${abcPcLensFace(c,'full',abcPcLensPanels(c))}</div>
+    ${c.declared?`<div class="pc-decl">Declared: <b>${c.declared==='ATTACK'?'⚔ Attack':'⛊ Block'}</b></div>`:''}${btn}
+    <button class="pcb-close" data-do="lens:${side}">Close &#10005;</button></div>`;
+}
+
 function menuScreen(){
   return `<div class="title-screen menu-landing">
     <img class="title-logo title-crest" src="${window.ABC_CREST||window.ABC_LOGO||''}" alt="Academic Battle Cards">
@@ -8711,6 +8975,7 @@ function handCard(c,idx){
       <div class="hc-foot">${c.type==='ATTACK'?'Answer to charge an attack':'Answer to charge a block'}</div></div>`;
   }
   if(c.cat==='crit'){
+    try{ const _pc=abcPcLensHand(c,idx,straty,deal); if(_pc) return _pc; }catch(e){}   /* fix_print_cards */
     const cp=straty && !you.crit;
     const img=c.img?`<img class="hcc-img" src="${c.img}" alt="${c.name}">`:`<span class="hcc-mono" style="background:${c.accent||'#444'}">${initials(c.name)}</span>`;
     return `<div class="hc crit ${cp?'playable':'spent'}${deal}" data-idx="${idx}">
@@ -8720,6 +8985,7 @@ function handCard(c,idx){
       <div class="hcc-foot">${you.crit?'A Lens is already active':'Tap to deploy'}</div></div>`;
   }
   if(c.cat==='char'){
+    try{ const _pc=abcPcCharHand(c,idx,straty,deal); if(_pc) return _pc; }catch(e){}   /* fix_print_cards */
     const d=c._cdef||{};
     const bench=drawnBench(you);
     const liveAct=!!(you._hasActive && you.team[you.activeIdx] && you.team[you.activeIdx].hp>0);
@@ -8746,6 +9012,7 @@ function handCard(c,idx){
   }
   if(c.cat==='act') return actHandCard(c,idx,straty,deal,_lk);
   const playable=straty && (you.flags.bmCount||0)<2 && !drawnLocked();
+  try{ const _pc=abcPcBm(c,idx,playable,deal,_lk); if(_pc) return _pc; }catch(e){}   /* fix_print_cards */
   return `<div class="hc bm ${c.kind.toLowerCase()} ${playable?'playable':'spent'}${deal}${_lk}" data-idx="${idx}">
     <div class="hc-top bmk">✦ ${c.kind}${c.rarity?` · ${({C:'⚪ C',U:'🟢 U',R:'🔵 R',E:'🟣 E',L:'👑 L'})[c.rarity]||c.rarity}`:''}</div>${c.img?`<div class="bmb-wrap"><img class="bmb-bg" src="${c.img}" alt=""><div class="bmb-fg"><div class="hc-name">${c.name}</div><div class="hc-text">${c.text}</div></div></div>`:`<div class="hc-name">${c.name}</div><div class="hc-text">${c.text}</div>`}</div>`;
 }
@@ -10078,7 +10345,7 @@ function abcPinnedHtml(){
     const h=String(benchInfoModal()||'').replace(/^\s*<div class="modal-bg">/,'').replace(/<\/div>\s*$/,'');
     if(h) return '<div class="ai-dossier">'+h+'</div>';
   }
-  for(const side of ['you','opp']){ const P=S[side]; if(P && P._lensOpen && P.crit) return '<div class="ai-lens">'+critChip(P,side)+'</div>'; }
+  for(const side of ['you','opp']){ const P=S[side]; if(P && P._lensOpen && P.crit) return '<div class="ai-lens">'+(abcPcLensInsp(P,side)||critChip(P,side))+'</div>';   /* fix_print_cards */ }
   return '';
 }
 function abcInspectPaint(){ const b=document.querySelector('.abc-inspect .ai-body'); if(b) b.innerHTML=abcInspectHtml(); }
@@ -10298,6 +10565,7 @@ function handViewModal(){
 function benchInfoModal(){
   const v=S._benchView||{}; const p=v.side==='you'?S.you:S.opp; if(!p) return '';
   const ch=p.team.find(c=>c.uid===v.uid); if(!ch) return '';
+  try{ const _pc=abcPcDossier(ch,p,v); if(_pc) return _pc; }catch(e){}   /* fix_print_cards */
   try{ const _pf=abcPfDossier(ch,p,v); if(_pf) return _pf; }catch(e){}   /* fix_print_frames */
   const pct=Math.max(0,ch.hp/ch.maxHp*100);
   const port=ch.img?`<img src="${ch.img}" style="object-position:${ch.imgpos||'50% 20%'}">`:`<span class="mono">${initials(ch.name)}</span>`;
