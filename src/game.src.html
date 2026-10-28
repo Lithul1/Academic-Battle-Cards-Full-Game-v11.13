@@ -2967,6 +2967,97 @@ body.px-boss .char.opp.boss .pc-moves{order:7}
 .chs-badge{display:inline-block;min-width:18px;padding:2px 6px;margin-left:6px;border-radius:999px;background:#b5402a;color:#fff;font:700 11px/1.2 Arial,sans-serif;vertical-align:middle}
 #abcChBanner{position:fixed;left:50%;top:12px;transform:translate(-50%,0);z-index:61;pointer-events:none;background:#1b1410;border:3px solid #E3A92B;box-shadow:0 3px 0 #6e1d12,6px 6px 0 rgba(0,0,0,.4);padding:8px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#f6eedb;font:700 14px/1.2 Arial,sans-serif}
 #abcChBanner img{display:block;image-rendering:crisp-edges;image-rendering:pixelated}
+
+/* fix_print_frames */
+:root{--pf-fe:url("data:image/webp;base64,__ABCASSET_1154__");--pf-gatsby-1:url("data:image/webp;base64,__ABCASSET_1155__");--pf-gatsby-2:url("data:image/webp;base64,__ABCASSET_1156__");--pf-gatsby-3:url("data:image/webp;base64,__ABCASSET_1157__");--pf-romeojuliet-1:url("data:image/webp;base64,__ABCASSET_1158__");--pf-romeojuliet-2:url("data:image/webp;base64,__ABCASSET_1159__");--pf-romeojuliet-3:url("data:image/webp;base64,__ABCASSET_1160__");}
+
+/* fix_print_frames -- every position is measured on the 750x1050 frame: x as % of width,
+   y as cqw (frame px / 7.5), so the frame can be scaled to any card width and cropped at the bottom */
+.pf-fr-base,
+body.abc-arena[data-screen="play"] .side .char.pf::before,
+body.abc-arena[data-screen="play"] .bench-mini.pf::before,
+.hc.pf-hc::before,
+.pfz::before{content:"";position:absolute;inset:0;background:var(--pf) no-repeat center top/100% auto;pointer-events:none;z-index:2;border-radius:inherit}
+/* -- Active card -- */
+body.abc-arena[data-screen="play"] .side .char.pf{padding:0!important;background:#efe4c8!important;border:0!important;border-radius:9px;
+  height:auto!important;aspect-ratio:168/135;container-type:inline-size;overflow:visible}
+body.abc-arena.abc-phone[data-screen="play"] .side .char.pf{aspect-ratio:136/150;padding:0!important}
+body.abc-arena[data-screen="play"] .side .char.pf .pc-art{position:absolute!important;left:5.6%;width:74.6%;top:10.6cqw;height:51.8cqw!important;
+  border:0!important;border-radius:0!important;background:linear-gradient(160deg,var(--accent),#1b1714)!important;box-shadow:none!important;margin:0!important;z-index:1;overflow:visible}
+body.abc-arena[data-screen="play"] .side .char.pf.pf-fe .pc-art{left:19.2%;width:60%}
+body.abc-arena[data-screen="play"] .side .char.pf .pc-art .port-img{position:absolute;inset:0}
+body.abc-arena[data-screen="play"] .side .char.pf .pc-art .pc-flip{z-index:4;right:3px;bottom:3px}
+body.abc-arena[data-screen="play"] .side .char.pf .fe-badge,
+body.abc-arena[data-screen="play"] .side .char.pf .act-crack,
+body.abc-arena[data-screen="play"] .side .char.pf .act-curtain,
+body.abc-arena[data-screen="play"] .side .char.pf .act-valance,
+body.abc-arena[data-screen="play"] .side .char.pf .pc-art::before,
+body.abc-arena[data-screen="play"] .side .char.pf .pc-art::after{display:none!important}
+body.abc-arena[data-screen="play"] .side .char.pf .pc-plate{position:absolute;left:4%;right:4%;top:61.5cqw;margin:0!important;z-index:3;flex-direction:column;gap:2px;
+  background:rgba(251,246,234,.96);border:1.5px solid #1b1410;border-radius:6px;padding:2px 4px 3px;box-shadow:0 2px 0 rgba(0,0,0,.35)}
+body.abc-arena[data-screen="play"] .side .char.pf .pc-name{background:none!important;color:#1b1410!important;border:0!important;box-shadow:none!important;padding:0!important;
+  font-family:var(--disp)!important;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+body.abc-arena[data-screen="play"] .side .char.pf .pc-hp{width:100%;min-width:0!important;flex:none}
+body.abc-arena[data-screen="play"] .side .char.pf .pips{position:absolute;left:6.5%;top:52cqw;z-index:3;margin:0!important;min-height:0;justify-content:flex-start;max-width:58%}
+/* -- Backstage minis -- */
+body.abc-arena[data-screen="play"] .bench-mini.pf{padding:0!important;background:#efe4c8!important;container-type:inline-size}
+body.abc-arena[data-screen="play"] .bench-mini.pf::before{border-radius:5px}
+body.abc-arena[data-screen="play"] .bench-mini.pf .bm-init{position:absolute;left:5.6%;width:74.6%!important;top:10.6cqw;height:51.8cqw!important;flex:none;border-radius:0!important;z-index:auto;display:block;overflow:visible}
+body.abc-arena[data-screen="play"] .bench-mini.pf.pf-fe .bm-init{left:19.2%;width:60%!important}
+body.abc-arena[data-screen="play"] .bench-mini.pf{isolation:isolate}
+body.abc-arena[data-screen="play"] .bench-mini.pf .bm-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+body.abc-arena[data-screen="play"] .bench-mini.pf .bm-swap{z-index:6;position:absolute;top:-10.6cqw;left:-7.5%;transform:translate(-6px,-6px);box-shadow:0 2px 0 #241f1b}
+body.abc-arena[data-screen="play"] .bench-mini.pf .fe-mini,body.abc-arena[data-screen="play"] .bench-mini.pf .bm-init::after{display:none!important}
+body.abc-arena[data-screen="play"] .bench-mini.pf .bm-hp{position:absolute;left:4px;right:4px;bottom:15px;margin:0!important;z-index:3}
+body.abc-arena[data-screen="play"] .bench-mini.pf .bm-name{position:absolute;left:0;right:0;bottom:0;z-index:3;background:rgba(251,246,234,.95);border-top:1.5px solid #1b1410;
+  border-radius:0 0 5px 5px;padding:1px 2px;color:#1b1410}
+body.abc-arena[data-screen="play"] .bench-mini.pf .bm-hpc,body.abc-arena[data-screen="play"] .bench-mini.pf .bm-stc,body.abc-arena[data-screen="play"] .bench-mini.pf .bm-chg{z-index:5}
+/* -- Act card in hand -- */
+.hc.pf-hc{position:relative;padding:0!important;background:#efe4c8;container-type:inline-size;overflow:hidden}
+.hc.pf-hc .pfh-art{position:absolute;left:5.6%;width:74.6%;top:10.6cqw;height:51.8cqw;z-index:1;overflow:hidden;background:#1b1714}
+.hc.pf-hc .pfh-art .hcc-img,.hc.pf-hc .pfh-art .hcc-mono{position:absolute;inset:0;width:100%;height:100%}
+.hc.pf-hc .pfh-plate{position:absolute;left:4%;right:4%;top:61.5cqw;z-index:3;background:rgba(251,246,234,.96);border:1.5px solid #1b1410;border-radius:6px;padding:2px 3px 3px;box-shadow:0 2px 0 rgba(0,0,0,.35)}
+.hc.pf-hc .hcc-nm{padding:0;font-size:max(10px,9cqw);color:#1b1410;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc.pf-hc .hcc-foot{padding:1px 0 0;font-size:max(7.5px,6.4cqw);color:#4a3f33;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc.pf-hc .act-cond{position:absolute;left:0;right:0;bottom:0;z-index:3;background:rgba(251,246,234,.95);border-top:1.5px solid #1b1410;font-size:max(7.5px,6.4cqw);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* -- Inspect dossier: the full printed-style card -- */
+.pf-dossier .pfz-wrap{container-type:inline-size;width:100%}
+.pfz{position:relative;width:100%;aspect-ratio:5/7;container-type:inline-size;border-radius:4.5cqw;background:#efe4c8;margin:0 auto 6px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
+.pfz-art{position:absolute;left:5.6%;width:74.6%;top:10.6cqw;height:51.8cqw;z-index:1;overflow:hidden;background:linear-gradient(160deg,var(--accent),#1b1714);display:grid;place-items:center}
+.pfz.pf-fe .pfz-art{left:19.2%;width:60%}
+.pfz-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pfz-art .mono{font-family:var(--disp);font-size:14cqw;color:rgba(255,255,255,.9)}
+.pfz-name{position:absolute;left:31%;right:21%;top:5.9cqw;height:4.2cqw;z-index:3;display:flex;align-items:center;overflow:hidden}
+.pfz.pf-fe .pfz-name{left:33%}
+.pfz-name .pc-name,body.abc-arena[data-screen="play"] .ai-dossier .pfz-name .pc-name{white-space:nowrap!important;line-height:1!important;font-family:var(--disp);color:#1b1410;text-shadow:0 0 3px #fff8e6,0 0 6px #fff8e6;background:none!important;padding:0!important;border:0!important;box-shadow:none!important}
+.pfz-hp{position:absolute;left:80.5%;width:18%;top:4.2cqw;z-index:3;text-align:center;font:800 7.6cqw/1 var(--disp);color:#a3202f}
+.pfz-hp small{display:block;font:700 3cqw/1.2 Arial,sans-serif;letter-spacing:.1em;color:#3a332b}
+.pfz-arch{position:absolute;left:80.5%;width:18%;top:19cqw;height:40cqw;z-index:3;writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;
+  font:700 4cqw/1 Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#3a332b}
+.pfz.pf-fe .pfz-hp,.pfz.pf-fe .pfz-hp small,.pfz.pf-fe .pfz-arch{color:#fff;text-shadow:0 1px 3px #000}
+.pfz-trig{position:absolute;left:24.5%;width:53%;top:64.8cqw;height:3.8cqw;z-index:3;display:flex;align-items:center;font:600 2.9cqw/1 Arial,sans-serif;color:#241f1b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pfz-moves{position:absolute;left:6%;right:6%;top:73cqw;z-index:3;display:flex;flex-direction:column;gap:2cqw}
+.pfz-m{display:flex;gap:2cqw;align-items:center;background:rgba(251,246,234,.92);border:.5cqw solid #1b1410;border-radius:2cqw;padding:1.8cqw 2.4cqw}
+.pfz-m>div{flex:1;min-width:0}
+.pfz-m b{display:block;font:700 max(10px,4.6cqw)/1.15 var(--disp);color:#1b1410;font-weight:400}
+.pfz-m em{font:700 max(10px,4.6cqw)/1 Arial,sans-serif;font-style:normal;color:#fff;border-radius:1.4cqw;padding:1.2cqw 1.8cqw;white-space:nowrap}
+.pfz-m.atk em{background:#a8321e}.pfz-m.blk em{background:#2e5f9e}
+.pfz-p{background:rgba(27,20,16,.88);color:#f3ead6;border-radius:2cqw;padding:1.6cqw 2.4cqw}
+.pfz-p b{display:block;font:700 max(9.5px,4cqw)/1.2 var(--disp);font-weight:400;color:#ffd45e}
+.pfz-d{display:none;font:max(9px,3.1cqw)/1.3 Arial,sans-serif;color:#3a332b}.pfz-p .pfz-d{color:#f3ead6}
+.pfz-deck{position:absolute;left:9%;top:133.7cqw;z-index:3;font:700 2.6cqw/1 Arial,sans-serif;letter-spacing:.06em;color:#1b1410}
+.pfz-live{display:flex;align-items:center;gap:6px;margin:0 0 6px;font:700 10px/1 Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#5a4a2a}
+.pfz-live .pc-hp{flex:1;min-width:0}
+.pfz-text{font:11.5px/1.35 Arial,sans-serif;color:#2a231c;margin:0 0 6px}
+.pfz-text p{margin:0 0 4px}
+/* wide Inspect (phone, iPad): the card is big enough to carry its own text */
+@container (min-width:300px){ .pfz-d{display:block} .pfz-text{display:none} .pfz-moves{top:71cqw} }
+body.abc-arena[data-screen="play"] .ai-dossier:has(.pf-dossier){width:100%}
+body.abc-arena[data-screen="play"] .ai-dossier .bench-view.pf-dossier{width:100%!important;box-sizing:border-box}
+body.abc-arena[data-screen="play"] .side .char.pf .act-badge,body.abc-arena[data-screen="play"] .side .char.pf .act-res{display:none!important}
+body.abc-arena[data-screen="play"] .side .char.pf .act-pass{z-index:3}
+body.abc-arena[data-screen="play"] .abc-inspect .hc.pf-hc,.hand-view .hc.pf-hc{height:auto!important;min-height:0!important;aspect-ratio:130/154;padding:0!important}
+body.abc-arena[data-screen="play"] .abc-inspect .hc.pf-hc .hcc-nm{font-size:max(12px,8cqw)!important}
 </style>
 </head>
 <body>
@@ -7696,6 +7787,90 @@ function abcChClick(d){
 }
 if(typeof window!=='undefined') window.ABC_CH={state:abcChState, ev:abcChEv, end:abcChEnd, claimable:abcChClaimable, scratch:function(){ return CHT; }, fresh:chFresh, dailies:chDailies, weeklies:chWeeklies, byId:chById, claim:chClaim};
 
+/* fix_print_frames */
+/* fix_print_frames: printed-card frames as live card backgrounds.
+   One frame per deck stage (Act I / II / III) plus one shared 1st Edition frame. The art window in each
+   frame is transparent, so the portrait sits underneath and the frame (cracks, lightning) draws over it.
+   Name, HP, trigger and moves stay live text. A deck without frames keeps its current look. */
+const PF_DECKS={ gatsby:{acts:[1,2,3]}, romeojuliet:{acts:[1,2,3]} };
+let PF_IDX=null;
+function abcPfOn(){ try{ return localStorage.getItem('abc_pframe')!=='off'; }catch(e){ return true; } }
+function abcPfSet(on){ try{ localStorage.setItem('abc_pframe', on?'on':'off'); }catch(e){} }
+function abcPfDeck(c){
+  if(!c) return '';
+  if(c._actId){ const a=actById(c._actId); if(a&&a.deck) return a.deck; }
+  if(c.deck) return c.deck;
+  if(c.base&&c.base[0]) return c.base[0];
+  if(!PF_IDX){ PF_IDX={}; for(const k in PF_DECKS) ((DATA.characters&&DATA.characters[k])||[]).forEach(function(d){ if(!(d.id in PF_IDX)) PF_IDX[d.id]=k; }); }
+  return PF_IDX[c.id]||'';
+}
+/* which frame: an evolved card shows its deck's Act frame (the Act card covers the base card, 1E
+   included); otherwise 1st Editions share the Special frame; otherwise the deck's Act I frame. */
+function abcPfKey(c){
+  if(!c||c._boss||!abcPfOn()) return '';
+  const act=c.act||1;
+  if(act===1 && c.fe) return 'fe';
+  const d=abcPfDeck(c), D=PF_DECKS[d];
+  return (D&&D.acts.indexOf(act)>=0)?d+'-'+act:'';
+}
+function abcPfCls(c){ const k=abcPfKey(c); return k?(' pf'+(k==='fe'?' pf-fe':'')):''; }
+function abcPfSty(c){ const k=abcPfKey(c); return k?(';--pf:var(--pf-'+k+')'):''; }
+function abcPfEsc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+/* the line printed in the trigger bar */
+function abcPfTrigger(c){
+  if((c.act||1)>1){ const a=actById(c._actId)||{}; return a.plot==='hit'?'Plot Point 1 · took damage':('Plot Point 2 · climax question'+(a.resolution?' · '+(a.resolution==='tragic'?'Tragic':'Comic'):'')); }
+  if(c.fe) return (c.passive&&c.passive.name)||'1st Edition';
+  const nx=(DATA.acts||[]).find(function(a){ return a.act===2 && a.from===c.id && a.deck===abcPfDeck(c); });
+  return nx?('Evolves when damaged → '+nx.name):'';
+}
+/* Inspect dossier: the full printed-style card, then charges, Offstage and Close as before */
+function abcPfDossier(ch,p,v){
+  const k=abcPfKey(ch); if(!k) return '';
+  const pct=Math.max(0,ch.hp/ch.maxHp*100), d=abcPfDeck(ch);
+  const port=ch.img?`<img src="${ch.img}" alt="" style="object-position:${ch.imgpos||'50% 20%'}">`:`<span class="mono">${initials(ch.name)}</span>`;
+  const mv=function(m,cls,ic){ return m?`<div class="pfz-m ${cls}"><div><b>${ic} ${abcPfEsc(m.n)}</b><span class="pfz-d">${m.t||''}</span></div><em>${m.label||''}</em></div>`:''; };
+  const pas=(ch.passive&&ch.passive.text)?`<div class="pfz-p"><b>✦ ${abcPfEsc(ch.passive.name||'Passive')}</b><span class="pfz-d">${ch.passive.text}</span></div>`:'';
+  const txt=[ch.atk&&ch.atk.t?`<p><b>⚔ ${abcPfEsc(ch.atk.n)}</b> ${ch.atk.t}</p>`:'', ch.atk2&&ch.atk2.t?`<p><b>⚔ ${abcPfEsc(ch.atk2.n)}</b> ${ch.atk2.t}</p>`:'',
+    ch.blk&&ch.blk.t?`<p><b>⛊ ${abcPfEsc(ch.blk.n)}</b> ${ch.blk.t}</p>`:'', pas?`<p><b>✦ ${abcPfEsc(ch.passive.name||'Passive')}</b> ${ch.passive.text}</p>`:''].join('');
+  let deckName=''; try{ deckName=setName(d)||''; }catch(e){}
+  const nm=String(ch.name||'').replace(/\s*\(1E\)\s*$/,''), nmFs=Math.min(5.4, 46/(0.5*Math.max(1,nm.length))).toFixed(2);
+  return `<div class="modal-bg"><div class="bench-view char pf-dossier" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"><div class="pfz-wrap">
+    <div class="pfz${k==='fe'?' pf-fe':''}" style="--pf:var(--pf-${k})">
+      <div class="pfz-art">${port}</div>
+      <div class="pfz-name"><span class="pc-name" style="font-size:${nmFs}cqw!important">${abcPfEsc(nm)}</span></div>
+      <div class="pfz-hp"><small>HP</small>${ch.maxHp}</div>
+      <div class="pfz-arch">${abcPfEsc(ch.archetype||'')}</div>
+      <div class="pfz-trig">${abcPfEsc(abcPfTrigger(ch))}</div>
+      <div class="pfz-moves">${mv(ch.atk,'atk','⚔')}${mv(ch.atk2,'atk','⚔')}${mv(ch.blk,'blk','⛊')}${pas}</div>
+      ${k==='fe'&&deckName?`<div class="pfz-deck">${abcPfEsc(deckName.toUpperCase())}</div>`:''}
+    </div>
+    <div class="pfz-live"><span>Health</span><span class="pc-hp"><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
+    ${txt?`<div class="pfz-text">${txt}</div>`:''}
+    </div>
+    ${benchChargeList(ch)}
+    ${(v.side==='you'&&S.arena&&ARENA_RULES.offstage&&!S._sim&&p.team.indexOf(ch)!==p.activeIdx)?arenaOffBtn(p,ch):''}
+    <button class="pcb-close" data-do="benchclose">Close &#10005;</button>
+  </div></div>`;
+}
+/* Act card in hand: the target Act's frame. Same rules and markup hooks as actHandCard. */
+function abcPfActHand(c,idx,straty,deal,_lk){
+  if(!abcPfOn()) return '';
+  const a=actById(c.actId); if(!a) return '';
+  const D=PF_DECKS[a.deck]; if(!D||D.acts.indexOf(a.act)<0) return '';
+  const you=S.you, pk=actPick(you,c), ok=straty && !drawnLocked() && !!pk.t;
+  let img=a.img, pos=a.hpos||'50% 22%';
+  if(!img){ const b=a.base&&DATA.characters[a.base[0]]&&DATA.characters[a.base[0]].find(function(x){ return x.id===a.base[1]; }); if(b&&b.img){ img=b.img; pos=b.imgpos||pos; } }
+  const port=img?`<img class="hcc-img" src="${img}" alt="${abcPfEsc(a.name)}" style="object-position:${pos}">`
+                :`<span class="hcc-mono" style="background:${a.accent||'#444'}">${initials(a.name)}</span>`;
+  let met=false, cond='';
+  if(a.plot==='hit'){ met=actTargets(you,a).some(function(t){ return t._tookHit; }); cond='Plot Point 1 · took damage '+(met?'✓':'✗'); }
+  else { met=actTargets(you,a).length>0; cond='Plot Point 2 · climax or theme question'; }
+  return `<div class="hc crit act-hc pf-hc ${ok?'playable':'spent'}${deal}${_lk}" data-idx="${idx}" title="${abcPfEsc(ok?'Tap to evolve':pk.why)}" style="--pf:var(--pf-${a.deck}-${a.act})">
+      <div class="pfh-art">${port}</div>
+      <div class="pfh-plate"><div class="hcc-nm">${abcPfEsc(a.name)}</div><div class="hcc-foot">Evolves from ${abcPfEsc(actStageName(a.from))}</div></div>
+      <div class="act-cond ${met?'met':'unmet'}">${cond}</div></div>`;
+}
+
 function menuScreen(){
   return `<div class="title-screen menu-landing">
     <img class="title-logo title-crest" src="${window.ABC_CREST||window.ABC_LOGO||''}" alt="Academic Battle Cards">
@@ -8319,6 +8494,7 @@ function actArt(ch){
     +(ch.resolution==='tragic'?'<span class="act-res">TRAGIC</span>':(ch.resolution==='comic'?'<span class="act-res comic">COMIC</span>':''))+pas;
 }
 function actHandCard(c,idx,straty,deal,_lk){
+  try{ const _pf=abcPfActHand(c,idx,straty,deal,_lk); if(_pf) return _pf; }catch(e){}   /* fix_print_frames */
   const you=S.you, a=actById(c.actId)||{name:c.name||'Act card',act:c.act||2};
   const pk=actPick(you,c), ok=straty && !drawnLocked() && !!pk.t;
   const img=a.img?`<img class="hcc-img" src="${a.img}" alt="${a.name}" style="object-position:${a.hpos||'50% 22%'}">`
@@ -8358,7 +8534,7 @@ function charTile(p,side){
   const port = ch.img
     ? `<img class="port-img" src="${ch.img}" alt="${ch.name}" style="object-position:${ch.imgpos||'50% 20%'}">`
     : `<span class="mono">${initials(ch.name)}</span>`;
-  return `<div class="char ${side} ${dead?'dead':''}${ch.fe?' fe':''}${ch.act>1?' act'+ch.act:''}${ch._evoFx?' evo-in':''}${ch._boss?' boss':''}${ch._big?' sol-big':''}${side==='you'&&ch.hp>0?' drop-zone':''}" data-deck="${p.setKey||''}" style="--accent:${ch.accent}"${side==='you'?` data-drop="1" data-charuid="${ch.uid}"`:''}>
+  return `<div class="char ${side} ${dead?'dead':''}${ch.fe?' fe':''}${ch.act>1?' act'+ch.act:''}${ch._evoFx?' evo-in':''}${ch._boss?' boss':''}${ch._big?' sol-big':''}${abcPfCls(ch)}${side==='you'&&ch.hp>0?' drop-zone':''}" data-deck="${p.setKey||''}" style="--accent:${ch.accent}${abcPfSty(ch)}"${side==='you'?` data-drop="1" data-charuid="${ch.uid}"`:''}>
     ${sbub}
     <div class="pc-plate"><span class="pc-name">${ch._boss?'\u26a0 ALGORITHM CORE':ch.name}</span><span class="pc-hp"><u style="width:${_op}%"></u><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
     <div class="pc-art">${actArt(ch)}${port}${ch.fe?`<span class="fe-badge" title="1st Edition \u2014 ${((ch.passive&&ch.passive.name)||'').replace(/"/g,'&quot;')}">1ST ED</span>`:''}<button class="pc-flip" data-benchinfo="${side}:${ch.uid}" title="Ability details">i</button></div>
@@ -8447,7 +8623,7 @@ function benchTiles(p,mine){
     /* Drawn Mode: the Backstage is a bench, not a graveyard — KO'd cards go to the pile. */
     if(dead && S && S.drawn && p._drawn) return '';
     const drop=mine&&!dead;
-    return `<div class="bench-mini ${dead?'dead':''}${c.fe?' fe':''}${drop?' drop-zone':''}" title="${c.name}" data-benchinfo="${mine?'you':'opp'}:${c.uid}"${drop?` data-drop="1" data-charuid="${c.uid}"`:''}>
+    return `<div class="bench-mini ${dead?'dead':''}${c.fe?' fe':''}${drop?' drop-zone':''}${abcPfCls(c)}" style="${abcPfSty(c).slice(1)}" title="${c.name}" data-benchinfo="${mine?'you':'opp'}:${c.uid}"${drop?` data-drop="1" data-charuid="${c.uid}"`:''}>
       <span class="bm-init" style="background:${c.accent}">${c.img?`<img class="bm-img" src="${c.img}" style="object-position:${c.imgpos||'50% 20%'}">`:initials(c.name)}${c.fe?'<span class="fe-mini" title="1st Edition">\u2726</span>':''}${mine&&!dead?`<button class="bm-swap" data-do="swap:${c.uid}" title="Bring to Active (one swap per turn)">\u21c4</button>`:''}</span>
       <div class="bm-hp"><div style="width:${pct}%"></div></div>
       <span class="bm-name">${abcShortName(c.name)}</span>
@@ -10122,6 +10298,7 @@ function handViewModal(){
 function benchInfoModal(){
   const v=S._benchView||{}; const p=v.side==='you'?S.you:S.opp; if(!p) return '';
   const ch=p.team.find(c=>c.uid===v.uid); if(!ch) return '';
+  try{ const _pf=abcPfDossier(ch,p,v); if(_pf) return _pf; }catch(e){}   /* fix_print_frames */
   const pct=Math.max(0,ch.hp/ch.maxHp*100);
   const port=ch.img?`<img src="${ch.img}" style="object-position:${ch.imgpos||'50% 20%'}">`:`<span class="mono">${initials(ch.name)}</span>`;
   return `<div class="modal-bg"><div class="bench-view char" data-deck="${p.setKey||''}" style="--accent:${ch.accent}">
@@ -10504,6 +10681,7 @@ function settingsRows(s){
     <div class="set-row set-head"><span>Accessibility</span><span></span></div>
     ${row('Pixel combat effects (16-bit)',`<input type="checkbox" data-abcpx ${abcPxPref()?'checked':''}>`)}   <!-- fix_pixel_fx -->
     ${row('Reduce motion &amp; flashing',`<input type="checkbox" data-calm ${(META.calmFx?'checked':'')}>`)}
+    ${row('Printed card frames',`<input type="checkbox" data-abcpf ${abcPfOn()?'checked':''}>`)}   <!-- fix_print_frames -->
     ${row('Tabletop tilt (3D board)',`<input type="checkbox" data-abctilt ${abcTiltOn()?'checked':''}>`)}
     ${row('Warm table lighting',`<input type="checkbox" data-abclight ${abcLightOn()?'checked':''}>`)}
     <div class="set-row set-head"><span>Audio</span><span></span></div>
@@ -11058,6 +11236,7 @@ document.addEventListener('input',e=>{
     if(SET_LABEL[t.dataset.audio]) relabelSetting(t, SET_LABEL[t.dataset.audio]());
     return;
   }
+  if(t.dataset.abcpf!=null){ abcPfSet(!!t.checked); try{ render(); }catch(e){} return; }   /* fix_print_frames */
   if(t.dataset.abctilt!=null){ abcTiltSet(!!t.checked); return; }   /* fix_board_layout_v3 */
   if(t.dataset.abclight!=null){ abcLightSet(!!t.checked); return; }   /* fix_board_layout_v6 */
   if(t.dataset.abcpx!=null){ abcPxSet(!!t.checked); return; }   /* fix_pixel_fx */
