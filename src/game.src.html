@@ -3374,6 +3374,25 @@ body .sub-screen.chs .chs-p{border:0;box-shadow:none;background:transparent;padd
 .turnbar .tb-fill{width:100%!important;transform-origin:left center;transition:transform .95s linear,background .5s ease;will-change:transform;border-radius:9px}
 @media (prefers-reduced-motion:reduce){.turnbar .tb-fill{transition:none}}
 body.calm-fx .turnbar .tb-fill{transition:none}
+
+/* fix_gameplay_perf2: looping glows run on the compositor (opacity/transform) instead of repainting the board every frame */
+.pc-move.atk.ready{animation:none!important;position:relative}
+.pc-move.atk.ready::before{content:"";position:absolute;inset:-3px;border-radius:inherit;box-shadow:0 0 0 2px var(--gold,#E3A92B),0 0 10px rgba(227,169,43,.55);
+  pointer-events:none;opacity:0;animation:abcRing 2.2s ease-in-out infinite;will-change:opacity}
+.lc-thesis.met{animation:none!important;position:relative}
+.lc-thesis.met::before{content:"";position:absolute;inset:-3px;border-radius:inherit;box-shadow:0 0 0 2px var(--gold,#E3A92B),0 0 12px rgba(230,200,120,.75);
+  pointer-events:none;opacity:0;animation:abcRing 2.2s ease-in-out infinite;will-change:opacity}
+@keyframes abcRing{0%,100%{opacity:0}50%{opacity:1}}
+.char.fe .pc-art::after,.bench-mini.fe .bm-init::after{inset:0 auto 0 0!important;width:200%!important;background-size:50% 100%!important;background-repeat:repeat-x!important;
+  background-image:linear-gradient(90deg,rgba(255,0,128,.16),rgba(255,214,0,.16) 25%,rgba(0,224,255,.16) 50%,rgba(140,60,255,.16) 75%,rgba(255,0,128,.16))!important;
+  animation:abcHolo 6.5s linear infinite!important;will-change:transform}
+@keyframes abcHolo{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.char.fe .pc-art::before{background-size:100% 100%!important;animation:abcSheen 4.2s ease-in-out infinite!important;will-change:transform}
+@keyframes abcSheen{0%{transform:translateX(-110%)}55%,100%{transform:translateX(110%)}}
+/* hand hover: the lift animates; the shadow just switches (animating a 24px blur repainted the card each frame) */
+body[data-screen="play"] .hand .hc{transition:transform .16s ease!important}
+@media (prefers-reduced-motion:reduce){.pc-move.atk.ready::before,.lc-thesis.met::before{animation:none;opacity:1}}
+body.calm-fx .pc-move.atk.ready::before,body.calm-fx .lc-thesis.met::before{opacity:1}
 </style>
 </head>
 <body>
@@ -7741,12 +7760,12 @@ function aiTurn(){
             pushLog(ok?'\u2026 and gets it this time.':'\u2026 and misses again.');
           }
         }
-        p.flags._freeNow=useFree; attach('opp',pick,ok||!S.settings.triviaOn,_ft||undefined); p.flags._freeNow=false; setTimeout(step,400);
+        p.flags._freeNow=useFree; attach('opp',pick,ok||!S.settings.triviaOn,_ft||undefined); p.flags._freeNow=false; setTimeout(step,abcPace(400));
       } else {
-        setTimeout(aiEngage,400);
+        setTimeout(aiEngage,abcPace(400));
       }
     }; step();
-  },400);
+  },abcPace(400));   /* fix_gameplay_perf2 */
 }
 function aiEngage(){
   if(!S||S.over){ busy=false; return; }
@@ -7757,12 +7776,12 @@ function aiEngage(){
     if(p.flags.truce){ p.flags.truce=false; pushLog('Opponent is under Truce — attack skipped.'); endAiTurn(); }
     else if(act.atkCharge.length>=act.atk.cost){ if(performAttack('opp','atk')===false){ pushLog('Opponent could not attack — passes.'); endAiTurn(); } }  // else finishAttack -> endAiTurn
     else { pushLog('Opponent has no charged attack — passes.'); endAiTurn(); }
-  },500);
+  },abcPace(500));   /* fix_gameplay_perf2 */
 }
 function armAiWatch(){ clearTimeout(aiWatch); aiWatch=setTimeout(function tick(){ if(!S||S.over||S.turn!=='opp') return; if(S.defend||S.pending){ aiWatch=setTimeout(tick,4000); return; } pushLog('Opponent stalled — safeguard ends the turn.'); busy=false; endAiTurn(); },9000); }
 function endAiTurn(){ clearTimeout(aiWatch); setTimeout(()=>{ if(!S) return; busy=false; if(!S.over){
   if(S.turn==='opp') S.opp.team.forEach(c=>{ if(c.hp>0) c._grow=(c._grow||0)+1; else delete c._grow; });   /* perTurn: the AI's turn never ran endTurn's tick */
-  S.turn='you'; startTurn(); } },700); }
+  S.turn='you'; startTurn(); } },abcPace(700)); }   /* fix_gameplay_perf2 */
 function solFace(boss,f){ boss._face=f; if(boss._faces&&boss._faces[f]) boss.img=boss._faces[f]; }
 function overlordTurn(){
   if(!S||S.over){ busy=false; return; }
@@ -7777,7 +7796,7 @@ function overlordTurn(){
     const heal=Math.round(boss.maxHp*0.05); boss.hp=Math.min(boss.maxHp, boss.hp+heal);
     solFace(boss,'taunt'); pushLog('\u26a1 The Over-lord RECALIBRATES \u2014 purges its afflictions and heals '+heal+' HP.');
     try{fxHeal('opp');}catch(e){}
-    S.phase='engage'; render(); setTimeout(endAiTurn,1000); return;
+    S.phase='engage'; render(); setTimeout(endAiTurn,abcPace(1000)); return;
   }
   // ---- pick a move by phase rotation ----
   const rot = (phase>=2) ? ['overload','disorient','overload','amplify'] : ['overload','amplify','disorient'];
@@ -7786,7 +7805,7 @@ function overlordTurn(){
   if(mv==='amplify'){
     boss.status=boss.status||{}; boss.status.highlight=true; if(phase===3) boss.status.laminate=true;
     solFace(boss,'defend'); pushLog('\ud83d\udee1 The Over-lord AMPLIFIES \u2014 it powers up its next assault'+(phase===3?' and shields itself.':'.'));
-    S.phase='engage'; render(); setTimeout(endAiTurn,1000); return;
+    S.phase='engage'; render(); setTimeout(endAiTurn,abcPace(1000)); return;
   }
   // overload / disorient are attacks routed through the normal pipeline (block + fx + KO)
   let dmg = (mv==='disorient') ? 15 : baseDmg;
@@ -8536,6 +8555,42 @@ function abcSlimData(){
   })();
 }
 if(typeof window!=='undefined') window.ABC_PERF={morph:abcMorph, blobUrl:abcBlobUrl, slimHtml:abcSlimHtml, slimVars:abcSlimVars, slimData:abcSlimData, blob:ABC_BLOB, fit:ABC_FIT};
+
+/* fix_gameplay_perf2 */
+/* fix_gameplay_perf2: Animation speed (Tune) + cheaper effects and sound. */
+function abcSpeed(){ try{ const v=localStorage.getItem('abc_speed'); return (v==='normal'||v==='instant')?v:'fast'; }catch(e){ return 'fast'; } }
+function abcFlyMsFor(){ const s=abcSpeed(); return s==='normal'?1300:(s==='instant'?0:650); }
+/* AI pacing: every AI step delay goes through this (Normal 1x, Fast 0.55x, Instant 0.2x) */
+function abcPace(ms){ const s=abcSpeed(); return Math.round(ms*(s==='normal'?1:(s==='instant'?0.2:0.55))); }
+function abcSpeedSet(v){ try{ localStorage.setItem('abc_speed', v); }catch(e){} try{ ABC_FLY_MS=abcFlyMsFor(); }catch(e){} }
+/* one shared white-noise buffer per audio context instead of generating fresh random samples on every hit */
+const ABC_NOISE=new WeakMap();
+function abcNoiseBuf(ctx){
+  let b=ABC_NOISE.get(ctx); if(b) return b;
+  const n=Math.floor(ctx.sampleRate*2); b=ctx.createBuffer(1,n,ctx.sampleRate); const ch=b.getChannelData(0);
+  for(let i=0;i<n;i++) ch[i]=Math.random()*2-1;
+  ABC_NOISE.set(ctx,b); return b;
+}
+/* Tune > Performance meter: frames per second, worst frame and stutters over the last 3 s (rAF loop only while on) */
+let ABC_PM=null;
+function abcPerfOn(){ try{ return localStorage.getItem('abc_perfmeter')==='on'; }catch(e){ return false; } }
+function abcPerfSet(on){ try{ localStorage.setItem('abc_perfmeter', on?'on':'off'); }catch(e){} abcPerfMeter(on); }
+function abcPerfMeter(on){
+  if(!on){ if(ABC_PM){ ABC_PM.stop=true; ABC_PM.el.remove(); ABC_PM=null; } return; }
+  if(ABC_PM) return;
+  const el=document.createElement('div'); el.id='abcPerfMeter';
+  el.style.cssText='position:fixed;right:8px;bottom:8px;z-index:99999;pointer-events:none;background:rgba(20,17,14,.88);color:#e8dcc4;font:600 11px/1.35 ui-monospace,Menlo,monospace;padding:6px 9px;border-radius:7px;border:1px solid #4a4036;white-space:pre';
+  document.body.appendChild(el);
+  const st={el:el, stop:false, f:[], last:performance.now(), shown:0};
+  ABC_PM=st;
+  (function loop(t){ if(st.stop) return; const d=t-st.last; st.last=t; st.f.push([t,d]); while(st.f.length && t-st.f[0][0]>3000) st.f.shift();
+    if(t-st.shown>500){ st.shown=t; const ds=st.f.map(x=>x[1]); const worst=Math.max.apply(null,ds.concat([0])); const jank=ds.filter(x=>x>50).length;
+      el.textContent='fps '+Math.round(st.f.length/3)+'  worst '+Math.round(worst)+'ms  stutters '+jank+(document.body.classList.contains('abc-tilt')?'  tilt':'')+(document.body.classList.contains('abc-light')?'  light':'');
+      el.style.color=jank>2?'#ff9b7a':(worst>34?'#ffd45e':'#a6f07a'); }
+    requestAnimationFrame(loop); })(performance.now());
+}
+setTimeout(function(){ if(abcPerfOn()) abcPerfMeter(true); }, 0);
+if(typeof window!=='undefined') window.ABC_SPEED={get:abcSpeed, set:abcSpeedSet, pace:abcPace, flyMs:function(){ return ABC_FLY_MS; }, noise:abcNoiseBuf};
 
 function menuScreen(){
   try{ if(typeof abcMbMenu==='function') return abcMbMenu(); }catch(e){}   /* fix_menu_book */
@@ -9462,8 +9517,7 @@ const SFX = (function(){
     env(g,t,Math.min(0.02,dur*0.3),dur,peak||0.3); o.connect(g); g.connect(dest||sfxGain); o.start(t); o.stop(t+dur+0.05);
   }
   function noise(t,dur,peak,filt,dest){
-    if(!ctx) return; const n=Math.max(1,Math.floor(ctx.sampleRate*dur)), buf=ctx.createBuffer(1,n,ctx.sampleRate), ch=buf.getChannelData(0);
-    for(let i=0;i<n;i++) ch[i]=Math.random()*2-1;
+    if(!ctx) return; const buf=abcNoiseBuf(ctx);   /* fix_gameplay_perf2 */
     const src=ctx.createBufferSource(); src.buffer=buf;
     const f=ctx.createBiquadFilter(); f.type=(filt>=3000)?'highpass':'lowpass'; f.frequency.value=filt||1500;
     const g=ctx.createGain(); env(g,t,0.005,dur,peak||0.2);
@@ -9538,8 +9592,7 @@ const SFX = (function(){
   }
   function kick(t){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(115,t); o.frequency.exponentialRampToValueAtTime(45,t+0.13); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.46,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+0.2); o.connect(g); g.connect(procGain); o.start(t); o.stop(t+0.22); }
   function snare(t){
-    const src=ctx.createBufferSource(), nb=ctx.createBuffer(1,Math.floor(ctx.sampleRate*0.2),ctx.sampleRate), c=nb.getChannelData(0);
-    for(let i=0;i<c.length;i++) c[i]=Math.random()*2-1; src.buffer=nb;
+    const src=ctx.createBufferSource(), nb=abcNoiseBuf(ctx); src.buffer=nb;   /* fix_gameplay_perf2 */
     const bf=ctx.createBiquadFilter(); bf.type='bandpass'; bf.frequency.value=1700; bf.Q.value=0.6;
     const g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.2,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
     src.connect(bf); bf.connect(g); g.connect(procGain); src.start(t); src.stop(t+0.2);
@@ -10797,7 +10850,7 @@ document.addEventListener('click', function(e){
 }, true);
 /* fix_card_play_anim: a played card flies from your hand to where it went */
 let abcLastHand=null, abcLastS=null;
-function abcFlyCalm(){ try{ return document.body.classList.contains('calm-fx') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }catch(e){ return false; } }
+function abcFlyCalm(){ try{ return abcSpeed()==='instant' || document.body.classList.contains('calm-fx') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }catch(e){ return false; } }
 /* before the board is rebuilt: which hand cards left, and where were they on screen? */
 function abcFlySnap(){
   const last=abcLastHand; abcLastHand=null;                 /* consumed: a nested render takes no snapshot */
@@ -10830,7 +10883,7 @@ function abcFlyTarget(card){
   return q('.discardpile[data-pile="you"]') || q('.char.you');
 }
 /* after the board is rebuilt: fly each copy to its new home */
-const ABC_FLY_MS=1300;   /* fix_card_play_anim2 -- card-play animation length (ms); every phase scales with it */
+let ABC_FLY_MS=abcFlyMsFor();   /* fix_gameplay_perf2 */   /* fix_card_play_anim2 -- card-play animation length (ms); every phase scales with it */
 function abcFlyRun(snap){
   abcLastHand=S?S.you.hand.slice():null; abcLastS=S;
   if(!snap) return;
@@ -11354,6 +11407,8 @@ function settingsRows(s){
     ${row('Pixel combat effects (16-bit)',`<input type="checkbox" data-abcpx ${abcPxPref()?'checked':''}>`)}   <!-- fix_pixel_fx -->
     ${row('Reduce motion &amp; flashing',`<input type="checkbox" data-calm ${(META.calmFx?'checked':'')}>`)}
     ${row('Printed card frames',`<input type="checkbox" data-abcpf ${abcPfOn()?'checked':''}>`)}   <!-- fix_print_frames -->
+    ${row('Animation speed',`<select data-abcspeed>${['fast','normal','instant'].map(v=>`<option value="${v}" ${abcSpeed()===v?'selected':''}>${v==='fast'?'Fast':(v==='normal'?'Normal':'Instant')}</option>`).join('')}</select>`)}   <!-- fix_gameplay_perf2 -->
+    ${row('Performance meter',`<input type="checkbox" data-abcperf ${abcPerfOn()?'checked':''}>`)}   <!-- fix_gameplay_perf2 -->
     ${row('Tabletop tilt (3D board)',`<input type="checkbox" data-abctilt ${abcTiltOn()?'checked':''}>`)}
     ${row('Warm table lighting',`<input type="checkbox" data-abclight ${abcLightOn()?'checked':''}>`)}
     <div class="set-row set-head"><span>Audio</span><span></span></div>
@@ -11909,6 +11964,8 @@ document.addEventListener('input',e=>{
     return;
   }
   if(t.dataset.abcpf!=null){ abcPfSet(!!t.checked); try{ render(); }catch(e){} return; }   /* fix_print_frames */
+  if(t.dataset.abcspeed!=null){ abcSpeedSet(t.value); return; }   /* fix_gameplay_perf2 */
+  if(t.dataset.abcperf!=null){ abcPerfSet(!!t.checked); return; }   /* fix_gameplay_perf2 */
   if(t.dataset.abctilt!=null){ abcTiltSet(!!t.checked); return; }   /* fix_board_layout_v3 */
   if(t.dataset.abclight!=null){ abcLightSet(!!t.checked); return; }   /* fix_board_layout_v6 */
   if(t.dataset.abcpx!=null){ abcPxSet(!!t.checked); return; }   /* fix_pixel_fx */
