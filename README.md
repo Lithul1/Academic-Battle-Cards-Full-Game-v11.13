@@ -66,6 +66,11 @@ npx playwright install chromium   # once
 npm run test:e2e                  # builds the stub, then runs tests/e2e in Chromium
 ```
 
+A test that fails once and passes on its automatic retry is reported as
+**flaky**, not failed. Its trace and screenshot stay in `test-results/` until
+the next run — open the trace with the `npx playwright show-trace …` command
+the run prints. The same test turning up flaky again means a real bug.
+
 Content counts in the static checks (`ROSTER_MIN`, `TEXTS_MIN`, `COND_MIN`)
 are **floors**: adding characters never breaks them, losing one does. Raise
 them when you add a deck so they keep guarding the new cards.
