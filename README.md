@@ -94,6 +94,20 @@ tests on a scratch copy, and hands back small `fix_*.py` scripts plus the exact
 terminal commands to run. You review, run, commit and push (GitHub Desktop).
 Your local `python3 build.py` remains the check on final asset integrity.
 
+## Continuous integration (GitHub Actions)
+
+`.github/workflows/tests.yml` builds and tests every pull request into `main`
+(and every push to `main`) before it is merged. The PR shows two checks:
+
+- **Engine tests (jsdom)** — `npm test`
+- **Browser tests (Playwright)** — `npm run test:e2e` in Chromium
+
+It tests the stub build of the PR's own `src`, so it needs no assets and no
+secrets, and works the same for PRs from forks. The Playwright HTML report
+(and, when anything failed, traces and screenshots) is attached to each run
+under **Summary → Artifacts**. To make the checks mandatory, add them as
+required status checks under *Settings → Branches → Branch protection* on `main`.
+
 ## Deploy (GitHub Pages)
 
 `dist/academic_battle_cards.html` is the deployable. Point Pages at wherever you
