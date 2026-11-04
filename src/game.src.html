@@ -3484,6 +3484,20 @@ body.abc-fs.abc-fs-idle #abcFsExit:hover,body.abc-fs #abcFsExit:focus-visible{op
 /* the older ABC drag's floating label is no longer used */
 body.dd-on .drag-ghost,body.dd-on .drag-dot{display:none!important}
 @media (prefers-reduced-motion:reduce){ .dd-chip,.hv2-b{transition:none!important} }
+
+/* fix_cardface_evolve */
+/* HP + archetype strip: only on framed Active cards on the arena board (same geometry as the printed card) */
+.pfs-hp,.pfs-arch{display:none}
+body.abc-arena[data-screen="play"] .side .char.pf .pfs-hp{display:flex;pointer-events:none}
+body.abc-arena[data-screen="play"] .side .char.pf .pfs-arch{display:flex;pointer-events:none}
+body.abc-arena[data-screen="play"] .side .char.pf.pf-fe .pfs-hp,
+body.abc-arena[data-screen="play"] .side .char.pf.pf-fe .pfs-arch span{color:#fff;text-shadow:0 .3cqw 1cqw #000}
+/* new card back: the art carries its own black rounded border */
+.cardback:has(> .cb-img){background:#f3ead6!important;border:0!important;box-shadow:0 1px 0 rgba(0,0,0,.35)!important;border-radius:6px}
+.cardback > .cb-img,.cardback.top > .cb-img{position:absolute;inset:0!important;width:100%!important;height:100%!important;object-fit:fill;border:0!important;border-radius:inherit}
+/* the stacked edges under the top card match it: cream card stock, black rim */
+.deckstack .cardback.edge{background:#efe5cf!important;border:2px solid #111!important;box-shadow:none!important;border-radius:6px}
+.hc.dm-fd .cb-img,.fly-card .cb-img{object-fit:fill!important;border:0!important}
 </style>
 </head>
 <body>
@@ -5038,7 +5052,7 @@ window.ABC_LOGO="data:image/jpeg;base64,__ABCASSET_107__";
 window.ABC_EMBLEM="data:image/jpeg;base64,__ABCASSET_108__";
 window.ABC_BG="data:image/jpeg;base64,__ABCASSET_109__";
 window.PACK_ART={silver:"data:image/png;base64,__ABCASSET_933__",gold:"data:image/png;base64,__ABCASSET_934__"};
-window.CARD_BACK="data:image/jpeg;base64,__ABCASSET_956__";
+window.CARD_BACK="data:image/webp;base64,__ABCASSET_1162__";   /* fix_cardface_evolve: new card back (was a956) */
 window.ABC_CREST="data:image/jpeg;base64,__ABCASSET_110__";
 try{document.documentElement.style.setProperty('--abc-bg','url("'+window.ABC_BG+'")');}catch(e){}
 window.ABC_BG_QC="data:image/jpeg;base64,__ABCASSET_109__";
@@ -9289,6 +9303,54 @@ render=function(){ const r=abcRenderDdBase.apply(this,arguments);
   return r; };
 if(typeof window!=='undefined') window.ABC_DDX={ dd:ABC_DD, kind:abcDdKind, begin:abcDdBegin, end:abcDdEnd, targets:abcDdTargets, fit:abcHvFit, zoneAt:abcDdZoneAt };
 
+/* fix_cardface_evolve */
+/* fix_cardface_evolve: printed-card HP + archetype strip on the board's Active card, drag an evolution card onto
+   the character it evolves from, and the new card back. */
+
+/* ---------- 1. HP + archetype down the right-hand strip, like the printed card ---------- */
+function abcPfStrip(ch){
+  try{ if(!ch || !abcPfCls(ch)) return ''; }catch(e){ return ''; }
+  const hp=ch.maxHp||ch.hp||'', arch=ch.archetype||'';
+  return '<div class="pcz-hp pfs-hp"><b style="--hfs:'+(String(hp).length<3?8.2:7.4)+'cqw">'+hp+'</b><small>HP</small></div>'
+    +(arch?'<div class="pcz-arch pfs-arch"><span style="--afs:'+abcPcFit(arch,36,9.2,.52).toFixed(2)+'cqw">'+abcPfEsc(arch)+'</span></div>':'');
+}
+
+/* ---------- 2. evolution cards: drag onto the character they evolve from ---------- */
+const ABC_EVO={ uid:null };
+const abcDdKindEvo=abcDdKind;
+abcDdKind=function(c){ if(c && c.cat==='act') return 'act'; return abcDdKindEvo(c); };
+const abcDdTargetsEvo=abcDdTargets;
+abcDdTargets=function(kind,card){
+  if(kind!=='act') return abcDdTargetsEvo(kind,card);
+  const out=[], P=S.you, a=actById(card&&card.actId); if(!a) return out;
+  actTargets(P,a).forEach(function(c){
+    const el=document.querySelector('#game .char.you[data-charuid="'+c.uid+'"]') || document.querySelector('#game .bench-mini[data-benchinfo="you:'+c.uid+'"]'); if(!el) return;
+    const r=actCanEvolve(c,a), nm=abcDdShort(c.name);
+    out.push({el:el, uid:c.uid, label:r.ok?('Evolve '+nm+' → '+a.name):(r.why||'Not yet'), short:r.ok?'★':'✕', no:!r.ok});
+  });
+  return out;
+};
+const abcDdActEvo=abcDdAct;
+abcDdAct=function(idx,kind,z){
+  if(kind!=='act') return abcDdActEvo(idx,kind,z);
+  const c=S.you.hand[idx]; if(!c || c!==ABC_DD.card) return;
+  ABC_EVO.uid=z.uid; try{ tryPlayHandCard(idx); } finally{ ABC_EVO.uid=null; }
+};
+/* the dropped-on character is the one that evolves (when it is eligible) */
+const abcActPickEvo=actPick;
+actPick=function(p,card){
+  const r=abcActPickEvo(p,card);
+  if(ABC_EVO.uid && r && r.a && p===S.you){
+    const c=p.team.find(function(x){ return x.uid===ABC_EVO.uid; });
+    if(c && actTargets(p,r.a).indexOf(c)>=0 && actCanEvolve(c,r.a).ok) return {a:r.a, t:c, why:''};
+  }
+  return r;
+};
+/* dropping on a red (not-yet) zone says why, instead of silently returning the card */
+const abcDdEndEvo=abcDdEnd;
+abcDdEnd=function(drop){ if(drop && drop.no && ABC_DD.on){ try{ toast(drop.label,'bad'); }catch(e){} } return abcDdEndEvo(drop); };
+if(typeof window!=='undefined') window.ABC_CF={ strip:abcPfStrip, evo:ABC_EVO };
+
 function menuScreen(){
   try{ if(typeof abcMbMenu==='function') return abcMbMenu(); }catch(e){}   /* fix_menu_book */
   return `<div class="title-screen menu-landing">
@@ -9957,6 +10019,7 @@ function charTile(p,side){
     ${sbub}
     <div class="pc-plate"><span class="pc-name">${ch._boss?'\u26a0 ALGORITHM CORE':ch.name}</span><span class="pc-hp"><u style="width:${_op}%"></u><i style="width:${pct}%"></i><b>${ch.hp}/${ch.maxHp}</b></span></div>
     <div class="pc-art">${actArt(ch)}${port}${ch.fe?`<span class="fe-badge" title="1st Edition \u2014 ${((ch.passive&&ch.passive.name)||'').replace(/"/g,'&quot;')}">1ST ED</span>`:''}<button class="pc-flip" data-benchinfo="${side}:${ch.uid}" title="Ability details">i</button></div>
+    ${abcPfStrip(ch)}   <!-- fix_cardface_evolve -->
     <div class="pips">${chargePips(ch)}</div>
     <div class="pc-moves">
       <button class="pc-move atk ${canAct&&atkReady?'ready':''}" data-act="attack" ${canAct&&atkReady?'':'disabled'}>
