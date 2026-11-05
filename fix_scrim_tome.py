@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""make_st_preview.py -- PREVIEW ONLY. Builds dist/ABC_scrimtome_preview.html from your src + assets with the
-Scrimmage tome look applied in memory. src/ and assets/ are not touched.
+"""fix_scrim_tome.py -- Literary Scrimmage as an adventurer's tome (look + effects; no rule changes).
 
-Run from the repo root:   python3 make_st_preview.py
-Then open dist/ABC_scrimtome_preview.html and go to Literary Scrimmage.
+Run from the repo root:   python3 fix_scrim_tome.py
+                          python3 build.py
+Undo:                     restore src/game.src.html from the .bak this writes.
+
+WHAT IT DOES
+  * The run map becomes an open campaign book: party as character sheets, ledger, relics and map key on the left page;
+    the route as hand-inked roads and wax seals on the right. Travelling inks the road red, walks the token and stamps
+    the seal; a new Act turns the page.
+  * Every Scrimmage page (Vault, kits, Study Break, Coffee Break, Book Fair, events, defeat) is restyled as a tome leaf.
+  * Battles inside a run sit on a candlelit wooden table (two small candles; hidden on phones).
+  * Adds IM Fell English + Cinzel to the existing Google Fonts link.
 """
-import os, sys, re, json
+import os, sys, shutil, datetime
 JS = r'''/* fix_scrim_tome */
 /* fix_scrim_tome: Literary Scrimmage as an adventurer's tome -- the map as an open campaign book (party sheets on the
    left, a hand-inked route of wax seals on the right), tome-styled pages for every Scrimmage screen, a candlelit
@@ -42,14 +50,15 @@ scrimMapScreen=function(){
       return '<button class="'+cls+'" '+(reach?'data-scrim="node:'+c+':'+r+'"':'disabled')+' title="'+stEsc(label)+'" aria-label="'+stEsc(label)+'"><span class="st-wax">'+(ST_GLYPH[node.type]||meta.ic)+'</span><span class="st-lbl">'+stEsc(label)+'</span></button>';
     }).join('')+'</div>';
   }).join('');
-  const legend=Object.keys(SCRIM_NODE).map(function(k){ return '<span class="st-lg"><span class="st-wax sm '+k+'">'+(ST_GLYPH[k]||SCRIM_NODE[k].ic)+'</span>'+stEsc(SCRIM_NODE[k].name)+'</span>'; }).join('');
+  const legend=Object.keys(SCRIM_NODE).map(function(k){ return '<span class="glg"><span class="st-wax sm '+k+'">'+(ST_GLYPH[k]||SCRIM_NODE[k].ic)+'</span>'+stEsc(SCRIM_NODE[k].name)+'</span>'; }).join('');
   const kit=(typeof SCRIM_KITS!=='undefined'&&SCRIM_KITS[SCRIM.kit])?SCRIM_KITS[SCRIM.kit].name:'the Unknown';
   const chap=SCRIM.doctoral?('Semester '+(SCRIM.semester||1)):('Act '+stRoman(SCRIM.act||1));
   const folio=2*((SCRIM.act||1)*6)+(m.pos.c||0);
-  return `<div class="scrim-wrap scrim-ink st-desk"><div class="st-tome${ST.turn?' st-turn':''}">
+  return `<div class="scrim-wrap scrim-ink st-desk"><div class="st-wrapcol">
+  <div class="st-bar"><button class="st-tab" data-scrim="endrun" title="Save the run and go to the Literary Scrimmage menu">‹ Scrimmage menu</button><button class="st-tab gold" data-st="shop" title="Save the run and open the Vault shop">🏛 Shop</button><span class="st-saved">Run saved automatically</span></div>
+  <div class="st-tome${ST.turn?' st-turn':''}">
     <div class="st-page l">
       <div class="st-ribbon" aria-hidden="true"></div>
-      <button class="st-back" data-scrim="endrun">‹ Library card <small>(run saved)</small></button>
       <div class="st-runhead">THE CAMPAIGN OF</div>
       <h2 class="st-chap">The ${stEsc(kit)}<small>${chap}${(SCRIM.honors||0)>0?' · Honors '+stRoman(SCRIM.honors):''}</small></h2>
       <div class="st-orn">✦</div>
@@ -61,7 +70,7 @@ scrimMapScreen=function(){
         <div class="st-row"><span>${SCRIM.doctoral?'Semester':'Act'}</span><b>${SCRIM.doctoral?(SCRIM.semester||1):stRoman(SCRIM.act||1)}</b></div>
       </div>
       <div class="st-sub">Relics</div><div class="st-relics">${stRelics()}</div>
-      <div class="st-sub">Map key</div><div class="st-legend">${legend}</div>
+      <div class="st-sub">MAP GUIDE</div><div class="st-legend">${legend}</div>
       <div class="st-folio">— ${stRoman(folio)} —</div>
     </div>
     <div class="st-page r">
@@ -70,7 +79,7 @@ scrimMapScreen=function(){
       <svg class="st-compass" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="none" stroke="#4a3522" stroke-width="1.5"/><polygon points="50,6 57,50 50,94 43,50" fill="#4a3522"/><polygon points="6,50 50,43 94,50 50,57" fill="#8e2a1c" opacity=".7"/><text x="50" y="22" text-anchor="middle" font-family="Cinzel,serif" font-size="11" fill="#2b1d12">N</text></svg>
       <div class="st-folio">— ${stRoman(folio+1)} —</div>
     </div>
-  </div></div>`;
+  </div></div></div>`;
 };
 /* the route in ink: walked roads in red, roads open from here in solid ink, the rest faint; the party token sits on its seal */
 function stCurve(x1,y1,x2,y2){ const my=(y1+y2)/2; return 'M'+x1+','+y1+' C'+x1+','+my+' '+x2+','+my+' '+x2+','+y2; }
@@ -122,6 +131,19 @@ window.addEventListener('click',function(e){
   }catch(err){}
   setTimeout(function(){ ST.busy=false; handleScrim(cmd); }, ms+260);
 },true);
+/* quick access: Shop from the map (the run is saved first), and Resume run from any Vault tab */
+window.addEventListener('click',function(e){
+  const b=e.target&&e.target.closest&&e.target.closest('[data-st="shop"]'); if(!b) return;
+  e.stopPropagation(); e.preventDefault();
+  try{ scrimSave(); }catch(err){}
+  SCRIM.vaultTab='shop'; SCRIM.view='shop'; APP.screen='scrim'; render();
+},true);
+const stVaultBase=scrimVaultShell;
+scrimVaultShell=function(){
+  let h=stVaultBase.apply(this,arguments);
+  try{ if(scrimHasSave()) h=h.replace('<div class="vtabs">','<div class="vtabs"><button class="vtab st-resume" data-scrim="resume" title="Back to your saved run">↩ Resume run</button>'); }catch(e){}
+  return h;
+};
 /* a page turn when a new Act begins */
 const stAdvanceActBase=scrimAdvanceAct;
 scrimAdvanceAct=function(){ ST.turn=!stCalm(); try{ return stAdvanceActBase.apply(this,arguments); } finally{ setTimeout(function(){ ST.turn=false; },900); } };
@@ -155,7 +177,7 @@ body[data-screen="scrim"] .scrim-panel,body[data-screen="scrim"] .vbody{ backgro
 body[data-screen="scrim"] .scrim-panel::after,body[data-screen="scrim"] .vbody::after{ content:""; position:absolute; inset:9px; border:1px solid rgba(74,53,34,.35); border-radius:3px; pointer-events:none; }
 body[data-screen="scrim"] .scrim-title{ font:400 34px/1.05 var(--st-fell)!important; letter-spacing:0!important; color:var(--st-ink)!important; text-shadow:none!important; }
 body[data-screen="scrim"] .scrim-title.sm{ font-size:28px!important; }
-body[data-screen="scrim"] .scrim-title::after{ content:"✦"; display:block; margin:8px auto 4px; width:200px; font:14px/1 serif; color:var(--st-gold);
+body[data-screen="scrim"] .scrim-panel > .scrim-title::after{ content:"✦"; display:block; margin:8px auto 4px; width:200px; font:14px/1 serif; color:var(--st-gold);
   background:linear-gradient(currentColor,currentColor) left 50%/80px 1px no-repeat,linear-gradient(currentColor,currentColor) right 50%/80px 1px no-repeat; }
 body[data-screen="scrim"] .scrim-tag,body[data-screen="scrim"] .vault-tabtitle{ font-family:var(--st-fell)!important; }
 body[data-screen="scrim"] .scrim-intro-copy,body[data-screen="scrim"] .scrim-note{ font:italic 16px/1.5 var(--st-fell)!important; color:var(--st-ink2)!important; }
@@ -183,8 +205,15 @@ body[data-screen="scrim"] .vtab.back{ background:linear-gradient(#4a3522,#2b1d12
 body[data-screen="scrim"] .st-char .st-nm,body[data-screen="scrim"] .st-hpn{ font-family:var(--st-fell)!important; color:var(--st-ink)!important; }
 
 /* ---------- the map: an open campaign book ---------- */
-.st-desk{ padding-top:22px!important; }
-.st-tome{ position:relative; width:min(1180px,98vw); display:grid; grid-template-columns:minmax(300px,1fr) 1.35fr; border-radius:6px 6px 10px 10px;
+.st-desk{ padding-top:16px!important; }
+.st-wrapcol{ width:min(1180px,98vw); display:flex; flex-direction:column; gap:0; }
+.st-bar{ display:flex; align-items:flex-end; gap:6px; padding:0 18px; position:relative; z-index:1; }
+.st-tab{ font:400 13px/1 var(--st-cinzel); letter-spacing:.1em; color:#f3e3c0; background:linear-gradient(#4a3522,#2b1d12); border:0; border-radius:5px 5px 0 0; padding:10px 14px 9px; cursor:pointer; }
+.st-tab.gold{ background:linear-gradient(#e3b450,#b8892c); color:#241608; }
+.st-tab:hover{ filter:none; transform:translateY(-1px); }
+.st-saved{ margin-left:auto; padding-bottom:8px; font:italic 12.5px/1 var(--st-fell); color:#bfa77a; }
+body[data-screen="scrim"] .vtab.st-resume{ background:linear-gradient(#1F6A6A,#134646)!important; color:#f3ead6!important; }
+.st-tome{ position:relative; width:100%; display:grid; grid-template-columns:minmax(300px,1fr) 1.35fr; border-radius:6px 6px 10px 10px;
   box-shadow:0 30px 50px rgba(0,0,0,.6),0 4px 0 #6b4a22,0 8px 0 #4a3216; color:var(--st-ink); font-family:'Spectral',Georgia,serif; }
 .st-tome::before{ content:""; position:absolute; left:42.5%; top:0; bottom:0; width:60px; transform:translateX(-50%); z-index:2; pointer-events:none;
   background:linear-gradient(90deg,transparent,rgba(70,40,10,.3) 45%,rgba(40,20,0,.42) 50%,rgba(70,40,10,.3) 55%,transparent); }
@@ -222,7 +251,7 @@ button.st-row:hover b{ color:var(--st-rub); }
 .st-relic{ font:13px/1 var(--st-fell); border:1px solid var(--st-ink2); border-radius:999px; padding:4px 9px; background:rgba(255,248,226,.6); cursor:help; }
 .st-none{ font:italic 13px/1 var(--st-fell); color:var(--st-ink2); }
 .st-legend{ display:grid; grid-template-columns:1fr 1fr; gap:5px 10px; font:13px/1.2 var(--st-fell); color:var(--st-ink2); }
-.st-lg{ display:flex; align-items:center; gap:7px; }
+.st-legend .glg{ display:flex!important; align-items:center; gap:7px; margin:0!important; padding:0!important; background:none!important; border:0!important; font:13px/1.2 var(--st-fell)!important; color:var(--st-ink2)!important; }
 .st-folio{ position:absolute; bottom:12px; left:0; right:0; text-align:center; font:italic 13px/1 var(--st-fell); color:#7a6440; }
 /* the route */
 .st-page.r .st-route-wrap{ position:relative; flex:1 1 auto; min-height:560px; max-height:min(76vh,760px); overflow-y:auto; overflow-x:hidden; padding:8px 4px 24px!important; background:none!important; border:0!important; }
@@ -274,6 +303,8 @@ button.st-row:hover b{ color:var(--st-rub); }
   .st-legend{ grid-template-columns:1fr 1fr 1fr; }
   .st-ribbon{ display:none; }
   .st-folio{ display:none; }
+  .st-bar{ padding:0 8px; }
+  .st-saved{ display:none; }
 }
 
 /* ---------- battles inside a run: the candlelit table ---------- */
@@ -306,10 +337,9 @@ def apply(s, TAG):
         if need not in s: sys.exit(f'{TAG} ERROR: post-check failed ({need}). Nothing written.')
     return s
 
-TAG='[st_preview]'
+TAG='[fix_scrim_tome]'
 if not os.path.exists(SRC): sys.exit(f'{TAG} ERROR: run from the repo root (src/game.src.html not found).')
 s=apply(open(SRC,encoding='utf-8').read(),TAG)
-A=json.load(open(os.path.join('assets','assets.json')))
-out=re.sub(r'__ABCASSET_(\d+)__',lambda m:A['a'+m.group(1)],s)
-os.makedirs('dist',exist_ok=True); p=os.path.join('dist','ABC_scrimtome_preview.html'); open(p,'w',encoding='utf-8').write(out)
-print(f'{TAG} wrote',p,f'({len(out):,} bytes) -- src/ untouched.')
+bak=SRC+'.bak_'+datetime.datetime.now().strftime('%Y%m%d_%H%M%S'); shutil.copyfile(SRC,bak)
+open(SRC,'w',encoding='utf-8').write(s)
+print(f'{TAG} Applied.  Backup:',bak); print(f'{TAG} Next: python3 build.py')
