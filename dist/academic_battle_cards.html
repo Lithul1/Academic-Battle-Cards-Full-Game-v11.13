@@ -6393,7 +6393,7 @@ function attackCostFor(side,ab,tgt){
   if(hasCrit(side,'biographical') && S[side].grave.length>0) cost=Math.max(1,cost-1);
   const P=S[side]; if(P){ const act=active(P);
     if(act&&(act.fe||act.act>1)&&act.passive&&act.passive.costMod) cost+=act.passive.costMod;
-    const wiz=P.team.find((c,i)=>i!==P.activeIdx&&c.fe&&c.hp>0&&c.passive&&c.passive.benchCostAura); if(wiz) cost+=wiz.passive.benchCostAura;
+    const wiz=P.team.find((c,i)=>i!==P.activeIdx&&(c.fe||c.act>1)&&c.hp>0&&c.passive&&c.passive.benchCostAura); /* fix_act_passives_2 */ if(wiz) cost+=wiz.passive.benchCostAura;
     cost=Math.max(1,cost);
   }
   return cost;
@@ -7503,7 +7503,7 @@ function actEvolve(side,handIdx,c){
   if(a.passive) c.passive=clone(a.passive); else delete c.passive;
   c.act=a.act; c._actId=a.id; c.resolution=a.resolution||null;
   clearAllStatus(c);
-  if(c.passive){ if(c.passive.spillLock){ c.status.spill=true; c.status._spillLock=true; } if(c.passive.noHealAbove) c._evoHp=c.hp; if(c.passive.noBlockOnEvolve) c._noBlockTurn=(S._turnNo||0)+1; }
+  if(c.passive){ if(c.passive.spillLock){ c.status.spill=true; c.status._spillLock=true; } if(c.passive.smudgeLock){ c.status.smudge=true; c.status._smudgeLock=true; } /* fix_act_passives_2 */ if(c.passive.noHealAbove) c._evoHp=c.hp; if(c.passive.noBlockOnEvolve) c._noBlockTurn=(S._turnNo||0)+1; }
   c.turnsInPlay=0; c._grow=0; c._tookHit=false; c._evoFx=true;
   try{ abcChEv(side,{t:'evolve',act:a.act}); }catch(e){}   /* fix_challenges */
   pushLog(`\u2605 ${from} evolves into ${a.name} (Act ${roman(a.act)}) \u2014 ${taken} damage and ${c.atkCharge.length+c.blkCharge.length} charge${(c.atkCharge.length+c.blkCharge.length)===1?'':'s'} carried over.`);
@@ -7671,8 +7671,8 @@ function performAttack(side,abilKey){           // == beginAttack
     if(_P.vsKillerOf && def && (def._killedIds||[]).indexOf(_P.vsKillerOf)>=0){ dmg+=(_P.dmgAdd||0); pushLog(`${_P.name}: +${_P.dmgAdd||0} \u2014 ${def.name} knocked out ${actStageName(_P.vsKillerOf)}.`); }
   }
   if(att.act>1&&att.passive&&att.passive.lowHpAtkAdd&&att.hp>0&&att.hp<att.maxHp/2){ dmg+=att.passive.lowHpAtkAdd; pushLog(`${att.passive.name||att.name}: +${att.passive.lowHpAtkAdd} damage below half health.`); }
-  if(att.fe&&att.passive&&att.passive.soloBonus&&isSoloAlive(A)){ dmg+=att.passive.soloBonus; pushLog(`${att.name} stands alone — +${att.passive.soloBonus} damage.`); }
-  if(att.fe&&att.passive&&att.passive.statusDmgBonus&&STATUS_NEG.some(x=>def.status[x])){ dmg+=att.passive.statusDmgBonus; pushLog(`${att.name}: +${att.passive.statusDmgBonus} against an afflicted target.`); }
+  if((att.fe||att.act>1)&&att.passive&&att.passive.soloBonus&&isSoloAlive(A)){ /* fix_act_passives_2 */ dmg+=att.passive.soloBonus; pushLog(`${att.name} stands alone — +${att.passive.soloBonus} damage.`); }
+  if((att.fe||att.act>1)&&att.passive&&att.passive.statusDmgBonus&&STATUS_NEG.some(x=>def.status[x])){ /* fix_act_passives_2 */ dmg+=att.passive.statusDmgBonus; pushLog(`${att.name}: +${att.passive.statusDmgBonus} against an afflicted target.`); }
   if(ab.bmDiscardBonus){ const n=(A.discard||[]).filter(c=>c.cat==='bookmark').length; const add=Math.min(ab.bmDiscardCap||9999, ab.bmDiscardBonus*n); if(add>0){ dmg+=add; pushLog(`${ab.n}: +${add} from ${n} Bookmark(s) in the discard.`); } }
   if(ab.guessTopFoe){ const top=D.deck[0]; const types=['ATTACK','BLOCK','BOOKMARK']; const guess=types[rnd(3)]; const actual=top?(top.cat==='abc'?top.type:'BOOKMARK'):null; if(actual&&guess===actual){ dmg+=ab.guessTopFoe.bonus||0; if(ab.guessTopFoe.inflict)condInflict=ab.guessTopFoe.inflict; pushLog(`The Mousetrap calls ${guess} — correct! +${ab.guessTopFoe.bonus} and Tear.`); } else pushLog(`The Mousetrap calls ${guess} — wrong.`); }
   if(ab.condPierceVillain && (def.tags||[]).includes('villain')){ condPierce=true; pushLog(`${ab.n} sees through the monstrous nature — Pierce.`); }
